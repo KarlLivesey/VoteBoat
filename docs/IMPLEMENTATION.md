@@ -1,5 +1,491 @@
 # Implementation record
 
+## Networked CPU track (pillar 2, opened 19 October 2026)
+
+Score: CPU (user+sys) per completed write, summed over every node process, at
+equal cores on the networked native path. Design: the R4 research plan
+`target/claude/research-r4/pillar2-network-plan.md` (main checkout, untracked;
+§3.1 harness, §3.2 cells, §3.3 attribution, §3.4 noise, §4 candidates). The
+design pack is unchanged.
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| NW1 Cheaper networked writes | A three-process TCP/TLS or QUIC deployment spends less CPU per write at light, moderate and loaded rates, without buying the rate with extra cores | Each slice gated on the N0 harness: 5 interleaved pairs per §3.2 cell, median total CPU per write, busy cores and p99 reported |
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Current N0: three-process cluster harness (implemented; in review as PR 17, round 4 below; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+| Next N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
+| Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
+
+### N0 schema plan (before editing, 19 October 2026)
+
+- **Library change: one pure move.** `HostWait`, `HOST_GATHER` and
+  `HOST_MAX_WAIT` move from `src/bin/support/service_setup.rs` into
+  `voteboat::native::readiness` (in a child module that forbids `unsafe`, so the
+  audited `poll(2)` scope does not widen). The only difference in the moved
+  code: the process wake is a constructor argument instead of a call to the
+  binaries' `service_setup::host_wake()` static, so the library holds no
+  process-global. The three service call sites pass `service_setup::host_wake()`,
+  the same `Arc` as before. A second, additive step makes `wait` return which
+  way it ended (`Immediate`, `Ready`, `Timeout`); the services ignore it, the
+  harness counts it. No policy constant, branch or call order changes.
+- **CLI.** `native_benchmark node N DIRECTORY tcp|quic BASE_PORT OFFERS WINDOW RATE
+  [--ready-items K]`. Every node gets the same arguments (followers need the same
+  `Counter` capacity). Each process opens only replica N through `NativeStartup`
+  with the configuration `open_recorded` builds (one shared constructor, so the
+  two cannot drift): listen `127.0.0.1:BASE+N`, peers `BASE+1..3`, fixture
+  certificates, `ready_visit_items`, entropy seed `N+17`, default limits. Timers
+  are the offered mode's (heartbeat 50 ms, election 10,000 + 10,000 ms, 32
+  expirations), also from one shared constant. The worker wake is a
+  `HostWake`, and every round waits with the library `HostWait` at its
+  production defaults (200 µs gather only when work is queued, 10 ms cap).
+- **Process protocol (stdin/stdout lines).** Each node prints `ready node=N` once
+  open. Node 1 then waits for a `start` line on stdin (EOF first aborts cleanly);
+  it campaigns until it leads with a commit in its term, runs a 64-write closed
+  warmup, records its term, runs the offered phase (the `offered.rs` `Ledger`,
+  `Offerer` and receipt handling), checks the term again, checks the ledger
+  history, performs one quorum read that must equal the expected counter value,
+  writes `run.txt`, `offers.csv` and `summary.txt` and prints a `mode=cluster`
+  summary. Nodes 2 and 3 run until stdin reaches EOF. Every node then shuts down,
+  drains, joins its workers and prints one line
+  `node_counters node=N poll_rounds= host_waits= host_waits_immediate=
+  host_waits_ready= host_waits_timeout= sends= received= persistence_batches=`
+  covering the whole process lifetime (the same span as its CPU).
+- **Ownership and cleanup.** A stdin reader thread owns stdin; it sets an atomic
+  flag and wakes the host (`HostWake` is a `WorkerWake`), so an idle follower
+  sleeps in `poll(2)`. Errors after open still drain and join the workers, as the
+  single-process path does. No Raft, runtime, wire or WAL behaviour changes.
+- **Parent script** `benchmarks/tools/cluster.py` (tracked; the main checkout's
+  `target/claude/tools` is not in git). Spawns three children, waits for three
+  `ready` lines, writes `start` to node 1, closes the followers' stdin when
+  node 1's summary arrives, reaps each child with `os.wait4` (per-process
+  user+sys), cross-checks the sum against `RUSAGE_CHILDREN` deltas and prints
+  busy cores (CPU / wall) per process. Rate lists give marginal CPU per write
+  ((CPU at 16,000 offers − CPU at 2,000) / 14,000) per process and in total.
+  ABAB pairs over two binaries. A run is invalid unless applied = offers,
+  window_refused = 0 and the leader term is unchanged.
+- **Failure paths.** A child that exits non-zero, prints no `ready` or loses
+  leadership makes the run invalid; the parent kills and reaps every remaining
+  child before reporting. A no-QUIC build refuses `quic` before creating any file
+  with the service binaries' hint ("QUIC support requires building with --features
+  quic").
+- **Restart and partial progress.** Nothing is recovered: every run uses fresh
+  directories. A crash leaves a retained directory under DIRECTORY for diagnosis.
+- **Limits.** One group only: `NativeStartup` bootstraps one group, so the §3.2
+  G=4 cell needs a shared-assembly node mode (planned with N2). No recovery
+  re-open (each process sees one replica); the quorum read replaces it.
+- **Acceptance checks.** A deterministic test in the `native_benchmark` example
+  re-executes its own test binary as three node processes on a leased
+  contiguous port block, runs 100 offers at 50/s, and asserts applied = 100,
+  the read value, `window_refused=0`, the unchanged term, clean exits and counter
+  bounds that hold on any hardware (node 1 `persistence_batches` ≥ 1, `sends`
+  ≥ 1 and `received` ≥ 1 on every node, waits = immediate + ready + timeout).
+  The existing counter, directory and transfer service suites cover the move.
+  fmt, the four strict Clippy builds and matched fmt/Clippy at zero diagnostics.
+
+### N0 implemented (evidence, 19–20 October 2026)
+
+- **Move.** Commit 1 moves `HostWait`, `HOST_GATHER` and `HOST_MAX_WAIT` to
+  `src/native/readiness/host_wait.rs` (`#![forbid(unsafe_code)]`, `deny` until
+  review round 3; re-exported as
+  `voteboat::native::readiness::{HostWait, HOST_GATHER, HOST_MAX_WAIT}`). A diff
+  of the old block against the new file shows only path spellings
+  (`voteboat::` → `crate::`/`super::`), the wake argument on `new`/`with` and two
+  doc lines; the `wait` body is byte-identical. `service_setup` re-exports
+  `HostWait`; the counter, directory and transfer call sites pass
+  `service_setup::host_wake()`, the same process `Arc` as before. Commit 2 makes
+  `wait` return `HostWaitOutcome` (additive; services ignore it), with a unit
+  test for each outcome (no wall-clock assertion).
+- **Harness.** `examples/benchmark/cluster.rs` (child of `offered.rs`, reusing
+  its `Ledger`, `Offerer`, `outputs` and `percentile`). `native_benchmark.rs`
+  gains `replica_startup` (the one `NativeStartup` constructor used by
+  `open_recorded` and by node mode), `finish_open`, `OFFERED_TIMERS` (also used
+  by `shared.rs`), `join` (split out of `close`), `parse_protocol` (no-QUIC
+  hint) and peer `sends`/`received` in `PollTotals`. The single-process paths
+  behave as before (`native.py` smoke on Linux: 2,000/2,000 applied).
+- **Script.** `benchmarks/tools/cluster.py` (tracked; Python 3.9 standard
+  library). Cross-check on every measured run: |Σ per-process CPU −
+  `RUSAGE_CHILDREN` delta| = 0.0 s.
+- **Tests.** `offered::cluster::tests` in the `native_benchmark` example: TCP
+  three-process run (and QUIC under `--features quic`), argument checks, no-QUIC
+  refusal (default build). The test re-executes its own test binary as the three
+  nodes, so it never runs a stale `target/debug` executable. Mutation: removing
+  the wait-count increment fails the TCP test. Ports (round 1; replaced in round
+  2, see below): offsets 8..10 of 128-port blocks in 1024..9984 and
+  20096..32767, locked in the shared lease namespace and probe-bound until the
+  nodes start.
+- **Checks run (Linux, cores 10–15).** fmt; strict Clippy default, all-features,
+  no-default-features, native-only; matched fmt and Clippy: zero diagnostics.
+  Default features: counter_service 144, directory_service 18, startup 48,
+  transfer_service 25, native_benchmark example 52 passed. All features: 203,
+  22, 63, 33, 60 passed. `--lib readiness` 9 passed.
+- **Observed while building (not acted on).** Under QUIC the leader makes ~3.5
+  poll rounds per write against ~0.22 under TCP, almost all `Ready` wakes (see
+  baseline): sizing input for N8/N3.
+
+### N0 baseline (quiet Mac M2 Max, 20 October 2026)
+
+Binary: branch head `d0f7a7a7` (main `fdf0c002` plus this harness; the replica
+code measured is main's), release, `--all-features`. Node directories on the
+RAM disk `/Volumes/vbram`; load average below 1.0 before each cell (recorded in
+the raw file); no builds during timing; 5 runs per cell, all valid (applied =
+offers, `window_refused=0`, term 1 → 1, every child exit 0). Window 1024,
+`ready_visit_items` 1024, one group, production `HostWait`. CPU is user+sys of
+each whole node process (startup, campaign, warmup, offered phase, drain).
+Busy cores = CPU / the run's common interval (first spawn to last child exit),
+per process and in total, so the per-process figures add up to the total (round
+2 definition; the per-process figures below were recomputed from the raw lines
+as `nN_cpu / wall_s`, see "N0 review round 2"). Medians. Raw lines:
+`target/claude/research-r4/n0-baseline-d0f7a7a7.txt` (main checkout, untracked).
+
+| Cell | Rate/s | p99 ms | CPU µs/write total (n1 / n2 / n3) | Busy cores total (n1 / n2 / n3) | Rounds/write n1 / n2 / n3 | Frames sent/write n1 / n2 / n3 | n1 waits/write immediate / ready / timeout |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| TCP 1,000/s, 16,000 offers | 999 | 18.0 | 500.1 (283.5 / 108.5 / 108.2) | 0.498 (0.282 / 0.108 / 0.108) | 2.892 / 1.142 / 1.141 | 0.404 / 0.203 / 0.202 | 0.985 / 1.908 / 0.002 |
+| TCP 4,000/s, 16,000 offers | 3,989 | 17.6 | 126.4 (72.7 / 27.1 / 26.5) | 0.497 (0.286 / 0.107 / 0.104) | 0.712 / 0.277 / 0.278 | 0.099 / 0.049 / 0.049 | 0.240 / 0.473 / 0.001 |
+| TCP 15,000/s, 2,000 offers | 14,225 | 14.6 | 31.5 (16.6 / 7.6 / 7.3) | 0.365 (0.193 / 0.088 / 0.086) | 0.262 / 0.119 / 0.116 | 0.040 / 0.020 / 0.020 | 0.089 / 0.169 / 0.000 |
+| TCP 15,000/s, 16,000 offers | 14,891 | 16.7 | 24.2 (14.0 / 5.1 / 5.1) | 0.349 (0.203 / 0.074 / 0.074) | 0.218 / 0.090 / 0.092 | 0.032 / 0.016 / 0.016 | 0.075 / 0.143 / 0.000 |
+| QUIC 15,000/s, 2,000 offers | 14,431 | 10.1 | 64.6 (39.5 / 11.6 / 11.5) | 0.497 (0.304 / 0.091 / 0.086) | 3.086 / 0.360 / 0.370 | 0.044 / 0.021 / 0.024 | 0.068 / 3.007 / 0.004 |
+| QUIC 15,000/s, 16,000 offers | 14,912 | 18.9 | 55.2 (40.8 / 8.0 / 8.3) | 0.737 (0.549 / 0.102 / 0.106) | 3.489 / 0.266 / 0.288 | 0.034 / 0.017 / 0.017 | 0.061 / 3.429 / 0.001 |
+| Idle TCP 20/s, 600 offers (30 s) | 20 | 16.5 | 7,483 (3,171 / 2,184 / 2,102) | 0.149 (0.063 / 0.044 / 0.042) | 26.4 / 16.9 / 16.9 | 5.98 / 2.99 / 2.99 | 10.36 / 12.62 / 3.44 |
+| TCP 15,000/s G=4 | not run: `NativeStartup` bootstraps one group (see limits) | | | | | | |
+
+Marginal CPU per write, (CPU at 16,000 offers − CPU at 2,000) / 14,000, per
+round, then the median:
+
+| Cell | Total | n1 | n2 | n3 | Rounds (total) |
+| --- | --- | --- | --- | --- | --- |
+| TCP 15,000/s | 23.01 µs | 13.63 | 4.71 | 4.76 | 22.47, 22.69, 23.01, 27.78, 45.48 |
+| QUIC 15,000/s | 54.97 µs | 41.01 | 7.42 | 7.91 | 53.45, 54.20, 57.47, 54.97, 61.63 |
+| Secondary: single-process `native.py` (svc.sh loop, shared assembly, witness publication, its own gather loop rather than `HostWait`), same binary | 20.74 µs | — | — | — | 20.74, 21.17, 21.85, 19.51, 15.29 |
+
+Reading (for N1 sizing, not acted on here): at 1,000/s and 4,000/s the cluster
+burns the same ~0.50 busy cores, and node 1 runs ~2,900 rounds/s at every TCP
+rate (2.89 rounds/write × 1,000/s; 0.218 × 15,000/s ≈ 3,270/s), so light-load
+CPU follows rounds driven by time (1 ms offer ticks, wakes, 200 µs gathers),
+not writes. The followers each cost about a third of the leader. Under QUIC
+the leader's waits end `Ready` ~3.4 times per write: it spins on readiness.
+
+What busy cores hides (round 3): it is an average over the run's common
+interval, and at a fixed offered rate it is close to CPU per write × rate, so
+it adds little beyond the CPU column. It does not show peak concurrency (work
+moved onto extra threads at the same total CPU looks identical); it includes
+fixed startup, campaign, warmup and drain time, which dilutes the 2,000-offer
+cells (0.365 against 0.349 total at 15,000/s); and it excludes kernel work done
+outside the node processes' own context (softirq, kworker and writeback
+threads, APFS kernel threads), which `wait4` never sees. "All CPU of every
+node process" is exact; it is not all the CPU the cluster causes.
+
+### N0 review round 2 schema plan (before editing, 20 October 2026)
+
+Review: GPT-6.1-Sol round 1 on `d4da3cfa` (PR 17), four P2 findings, no P1.
+No library change; only the harness, its script and its tests change.
+
+- **Rounds (finding 1).** `cluster.py` keeps every run as (round, label,
+  offers, result). A round is valid only when every binary at every offer
+  count has a valid run in it. Marginal CPU per write and B/A ratios are formed
+  inside one round; their medians are over valid rounds; the report lists each
+  dropped round with the runs that invalidated it. Per-cell summary lines stay
+  medians over that cell's valid runs (they describe a cell; they pair nothing).
+- **Wall (finding 2).** A child's `wait4` CPU covers its whole life, so the
+  denominator must cover it too. Busy cores = CPU / the run's common interval,
+  first spawn to last child exit, per process and in total. Each child gets a
+  watcher thread that blocks in `wait4` and stamps the exit when it returns, so
+  the interval ends at the last actual exit, not when the parent has drained
+  every stream. Per-child exit stamps are printed (`nN_exit_s`).
+- **Failures (finding 3).** `run_once` always returns a result: an exit
+  before node 1's summary releases every stdin; the `--timeout` guard kills
+  what is left; spawn or harness errors are recorded. Invalid reasons name the
+  rule (`nN_exit=`, `no_summary`, `applied=`, `window_refused=`, `term=`,
+  `nN_no_counters`, `timeout`, `error=`). `finally` closes every stdin, kills
+  only children whose watcher has not reaped them (under the watcher's lock)
+  and joins every watcher, so no child outlives the run while the script is
+  alive. (Round 3: this held only while the script ran; a killed script left
+  node 1 running, see "N0 review round 3".)
+- **Ports (finding 4).** The node mode's port argument takes `BASE` (manual
+  runs, BASE+1..3) or `P1,P2,P3`. The test reserves three OS-selected ports,
+  each held for TCP and UDP (the `tests/startup.rs` acquisition), passes them as
+  `P1,P2,P3` and releases the holds just before the nodes bind. Another binder
+  can take a released ephemeral port in that moment; that node then fails to
+  open with `AddrInUse` before `ready`, and the test retries the whole cluster
+  on fresh ports (at most 8 attempts). Any other failure still fails the test.
+- **Builds (Sol's validation note).** `native_benchmark` has
+  `required-features = ["tls"]`, so a native-only build has no cluster mode;
+  `native,tls` runs TCP clusters and refuses `quic`; QUIC needs `--features
+  quic`. Stated in the usage text and the script's help.
+- **Acceptance.** A Python self-test, run by `cargo test`, that fails on the
+  round-1 pairing and passes now; fixture-node checks for exit stamps and
+  retained failures; a deterministic collision test; the cluster tests 20 times
+  in a row in all-features and in `native,tls`; fmt, four strict Clippy builds,
+  matched fmt/Clippy; startup, counter_service and the example in all-features,
+  native-only and `native,tls`.
+
+### N0 review round 2 implemented (evidence, 20 October 2026)
+
+- **Finding 1 → round-paired figures.** `rounds()` splits rounds into valid and
+  dropped (with reasons); `marginal_rows()` and the ratio lines use valid rounds
+  only and print their round numbers. Runs are keyed by label, so one binary
+  may be both A and B (round 1 merged them: found by the smoke run below). Test:
+  `benchmarks/tools/cluster_test.py` `Pairing`, Sol's reproduction (A valid
+  deltas 1 and 3 in rounds 0 and 2, B 20 and 30 in rounds 1 and 2) must give
+  `pairs=[10.000]`; on the round-1 script (`CLUSTER_PY=` the `d4da3cfa` copy)
+  it fails with `[20.0, 10.0] != [10.0]`.
+- **Finding 2 → common interval.** `wall_s` = first spawn to last exit,
+  `busy` and `nN_busy` = CPU / `wall_s`, `nN_exit_s` per child, all stated in
+  the script help and its header line. Test: fixture run asserts `wall_s` =
+  max exit stamp, every stamp in (0, `wall_s`], per-process busy summing to the
+  total. Only the denominator changed, so the baseline was recomputed from the
+  raw lines, not re-measured: totals are unchanged (they already used the
+  longest wall) and follower figures move by at most 0.003 cores (they were
+  spawned a few ms after node 1). The CPU, rate, p99, counter and marginal
+  columns are untouched.
+- **Finding 3 → retained invalid runs.** Tests: node 1 exiting 7 after `start`
+  gives `valid=no(n1_exit=7,n1_no_counters,no_summary)`, followers exit 0 on
+  EOF, the next round runs and is valid; a follower that never exits trips a
+  1 s guard and is reported `timeout,n2_exit=-9`; after each, `waitpid(-1,
+  WNOHANG)` finds no child. Real-binary check: `--ready 5000` (every node
+  refuses at once) gave two retained invalid runs and a completed report.
+- **Finding 4 → OS-selected ports.** `parse_ports` accepts `BASE` or three
+  distinct non-zero `P1,P2,P3`; `run.txt` records `ports=`. The cluster tests
+  use the reservation and retry above; `a_node_whose_port_is_taken_is_reported_
+  as_a_collision` holds node 3's port and requires the collision outcome.
+  Repeats (Linux, cores 10–15, other agents' suites running): all-features
+  20/20 runs of the 6 cluster tests passed, one run retrying once after a real
+  collision (node 1 lost a released port); `native,tls` 20/20, no retries.
+- **Checks run (Linux, cores 10–15).** Script self-test 6/6. All features:
+  startup 63, counter_service 203, native_benchmark example 62 passed.
+  `native,tls`: 48, 144, 54 passed. Native-only: startup and counter_service
+  build with 0 runnable tests (gated on `tls`); the example is refused by
+  Cargo's `requires the features: tls` gate. fmt, four strict Clippy builds,
+  matched fmt and Clippy: zero diagnostics. Smoke: `cluster.py` with the debug
+  binary as A and B, offers 50,100, 2 rounds: 8/8 valid, Σ CPU =
+  `RUSAGE_CHILDREN` delta on every run.
+- **Not re-measured.** Findings 1 and 3 change only reporting and failure
+  handling, and all 35 baseline runs were valid, so no round would drop and no
+  figure changes. Finding 2 changes only the busy-cores denominator
+  (recomputed above). Finding 4 changes the port argument's parsing, not what a
+  node does once open.
+
+### N0 review round 3 schema plan (before editing, 20 October 2026)
+
+Review: Claude Opus 5.5 round 2 on `7c2c1fdf` (PR 17), one P2 and P3s; Sol's
+four round-1 P2s confirmed resolved. No library behaviour change; the only
+library edit is `host_wait.rs` `deny(unsafe_code)` → `forbid(unsafe_code)`.
+
+- **P2: node 1 outlived a killed parent.** Node 1 checked stdin EOF only before
+  `start`; a SIGKILLed `cluster.py` (or killed test binary) left it running to
+  its phase limits (horizon + up to ~240 s) on the measuring host. Shape: the
+  existing reader thread already sets `closed` and wakes the host. `Control`
+  moves into `Host`, and `Host::armed: Option<phase>` names the node-1 phase
+  that stops on closed stdin: waiting for `start`, campaign, warmup, offering
+  and quorum read. `finish` (the final drain) and followers are not armed
+  (EOF is a follower's normal end). An armed `round()` checks after its poll
+  and returns a typed `StdinClosed { phase, rounds_to_notice }`; node 1 prints
+  `stdin_closed node=1 phase=P rounds_to_notice=K`, still drains, joins and
+  prints `node_counters`, then exits with status 4 (`STDIN_CLOSED_STATUS`;
+  any other failure stays 1). (Changed while testing, see the evidence: node
+  1 aborts its node instead of draining.) Bounded rounds without wall-clock: an armed host
+  stores its round count then loads `closed`; the reader stores `closed` then
+  loads the round count into `closed_at`; all `SeqCst`, and the host stops
+  storing once it has noticed, so the host stops at round `closed_at` or
+  `closed_at + 1` (K ≤ 1). Cost: node 1 adds one `SeqCst` store and one load
+  per round in armed phases (followers add nothing); the reader thread is
+  blocked in `read(2)` and costs nothing while idle. Measured on the quiet Mac
+  anyway (below), because it runs in the measured loop.
+- **P2, parent side.** `cluster.py` handles SIGTERM, SIGHUP and SIGINT by
+  raising `SystemExit` so `finally` closes, kills and reaps; a signal arriving
+  during that cleanup is deferred until it ends. Each event wait is capped at
+  0.5 s because a lock wait on macOS is not woken by signals. SIGKILL of the
+  parent is covered by the children: the kernel closes their stdin.
+- **P3s.** (a) Watchers wait for the exit without reaping (`waitid(WNOWAIT)` on
+  Linux; kqueue `NOTE_EXIT` on macOS, whose Python 3.9 has no `waitid`), mark
+  the child exited under the lock, then `wait4`; `kill` signals only children
+  not marked exited, so never a freed PID. (b) |Σ wait4 CPU − `RUSAGE_CHILDREN`
+  delta| > 0.01 s invalidates a run (`cpu_crosscheck=SUM:DELTA`). (c)
+  `--offers` must be distinct positive integers (`OffersError`, argparse exit
+  2); `report` refuses duplicates too. (d) Even rounds run A small, A big, B
+  small, B big; odd rounds the reverse (ABBA over consecutive rounds). (e) The
+  busy-cores caveat above. (f) `forbid`. (g) PR body qualifier for the
+  single-process comparison. (h) A shared typed hint, `QuicNotBuilt`, in
+  `src/bin/support/quic_hint.rs`, used by the three services and the
+  benchmark (no shared type existed; the text is unchanged). (i) The test's
+  `start` write no longer unwraps a taken stdin; a collision names the node
+  and its port, and exhausted retries say what is known (a node failed to
+  bind its port with `AddrInUse` before `ready`) and what is not (whether
+  another program or a node took it), keeping the last attempt's logs.
+- **Acceptance.** A Rust test closes every stdin once node 1 prints
+  `offering node=1` (15,000 offers at 50/s: a 300 s horizon) and requires
+  node 1 exit 4 with `phase=offering rounds_to_notice` ≤ 1, followers exit 0,
+  no summary and three `node_counters` lines; with the offered phase disarmed
+  it must fail. Script self-tests for (a)–(d) and SIGTERM that fail on the
+  round-2 script. fmt, four strict Clippy builds, matched fmt/Clippy; the
+  readiness, startup, counter_service and example suites in all-features and
+  `native,tls`; cluster tests 10 times in a row in both; TCP 15,000/s on the
+  quiet Mac, 5 rounds against `d0f7a7a7`.
+
+### N0 review round 3 implemented (evidence, 20 October 2026)
+
+- **P2 → node 1 stops on closed stdin.** As planned, with one change found by
+  the repeat runs: the first version drained after the stop, and 1 run in 10
+  in each configuration hit the 120 s drain limit. Cause: when the followers
+  leave while a write is in flight, it can never commit, and the node's
+  graceful drain (`begin_shutdown` → `Quiescing`) waits for every pending
+  client write. Node 1 now calls the node's `abort()` (pending writes are
+  reported unknown, workers closed), prints `node_counters` and exits 4
+  without draining; process exit ends its worker threads, and drops do not
+  join threads. A run stopped this way is abandoned (its directory is kept
+  for diagnosis). Test `node_1_stops_within_one_round_when_stdin_closes_in_the_
+  offered_phase` (TCP, 15,000 offers at 50/s, every stdin closed once node 1
+  prints `offering node=1`): node 1 exits 4 with `phase=offering
+  rounds_to_notice` ≤ 1 (1 in both retained failure logs), followers exit 0, no summary, three
+  `node_counters` lines; 30/30 solo runs after the change. Mutation: with
+  the offered phase disarmed (round-2 behaviour) node 1 ran on for 540 s
+  (horizon 300 s, then the offered drain and the final drain limits) and
+  exited 101, failing the test.
+- **P2, parent side.** Handlers for SIGTERM, SIGHUP and SIGINT raise
+  `SystemExit`; a signal during cleanup is deferred until the children are
+  reaped; event waits are capped at 0.5 s. Self-test: `cluster.py` run as a
+  process with fixture nodes whose node 1 ignores EOF; SIGTERM once all three
+  have started; the script exits 143 and every child PID is gone. On the
+  round-2 script it exits −15 and node 1 survives (the test then kills it).
+- **P3s.** (a) `wait_exited` (waitid `WNOWAIT` on Linux, kqueue `NOTE_EXIT` on
+  macOS) then mark-exited then `wait4`; self-test: `wait4` is entered only for
+  a child already marked exited, and `kill` after the exit sends no signal.
+  (b) `cpu_crosscheck`: 3 s against 99 s is invalid; within 0.005 s valid.
+  (c) `--offers 2000,2000` exits 2 with "--offers values must be distinct";
+  `report` raises `OffersError`. (d) ABBA: rounds 0 and 1 of A, B at 1000,2000
+  run A1000 A2000 B1000 B2000 then the reverse; the header says so. (e) Busy
+  cores caveat in the baseline section. (f) `#![forbid(unsafe_code)]` in
+  `host_wait.rs`. (g) PR body. (h) `QuicNotBuilt` in
+  `src/bin/support/quic_hint.rs` (cfg'd out with `quic`), used by the counter,
+  directory and transfer services and the benchmark; its `Debug` prints the
+  quoted message, so the binaries' stderr is byte-identical (`Error: "QUIC
+  support requires building with --features quic"`, checked by the services'
+  no-QUIC tests, which failed with a derived `Debug`). (i) Test messages as
+  planned. Each new self-test (5) fails on the round-2 script (`CLUSTER_PY=`).
+- **Checks run (Linux, cores 10–15, `-j 4`).** fmt; strict Clippy default,
+  all-features, no-default-features, native-only (and `native,tls`); matched
+  fmt and Clippy: zero diagnostics. Script self-test 11/11. All features:
+  `--lib readiness` 9, startup 63, counter_service 203, directory_service 22,
+  transfer_service 33, native_benchmark example 63 passed. `native,tls`: 9,
+  48, 144, 18, 25, 55 passed. Cluster tests (7) 10 runs in a row in each
+  configuration after the abort change: 10/10 and 10/10, no port retries.
+- **Instrument unchanged (quiet Mac M2 Max, 20 October 2026).** The only
+  change to what a node does once open is node 1's per-round check in armed
+  phases (one `SeqCst` store and one load; followers and the drain add
+  nothing). TCP 15,000/s, offers 2,000 and 16,000, release `--all-features`
+  builds of `d0f7a7a7` (A, the baseline binary) and `9e96f1e2` (B), RAM-disk
+  directories, 6 rounds in ABBA order (even, so the order balances), started
+  at load 0.31 / 0.96 (1 / 5 min): 24/24 runs valid, Σ CPU =
+  `RUSAGE_CHILDREN` delta on every run. B/A marginal ratio median 0.989
+  (pairs 0.984, 1.047, 0.994, 0.814, 1.011, 0.900). Marginal µs/write per
+  round, A: 23.02, 22.58, 22.46, 39.73, 43.42, 49.82; B: 22.65, 23.63, 22.32,
+  32.35, 43.88, 44.82. Rounds 0–2 reproduce the published 23.01 µs for both
+  binaries; rounds 3–5 drifted up for both alike (host noise, not the change).
+  CPU/write at 16,000 offers: A 31.7, B 28.8 (medians, drift included). An
+  earlier 5-round run started while the 5-minute load was still 2.4 after the
+  build gave B/A 0.998 and is not used. The baseline table is unchanged.
+- **Unrelated flake (not fixed here; file untouched).**
+  `shared::drain::quic_mixed_voter_and_learner_assignments_resume_together`
+  (all features), 20 solo runs on cores 10–15 with other agents' suites
+  running: 17 passed, 3 failed, each at `shared_drain.rs:304` with
+  `Unknown(LeadershipChanged)`.
+
+### N0 review round 4 schema plan (before editing, 20 October 2026)
+
+Review: Claude Opus 5.5 round 3 on `b47b2538` approved with four P3s
+(GPT-6.1-Sol also approved). This round folds those P3s and changes nothing
+else: only the node stop path in `examples/benchmark/cluster.rs`,
+`cluster.py`, `cluster_test.py` and these docs. No library change.
+
+- **P3 1: the documented dead-parent exit is not the one taken.** A dead
+  parent also closes the read end of every node's stdout, so node 1's
+  `println!("stdin_closed …")` panicked (`failed printing to stdout: Broken
+  pipe`, status 101) before reaching `abort()`, and the followers panicked at
+  `node_counters` after their drain. Shape: two helpers, `say` (stdout, then
+  flush) and `note` (stderr), write through the locked stream and discard the
+  error; every node-process print uses them (a parent can die between any two
+  prints, and `println!` is equivalent when the write succeeds: one locked,
+  line-buffered write). On a `StdinClosed` stop node 1 aborts and takes its
+  counters before any output. The node-child test exits 0 after a successful
+  run, as the binary's `main` does, so libtest's closing report cannot fail
+  on a closed stdout. Acceptance: a new test in which each test-side reader
+  closes its read end (followers after `ready`, node 1 after `offering
+  node=1`) before any stdin is closed requires statuses [4, 0, 0] and no
+  `panicked` in any log; it must fail with `println!`.
+- **P3 2: the SIGTERM self-test could signal a reused PID.** It probed and
+  killed fixture PIDs after `cluster.py` had reaped them. Shape: no PID is
+  read or signalled. Every fixture holds the write end of a FIFO (`alive`)
+  until it exits; once `cluster.py` has exited (so has reaped every child),
+  EOF on the test's non-blocking read end means no fixture survives. A node 1
+  that survives a failure blocks reading a second FIFO (`leash`) whose only
+  writer is the test, and exits when the test closes it. Audit: every other
+  `kill` signals the caller's own unreaped child (`Popen.kill`/`send_signal`
+  on the script; `Cluster.kill` under the lock, not marked exited).
+- **P3 4: two narrow signal windows in `cluster.py`.** A signal between
+  `Popen` returning and registration, or between entering `finally` and
+  raising the cleanup depth, skipped part of the cleanup. Shape: the depth is
+  raised before the run's `try` (before the first spawn) and lowered after
+  the cleanup, so during a run a signal is only recorded; the run loop checks
+  for it at each event wait (at most 0.5 s) and breaks, the cleanup runs, and
+  the signal is raised as `SystemExit(128 + signal)`. Acceptance: a test
+  calls the handler between `Popen` and registration and requires
+  `SystemExit(143)` with no unreaped child; it must fail on the round-3
+  script.
+- **P3 3: docs.** `forbid(unsafe_code)` where the docs said `deny`; the
+  baseline's single-process row carries the wait-loop qualifier.
+- **Baseline unchanged.** The stop path runs only after a run is already
+  invalid (stdin closed before the summary), and the other prints write the
+  same bytes through the same locked, line-buffered stdout, a constant few
+  per run (none in the offered phase), which a marginal per write cancels.
+- **Checks.** fmt, four strict Clippy configurations (and `native,tls`),
+  matched fmt/Clippy; readiness, startup, counter_service, directory and
+  transfer services and the example suite in all-features and `native,tls`;
+  script self-test; cluster tests 10 times in a row in each; SIGTERM, SIGHUP,
+  SIGINT and SIGKILL of a live `cluster.py` with exit codes recorded.
+
+### N0 review round 4 implemented (evidence, 20 October 2026)
+
+- **P3 1 → nodes take the documented exits when the parent is gone.** As
+  planned. Test `every_node_takes_its_documented_exit_when_the_parent_is_gone`
+  (TCP, 15,000 offers at 50/s): statuses [4, 0, 0], node 1's log says `stdin
+  closed during offering … after 1 further poll round(s)`, no `panicked` in
+  any log. Mutation: with `say`/`note` as `print!`/`eprint!` the statuses are
+  [101, 101, 101] and every log has `failed printing to stdout: Broken pipe`
+  (Opus's reproduction). The stdin-only test is unchanged and passes.
+- **P3 2 → no PID is probed or signalled by the SIGTERM self-test.** As
+  planned (FIFOs `alive` and `leash`). Against the round-2 script (which
+  exits −15 and leaves node 1 running) the survivor check fires (`children
+  outlived cluster.py`, asserted first in a scratch copy) and closing the
+  leash ends the survivor: no fixture process remains.
+- **P3 4 → signals are deferred for the whole run.** As planned. The new
+  self-test fails on the round-3 script (`a child was left unreaped`) and
+  passes here. Cost: a signal now takes effect at the run loop's next wait,
+  within 0.5 s (live: 0.46–0.51 s), instead of at once.
+- **P3 3.** As planned.
+- **Checks run (Linux, cores 10–15, `-j 4`).** fmt; strict Clippy default,
+  all-features, no-default-features, native-only and `native,tls`; matched
+  fmt and Clippy: zero diagnostics. Script self-test 12/12; on the round-3
+  script 1 fails (the new spawn-window test), on the round-2 script 4 fail and
+  2 error. All features: `--lib readiness` 9, startup 63, counter_service
+  203, directory_service 22, transfer_service 33, native_benchmark example
+  64 passed. `native,tls`: 9, 48, 144, 18, 25, 56 passed. Cluster tests (8),
+  10 runs in a row in each configuration: 10/10 and 10/10, no port retries,
+  no node process left after any run.
+- **Live parent death (debug `--all-features` binary, `cluster.py` at TCP
+  15,000 offers and 50/s, signalled once `node1.err` shows `phase=offering`;
+  the driver is a child subreaper, so a node that outlives `cluster.py`
+  becomes its child and its status is recorded).** SIGTERM, SIGHUP, SIGINT:
+  `cluster.py` exits 143, 129, 130, and no node outlives it. SIGKILL, 3 runs:
+  the orphaned nodes exit [4, 0, 0] every time, all within 0.002–0.052 s,
+  node 1's log ends `Error: stdin closed during offering … after 1 further
+  poll round(s)`, and no log contains `panicked`.
+- **Baseline unchanged**, for the reason in the plan; not re-measured.
+
 ## Lifetime bounds track (opened 19 October 2026)
 
 User rule (19 October 2026): this is infrastructure, so failing after X time,
