@@ -71,6 +71,8 @@ storage, wire field or byte declaration changes, and lifetime declarations do
 not depend on it. A declaration that is incompatible on the identity is still
 refused first (`Capability`).
 
+Whichever bootstrap the first committed claim carries becomes the binding, so the correctly configured replicas may be the ones that stop.
+
 | Family | Flag (`deployment_bound`) | Why it attests the binding |
 | --- | --- | --- |
 | `RoutedApplication` | `initialized`, and its inner application's | bootstrap applies only as the exact binding (grant, local group, limits, inner schema and initial checkpoint); checkpoint decode compares the binding |

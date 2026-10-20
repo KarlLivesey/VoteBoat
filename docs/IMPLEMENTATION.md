@@ -1,5 +1,54 @@
 # Implementation record
 
+## PR15 cumulative reconciliation plan (21 October 2026; before reconciliation)
+
+This finishes existing DR1 only; it opens no new slice. Starting source is
+`79829e871b2c4131700f51a7c2df978db8fc7618` (PR15). Merge, preserving both
+histories, exact PR14 dependency `219ad7bb8489c19012c8298d1021ddd959861782`
+(published `origin/lb/st2-maintenance-defaults`), including main
+`bd714771e181d59c2cfaece3fc93dc411ce41ddb` and fixture repair `3fa6435b`.
+PR15 remains based on main in GitHub; stacking does not qualify or merge PR14.
+The existing LB macro and application/storage mini plans remain the scope;
+DR2/TX1 and later milestones remain planned, not work authorized here.
+
+**Data/API shape.** Keep DR1's 16-byte Counter session commands, schema,
+checkpoint acknowledgement evidence, allocation fence, retention declarations,
+and exact family/schema/configuration/plan readiness identity. Compose these
+with ST2 default checkpoints/reclaim, profiles and maximum-batch/WAL admission.
+Preserve main's owned sink, summarized-log/in-place install stamps, V3e bounded
+peer/stall slots, EO1 continuation order and N0 benchmark/QUIC paths. Inherit
+ST2's checked port-layout leases, owner/fork exclusions, reader joins and held
+recovery arming; do not introduce another allocator or maintenance mechanism.
+
+**Transitions and ownership/failure cleanup.** Registration/eviction, command
+acknowledgement/closure and checkpoint/restore retain the reviewed DR1 semantics:
+acknowledged or evicted IDs never re-execute; allocation cannot roll back or
+alias. Readiness requires every committed bootstrap binding (`deployment_bound`)
+and fully charges boxed requests; first ordinary logical-voter claims compare
+exact binding bytes and candidates compare the complete bootstrap. Maintenance
+keeps ST2's typed pressure, reserved control capacity and ordered reclaim.
+Each app/core/provider retains its existing ownership; failures refuse without
+partial install or false readiness. No changes to these contracts are planned.
+
+**Restart/partial-progress and acceptance.** Inspect three-way conflicts against
+both heads, then run focused floor/allocation/checkpoint, Counter protocol with
+default maintenance, readiness identity/charge/bootstrap and existing `rr7_*`
+regressions; exercise transfer layout's u16 boundary and the original TCP failure,
+and relevant changed core/runtime paths. Run root fmt, four strict locked/offline
+all-target Clippy profiles and matched fmt/Clippy, plus the enabled actual push
+hook. Configurations run sequentially on cores 0–3, nice 19, at most four jobs,
+no incremental builds, only this checkout's target (including matched).
+
+**Evidence boundary.** The old `79829e87` full gate is not green: all-features
+2,890/1 failed at transfer-service port addition overflow; unchanged 33/0 rerun
+was diagnostic only. That exact fixture is repaired by the dependency. All old
+passes remain historical, not qualification of this cumulative head. ST2 owns
+the sole full runner. Parent must obtain fresh source confirmations and the
+final exclusive whole matrix after ST2 finishes and this source is stable.
+Record focused results separately, push nonforce to existing PR15, save reports
+and logs under main target/claude/research-lv/pr15-final-reconcile, then sweep
+this task's own checkout/target and verify process/disk cleanup. No main writes.
+
 ## Lifetime bounds track (opened 19 October 2026)
 
 User rule (19 October 2026): this is infrastructure, so failing after X time,
