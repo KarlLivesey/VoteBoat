@@ -51,12 +51,14 @@ impl Raft {
             self.ack_order[..=i].rotate_right(1);
         }
     }
-    /// Highest index a peer holds or has been sent in an ordinary request.
+    /// Highest index a peer holds or has been sent in an ordinary request that
+    /// extends its acknowledged prefix (a probe that may be rejected does not
+    /// count).
     fn reach(&self, peer: NodeId) -> u64 {
         let acked = self.progress.get(&peer).copied().unwrap_or(0);
         self.requests
             .get(&peer)
-            .filter(|sent| sent.snapshot.is_none())
+            .filter(|sent| sent.snapshot.is_none() && sent.start <= acked.saturating_add(1))
             .map_or(acked, |sent| acked.max(sent.end))
     }
     /// The latest entry already reaches a quorum without `peer`.
@@ -88,17 +90,23 @@ impl Raft {
         let Some(&next) = self.next_index.get(&peer) else {
             return false;
         };
+        // Only acknowledged progress proves what the peer holds: a new
+        // leader's optimistic `next_index` does not, so its first probe is
+        // never held.
+        let acked = self.progress.get(&peer).copied().unwrap_or(0);
         if next > last {
-            // Only a newer commit to report: the next data Append or the
-            // heartbeat carries it, unless it is the first commit covering the
-            // latest configuration entry, which goes out at once.
-            return !self.configuration_notice;
+            // Only a newer commit to report, to a peer that acknowledged every
+            // entry: the next data Append or the heartbeat carries it, unless
+            // it is the first commit covering the latest configuration entry,
+            // which goes out at once.
+            return acked >= last && !self.configuration_notice;
         }
-        // A data Append (no snapshot), from a peer that holds everything before
-        // the latest leader batch and that one Append brings to the tip.
+        // A data Append (no snapshot), from a peer that acknowledged everything
+        // before the latest leader batch and that one Append brings to the tip.
         next > self.durable.base_index()
             && next <= last
             && next > self.batch_floor
+            && acked >= self.batch_floor
             && last - next < self.batch_limits.max_replication_entries as u64
             && self.covered_without(peer, last)
     }
@@ -187,6 +195,18 @@ impl Raft {
             out.push_back(self.append_for(peer)?);
         }
         Ok(())
+    }
+    /// A voter rejected its ordinary request, so the quorum this batch was
+    /// counted on may be short: send every held Append now. Held peers are
+    /// caught up by construction, so these are ordinary Appends.
+    pub(super) fn release_on_rejection_into(
+        &mut self,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
+        if self.held.is_empty() {
+            return Ok(());
+        }
+        self.release_held_into(out)
     }
     /// `Event::ReleaseHeldAppends`: send every held Append now.
     pub(super) fn release_held_into(

@@ -127,3 +127,88 @@ fn zero_bound_turns_holds_off() {
         );
     }
 }
+fn pump_cut(nodes: &mut [Node], ms: u64, cut: usize) {
+    pump_auto(nodes, MonoTime(ms), Some(cut), &mut Vec::new());
+}
+fn commit_index(node: &Node) -> u64 {
+    node.runtime.core(group(1)).unwrap().state().commit_index
+}
+
+#[test]
+fn new_leader_probes_a_lagging_follower_at_once() {
+    // Holds last as long as the heartbeat, so a held probe would be visible.
+    let heartbeat = timer_config().heartbeat_ms;
+    let mut nodes = cluster(heartbeat);
+    let (old, beat) = elected(&mut nodes);
+    let lagging = (old + 1) % 3;
+    let other = (old + 2) % 3;
+    // The lagging follower misses three committed writes.
+    for (k, operation) in (10..13).enumerate() {
+        nodes[old]
+            .runtime
+            .admit(group(1), proposal(operation))
+            .unwrap();
+        pump_cut(&mut nodes, beat + k as u64, lagging);
+    }
+    let committed = commit_index(&nodes[old]);
+    assert_eq!(last_index(&nodes[other]), committed);
+    assert!(last_index(&nodes[lagging]) < committed);
+    // The old leader is cut off; only `other` can win (its log is ahead).
+    let mut ms = beat + 3;
+    let elected_at = loop {
+        ms += 1;
+        assert!(ms < beat + 1000, "no new leader");
+        pump_cut(&mut nodes, ms, old);
+        if nodes[other].runtime.core(group(1)).unwrap().role() == Role::Leader {
+            break ms;
+        }
+    };
+    // In the millisecond of the new leader's no-op, the lagging follower's
+    // probe is rejected, rewound and answered, and its ack commits the no-op:
+    // with the old leader silent, nothing else could.
+    let tip = last_index(&nodes[other]);
+    assert!(tip > committed);
+    assert_eq!(
+        last_index(&nodes[lagging]),
+        tip,
+        "caught up at ms {elected_at}"
+    );
+    assert_eq!(commit_index(&nodes[other]), tip);
+}
+
+#[test]
+fn a_silent_quorum_follower_delays_the_commit_by_exactly_the_bound() {
+    // Which follower carries the batch at once is deterministic; cut that one
+    // off before the batch, so only the held follower can complete the quorum.
+    let mut found = 0;
+    for cut in 0..3 {
+        let mut nodes = cluster(2);
+        let (leader, beat) = elected(&mut nodes);
+        if cut == leader {
+            continue;
+        }
+        nodes[leader].runtime.admit(group(1), proposal(9)).unwrap();
+        pump_cut(&mut nodes, beat, cut);
+        let tip = last_index(&nodes[leader]);
+        if commit_index(&nodes[leader]) == tip {
+            continue; // `cut` was the follower the quorum did not need
+        }
+        found += 1;
+        let held = 3 - leader - cut;
+        assert!(nodes[leader]
+            .runtime
+            .core(group(1))
+            .unwrap()
+            .has_held_appends());
+        pump_cut(&mut nodes, beat + 1, cut);
+        assert!(
+            commit_index(&nodes[leader]) < tip,
+            "not a millisecond early"
+        );
+        assert!(last_index(&nodes[held]) < tip);
+        pump_cut(&mut nodes, beat + 2, cut);
+        assert_eq!(last_index(&nodes[held]), tip);
+        assert_eq!(commit_index(&nodes[leader]), tip);
+    }
+    assert_eq!(found, 1);
+}

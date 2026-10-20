@@ -86,6 +86,29 @@ fn held(hold: AppendHold) -> Raft {
     leader.set_append_hold(hold);
     leader
 }
+/// A leader whose followers have both acknowledged its whole log (a heartbeat,
+/// 3 first, so 2 is the most recent ack): the prefix evidence a hold needs.
+fn confirmed(hold: AppendHold) -> Raft {
+    let mut leader = held(hold);
+    let effects = step(&mut leader, Event::Heartbeat);
+    for peer in [3, 2] {
+        let request = sent(&effects, peer).unwrap();
+        assert!(reply(&mut leader, &request).is_empty());
+    }
+    assert_eq!(leader.progress[&node(2)], leader.state().last_index());
+    assert_eq!(leader.progress[&node(3)], leader.state().last_index());
+    leader
+}
+fn nack(core: &Raft, request: &Message, matching_index: u64) -> Event {
+    let Event::Receive(mut m) = ack(core, request) else {
+        unreachable!()
+    };
+    m.rpc = Rpc::Appended {
+        success: false,
+        matching_index,
+    };
+    Event::Receive(m)
+}
 /// First batch (entries 2..=3): follower 2 gets it, follower 3 is held.
 fn first_batch_holds_three(leader: &mut Raft) -> Message {
     let effects = batch(leader, 1, 2);
@@ -99,7 +122,7 @@ fn first_batch_holds_three(leader: &mut Raft) -> Message {
 
 #[test]
 fn quorum_follower_is_sent_at_once_and_the_held_one_gets_both_batches_next() {
-    let mut leader = held(AppendHold::QuorumFirst);
+    let mut leader = confirmed(AppendHold::QuorumFirst);
     let two = first_batch_holds_three(&mut leader);
     // The quorum ack commits. 2's commit notice is held as well: its next
     // data Append (or the heartbeat) carries the commit.
@@ -148,7 +171,7 @@ fn commit_covering_a_configuration_entry_is_never_held() {
 
 #[test]
 fn heartbeat_and_release_event_each_end_a_hold() {
-    let mut leader = held(AppendHold::QuorumFirst);
+    let mut leader = confirmed(AppendHold::QuorumFirst);
     first_batch_holds_three(&mut leader);
     let effects = step(&mut leader, Event::ReleaseHeldAppends);
     assert_eq!(effects.len(), 1);
@@ -156,7 +179,7 @@ fn heartbeat_and_release_event_each_end_a_hold() {
     assert!(!leader.has_held_appends());
     assert!(step(&mut leader, Event::ReleaseHeldAppends).is_empty());
 
-    let mut leader = held(AppendHold::QuorumFirst);
+    let mut leader = confirmed(AppendHold::QuorumFirst);
     let two = first_batch_holds_three(&mut leader);
     let effects = step(&mut leader, Event::Heartbeat);
     assert_eq!(range(&sent(&effects, 3).unwrap()), (1, vec![2, 3]));
@@ -194,7 +217,7 @@ fn lagging_follower_is_never_held() {
 
 #[test]
 fn step_down_clears_holds_and_a_release_then_emits_nothing() {
-    let mut leader = held(AppendHold::QuorumFirst);
+    let mut leader = confirmed(AppendHold::QuorumFirst);
     first_batch_holds_three(&mut leader);
     let sender = StoreBinding {
         identity: leader.membership().replica_store(node(2)).unwrap(),
@@ -227,7 +250,7 @@ fn step_down_clears_holds_and_a_release_then_emits_nothing() {
 
 #[test]
 fn transfer_start_releases_holds_through_its_broadcast() {
-    let mut leader = held(AppendHold::QuorumFirst);
+    let mut leader = confirmed(AppendHold::QuorumFirst);
     first_batch_holds_three(&mut leader);
     let transfer = Event::TransferLeadership(LeadershipTransferRequest {
         operation: OperationId::new(800).unwrap(),
@@ -250,14 +273,14 @@ fn transfer_start_releases_holds_through_its_broadcast() {
 #[test]
 fn membership_change_clears_holds_and_keeps_todays_broadcast() {
     let change = || ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4]));
-    let mut off = held(AppendHold::Off);
+    let mut off = confirmed(AppendHold::Off);
     let effects = batch(&mut off, 1, 2);
     let two = sent(&effects, 2).unwrap();
     reply(&mut off, &two);
     let effects = accept(&mut off, 100, change());
     let expected = run(&mut off, effects);
 
-    let mut leader = held(AppendHold::QuorumFirst);
+    let mut leader = confirmed(AppendHold::QuorumFirst);
     let two = first_batch_holds_three(&mut leader);
     reply(&mut leader, &two);
     let effects = accept(&mut leader, 100, change());
@@ -284,7 +307,7 @@ fn membership_change_clears_holds_and_keeps_todays_broadcast() {
 
 #[test]
 fn compaction_releases_holds_and_a_snapshot_peer_is_never_held() {
-    let mut leader = held(AppendHold::QuorumFirst);
+    let mut leader = confirmed(AppendHold::QuorumFirst);
     let two = first_batch_holds_three(&mut leader);
     reply(&mut leader, &two);
     let reference = SnapshotRef {
@@ -312,7 +335,7 @@ fn compaction_releases_holds_and_a_snapshot_peer_is_never_held() {
 #[test]
 fn every_batch_commits_on_its_first_follower_ack_as_with_holds_off() {
     for hold in [AppendHold::Off, AppendHold::QuorumFirst] {
-        let mut leader = held(hold);
+        let mut leader = confirmed(hold);
         let mut outstanding: Vec<Message> = Vec::new();
         for (round, first) in (1..=11).step_by(2).enumerate() {
             let tip = leader.state().last_index() + 2;
@@ -339,11 +362,7 @@ fn every_batch_commits_on_its_first_follower_ack_as_with_holds_off() {
 }
 
 fn early_leader() -> Raft {
-    let mut leader = held(AppendHold::QuorumFirst);
-    for id in 2..=3 {
-        leader.progress.insert(node(id), 1);
-    }
-    leader
+    confirmed(AppendHold::QuorumFirst)
 }
 /// Propose a batch and bind its exact ticket; the pre-barrier sends follow.
 fn early_batch(leader: &mut Raft, first: u128, count: u128) -> (LogTicket, Vec<Effect>) {
@@ -407,4 +426,105 @@ fn a_held_follower_due_at_the_batch_counts_toward_the_early_quorum() {
     assert_eq!(range(&sent(&effects, 3).unwrap()), (1, vec![2, 3, 4, 5]));
     assert!(sent(&effects, 2).is_none());
     assert_eq!(leader.held, BTreeMap::from([(node(2), 5)]));
+}
+
+#[test]
+fn sol_review_new_leader_unknown_prefix_is_catchup_not_holdable() {
+    let mut leader = held(AppendHold::QuorumFirst);
+    assert_eq!(leader.progress[&node(3)], 0);
+    assert_eq!(leader.next_index[&node(3)], 2);
+    let effects = leader.become_leader().unwrap();
+    let effects = run(&mut leader, effects);
+    assert!(sent(&effects, 2).is_some());
+    assert!(
+        sent(&effects, 3).is_some(),
+        "probe unconfirmed prefixes eagerly"
+    );
+    assert!(!leader.has_held_appends());
+}
+
+#[test]
+fn unacknowledged_follower_gets_its_first_batch_and_commit_notice_at_once() {
+    // No acknowledgement yet: the cursors are optimistic, so nothing is held,
+    // neither the first data Append nor the commit notice after it.
+    let mut leader = held(AppendHold::QuorumFirst);
+    let effects = batch(&mut leader, 1, 2);
+    let two = sent(&effects, 2).unwrap();
+    assert_eq!(range(&sent(&effects, 3).unwrap()), (1, vec![2, 3]));
+    assert!(leader.held.is_empty());
+    reply(&mut leader, &two);
+    assert_eq!(leader.state().commit_index, 3);
+    // 2 acknowledged everything: its commit notice may now be held.
+    assert_eq!(leader.held, BTreeMap::from([(node(2), 3)]));
+}
+
+#[test]
+fn quorum_follower_rejection_releases_the_held_follower_at_once() {
+    let mut leader = confirmed(AppendHold::QuorumFirst);
+    let two = first_batch_holds_three(&mut leader);
+    let event = nack(&leader, &two, 1);
+    let effects = step(&mut leader, event);
+    // 3 is caught up: it gets the batch in this step, and its ack commits it.
+    let three = sent(&effects, 3).expect("the held follower is released");
+    assert_eq!(range(&three), (1, vec![2, 3]));
+    assert!(sent(&effects, 2).is_some(), "2 is retried as before");
+    assert!(leader.held.is_empty());
+    reply(&mut leader, &three);
+    assert_eq!(leader.state().commit_index, 3);
+}
+
+#[test]
+fn a_probe_that_may_be_rejected_does_not_cover_a_hold() {
+    // A new leader over entries 1..=3: its no-op (4) probes both followers,
+    // and the next batch (5..=6) waits behind both outstanding probes.
+    let mut leader = held(AppendHold::QuorumFirst);
+    batch(&mut leader, 1, 2);
+    let effects = leader.become_leader().unwrap();
+    let effects = run(&mut leader, effects);
+    let two = sent(&effects, 2).unwrap();
+    let three = sent(&effects, 3).unwrap();
+    assert_eq!(range(&three), (3, vec![4]));
+    assert!(batch(&mut leader, 3, 2).is_empty());
+    // 2 rejects: its rewound Append reaches the tip but extends no
+    // acknowledged prefix (2 acknowledged nothing), so it may be rejected again.
+    let event = nack(&leader, &two, 3);
+    let effects = step(&mut leader, event);
+    assert_eq!(range(&sent(&effects, 2).unwrap()), (2, vec![3, 4, 5, 6]));
+    assert_eq!(leader.progress[&node(2)], 0);
+    // 3's ack leaves it one batch behind with its prefix confirmed. 2's probe
+    // does not cover batch 5..=6 for it, so 3 gets that batch at once.
+    let effects = reply(&mut leader, &three);
+    assert_eq!(range(&sent(&effects, 3).unwrap()), (4, vec![5, 6]));
+    assert!(leader.held.is_empty());
+}
+
+#[test]
+fn an_optimistic_cursor_alone_never_justifies_a_hold() {
+    // Before the new leader's no-op is durable, 3's cursor is past the tip
+    // but 3 acknowledged nothing: its commit notice is not holdable.
+    let mut leader = held(AppendHold::QuorumFirst);
+    let effects = leader.become_leader().unwrap();
+    assert_eq!(leader.next_index[&node(3)], leader.state().last_index() + 1);
+    assert!(!leader.hold_append(node(3)));
+    let effects = run(&mut leader, effects);
+    // 2 acknowledges the no-op and then carries batch 2..=3 alone.
+    reply(&mut leader, &sent(&effects, 2).unwrap());
+    let effects = batch(&mut leader, 1, 2);
+    reply(&mut leader, &sent(&effects, 2).unwrap());
+    assert_eq!(leader.state().commit_index, 4);
+    // Without 3's outstanding probe, and with a cursor inside the latest
+    // batch, 3's next data Append is fully covered by 2, yet 3 acknowledged
+    // nothing below the batch: it is not held. (The core only sets such a
+    // cursor at a new leader's no-op, where nothing confirmed can cover it, so
+    // this pins the rule directly.)
+    leader.retire_replication(node(3));
+    leader
+        .next_index
+        .insert(node(3), leader.state().last_index());
+    assert_eq!(leader.progress[&node(3)], 0);
+    assert!(!leader.hold_append(node(3)));
+    leader
+        .progress
+        .insert(node(3), leader.state().last_index() - 1);
+    assert!(leader.hold_append(node(3)), "acknowledged prefix: holdable");
 }

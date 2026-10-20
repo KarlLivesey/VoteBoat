@@ -270,6 +270,66 @@ main because of the leader's per-batch commit persists. The bound (it caps the
 extra commit wait when the covering follower stalls) and whether to keep N1's
 latency at that leader cost are user decisions.
 
+### N1c review round 2 schema plan (before editing, 20 October 2026)
+
+Input: GPT-6.1-Sol's round-1 review of PR 23 (head `767539b4`): one P2, commit
+safety confirmed, the TCP 15,000/s p99 rise (24.4 → 28.7 ms) "a concern, not
+established noise", and three prose corrections. N1c merges alone; PR 19 (N1)
+stays blocked.
+
+- **P2: an optimistic cursor is not a confirmed prefix.** `initialize_replication`
+  sets every `next_index` to the old tip + 1 with acknowledged `progress` 0, so
+  `next > batch_floor` does not prove the follower holds the earlier batches. A
+  new leader whose follower is actually behind held that follower's first probe
+  after the no-op and delayed the rewind/snapshot path by up to the bound.
+  - *Data/API:* no new state or API. `hold_append(P)` for a data Append also
+    requires `progress[P] ≥ batch_floor` (acknowledged evidence, not the cursor);
+    a commit-only notice requires `progress[P] ≥ last` (P acknowledged every
+    entry). `reach(Q)` counts Q's outstanding ordinary request only when it
+    extends Q's acknowledged prefix (`start ≤ progress[Q] + 1`): a probe that may
+    be rejected does not cover the quorum for someone else's hold.
+  - *Transitions:* a new leader probes every follower at once after its no-op
+    (nothing is acknowledged yet); holds start only after a follower's first
+    acknowledgement. Steady state is unchanged: a released follower's ack sets
+    `progress` to the previous tip, which is the next `batch_floor`, and every
+    steady-state request starts at `progress + 1`.
+  - *Fixtures:* the positive hold tests first acknowledge a heartbeat from both
+    followers, through the core, so the prefix evidence is real.
+- **Spare release when the quorum follower fails.** The core has no
+  transport-failure input: a disconnected follower is silent, and the transport
+  retries below the core. A correlated rejection is an input: on an `Appended`
+  rejection of a voter's ordinary request while holds exist, the leader releases
+  every held follower through `append_for` in the same step (they are caught up
+  by construction, so this is an ordinary Append), then rewinds the rejecting
+  follower as today. Silent loss stays bounded by the deadline or heartbeat; a
+  new runtime→core transport-failure event would cross the peer driver (which
+  sees connections, not groups) for a case the bound already covers, so it is
+  not added. Ownership/cleanup: unchanged; a release only empties `held`.
+- **Acceptance.** Sol's `sol_review_new_leader_unknown_prefix_is_catchup_not_holdable`
+  verbatim; a runtime regression in which a follower misses committed writes,
+  a new leader is elected, and the lagging follower catches up in the
+  millisecond of the no-op (with holds at the heartbeat bound); the existing
+  lagging test kept; a core test that a quorum follower's rejection releases the
+  spare in the same step; a runtime test that a silently lost quorum follower
+  delays the commit by exactly the bound. Mutations: drop the `progress` check
+  (the Sol test and the runtime regression fail); drop the release on rejection
+  (its test fails).
+- **p99 at TCP 15,000/s.** On the quiet Mac, 7 ABBA rounds of that cell with
+  main + counters, the round-2 head + counters, and the same head with the hold
+  default set to 0 (measurement-only control: the same code with holds off),
+  recording per-run p50/p99, CPU per write (the regime) and leader persistence
+  batches. Hypotheses: (1) the hold itself (each batch commits on one follower,
+  not the faster of two, and the spare waits up to the bound); (2) regime mix
+  across runs; (3) queueing in the single worker. The holds-off control
+  separates (1) from the rest of the code. Then the five N0 cells 5 ABBA rounds
+  and `nat.sh` 5 pairs on Linux for the final head. The bound is whole
+  milliseconds (`MonoTime`), so 0.5 ms is not representable without a timer
+  resolution change; the measured answer uses 0 and 1.
+- **Prose.** One Append carries the accumulated batches only within
+  `max_replication_entries`/bytes (at the limits, several ordered Appends); the
+  bound is protocol-time release admission, not a real-time guarantee under
+  backpressure; the P2 boundary (holds need acknowledged prefix evidence).
+
 ### N0 schema plan (before editing, 19 October 2026)
 
 - **Library change: one pure move.** `HostWait`, `HOST_GATHER` and

@@ -441,6 +441,7 @@ impl Raft {
                 .min(matching_index.saturating_add(1))
                 .max(1);
             self.next_index.insert(m.from, next);
+            self.release_on_rejection_into(out)?;
             out.push_back(self.append_for(m.from)?);
             Ok(())
         }
