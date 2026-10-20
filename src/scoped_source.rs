@@ -482,24 +482,28 @@ where
         }
         Ok(())
     }
+    /// The highest enabled mode's schema.
+    fn mode_schema(&self) -> u64 {
+        if self.metadata_locator_adoption {
+            LOCATOR_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.metadata_adoption {
+            METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.parent_slots {
+            PARENT_SLOT_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.parent_limit != 0 {
+            PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.retained_grants {
+            RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.bound_intents {
+            BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else {
+            SCOPED_TRANSFER_SOURCE_SCHEMA
+        }
+    }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
-            application_schema: if self.metadata_locator_adoption {
-                LOCATOR_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.metadata_adoption {
-                METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.parent_slots {
-                PARENT_SLOT_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.parent_limit != 0 {
-                PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.retained_grants {
-                RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.bound_intents {
-                BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else {
-                SCOPED_TRANSFER_SOURCE_SCHEMA
-            },
+            application_schema: self.mode_schema(),
             // Words: 0 = export image bound; 1 = parent adoption limit; 2 =
             // modes (bit 0 bound intents, 1 retained grants, 2 parent slots,
             // 3 metadata adoption, 4 metadata locator adoption). The schema
@@ -1172,7 +1176,7 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        self.readiness_requirements().application_schema
+        self.mode_schema()
     }
     fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         let inner = self.routed.checkpoint(max_bytes)?;

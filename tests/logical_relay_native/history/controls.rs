@@ -57,14 +57,12 @@ pub(super) fn source_and_original_controls(c: &mut cluster::Cluster) {
         .request_activation_readiness(
             setup::child().group,
             support::node(1),
+            // The application's identity (family, limits and plan) with
+            // minimal reservations.
             ReadinessRequirements {
-                application_schema: voteboat::logical_voter::LOGICAL_APPLICATION_SCHEMA,
-                identity: voteboat::raft::LayerIdentity::family(
-                    voteboat::raft::ApplicationFamily::LOGICAL_VOTER,
-                ),
-                inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 1,
                 snapshot_bytes: 1,
+                ..setup::app().deployment_requirements().unwrap()
             },
         )
         .unwrap();
@@ -159,15 +157,7 @@ fn configure(c: &mut cluster::Cluster) {
                     change: ConfigurationChange::Learners(next),
                 },
                 readiness: Vec::new(),
-                requirements: ReadinessRequirements {
-                    application_schema: voteboat::logical_voter::LOGICAL_APPLICATION_SCHEMA,
-                    identity: voteboat::raft::LayerIdentity::family(
-                        voteboat::raft::ApplicationFamily::LOGICAL_VOTER,
-                    ),
-                    inner_profile: voteboat::raft::InnerProfile::LEAF,
-                    command_bytes: setup::limits().max_command_bytes,
-                    snapshot_bytes: setup::limits().max_child_checkpoint_bytes,
-                },
+                requirements: setup::app().deployment_requirements().unwrap(),
             },
         })
         .unwrap();

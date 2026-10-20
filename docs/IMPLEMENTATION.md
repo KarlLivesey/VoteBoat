@@ -1164,7 +1164,9 @@ Totals: e32d0511 9/15 probes pass (the six failures are exactly the round-4
 findings); branch 15/15.
 
 **CPU.** Not re-measured. The identity is built and compared only on the
-readiness, membership and wire readiness paths. Counter admission and apply,
+readiness, membership and wire readiness paths (corrected in round 6: too
+broad; several wrappers also build it for their admission and restore byte
+bounds). Counter admission and apply,
 the ledger, and the per-write frames are unchanged; `Event` and `Message`
 keep their sizes, `Raft` and the per-request window allocation are smaller.
 No Mac was used.
@@ -1325,6 +1327,159 @@ leader admits. Reclaiming lifetime tables stays TX1/LV/DR2/AI3.
    `src/` in this worktree. Counter admission/apply, the ledger and per-write
    frames are untouched; the larger value is built only where
    `readiness_requirements()` is called.
+
+#### DR1 round 6 implemented (20 October 2026, PR 15)
+
+Implemented as planned above (schema plan e6133f1c); deviations inline.
+
+- **Deployment plans (Sol P2-1).** `raft::DeploymentPlan` (segments of a
+  `depth << 32 | count` header and the layer's words, canonical, unused words
+  zero) lives in `InnerProfile`: `InnerProfile::wrapping` carries an inner
+  plan one layer deeper, `InnerProfile::planned` adds the owner's segment,
+  `InnerProfile::with_plan` installs a decoded one. A plan that does not fit,
+  a second own segment or a depth beyond the layer count overflows the
+  profile, which readiness refuses (`UnsupportedSchema`). No compare change:
+  the profile was already compared exactly. Activation's plan is the parent
+  and every mapping (voter, store, child) in constructor order. Deviation:
+  `MAX_DEPLOYMENT_PLAN_WORDS` is 192, not 128, because the audit (below)
+  also carries the logical voter, whose largest plan (an enrollment candidate
+  with a 16-mapping activation control profile) is 1 + 173 words; measured by
+  `the_largest_logical_voter_plan_fits_the_deployment_plan_bound`.
+- **Leaf limits and the audit (Sol P2-2).** Carried now (exact): transfer
+  transactions/accounts (words) and own group + profile (plan); program
+  coordinator transactions/keys (words) and own group, profile version,
+  coordinators and participants (plan); `BucketCounter` scope and partition
+  scheme (plan); metadata source/publishing/target/serving: the initial
+  directory's operations, history bytes and profiles (words 1–3, beside the
+  export bound), the target's operation and source configuration and the
+  serving target's configuration (plan); the logical voter: action limits
+  (words) and mapping, every other `LogicalLimits` field, codec format
+  versions and wire limits, the enrollment plan and the activation control
+  profile (plan). `Counter`: everything decision-affecting was already in
+  its schema. `Directory`: limits and all 15 profile flags were already in
+  its words; its plan is bound by its bootstrap entry. Deviation: the plan
+  named only the two transaction leaves; the audit (an independent read of
+  every leaf, citing each use) found the same defect class in
+  `BucketCounter` (scope refuses a key the wide replica accepts), the
+  metadata target (`operation` decides `Conflict` before any anchor check;
+  the source's inner directory limits decide its rejection capacity) and the
+  logical voter (family only), each bounded, so they are carried in this
+  round rather than recorded. The table is in
+  docs/APPLICATION_ENVELOPES.md#compared-identity; outside the identity, and
+  said so there: initial images (opening accounts and keys, initial inner
+  checkpoints), grant manifests, directory, namespace and move plans,
+  retirement anchors, the logical voter's child and parent bootstraps, and
+  policy/codec code.
+- **Byte budgets (Sol P2-3).** `event_cost` charges
+  `size_of::<ReadinessRequirements>()` for `Event::CheckLearnerReadiness`
+  (one cost feeds the item/byte, group, control and visit quotas).
+  `RequestWindow::owned_bytes` (the boxed request for a readiness boundary,
+  else 0). Capture keeps its pre-allocation bound (scopes and windows) and
+  then refuses a batch whose exact metadata (`NativeRelayBatch::metadata_bytes`:
+  batch owner, each scope, each window and its owned request) exceeds
+  `metadata_bytes`. `RelayRequestScopes::retained_bytes` adds each window's
+  owned request (made `pub(crate)` for a unit test).
+  `NativeRelayBatch::metadata_bound`, which sizes the relay's own output
+  limits and capture reserve, charges a request per message, so the relay
+  never refuses a valid readiness batch under its own limits. Box audit since
+  e32d0511: event and boundary (fixed here); `Raft`'s pending and ready
+  learner, the logical bridge's waiting attempt (one slot each, fixed count,
+  readiness-only); `Rpc` readiness boxes (charged by `message_cost`).
+- **Per-proposal bounds.** `RetirementGuard`, `TransferTarget` and the
+  metadata source/target admission computed `readiness_requirements()` once
+  per pending entry; now once per proposal (the value is larger). The
+  metadata serving target stores the initial directory's two byte bounds
+  instead of a whole `ReadinessRequirements`.
+- **Docs.** APPLICATION_ENVELOPES.md: plan column; mappings no longer "left to
+  the host"; "What it does not attest"; "Where the identity is built" (also
+  in admission and restore of several wrappers; not in the Counter's
+  admission or apply); a third recorded gap, readiness before a bootstrap
+  entry commits (owner DR2, row updated). WIRE_FORMAT.md: the plan field.
+  Round 5's CPU sentence is marked as too broad.
+- **Tests (permanent).** tests/learners/readiness_plans.rs:
+  `adversarial_activation_mapping` (Sol's pair: `Begun` vs
+  `Err(InvalidCommand)` at index 3, then `UnsupportedSchema` direct and
+  `Capability` through the real verifier both ways, own declarations get
+  receipts), `adversarial_transaction_leaf_capacity` (`Started` vs
+  `Err(DedupCapacity)` at index 4, then the same refusals),
+  `adversarial_routed_transaction_leaf_capacity` (the leaf's words and plan
+  one layer down in Routed's profile), `transaction_profiles_and_groups_are_compared_exactly`,
+  `activation_plan_names_every_mapping_and_its_order_is_canonical` (16
+  mappings: 116 words), `bucket_counter_scope_and_scheme_are_compared_exactly`
+  (`Value(5)` vs `Err(InvalidCommand)`; direct comparator only, because a bare
+  `BucketCounter`'s 69,656-byte command bound exceeds the cluster's 64 KiB log
+  limit), `deployment_plans_are_canonical_bounded_and_refused_when_they_overflow`.
+  tests/runtime.rs `event_budget::readiness_event_heap_is_counted`;
+  tests/learners.rs `relay_budget::captured_readiness_metadata_covers_owned_request`
+  (binary search through the real leader and `NativeRelayBatch::capture`);
+  library `relay_native_readiness_scope_charges_the_owned_request`
+  (retained scopes). tests/metadata_transfer.rs
+  `readiness_compares_the_initial_directory_limits_and_the_target_operation`;
+  tests/logical_voter_application/candidate.rs
+  `readiness_compares_every_limit_mapping_plan_and_control_profile` and
+  `the_largest_logical_voter_plan_fits_the_deployment_plan_bound`.
+  tests/wire.rs: plan round trip (owner and inner segments, a full 192-word
+  plan), zero-length segment, oversized count and too-deep segment refused.
+  tests/logical_relay_native/history/controls.rs now declares the
+  application's own requirements instead of a family-only literal.
+
+**Before/after.** Temporary probe target (`tests/zz_r6_probes.rs`, not
+committed; only APIs present at both revisions), built with 7b39cdc0's and
+this branch's `src/` in this worktree; `git diff --exit-code -- src` after
+restoring.
+
+| Probe | 7b39cdc0 | Branch |
+| --- | --- | --- |
+| P2-1 activation mappings g2/g3, learner verifier | receipts both ways | `Capability` both ways; own declarations get receipts |
+| P2-2 transfer capacity 1/2, learner verifier | receipts both ways | `Capability` both ways |
+| P2-2 `Routed<TransferApplication>` capacity 1/2, learner verifier | receipts both ways | `Capability` both ways |
+| Audit: program capacity 1/2, comparator | `Ok`/`Ok` | `UnsupportedSchema` both ways |
+| Audit: `BucketCounter` scope 256/128, comparator | `Ok`/`Ok` | `UnsupportedSchema` both ways |
+| Audit: logical voter `max_actions`, comparator | `Ok`/`Ok` | `UnsupportedSchema` both ways |
+| Audit: metadata source directory operations 16/17 | `Ok`/`Ok` | `UnsupportedSchema` both ways |
+| Audit: metadata target operation 7/8 | `Ok`/`Ok` | `UnsupportedSchema` both ways |
+| P2-3 event at `max_event_bytes` = 256 (inline) | accepted, charged 256 (retains 664) | `EventTooLarge`; at 2,208 accepted and charged 2,208 |
+| P2-3 least accepted relay `metadata_bytes` | 624 (batch + request need 848) | 2,768 (batch + request 2,384) |
+| Sizes `Event`/`Message`/`Raft`/requirements/request | 256 / 256 / 4,512 / 408 / 608 | 256 / 256 / 4,512 / 1,952 / 2,144 |
+
+Totals: 7b39cdc0 1/11 (the size print); branch 11/11. Every round-1–5 test is
+still in the suites below and passes.
+
+**CPU.** Not re-measured; no Mac. `Event`, `Message` and `Raft` keep their
+sizes. Counter admission and apply, the ledger and the per-write frames are
+unchanged (the Counter builds no requirements on those paths). The larger
+requirements value is built on readiness, membership and wire readiness
+paths, and in the admission and restore byte checks of `RetirementGuard`,
+`TransferTarget`, the metadata leaves and the Routed family (now once per
+proposal); those are not the scored path and were not measured.
+
+**Checks (Linux, cores 0–3, nice 19, `-j 2`, suites on cores 1–3, one
+configuration at a time).** fmt; strict Clippy default, all-features,
+no-default-features, native-only: zero diagnostics (re-run after the last
+source change); matched fmt/Clippy by the pre-push hook. All-features, every
+test target except `representative_relay_model` (unchanged standalone model,
+not run, as in round 5) plus the library: lib 510 (+1 ignored; goldens
+unchanged), application 33, counter_service 205 (three exact-name chunks),
+effect_owner 210, leadership_maintenance 14, learners 36, routed 194 (nine
+exact-name chunks; the first three before the `ScopedTransferSource`
+`mode_schema` refactor, which is behaviour-preserving, and scoped_source,
+transfer_source, transfer_target, namespace_creation, delegation,
+retained_insertion, transfer_service and the library were re-run after it),
+transfer_source 9, scoped_source 6, transfer_target 10, namespace_creation
+19, logical_activation_application 7, transaction_application 6,
+program_transaction_application 3, wire 18, native_relay 22,
+provider_conformance 42, lifetime_apply_never_errs (U2) 4, raft 79, runtime
+58, metadata_transfer 43, logical_voter_application 10, logical_relay_native
+2, logical_voter_native 42, startup 60, native_member_startup 50, and every
+other target green. Default: lib 508, application 33, counter_service 146,
+effect_owner 210, leadership_maintenance 14, learners 35, routed 112,
+transfer_source 9, scoped_source 6, transfer_target 10, namespace_creation 19,
+logical_activation_application 7, transaction_application 6,
+program_transaction_application 3, wire 18, native_relay 13,
+provider_conformance 42, lifetime_apply_never_errs 4, raft 79, runtime 58,
+metadata_transfer 43, logical_voter_application 10, logical_relay_native 1.
+One routed command ran past the tool's 10-minute foreground limit and finished
+in the background (exit 0, 30 + 31 passed); no other detached work.
 
 ## Logical-voter reliability track (opened 18 October 2026)
 
