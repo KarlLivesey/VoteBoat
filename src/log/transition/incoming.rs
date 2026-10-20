@@ -255,30 +255,50 @@ impl OwnedNextLog {
                 .map(PreparedOwnedLog::Other),
         }
     }
+    #[cfg(test)]
     pub(crate) fn install(self, current: &mut GroupLog) -> Result<LogSummary, StorageError> {
         Ok(self.prepare_install(current)?.install(current))
     }
-    /// [`Self::install`] for a plan made from a [`SummarizedLog`] view of
-    /// `current`, with no change to `current` since (its version is
-    /// unchanged): the predecessor is `current`'s metadata, so an append or
-    /// commit advance installs without comparing it. Other plans keep every
-    /// check. The installed log's summary is written to `summary`, which is
-    /// left unchanged on error.
-    pub(super) fn install_unchanged(
-        self,
+    /// Install this plan into `current` where it lies and write the
+    /// installed log's summary to `summary`. `unchanged` means the plan was
+    /// made from a [`SummarizedLog`] view of `current` with no change since
+    /// (its stamp is unchanged): the predecessor is then `current`'s
+    /// metadata, so an append or commit advance installs without comparing
+    /// it. Every other plan, and every plan when `unchanged` is false, is
+    /// checked as [`Self::install`] checks it.
+    ///
+    /// Every check precedes the first change: on error `current`, `summary`
+    /// and this plan are as they were. On success the plan is spent (its
+    /// suffix belongs to `current`; a full plan holds the replaced log) and
+    /// must be dropped without further use.
+    pub(super) fn install_in_place(
+        &mut self,
         current: &mut GroupLog,
         summary: &mut LogSummary,
+        unchanged: bool,
     ) -> Result<(), StorageError> {
-        match self.0 {
+        match &mut self.0 {
             OwnedChange::Append(append) => {
-                debug_assert!(append.check_install(LogMetadata::from_log(current)).is_ok());
-                *summary = install_append(current, append.suffix, append.summary);
+                if unchanged {
+                    debug_assert!(append.check_install(LogMetadata::from_log(current)).is_ok());
+                } else {
+                    append.check_install(LogMetadata::from_log(current))?;
+                }
+                install_append_ref(current, append.suffix.take(), &append.summary);
+                *summary = append.summary;
             }
             OwnedChange::Commit(commit) => {
-                debug_assert_eq!(commit.predecessor, LogMetadata::from_log(current));
-                *summary = install_append(current, None, commit.summary);
+                if unchanged {
+                    debug_assert_eq!(commit.predecessor, LogMetadata::from_log(current));
+                } else {
+                    check_predecessor(&commit.predecessor, LogMetadata::from_log(current))?;
+                }
+                install_append_ref(current, None, &commit.summary);
+                *summary = commit.summary;
             }
-            other @ OwnedChange::Other { .. } => *summary = Self(other).install(current)?,
+            OwnedChange::Other { next, update } => {
+                *summary = next.install_in_place(current, update)?;
+            }
         }
         Ok(())
     }
@@ -325,13 +345,8 @@ impl OwnedAppend {
         self.summary
     }
     pub(crate) fn check_install(&self, current: LogMetadata) -> Result<(), StorageError> {
-        if current != self.predecessor {
-            return Err(StorageError::Rejected(
-                "transition plan predecessor or update mismatch",
-            ));
-        }
         // The original is immutable and bound to this plan before sealing.
-        Ok(())
+        check_predecessor(&self.predecessor, current)
     }
     #[cfg(feature = "native")]
     pub(crate) fn predecessor(&self) -> LogMetadata {
@@ -403,16 +418,28 @@ fn plain_update(
         snapshot_membership: None,
     }
 }
+fn check_predecessor(predecessor: &LogMetadata, current: LogMetadata) -> Result<(), StorageError> {
+    if current != *predecessor {
+        return Err(StorageError::Rejected(
+            "transition plan predecessor or update mismatch",
+        ));
+    }
+    Ok(())
+}
 fn install_append(
     current: &mut GroupLog,
     suffix: Option<Suffix>,
     summary: LogSummary,
 ) -> LogSummary {
+    install_append_ref(current, suffix, &summary);
+    summary
+}
+/// Append `suffix` and install `next`'s header; the caller stores `next`.
+fn install_append_ref(current: &mut GroupLog, suffix: Option<Suffix>, next: &LogSummary) {
     if let Some(suffix) = suffix {
         current.entries.append(suffix.entries);
     }
-    summary.metadata.install_header(current);
-    summary
+    next.metadata.install_header(current);
 }
 fn validate_base(
     view: &LogView<'_>,
