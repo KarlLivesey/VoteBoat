@@ -462,6 +462,10 @@ impl StateMachine for MetadataServingTarget {
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.target.validate_group(group)
     }
+    /// Its exact bootstrap is forwarded as the target's, which stages it.
+    fn deployment_bound(&self) -> bool {
+        self.target.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.target.applied_index()
     }

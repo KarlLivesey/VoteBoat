@@ -395,7 +395,8 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     /// adoption limit (bits 8..32) and the adoption modes (bit 0 cross-parent,
     /// 1 metadata, 2 metadata locator). Every limit is bounded below 2^32 at
     /// construction. The grant, local group and initial inner checkpoint are
-    /// the group's deployment plan, bound by the committed bootstrap entry.
+    /// the group's deployment plan, bound by the committed bootstrap entry,
+    /// which readiness waits for (`deployment_bound`).
     fn layer_identity(&self) -> crate::raft::LayerIdentity {
         let modes = u64::from(self.cross_parent_adoption)
             | u64::from(self.metadata_adoption) << 1
@@ -510,6 +511,12 @@ where
     }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
+    }
+    /// The bootstrap entry (grant, local group, initial inner checkpoint) has
+    /// applied: apply requires the committed bytes to equal this binding and
+    /// restore compares it, so `initialized` attests it.
+    fn deployment_bound(&self) -> bool {
+        self.initialized.is_some() && self.inner.deployment_bound()
     }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()

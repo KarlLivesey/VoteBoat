@@ -480,6 +480,14 @@ where
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }
+    /// The anchor is the owner's initial checkpoint, fixed by the owner's
+    /// binding: bound once the owner's is. A retired guard applied a proof
+    /// that matched the anchor exactly.
+    fn deployment_bound(&self) -> bool {
+        self.owner
+            .as_ref()
+            .map_or(self.retired.is_some(), S::deployment_bound)
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

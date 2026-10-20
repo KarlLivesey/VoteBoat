@@ -352,7 +352,11 @@ fn adversarial_routed_transaction_leaf_capacity() {
     // The leaf's plan, one layer deeper.
     assert_eq!(ds.inner_profile.plan().segment(0), None);
     assert_eq!(ds.inner_profile.plan().segment(1).unwrap().len(), 12);
-    assert_learners_refuse_each_other(small, large, covering(ds, dl));
+    // DR1 round 7: the Routed layer's bootstrap applies before a receipt.
+    let boot = |r: &RoutedApplication<TransferApplication, Policy>| {
+        vec![(op(991), r.bootstrap_command(65536).unwrap())]
+    };
+    assert_bound_learners_refuse_each_other(small, large, covering(ds, dl), boot, boot);
 }
 
 #[test]

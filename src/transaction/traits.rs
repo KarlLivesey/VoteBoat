@@ -48,11 +48,19 @@ impl StateMachine for TransferApplication {
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         use crate::raft::DeploymentPlan;
         // Plan: this group, which with the profile decides the role, then the
-        // profile's coordinator and two participants (3 words each).
+        // profile's coordinator and two participants (3 words each); then a
+        // participant's opening image, per account in id order: id, opening
+        // (an initial input no committed entry binds). 1 + 12 + 2a words, so
+        // at most 89 accounts fit; a larger image overflows the profile and
+        // readiness refuses it rather than truncating.
         let [first, second] = self.profile.participants();
-        let plan = [self.group, self.profile.coordinator(), first, second]
-            .map(DeploymentPlan::group_words)
-            .concat();
+        let mut plan = Vec::with_capacity(12 + 2 * self.accounts.len());
+        for group in [self.group, self.profile.coordinator(), first, second] {
+            plan.extend(DeploymentPlan::group_words(group));
+        }
+        for (id, account) in &self.accounts {
+            plan.extend([id.get(), account.opening as u64]);
+        }
         Some(ReadinessRequirements {
             application_schema: TRANSFER_SCHEMA,
             // Words: transaction and account capacities, each of which

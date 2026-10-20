@@ -219,6 +219,11 @@ impl StateMachine for MetadataPublishingSource {
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.inner.validate_group(group)
     }
+    /// Its exact bootstrap is forwarded as the source's (a raw source
+    /// bootstrap is refused), which records it.
+    fn deployment_bound(&self) -> bool {
+        self.inner.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
     }

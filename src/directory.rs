@@ -1792,6 +1792,11 @@ impl StateMachine for Directory {
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }
+    /// The bootstrap entry (authority, limits, manifests) has applied: only
+    /// its exact bytes initialize, and restore compares the plan.
+    fn deployment_bound(&self) -> bool {
+        self.initialized
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

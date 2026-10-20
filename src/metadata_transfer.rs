@@ -742,6 +742,12 @@ impl StateMachine for MetadataAuthoritySource {
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())
     }
+    /// The source bootstrap (anchor, export bound, initial directory
+    /// bootstrap) has applied: only its exact bytes set it, and restore
+    /// requires the directory's bootstrap to match.
+    fn deployment_bound(&self) -> bool {
+        self.bootstrap.is_some()
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

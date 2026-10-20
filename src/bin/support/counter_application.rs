@@ -74,6 +74,9 @@ impl StateMachine for Application {
     fn retention(&self) -> Retention {
         delegate!(self, app => app.retention())
     }
+    fn deployment_bound(&self) -> bool {
+        delegate!(self, app => app.deployment_bound())
+    }
     fn applied_index(&self) -> u64 {
         delegate!(self, app => app.applied_index())
     }

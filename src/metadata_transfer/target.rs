@@ -406,6 +406,12 @@ impl StateMachine for MetadataAuthorityTarget {
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())
     }
+    /// The target bootstrap (its anchor over the source, plan and operation)
+    /// has applied: only its exact bytes stage it, and restore compares the
+    /// anchor.
+    fn deployment_bound(&self) -> bool {
+        self.staged.is_some()
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

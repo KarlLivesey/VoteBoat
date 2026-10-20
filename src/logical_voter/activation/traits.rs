@@ -87,6 +87,9 @@ where
             snapshot_bytes: self.limits.checkpoint_bytes,
         })
     }
+    fn deployment_bound(&self) -> bool {
+        self.inner.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
     }

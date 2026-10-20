@@ -286,10 +286,11 @@ pub const MAX_DEPLOYMENT_PLAN_WORDS: usize = 192;
 /// entries but are neither a limit nor a mode: the groups, voters and stores
 /// an application was built for (logical activation's parent and store
 /// mappings, a transaction's group and profile, a bucket counter's scope and
-/// partition scheme). Readiness compares it exactly, as part of
-/// [`InnerProfile`]. It does not cover unbounded inputs (initial images,
-/// grant manifests, directory plans, anchors); see
-/// docs/APPLICATION_ENVELOPES.md.
+/// partition scheme, a transaction participant's opening image). Readiness
+/// compares it exactly, as part of [`InnerProfile`]. Unbounded inputs that a
+/// committed bootstrap entry binds (grant manifests, directory plans, initial
+/// checkpoints, anchors) are attested instead by waiting for that entry
+/// (`StateMachine::deployment_bound`); see docs/APPLICATION_ENVELOPES.md.
 ///
 /// Segments, outermost first: a header word `depth << 32 | count`, then
 /// `count` words in the layer's documented layout. Depth 0 is the application
@@ -454,6 +455,10 @@ pub enum ReadinessError {
     Stale,
     NotCaughtUp,
     Capability,
+    /// Compatible declaration, but the application's committed bootstrap
+    /// binding has not applied on the learner yet
+    /// (`StateMachine::deployment_bound`). Retry after it commits.
+    BootstrapPending,
 }
 impl From<RaftError> for ReadinessError {
     fn from(e: RaftError) -> Self {
@@ -701,6 +706,7 @@ impl Raft {
             Ok(()) => true,
             Err(
                 ReadinessError::Capability
+                | ReadinessError::BootstrapPending
                 | ReadinessError::NotCaughtUp
                 | ReadinessError::Application(_)
                 | ReadinessError::InvalidRequirements,
@@ -865,6 +871,12 @@ fn verify_readiness_evidence<A: CheckpointStateMachine>(
         || snapshot_limits.max_application_bytes < required.snapshot_bytes
     {
         return Err(ReadinessError::Capability);
+    }
+    // Inputs a committed bootstrap entry binds (outside the identity) are
+    // attested only once that entry has applied here; the self-checkpoint
+    // round trip below cannot establish them.
+    if !application.deployment_bound() {
+        return Err(ReadinessError::BootstrapPending);
     }
     if state.snapshot.is_some() != snapshot.is_some() {
         return Err(ReadinessError::Storage(StorageError::Rejected(

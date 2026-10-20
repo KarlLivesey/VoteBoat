@@ -211,6 +211,20 @@ pub trait StateMachine {
     fn retention(&self) -> Retention {
         Retention::Undeclared
     }
+    /// Whether every committed binding entry this application and each layer
+    /// it wraps compare (a family's bootstrap entry: a Routed grant and
+    /// initial checkpoint, a directory plan, a target or namespace binding)
+    /// has applied in its applied state. Readiness refuses a positive receipt
+    /// before then (`ReadinessError::BootstrapPending`): inputs outside the
+    /// compared identity are attested only once that entry applied, since a
+    /// family applies it only when the committed bytes equal its own binding
+    /// and restore compares the binding exactly. `true` (the default) for an
+    /// application with no such entry. A wrapper must AND its inner
+    /// application's; reporting `true` around an unbound inner application is
+    /// a trusted-provider obligation, like declaring `InnerProfile::LEAF`.
+    fn deployment_bound(&self) -> bool {
+        true
+    }
     /// Pure, nonblocking check against the selected application's enforced
     /// bounds. Refuses an application that declares no retention rule.
     fn validate_deployment_requirements(

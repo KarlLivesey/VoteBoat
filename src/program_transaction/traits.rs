@@ -35,10 +35,15 @@ impl StateMachine for ProgramApplication {
         use crate::raft::DeploymentPlan;
         // Plan: this group (decides the role), the profile version, the
         // coordinator and participant counts, then each catalog group in
-        // order (3 words each). At most 3 + 3 + 16 × 3 = 54 words.
+        // order (3 words each), at most 3 + 3 + 16 × 3 = 54 words; then a
+        // participant's opening keys in id order: id, opening (an initial
+        // input no committed entry binds). An image that does not fit the
+        // plan overflows the profile and readiness refuses it.
         let (coordinators, participants) =
             (self.profile.coordinators(), self.profile.participants());
-        let mut plan = Vec::with_capacity(6 + 3 * (coordinators.len() + participants.len()));
+        let mut plan = Vec::with_capacity(
+            6 + 3 * (coordinators.len() + participants.len()) + 2 * self.keys.len(),
+        );
         plan.extend(DeploymentPlan::group_words(self.group));
         plan.extend([
             self.profile.version(),
@@ -47,6 +52,9 @@ impl StateMachine for ProgramApplication {
         ]);
         for group in coordinators.iter().chain(participants) {
             plan.extend(DeploymentPlan::group_words(*group));
+        }
+        for (id, key) in &self.keys {
+            plan.extend([id.get(), key.opening as u64]);
         }
         Some(ReadinessRequirements {
             application_schema: PROGRAM_SCHEMA,

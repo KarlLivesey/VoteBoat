@@ -116,6 +116,9 @@ impl<A: StateMachine + Clone> StateMachine for Maintenance<A> {
                 .checked_add(self.capacity.checked_mul(codec::RECORD_BYTES)?)?,
         })
     }
+    fn deployment_bound(&self) -> bool {
+        self.inner.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
     }

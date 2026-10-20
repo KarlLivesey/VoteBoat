@@ -325,6 +325,11 @@ where
     fn validate_group(&self, g: GroupIdentity) -> Result<(), ApplicationError> {
         self.inner.validate_group(g)
     }
+    /// The namespace binding (plan and owner bootstrap) has applied: only its
+    /// exact bytes make it ready, and restore compares it.
+    fn deployment_bound(&self) -> bool {
+        self.ready.is_some() && self.inner.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
     }

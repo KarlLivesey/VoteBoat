@@ -1271,6 +1271,12 @@ where
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }
+    /// The target binding (group, operation, intent, initial inner
+    /// checkpoint) has applied: only its exact bytes stage it, and restore
+    /// compares it.
+    fn deployment_bound(&self) -> bool {
+        self.staged.is_some() && self.inner.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

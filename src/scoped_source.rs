@@ -1056,6 +1056,11 @@ where
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }
+    /// The scoped bootstrap applies only as its exact bytes (a raw Routed
+    /// bootstrap is refused) and initializes the Routed layer.
+    fn deployment_bound(&self) -> bool {
+        self.routed.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.routed.applied_index()
     }

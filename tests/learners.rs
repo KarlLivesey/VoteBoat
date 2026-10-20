@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 //! Explicit host-authorized learner enrollment through the public storage,
 //! core, application and snapshot contracts. No network bootstrap is inferred.
+#[path = "learners/bootstrap_bindings.rs"]
+mod bootstrap_bindings;
 #[path = "learners/readiness_plans.rs"]
 mod readiness_plans;
 mod support;
@@ -1596,6 +1598,77 @@ fn readiness_refuses_a_wrapped_learner_whose_inner_session_limits_differ() {
     .unwrap();
 }
 
+/// Step `core` and complete any persistence it asks for; the other effects.
+fn step_persisted<S: LogStore>(core: &mut Raft, store: &mut S, event: Event) -> Vec<Effect> {
+    let mut out = Vec::new();
+    for effect in core.step(event).unwrap() {
+        match effect {
+            Effect::Persist(update) => out.extend(persist_effect(core, store, update).unwrap()),
+            other => out.push(other),
+        }
+    }
+    out
+}
+/// Commit one command at the next index on a `readiness_cluster` leader and
+/// learner by actual replication: voter 2 acknowledges every append it is
+/// sent and the learner's replies are delivered. Returns the index.
+fn commit_command<L: LogStore, M: LogStore>(
+    leader: &mut Raft,
+    leader_log: &mut M,
+    learner: &mut Raft,
+    log: &mut L,
+    operation: OperationId,
+    bytes: Vec<u8>,
+) -> u64 {
+    let index = leader.state().last_index() + 1;
+    let mut pending = step_persisted(leader, leader_log, Event::Propose { operation, bytes });
+    for _ in 0..16 {
+        if leader.state().commit_index >= index && learner.state().commit_index >= index {
+            assert_eq!(
+                learner.state().term_at(index),
+                leader.state().term_at(index)
+            );
+            return index;
+        }
+        let mut next = Vec::new();
+        for effect in std::mem::take(&mut pending) {
+            let Effect::Send(message) = effect else {
+                continue;
+            };
+            if message.to == node(2) {
+                if let Rpc::Append {
+                    previous_index,
+                    entries,
+                    ..
+                } = &message.rpc
+                {
+                    let ack = response(
+                        &message,
+                        2,
+                        Rpc::Appended {
+                            success: true,
+                            matching_index: previous_index + entries.len() as u64,
+                        },
+                    );
+                    next.extend(step_persisted(leader, leader_log, Event::Receive(ack)));
+                }
+            } else if message.to == node(4) {
+                for reply in step_persisted(learner, log, Event::Receive(message)) {
+                    if let Effect::Send(reply) = reply {
+                        if reply.to == node(1) {
+                            next.extend(step_persisted(leader, leader_log, Event::Receive(reply)));
+                        }
+                    }
+                }
+            }
+        }
+        if next.is_empty() {
+            next = step_persisted(leader, leader_log, Event::Heartbeat);
+        }
+        pending = next;
+    }
+    panic!("index {index} did not commit on the learner")
+}
 /// Real learner readiness for one declaration: a fresh leader/learner cluster,
 /// the learner's application (from `build`) caught up on the committed prefix,
 /// then the leader's request and the learner's `verify_learner_readiness`.
@@ -1603,8 +1676,28 @@ fn learner_verdict<A: CheckpointStateMachine>(
     declared: ReadinessRequirements,
     build: impl Fn() -> A,
 ) -> Result<LearnerReadinessReceipt, ReadinessError> {
+    learner_verdict_after(declared, build, Vec::new())
+}
+/// As [`learner_verdict`], with `bootstrap` (operations and their bytes)
+/// first committed from index 3 by actual replication and applied.
+fn learner_verdict_after<A: CheckpointStateMachine>(
+    declared: ReadinessRequirements,
+    build: impl Fn() -> A,
+    bootstrap: Vec<(OperationId, Vec<u8>)>,
+) -> Result<LearnerReadinessReceipt, ReadinessError> {
     let mut log = HostLogStore::new(4);
-    let (mut leader, learner, _, _leader_log) = readiness_cluster(&mut log);
+    let (mut leader, mut learner, _, mut leader_log) = readiness_cluster(&mut log);
+    for (n, (operation, bytes)) in bootstrap.into_iter().enumerate() {
+        let index = commit_command(
+            &mut leader,
+            &mut leader_log,
+            &mut learner,
+            &mut log,
+            operation,
+            bytes,
+        );
+        assert_eq!(index, 3 + n as u64);
+    }
     let mut snapshots = snapshots();
     let mut app = build();
     app.apply_batch(learner.replay_committed()).unwrap();
@@ -1636,6 +1729,34 @@ fn assert_learners_refuse_each_other<A: CheckpointStateMachine, B: CheckpointSta
     assert_eq!(learner_verdict(db, &a), Err(ReadinessError::Capability));
     assert_eq!(learner_verdict(da, &b), Err(ReadinessError::Capability));
 }
+/// [`assert_learners_refuse_each_other`] for applications with a committed
+/// bootstrap binding (`boot_a`, `boot_b` give each one's bootstrap entries):
+/// each is refused for the other's declaration, refused for its own until its
+/// bootstrap has applied (`BootstrapPending`), and gets a receipt after.
+fn assert_bound_learners_refuse_each_other<A: CheckpointStateMachine, B: CheckpointStateMachine>(
+    a: impl Fn() -> A,
+    b: impl Fn() -> B,
+    widen: impl Fn(ReadinessRequirements) -> ReadinessRequirements,
+    boot_a: impl Fn(&A) -> Vec<(OperationId, Vec<u8>)>,
+    boot_b: impl Fn(&B) -> Vec<(OperationId, Vec<u8>)>,
+) {
+    let (da, db) = (
+        widen(a().deployment_requirements().unwrap()),
+        widen(b().deployment_requirements().unwrap()),
+    );
+    assert_eq!(
+        learner_verdict(da, &a),
+        Err(ReadinessError::BootstrapPending)
+    );
+    assert_eq!(
+        learner_verdict(db, &b),
+        Err(ReadinessError::BootstrapPending)
+    );
+    assert!(learner_verdict_after(da, &a, boot_a(&a())).is_ok());
+    assert!(learner_verdict_after(db, &b, boot_b(&b())).is_ok());
+    assert_eq!(learner_verdict(db, &a), Err(ReadinessError::Capability));
+    assert_eq!(learner_verdict(da, &b), Err(ReadinessError::Capability));
+}
 
 #[test]
 fn readiness_refuses_another_wrapper_family_with_the_same_schema_numbers() {
@@ -1660,7 +1781,36 @@ fn readiness_refuses_another_wrapper_family_with_the_same_schema_numbers() {
         snapshot_bytes: s.snapshot_bytes.max(n.snapshot_bytes),
         ..r
     };
-    assert_learners_refuse_each_other(source, nested, common);
+    // DR1 round 7: each gets its receipt once its bootstrap entries applied
+    // (the nested inner Routed layer is bootstrapped by an outer data entry).
+    assert_bound_learners_refuse_each_other(
+        source,
+        nested,
+        common,
+        |s| {
+            vec![(
+                OperationId::new(991).unwrap(),
+                s.bootstrap_command(65536).unwrap(),
+            )]
+        },
+        |n| {
+            let inner = n.application().bootstrap_command(65536).unwrap();
+            let hint = voteboat::routing::RouteHint {
+                group: group(1),
+                ..transfer_fixtures::hint(1)
+            };
+            vec![
+                (
+                    OperationId::new(991).unwrap(),
+                    n.bootstrap_command(65536).unwrap(),
+                ),
+                (
+                    OperationId::new(992).unwrap(),
+                    voteboat::routed::encode_routed(hint, &[1], &inner, 65536).unwrap(),
+                ),
+            ]
+        },
+    );
 }
 
 #[test]
@@ -1710,7 +1860,13 @@ fn readiness_refuses_a_learner_whose_wrapper_configuration_differs() {
         command_bytes: r.command_bytes + 1024,
         ..r
     };
-    assert_learners_refuse_each_other(routed(4), routed(7), widest);
+    let boot = |r: &RoutedApplication<BucketCounter<Policy>, Policy>| {
+        vec![(
+            OperationId::new(991).unwrap(),
+            r.bootstrap_command(65536).unwrap(),
+        )]
+    };
+    assert_bound_learners_refuse_each_other(routed(4), routed(7), widest, boot, boot);
 }
 
 #[test]
