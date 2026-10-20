@@ -19,8 +19,113 @@ design pack is unchanged.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
-| Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
+| Current EO1: effect-owner continuations keep the released effect's position (split from PR 19; implemented, evidence below, PR open) | Remove a pre-existing availability loss: a loaded snapshot's Send queued behind a same-step Persist fenced the owner during snapshot catch-up under write load | — (on main) | Owner unit tests below fail on main and pass with the rule; mutation reverts fail both; witness test ×10 all-features; fmt, four strict Clippy builds, matched fmt/Clippy; effect_owner, runtime, native_member_startup, snapshot, snapshot_worker, counter_service in default and all-features | NW1 (unblocks N1) |
+| Then N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline; EO1 (PR 19 rebases on it) | Plan §5.3 tests and §5.4 gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
+
+### EO1 schema plan (before editing, 20 October 2026)
+
+- **Bug (on main).** A leader step can emit `[SnapshotRequired, Persist]`
+  (`After::LeaderAppend`: `broadcast_append_progress_into` re-emits
+  `SnapshotRequired` for a follower in snapshot catch-up, then
+  `maybe_commit_into` pushes `Persist(commit)` last). The owner leases the
+  front effect; when the image loads, `complete_effect_inner` appended the
+  continuation (one `Send` from the pure `snapshot_send`/`repair_snapshot_send`),
+  giving `[Persist, Send]`. `submit_persists` refuses a Persist with a queued
+  tail (`ProviderContract`), the replica fences the owner and recovers.
+  Fail-closed: the Send was never emitted and the Persist never submitted, so
+  no false reply and no corrupt state; an availability loss that repeats on the
+  next leader while the follower still needs the image. Found by N1 (PR 19,
+  `5986c826`), reproduced on main by the PR 19 review with an owner fixture.
+- **Invariant.** A continuation (the effects a completion callback returns for a
+  released lease, an in-place expansion of that effect) takes the released
+  effect's position in its visit's queue, in its own order. Because a visit
+  holds at most one lease (`Active::leased: Option`) and `take_owned_effect`
+  always pops the front, that position is the queue front: the continuation is
+  prepended, never appended. This is the order a synchronous completion would
+  have produced, and it is the order the core's own list contract (a Persist is
+  last) is written against.
+- **Mechanism.** One code path in `complete_effect_inner`: push the
+  continuation to the front in reverse, so it keeps its own order ahead of the
+  remaining effects. No kind is special-cased. Byte accounting is unchanged
+  (the same retained total is checked before the move). The Persist-tail rule
+  in `submit_persists` is unchanged and still the fail-closed backstop.
+  Not changed: `install_continuation` (worker Written/Durable continuations of
+  an already-submitted Persist). That is not a lease expansion: the Persist
+  left the queue at submission, and only early Sends emitted after it can be
+  queued, so FIFO after them is correct.
+- **Audit (every `Effect` kind: producer shape, continuation, effect of the
+  rule).** The rule only differs from appending when the continuation is
+  non-empty and effects are queued behind the released one.
+  - `Send`, `ReadReady`: continuation is empty (`release`,
+    `release_owned_send`, read capture, `cancel_read`). No change.
+  - `Committed`: inserted at index 0 with following effects behind it
+    (`CompletionEffects::into_owned`, `completion.rs:50`), but every production
+    continuation is empty (`release`, `complete_applied_capture`). No change.
+  - `Persist`: never completed through a callback (`PersistenceEffect`); its
+    continuation arrives through `deliver_worker` (see above). No change.
+  - `PersistVolatile`: only from `Raft::recover_volatile` cores, which the owner
+    does not run; completed through `persist_volatile`, outside the owner.
+  - `VerifyLearnerReadiness` (`readiness.rs:215`), `CheckpointRequired`
+    (`raft.rs:1082`), `StageSnapshot` (`receive.rs:538`): each returned as its
+    step's only effect, so nothing is queued behind them. No change.
+  - `SnapshotInstalled`, `CheckpointCompacted`: pushed last by `after_durable`
+    (`raft.rs:1425`, `raft.rs:1432`); nothing is queued behind them. No change.
+  - `SnapshotRequired`: the only kind emitted inside a multi-effect step
+    (`progress_broadcast.rs:15`, `raft.rs:1745`, `snapshot_repair.rs:123`), with
+    other Sends, other `SnapshotRequired`s and a final Persist behind it. Its
+    continuation is exactly one Send (pure `&self` expansion). This is the fix.
+  - Public `complete_effect`/`complete_effect_with` (physical embedding API)
+    with an arbitrary callback: the rule applies uniformly. A continuation that
+    itself holds a Persist with a non-empty tail now fails closed at
+    `submit_persists` (as appending already did whenever a Persist was queued
+    behind); no internal producer makes that shape. Sends ahead of a queued
+    Persist are the core's normal step shape: the core emits a durability-
+    dependent reply only from `after_durable`.
+  - Conclusion: the general rule is not unsafe for any kind; no special case.
+- **Tests (owner unit tests in `src/runtime/effects/continuation_tests.rs`,
+  deterministic, no I/O, white-box queue construction on the existing fixture,
+  generalised to N groups).** (1) `[SnapshotRequired, Persist]`, complete the
+  lease with one Send: the next leases are Send then Persist, and
+  `submit_persists` accepts the Persist. Fails on main with `ProviderContract`.
+  (2) Two visits each `[SnapshotRequired, …, Persist]`, both leased, the later
+  lease completes first (with a two-Send continuation): each queue keeps the
+  continuation in the released effect's place and order, and both Persists
+  are accepted in one batch. Mutation: restoring `extend` fails both.
+- **Measurement.** None: only snapshot-continuation releases change order;
+  per-write releases (`Send`, `Committed`) have empty continuations, so the
+  per-write path runs the same operations.
+
+### EO1 implemented (evidence, 20 October 2026, Linux cores 10–15, nice 19, `-j 4`)
+
+- **Change.** `complete_effect_inner` prepends the continuation in its own
+  order (one path, no kind special case); the rule is stated on
+  `EffectOwner`'s documentation. The in-crate owner fixture
+  (`effects/peer_ingress_tests.rs`) now builds one owner over N groups; its two
+  existing tests are unchanged.
+- **Tests.** `continuation_tests::loaded_snapshot_send_takes_its_place_ahead_of_the_steps_persist`
+  and `continuation_tests::continuations_released_out_of_lease_order_keep_their_positions`
+  pass. Each Persist is leased last and `submit_persists` accepts it (one
+  batch of two in the second test); the owner is not failed.
+- **Mutation.** Restoring main's `a.effects.extend(effects)` fails both: queue
+  `[Persist, Send(11)]` against `[Send(11), Persist]`, and
+  `[Persist, Send(21), Send(22)]` against `[Send(21), Send(22), Persist]`.
+  Restored afterwards.
+- **Checks.** `cargo +stable fmt --all -- --check` clean; strict Clippy
+  (`--locked --offline --keep-going --all-targets -D warnings`) clean in
+  default, `--all-features`, `--no-default-features` and
+  `--no-default-features --features native`; matched fmt and strict Clippy
+  clean.
+- **Suites, default features:** lib 551 (1 ignored), counter_service 144,
+  effect_owner 210, native_member_startup 27, runtime 57, snapshot 27,
+  snapshot_worker 14: all passed. **All features:** lib 553 (1 ignored),
+  counter_service 203, effect_owner 210, native_member_startup 50, runtime 57,
+  snapshot 27, snapshot_worker 14: all passed.
+- **Witness.** `quic_promoted_leader_witness_installs_compacted_final_snapshot`
+  (all features) passed 10/10. It does not reproduce the bug on main (that
+  needs N1's early sends); this shows no regression.
+- **Not measured.** No CPU measurement: per-write releases (`Send`,
+  `Committed`) have empty continuations, so the per-write path is unchanged.
 
 ### N0 schema plan (before editing, 19 October 2026)
 
