@@ -1614,9 +1614,10 @@ impl Raft {
             .collect()
     }
     /// Rebuild the hot broadcasts' peer order in place when the accepted
-    /// configuration id changed. A leader's membership changes only through
-    /// its own strictly increasing configuration ids, and leadership and
-    /// configuration changes reset the cache, so the id names the replica set.
+    /// configuration id changed. Only a leader reads it, and a leader's
+    /// membership changes only through its own strictly increasing ids. An id
+    /// is not unique across a truncation (a follower's uncommitted entry can be
+    /// replaced by another with the same id), so every election resets it.
     fn refresh_peer_order(&mut self) {
         let id = self.membership().id();
         if self.peer_order_for != Some(id) {
@@ -1644,7 +1645,6 @@ impl Raft {
     /// fresh request contexts, including unchanged identities and same-voter
     /// policy changes. This is not a durability or catch-up assertion.
     fn configuration_changed(&mut self) -> Result<(), RaftError> {
-        self.peer_order_for = None;
         self.clear_replication_authority();
         self.clear_reads();
         self.votes.clear();
@@ -1710,6 +1710,7 @@ impl Raft {
     }
     fn become_leader(&mut self) -> Result<Vec<Effect>, RaftError> {
         self.role = Role::Leader;
+        // A configuration id seen while following may name other replicas.
         self.peer_order_for = None;
         self.progress.clear();
         self.next_index.clear();

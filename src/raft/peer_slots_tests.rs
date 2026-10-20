@@ -35,7 +35,7 @@ struct Stats {
 }
 
 /// After every core call: no slot for a peer outside the current membership,
-/// the cached peer order is the fresh one, and the commit decisions equal the
+/// a leader's cached peer order is the fresh one, and the commit decisions equal the
 /// map form's (a planned commit is exactly its frontier, and none is missed).
 fn check(core: &Raft, stats: &mut Stats) {
     // Keys are bounded by the installed membership (a pending configuration
@@ -59,7 +59,8 @@ fn check(core: &Raft, stats: &mut Stats) {
         assert!(keys.len() <= peers.len());
     }
     assert!(core.requests.len() <= peers.len());
-    if core.peer_order_for == Some(core.membership().id()) {
+    // Only a leader reads the cached order (a follower's may be stale).
+    if core.role == Role::Leader && core.peer_order_for == Some(core.membership().id()) {
         assert_eq!(core.peer_order, core.peers());
     }
     if core.role != Role::Leader {
@@ -361,14 +362,16 @@ fn no_slot_is_retained_for_a_departed_peer() {
 }
 
 /// Deliver to quiescence on real volatile cores, checking every core after
-/// every call. Sends from `silent` are lost.
+/// every call. Sends from `silent` are lost, and so are sends to replicas
+/// outside the cluster (learners with no core), whose recipients are returned.
 fn settle(
     cluster: &mut [(Raft, VolatileLog)],
     slot: usize,
     effects: Vec<Effect>,
     silent: Option<usize>,
     stats: &mut Stats,
-) {
+) -> BTreeSet<NodeId> {
+    let mut outside = BTreeSet::new();
     let mut inbox: Vec<VecDeque<Message>> = vec![VecDeque::new(); cluster.len()];
     let mut work = vec![(slot, effects)];
     loop {
@@ -384,17 +387,23 @@ fn settle(
                         queue.extend(following);
                     }
                     Effect::Send(message) if silent != Some(slot) => {
-                        inbox[(message.to.get() - 1) as usize].push_back(message);
+                        match inbox.get_mut((message.to.get() - 1) as usize) {
+                            Some(queue) => queue.push_back(message),
+                            None => {
+                                outside.insert(message.to);
+                            }
+                        }
                     }
                     _ => {}
                 }
             }
         }
         let Some(slot) = (0..cluster.len()).find(|slot| !inbox[*slot].is_empty()) else {
-            return;
+            return outside;
         };
         let message = inbox[slot].pop_front().unwrap();
-        let effects = cluster[slot].0.step(Event::Receive(message)).unwrap();
+        let shown = format!("{message:?}");
+        let effects = cluster[slot].0.step(Event::Receive(message)).expect(&shown);
         check(&cluster[slot].0, stats);
         work.push((slot, effects));
     }
@@ -448,4 +457,119 @@ fn slots_follow_conflict_truncation_and_re_election_of_a_deposed_leader() {
         assert!(core.requests.keys().next().is_none());
     }
     assert!(stats.decisions >= 8, "decisions {}", stats.decisions);
+}
+
+/// Durable member cores of the bootstrap {1, 2, 3} with configuration
+/// replication enabled (volatile and default cores refuse that ingress).
+fn member_cluster() -> Vec<Raft> {
+    let state = core().state().clone();
+    (1..=3)
+        .map(|id| {
+            let binding = StoreBinding {
+                identity: store(id),
+                session: StoreSession::new(1).unwrap(),
+            };
+            Raft::recover_member(node(id), binding, state.clone(), LogLimits::default())
+                .unwrap()
+                .with_configuration_replication()
+        })
+        .collect()
+}
+
+/// Deliver to quiescence on durable cores, completing every persistence
+/// dependency. Nothing reaches or leaves `cut`; sends to replicas without a
+/// core are dropped and their recipients returned.
+fn settle_members(
+    cluster: &mut [Raft],
+    slot: usize,
+    effects: Vec<Effect>,
+    cut: Option<usize>,
+    stats: &mut Stats,
+) -> BTreeSet<NodeId> {
+    let mut outside = BTreeSet::new();
+    let mut inbox: Vec<VecDeque<Message>> = vec![VecDeque::new(); cluster.len()];
+    let mut work = vec![(slot, effects)];
+    loop {
+        while let Some((slot, effects)) = work.pop() {
+            let mut queue: VecDeque<Effect> = effects.into();
+            while let Some(effect) = queue.pop_front() {
+                match effect {
+                    Effect::Persist(update) => {
+                        let following = complete(&mut cluster[slot], &update);
+                        check(&cluster[slot], stats);
+                        queue.extend(following);
+                    }
+                    Effect::Send(message) if cut != Some(slot) => {
+                        let to = (message.to.get() - 1) as usize;
+                        match inbox.get_mut(to) {
+                            Some(_) if cut == Some(to) => {}
+                            Some(queue) => queue.push_back(message),
+                            None => {
+                                outside.insert(message.to);
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        let Some(slot) = (0..cluster.len()).find(|slot| !inbox[*slot].is_empty()) else {
+            return outside;
+        };
+        let message = inbox[slot].pop_front().unwrap();
+        let effects = cluster[slot].step(Event::Receive(message)).unwrap();
+        check(&cluster[slot], stats);
+        work.push((slot, effects));
+    }
+}
+
+#[test]
+fn peer_order_follows_a_same_id_configuration_replaced_by_truncation() {
+    // Configuration ids are unique along one log, not across a truncation:
+    // an uncommitted entry can be replaced, in one install, by another
+    // leader's entry with the same id and other replicas. Install sees equal
+    // ids and resets nothing; the next election must address the replacement.
+    let mut cluster = member_cluster();
+    let mut stats = Stats::default();
+    let effects = cluster[0].step(Event::Campaign).unwrap();
+    settle_members(&mut cluster, 0, effects, None, &mut stats);
+    assert_eq!(cluster[0].role(), Role::Leader);
+    // Node 1 accepts configuration 2 with learner 4 while cut off.
+    let effects = accept(
+        &mut cluster[0],
+        1_000,
+        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4])),
+    );
+    settle_members(&mut cluster, 0, effects, Some(0), &mut stats);
+    assert_eq!(cluster[0].peer_order, [node(2), node(3), node(4)]);
+    // Without it, node 2 is elected and commits configuration 2 with learner 5.
+    let effects = cluster[1].step(Event::Campaign).unwrap();
+    settle_members(&mut cluster, 1, effects, Some(0), &mut stats);
+    assert_eq!(cluster[1].role(), Role::Leader);
+    let effects = accept(
+        &mut cluster[1],
+        1_001,
+        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[5])),
+    );
+    settle_members(&mut cluster, 1, effects, Some(0), &mut stats);
+    let replacement = cluster[1].state().last_index();
+    // Reconnected, node 1 backs off and takes the new leader's noop and
+    // configuration in one append, replacing its own entry under the same id.
+    let before = cluster[0].membership().id();
+    let effects = cluster[1].step(Event::Heartbeat).unwrap();
+    settle_members(&mut cluster, 1, effects, None, &mut stats);
+    assert_eq!(cluster[0].state().last_index(), replacement);
+    let replaced = cluster[0].membership();
+    assert_eq!((before, replaced.id()), (cid(2), cid(2)));
+    assert!(replaced.replica_store(node(5)).is_some());
+    assert!(replaced.replica_store(node(4)).is_none());
+    // The order cached under that id is stale, so the election resets it.
+    assert_eq!(cluster[0].peer_order_for, Some(cid(2)));
+    assert_eq!(cluster[0].peer_order, [node(2), node(3), node(4)]);
+    let effects = cluster[0].step(Event::Campaign).unwrap();
+    let outside = settle_members(&mut cluster, 0, effects, None, &mut stats);
+    assert_eq!(cluster[0].role(), Role::Leader);
+    assert_eq!(cluster[0].peer_order, [node(2), node(3), node(5)]);
+    assert!(outside.contains(&node(5)) && !outside.contains(&node(4)));
+    assert!(cluster[0].requests.keys().all(|key| key != node(4)));
 }
