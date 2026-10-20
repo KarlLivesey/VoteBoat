@@ -24,7 +24,7 @@ are; LB references them for the audit's L1–L3 rows.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current ST2 (PR 14; rounds 1–3 implemented; round 4 implemented, in review: live noop bytes in the WAL proof, the stall map bound, an O(n) batch check): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Current ST2 (PR 14; rounds 1–4 implemented; round 5 in progress: the append byte check on the validated new suffix, starvation rewrites at deadlines, documentation): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
 | Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
 | Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
 
@@ -1263,6 +1263,101 @@ only). No assertion was weakened.
 - Still open from rounds 2–3: snapshot-store barrier fsync (device
   identification); a leader clears in-flight replication requests at
   compaction; pre-vote/check-quorum not added.
+
+#### ST2 round 5 schema plan (written before editing, 20 October 2026)
+
+GPT-6.1-Sol's round-4 review (5579339724) requests changes: no new P1; the
+round-3 parked-noop P1, the stall-map P2 and the O(n²) P3 are resolved. Two
+P2s remain in the capacity argument, plus documentation contradictions.
+Binding rules unchanged (no permanent capacity stop without a typed,
+operator-visible, recoverable state; no admitted or possibly committed entry
+dropped; every Raft check kept; no `unsafe`, no new crates, no weakened
+assertion; deterministic tests; CPU put to the user).
+
+**R5-1 (Sol P2-1): a matched data prefix bypasses the noop byte check.**
+Cause: the shard classifies and bounds the *whole received* `Append`
+(`wal_account::growth_bound`) before the step, the core accepts only the *new
+suffix* (`first_new_entry`). A received range that starts with an
+already-held command and continues with new noops is "data" to the shard
+(data check fails, sets storage pressure, `noop_over` stays false, so the
+core's `wal_noop_room` says only that *one* 576-byte noop fits), and
+"noop-only" to the core, which takes the whole noop suffix on that boolean.
+
+- *Shape.* The byte check moves to where the suffix is known. The shard
+  gives the core, before every step and completion, its exact room:
+  `Raft::set_wal_room(Option<WalRoom>)`, `WalRoom { data, noop }` = bytes
+  left under `H` and under `H + R` (`None`: no bounded WAL). The core, after
+  `validate_append_entries` and `first_new_entry`, walks the validated new
+  suffix **once**, accumulating `UPDATE_WAL_OVERHEAD + Σ entry_wal_bound` and
+  whether any entry is data. It declines the new entries when they are data
+  and `storage_pressure || bound > data`, or noop-only and `bound > noop`
+  (or, as before, past the retained-entry capacity). The same bound is
+  passed to staging (`persist_bounded`), so `LogUpdate::wal_bound` is not
+  walked again (its equality `debug_assert` stays).
+- *Ownership.* The core owns classification and the decision; the shard owns
+  the account and the counters. The core counts `wal_declined_appends` and
+  `wal_noop_declined_appends` (saturating); the shard adds their change over
+  each step to `WalAccount::declined` / `noop_refused`, as it already does
+  for `wal_noop_refusals`. `growth_bound` keeps proposals and configuration
+  entries only; the shard's per-step "decline this append" storage-pressure
+  toggle goes away. `wal_noop_room` (one leader noop fits) stays the
+  campaign / noop-placement input, now just `noop_fits`.
+- *State transitions.* Unchanged: a declined append keeps leader contact,
+  term and the verified-prefix commit, truncates a conflicting suffix with a
+  control record, sends no reply; the leader resends. Identity/log-matching
+  checks (`validate_append_entries`, `first_new_entry`'s equal-term
+  identity) run before the walk, exactly as now. Volatile cores without a
+  bounded WAL skip the walk (they stage no bytes).
+- *Failure/cleanup.* No new durable state or format. A declined noop counts
+  as a noop refusal, so maintenance enters the starvation state and rewrites
+  while the WAL grows (R5-2).
+- *CPU.* Today an ordinary follower append is walked three times for bytes
+  (shard `any` + `fold` over the whole message, then `wal_bound` at
+  staging); after this, once over the new suffix only. Leader and
+  single-proposal paths are unchanged. Re-measured on the quiet Mac (item 4).
+- *Acceptance.* (1) Sol's reproduction as a permanent test with the real
+  `Shard`, `Raft`, `apply_batch` planner and native checkpoint codec: two
+  groups share one account, the other group's uncommitted noops fill the
+  live image to 616 bytes under `H + R` (4.5 MiB WAL, 64 KiB reserve, 1 MiB
+  batches, 400,000-entry budget); an append of the matching command 2 and
+  64 new noops at indexes 3–66 in terms 2–65. Re-encoding the live state
+  after the step must satisfy `L ≤ H + R`; fails on cd90fb7a, passes now.
+  (2) The same append with a new data entry in the new suffix is declined as
+  before. (3) With room, the matched-prefix append is accepted and stages
+  exactly the new-suffix bound. Existing core capacity tests keep their
+  assertions (their WAL-room helper sets bytes instead of a boolean).
+
+**R5-2 (Sol P2-2): normal deadlines suppress every starvation rewrite.**
+Cause: `WalMaintenanceStatus::due` returns `None` after a below-threshold
+interval skip, before the high-water / held-batch / refused-noop rule; when
+every poll lands on a deadline, that rule never runs.
+- *Shape.* The deadline branch moves the deadline on, counts the skip and
+  falls through to the early rules (same `retry_ms` spacing, same "grown
+  since the last rewrite" condition). No new state.
+- *Acceptance.* Sol's reproduction (default policy for a 4.5 MiB ceiling,
+  usable 4,653,056, refused-noop high-water state, published
+  `3,555,000 + n/2`, live 3,554,000, polls at `1000·n` for n = 1..100) as a
+  permanent test: at least one rewrite; fails on cd90fb7a (0 of 100). A
+  second test: with polls at every deadline the trigger still respects
+  `retry_ms` (no two attempts closer than it) and does not fire when the WAL
+  has not grown since the last rewrite.
+
+**R5-3 (Sol P3-1): documentation.** `IMPLEMENTATION.md` round-4 plan:
+lowering the high-water percentage *reduces* noop room, so only a larger
+`max_wal_bytes` recovers; `WORKER_MAINTENANCE.md`: the immediate typed
+post-rewrite terminal; `COUNTER_SERVICE.md`: the capacity step-down when the
+uncommitted suffix cannot be checkpointed, distinguished from a deferred
+checkpointable noop. Narrow "unreachable in a node": the fit proof covers
+admission on validated suffixes; a recovered live state over the mark is
+reported through capacity refusal, not refused at construction; recovery
+with unchanged limits is not promised; snapshot-anchor growth is argued, not
+tested; an exhausted quorum (both followers without room) keeps its leader
+with no step-down and needs the visible operator recovery.
+
+**R5-4: CPU.** R5-1 changes the follower path, so ST2's own serving-only cost
+is re-measured on the quiet Mac against the same-CRC base (rebuilt by
+cherry-pick, as in round 4), ≥ 7 pairs, and the framework single-1 cell
+(5 pairs). Reported as measured, not offset by other changes.
 
 #### Design-pack amendment realised by ST2 (pack preserved)
 
