@@ -3890,7 +3890,7 @@ calls.
     travels in `Pending.planned`). On error nothing changes: log, summary,
     stamp and the plan.
   - `Raft::install_pending_plan(&mut self) -> Result<Installed,
-    StorageError>` is the only caller. It installs `self.pending`'s plan in
+    RaftError>` is the only caller. It installs `self.pending`'s plan in
     place; on `Ok` it takes `membership`, `after` and `reply` out (a
     16-byte-aligned 8 + 16 + 256 B, the parts the core still uses) and sets
     the slot to `None`; on `Err` it returns before touching the slot.
@@ -4121,7 +4121,7 @@ without conflict (`src/raft.rs` auto-merges once `Installed` sits beside
 `Pending`; the first check, with it beside `Replication`, conflicted on
 V3e's derive line), and the merged tree passes `--lib` 562/562 (1 ignored,
 both slices' tests and V3e's debug oracles), `volatile` 11, `raft` 81 and
-`snapshot` 27. `docs/IMPLEMENTATION.md` conflicts in two places, both
+`snapshot` 27. `docs/IMPLEMENTATION.md` conflicts in three places, all
 "take both": the adjacent V3e/V3f mini-plan rows, and both slices' sections
 inserted before "H2 round 2".
 
