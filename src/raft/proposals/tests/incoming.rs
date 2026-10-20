@@ -49,20 +49,22 @@ fn persist_effect_captures_raw_proposal_once_and_pending_shares_exact_immutable_
     assert_eq!(core.validate_persist_effect(&original), Ok(()));
     for operation in [false, true] {
         let mut wrong = original.clone();
-        let EntryPayload::Command {
-            operation: id,
-            bytes,
-        } = &mut wrong.suffix.as_mut().unwrap().entries[0].payload
-        else {
-            unreachable!()
-        };
-        if operation {
-            *id = OperationId::new(999).unwrap();
-        } else {
-            let mut raw = bytes.to_vec();
-            raw[0] ^= 1;
-            *bytes = raw.into();
-        }
+        wrong.suffix.as_mut().unwrap().entries.edit(|entries| {
+            let EntryPayload::Command {
+                operation: id,
+                bytes,
+            } = &mut entries[0].payload
+            else {
+                unreachable!()
+            };
+            if operation {
+                *id = OperationId::new(999).unwrap();
+            } else {
+                let mut raw = bytes.to_vec();
+                raw[0] ^= 1;
+                *bytes = raw.into();
+            }
+        });
         assert_eq!(
             core.validate_persist_effect(&wrong),
             Err(RaftError::WrongCompletion)

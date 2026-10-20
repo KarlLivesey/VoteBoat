@@ -33,7 +33,7 @@ fn configured(io: ModelIo) -> (NativeLogStore<ModelIo>, Vec<LogTicket>) {
             2,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 7), record],
+                entries: vec![entry(1, 1, 7), record].into(),
             }),
         )],
     );
@@ -58,7 +58,7 @@ fn configured_delta_power_loss_respects_each_durability_phase_and_old_session_re
             3,
             Some(Suffix {
                 from: 3,
-                entries: vec![entry(3, 1, 9)],
+                entries: vec![entry(3, 1, 9)].into(),
             }),
         );
         let mut oracle = BTreeMap::from([(group(1), before.clone())]);
@@ -165,7 +165,10 @@ fn wal_bound_covers_the_native_encoding_of_every_update_shape() {
             &state,
             1,
             0,
-            entries.map(|entries| Suffix { from: 1, entries }),
+            entries.map(|entries| Suffix {
+                from: 1,
+                entries: entries.into(),
+            }),
         );
         let LogMutation::Update(u) = &mutation else {
             unreachable!()

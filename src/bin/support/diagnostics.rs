@@ -43,7 +43,7 @@ impl Diagnostics {
     pub fn metrics(&self) -> String {
         let snapshot = self.counters.snapshot_counters();
         let c = snapshot.counters;
-        format!("OK evidence=local_volatile store_session={} polls={} failed_polls={} owner_steps={} step_errors={} worker_events={} snapshot_events={} snapshot_installs={} persistence_batches={} applications={} peer_sends={} peer_received={} ingress_blocked={} connection_failures={}", snapshot.owner.store.session.get(), c.polls, c.failed_polls, c.owner_steps, c.step_errors, c.worker_events, c.snapshot_events, c.snapshot_installs, c.persistence_batches, c.applications, c.peer_sends, c.peer_received, c.ingress_blocked, c.connection_failures)
+        format!("OK evidence=local_volatile store_session={} polls={} failed_polls={} owner_steps={} step_errors={} worker_events={} snapshot_events={} snapshot_installs={} persistence_batches={} applications={} peer_sends={} peer_received={} ingress_blocked={} connection_failures={} accept_errors={} accept_backoffs={} accept_paused={} generations_exhausted={}", snapshot.owner.store.session.get(), c.polls, c.failed_polls, c.owner_steps, c.step_errors, c.worker_events, c.snapshot_events, c.snapshot_installs, c.persistence_batches, c.applications, c.peer_sends, c.peer_received, c.ingress_blocked, c.connection_failures, c.accept_errors, c.accept_backoffs, u8::from(snapshot.network.accept_paused), u8::from(snapshot.network.generations_exhausted))
     }
     pub fn record(&mut self, sample: NodeObservation) {
         let _ = self.counters.record_bounded(sample);
@@ -139,7 +139,13 @@ fn render(record: &EventRecord) -> String {
             ingress_blocked,
             snapshot_refusals,
             connection_failures,
-        } => format!("pressure:{ingress_blocked}:{snapshot_refusals}:{connection_failures}"),
+            accept_errors,
+            accept_backoffs,
+            generations_exhausted,
+        } => format!(
+            "pressure:{ingress_blocked}:{snapshot_refusals}:{connection_failures}:{accept_errors}:{accept_backoffs}:{}",
+            u8::from(generations_exhausted)
+        ),
     };
     format!(
         "{}@{}:{data}",
@@ -215,6 +221,9 @@ mod tests {
                         ingress_blocked: u64::MAX,
                         snapshot_refusals: u64::MAX,
                         connection_failures: u64::MAX,
+                        accept_errors: u64::MAX,
+                        accept_backoffs: u64::MAX,
+                        generations_exhausted: true,
                     },
                 })
                 .unwrap();
@@ -227,5 +236,46 @@ mod tests {
         assert!(diagnostics.events("2", "0", "1").is_err());
         diagnostics.close();
         assert_eq!(diagnostics.events("1", "0", "16").unwrap(), reply);
+    }
+    /// NT1 round 2 (Opus P2): a listener that backs off is visible in the
+    /// `metrics` reply and as a Pressure event, not only to tests.
+    #[test]
+    fn listener_pressure_reaches_metrics_and_events() {
+        let owner = RuntimeOwner {
+            store: StoreBinding {
+                identity: StoreIdentity {
+                    id: StoreId::new(1).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+                session: StoreSession::new(1).unwrap(),
+            },
+            lane: ExecutionLaneId::new(1).unwrap(),
+            generation: RuntimeGeneration::new(1).unwrap(),
+        };
+        let mut diagnostics = Diagnostics::new(owner).unwrap();
+        diagnostics.record(NodeObservation {
+            owner,
+            sampled_at: MonoTime(5),
+            state: NodeState::Running,
+            counters: NodeCounters {
+                polls: 1,
+                accept_errors: 1,
+                accept_backoffs: 1,
+                ..NodeCounters::default()
+            },
+            network: NetworkHealth {
+                accept_paused: true,
+                generations_exhausted: false,
+            },
+        });
+        let metrics = diagnostics.metrics();
+        assert!(
+            metrics.ends_with(
+                " accept_errors=1 accept_backoffs=1 accept_paused=1 generations_exhausted=0"
+            ),
+            "{metrics}"
+        );
+        let events = diagnostics.events("0", "0", "16").unwrap();
+        assert!(events.contains("@5:pressure:0:0:0:1:1:0"), "{events}");
     }
 }

@@ -29,6 +29,8 @@ use voteboat::{
 };
 #[path = "startup/backpressure.rs"]
 mod backpressure;
+#[path = "startup/connection_generations.rs"]
+mod connection_generations;
 #[path = "startup/discovery.rs"]
 mod discovery;
 #[path = "startup/log_limits.rs"]

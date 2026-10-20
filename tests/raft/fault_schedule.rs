@@ -216,7 +216,11 @@ impl Replay {
             store.limits(),
         )
         .unwrap();
-        if !core.replay_committed().starts_with(&acknowledged) {
+        if !core
+            .replay_committed()
+            .contiguous()
+            .starts_with(&acknowledged)
+        {
             let missing = acknowledged
                 .iter()
                 .zip(

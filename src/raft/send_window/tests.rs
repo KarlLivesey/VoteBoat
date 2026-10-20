@@ -177,14 +177,18 @@ fn granted_reply_requires_exact_original_follower_ballot_context_and_store() {
     }
     core.role = Role::Follower;
     let ballot = core.durable.ballot_origin.unwrap();
-    core.durable.ballot_origin.as_mut().unwrap().candidate_store = binding(3).identity;
+    core.durable
+        .edit(|log| log.ballot_origin.as_mut().unwrap().candidate_store = binding(3).identity);
     core.note_logical_vote_transferred(&message).unwrap();
     assert_eq!(core.election_reset_sequence(), reset);
-    core.durable.ballot_origin = Some(ballot);
-    core.durable.hard_state.voted_for = Some(node(3));
+    core.durable.edit(|log| {
+        log.ballot_origin = Some(ballot);
+        log.hard_state.voted_for = Some(node(3));
+    });
     core.note_logical_vote_transferred(&message).unwrap();
     assert_eq!(core.election_reset_sequence(), reset);
-    core.durable.hard_state.voted_for = Some(node(2));
+    core.durable
+        .edit(|log| log.hard_state.voted_for = Some(node(2)));
     core.note_logical_vote_transferred(&message).unwrap();
     assert_eq!(core.election_reset_sequence(), reset + 1);
     assert_eq!(core.state().hard_state.term, 2);

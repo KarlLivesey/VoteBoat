@@ -36,7 +36,8 @@ fn frame(f: &Fixture, peer: u64, class: MessageClass) -> ReceivedBatch {
                             operation: OperationId::new(u128::from(peer * 10 + offset)).unwrap(),
                             bytes: 1i64.to_le_bytes().to_vec().into(),
                         },
-                    }],
+                    }]
+                    .into(),
                 },
                 MessageClass::Background => Rpc::Snapshot {
                     snapshot: Box::new(Snapshot {

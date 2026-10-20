@@ -133,7 +133,10 @@ fn state(id: u128, entries: Vec<LogEntry>) -> GroupLog {
             voted_for: None,
         },
         commit_index: 0,
-        suffix: Some(Suffix { from: 1, entries }),
+        suffix: Some(Suffix {
+            from: 1,
+            entries: entries.into(),
+        }),
         snapshot: None,
         snapshot_membership: None,
     };
@@ -202,7 +205,7 @@ fn append(previous_index: u64, entries: Vec<LogEntry>) -> Event {
         rpc: Rpc::Append {
             previous_index,
             previous_term: 1,
-            entries,
+            entries: entries.into(),
             leader_commit: 0,
         },
     })

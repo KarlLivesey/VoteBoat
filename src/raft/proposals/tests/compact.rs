@@ -38,7 +38,7 @@ fn compact_pending_and_durable_keep_exact_terms_pointers_membership_and_charge()
     assert_eq!(payload_pointers(&core), pointers[2..]);
     assert_eq!(core.membership() as *const Membership, membership);
     assert_eq!(core.connection_replicas(3).unwrap(), peers);
-    assert!(core.log_summary.matches(core.state()));
+    assert!(core.durable.summary().matches(core.state()));
     assert_eq!(
         core.retained_log_bytes(),
         LogSummary::from_validated(core.state()).retained_bytes()

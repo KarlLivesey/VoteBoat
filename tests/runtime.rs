@@ -1093,7 +1093,8 @@ fn hundred_groups_share_native_wals_and_recover_acknowledged_state() {
             )
             .unwrap();
             let mut app = Counter::new(10).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            app.apply_batch(&core.replay_committed().contiguous())
+                .unwrap();
             assert_eq!(app.read_applied(core.state().commit_index), Ok(10));
             shard.register(core).unwrap();
         }
@@ -1155,7 +1156,8 @@ fn hundred_group_history_uses_actual_shared_files_on_three_nodes() {
             )
             .unwrap();
             let mut app = Counter::new(10).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            app.apply_batch(&core.replay_committed().contiguous())
+                .unwrap();
             assert_eq!(app.read_applied(core.state().commit_index), Ok(10));
         }
     }
@@ -1338,7 +1340,7 @@ fn heartbeat(term: u64) -> Message {
         rpc: Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 0,
         },
     }
@@ -1422,7 +1424,7 @@ fn stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadline
     malformed.rpc = Rpc::Append {
         previous_index: 99,
         previous_term: 1,
-        entries: vec![entry(150, 1, 7)],
+        entries: vec![entry(150, 1, 7)].into(),
         leader_commit: 0,
     };
     let mut foreign = heartbeat(2);
@@ -1606,7 +1608,8 @@ impl<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> AutoNo
             )
             .unwrap();
             let mut app = Counter::new(10).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            app.apply_batch(&core.replay_committed().contiguous())
+                .unwrap();
             shard.register(core).unwrap();
             apps.insert(group(g), app);
         }
@@ -2229,7 +2232,8 @@ fn enrolled_learner_log() -> HostLogStore {
                             .unwrap(),
                         ),
                     })),
-                }],
+                }]
+                .into(),
             }),
         )],
     );
@@ -2272,7 +2276,8 @@ fn enrolled_learner_has_no_election_timer_and_still_processes_durable_replicatio
                 index: 2,
                 term: 1,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
             leader_commit: 2,
         },
     };
@@ -2362,7 +2367,8 @@ fn prospective_reservation_peeks_the_exact_queue_choice_without_consumption() {
                     expected: before.bootstrap.configuration,
                     change: ConfigurationChange::Learners(next),
                 })),
-            }],
+            }]
+            .into(),
         },
     });
     let ordinary = core

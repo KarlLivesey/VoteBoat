@@ -17,6 +17,8 @@ use super::*;
 #[path = "maintenance.rs"]
 mod maintenance;
 use maintenance::Maintenance;
+#[path = "cluster.rs"]
+pub(super) mod cluster;
 pub(super) use maintenance::{config as maintenance_config, Config as MaintenanceConfig};
 
 pub(super) fn validate(count: usize, rate: usize) -> Result<(), Failure> {

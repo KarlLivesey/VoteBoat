@@ -546,7 +546,10 @@ impl<'a> Encoder<'a> {
     fn message(&mut self, m: &Message) -> Result<(), WireError> {
         // Bound traversals as well as allocations before semantic validation.
         match &m.rpc {
-            Rpc::Append { entries, .. } | Rpc::LearnerRepair { entries, .. }
+            Rpc::Append { entries, .. } if entries.len() > self.limits.max_entries_per_message => {
+                return Err(WireError::TooLarge)
+            }
+            Rpc::LearnerRepair { entries, .. }
                 if entries.len() > self.limits.max_entries_per_message =>
             {
                 return Err(WireError::TooLarge)
@@ -699,7 +702,7 @@ impl<'a> Encoder<'a> {
         &mut self,
         previous_index: u64,
         previous_term: u64,
-        entries: &[LogEntry],
+        entries: &EntryBatch,
         leader_commit: u64,
     ) -> Result<(), WireError> {
         if entries.len() > self.limits.max_entries_per_message {
@@ -711,9 +714,15 @@ impl<'a> Encoder<'a> {
         self.u64(previous_term)?;
         self.u64(leader_commit)?;
         self.u32(entries.len() as u32)?;
+        // The decoder freezes the visible entries and charges the index that
+        // takes; whatever index the source's backings hold is not decoded.
+        let mut index = IndexNeed::default();
         for entry in entries {
+            index.push(entry);
             self.entry(entry)?;
         }
+        self.budget
+            .charge(index.bytes().ok_or(WireError::TooLarge)?)?;
         Ok(())
     }
     fn readiness_rpc(&mut self, m: &Message, r: &LearnerReadinessRequest) -> Result<(), WireError> {
@@ -1195,6 +1204,8 @@ impl<'a> Decoder<'a> {
                 for _ in 0..count {
                     entries.push(self.entry(limits, budget, version)?);
                 }
+                // Freezing charges its index before allocating it.
+                let entries = EntryBatch::decoded(entries, |bytes| budget.charge(bytes))?;
                 Rpc::Append {
                     previous_index,
                     previous_term,

@@ -296,7 +296,7 @@ fn seed_partial_final(
                 commit_index: 2,
                 suffix: Some(Suffix {
                     from: 1,
-                    entries: history[..if local == 3 { 3 } else { 2 }].to_vec(),
+                    entries: history[..if local == 3 { 3 } else { 2 }].to_vec().into(),
                 }),
                 snapshot: None,
                 snapshot_membership: None,

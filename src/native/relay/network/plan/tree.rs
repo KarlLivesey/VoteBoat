@@ -182,3 +182,61 @@ impl RelayTreePlan {
         true
     }
 }
+
+#[cfg(test)]
+mod stale_capture_tests {
+    use super::*;
+    fn store(n: u64) -> StoreIdentity {
+        StoreIdentity {
+            id: StoreId::new(u128::from(n)).unwrap(),
+            incarnation: StoreIncarnation::new(1).unwrap(),
+        }
+    }
+    fn local(n: u64, session: u64) -> LocalIdentity {
+        LocalIdentity {
+            node: NodeId::new(n).unwrap(),
+            store: StoreBinding {
+                identity: store(n),
+                session: StoreSession::new(session).unwrap(),
+            },
+        }
+    }
+    /// A source channel captured by helper 9 in `session`.
+    fn capture(session: u64, generation: u64) -> RelaySourceCapture {
+        let binding = SessionBinding {
+            local: local(9, session),
+            peer: local(1, 1),
+            generation: SecureSessionGeneration::new(generation).unwrap(),
+            wire_version: RELAY_NETWORK_VERSION,
+        };
+        RelaySourceCapture {
+            binding,
+            original_wire_version: 8,
+            path: AuthenticatedDelegationPath::leaf(binding),
+        }
+    }
+
+    /// NT1 round 2 (Sol 2): helper 9 restarted from store session 1 into 2,
+    /// and its connection generations restarted at 1. A capture from session
+    /// 1 is refused by the recovered helper whether its numeric generation is
+    /// higher than or equal to the fresh one: the path compares the full
+    /// local identity, including the store session.
+    #[test]
+    fn a_recovered_helper_refuses_captures_of_its_previous_session() {
+        let sources = (1..=3)
+            .map(|n| (NodeId::new(n).unwrap(), store(n)))
+            .collect();
+        let helper = PeerIdentity {
+            node: NodeId::new(9).unwrap(),
+            store: store(9),
+        };
+        let tree = RelayTreePlan::star(sources, helper, 8).unwrap();
+        let recovered = local(9, 2);
+        assert!(tree.path_matches(capture(2, 1), recovered), "control");
+        for generation in [1, 50_000] {
+            assert!(!tree.path_matches(capture(1, generation), recovered));
+        }
+        // The old capture still matches only the session that made it.
+        assert!(tree.path_matches(capture(1, 50_000), local(9, 1)));
+    }
+}

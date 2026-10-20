@@ -124,7 +124,6 @@ fn witness_controls_require_authority_wire_before_admission_and_close_with_node(
                     local: net.roster.local(),
                     outbound: net.roster.outbound_binding(),
                     first_generation: SecureSessionGeneration::new(1).unwrap(),
-                    last_generation: SecureSessionGeneration::new(100).unwrap(),
                     wire_version: 2,
                     limits: net.roster.limits(),
                     transport_limits: TransportLimits::default(),
@@ -737,7 +736,6 @@ fn constructor_requires_voter_store_authorization_and_returns_original_parts_bef
             local: net.roster.local(),
             outbound: net.roster.outbound_binding(),
             first_generation: SecureSessionGeneration::new(1).unwrap(),
-            last_generation: SecureSessionGeneration::new(100).unwrap(),
             wire_version: 1,
             limits: PeerRosterLimits {
                 connect_timeout_ms: 10,
@@ -803,7 +801,8 @@ fn constructor_requires_connections_for_rollback_reachable_recovered_learners() 
                     change: ConfigurationChange::Learners(config(3, Default::default())),
                 })),
             },
-        ];
+        ]
+        .into();
         state.hard_state.term = 1;
         state.commit_index = 1;
         let core = Raft::recover_member(node(1), id.store, state, LogLimits::default()).unwrap();
@@ -1470,7 +1469,6 @@ fn selected_transport_capacity_rechecks_version_and_roster_budgets_before_persis
                 local: net.roster.local(),
                 outbound: net.roster.outbound_binding(),
                 first_generation: SecureSessionGeneration::new(1).unwrap(),
-                last_generation: SecureSessionGeneration::new(100).unwrap(),
                 wire_version: 4,
                 limits: net.roster.limits(),
                 transport_limits: TransportLimits {
@@ -1559,6 +1557,7 @@ fn refusing_diagnostics_cannot_change_original_node_write_read_or_shutdown() {
             sampled_at: None,
             state: None,
             counters: NodeCounters::default(),
+            network: NetworkHealth::default(),
             closed: false,
         },
         attempts: 0,

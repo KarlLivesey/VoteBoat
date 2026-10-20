@@ -237,22 +237,17 @@ pub(crate) fn persist_payload_cost(update: &LogUpdate) -> Result<(usize, bool), 
         control = false;
     }
     if let Some(suffix) = &update.suffix {
+        // Every shared backing the update keeps alive, in full.
         bytes = bytes
             .checked_add(
                 suffix
                     .entries
-                    .capacity()
-                    .checked_mul(size_of::<LogEntry>())
+                    .retained_bytes()
                     .ok_or(WorkerError::BatchTooLarge)?,
             )
             .ok_or(WorkerError::BatchTooLarge)?;
-        for entry in &suffix.entries {
-            if !matches!(entry.payload, EntryPayload::Noop) {
-                control = false;
-                bytes = bytes
-                    .checked_add(entry.retained_payload_bytes())
-                    .ok_or(WorkerError::BatchTooLarge)?;
-            }
+        if suffix.entries.has_data() {
+            control = false;
         }
     }
     Ok((bytes, control))

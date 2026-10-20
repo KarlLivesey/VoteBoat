@@ -238,7 +238,7 @@ fn authority_exception_does_not_relax_normal_promise_or_original_request_scope()
     append.rpc = Rpc::Append {
         previous_index: 0,
         previous_term: 0,
-        entries: vec![],
+        entries: vec![].into(),
         leader_commit: 0,
     };
     refused(&mut a, 7, append);

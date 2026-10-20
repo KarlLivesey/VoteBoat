@@ -143,6 +143,17 @@ pub struct PeerDriverProgress {
     pub ingress_blocked: usize,
     pub ingress: IngressProgress,
     pub peers: Vec<PeerPoll>,
+    /// Listener accept errors survived during this poll (diagnostic).
+    pub accept_errors: u64,
+    /// Times the listener started an accept backoff during this poll.
+    pub accept_backoffs: u64,
+    /// The listener is currently backing off and accepts nothing.
+    pub accept_paused: bool,
+    /// The roster can issue no further connection attempt (see
+    /// `PeerRoster::generations_exhausted`), or the discovery source has
+    /// refused a lookup with `DiscoveryError::Exhausted`: its own connection
+    /// generations are spent, so dials that need a fresh lookup fail.
+    pub generations_exhausted: bool,
 }
 /// Explicit recovery handoff. Original queue payloads remain charged until the
 /// host resolves them against their exact queue; no field establishes delivery.
@@ -175,23 +186,29 @@ pub struct PeerDriver<C: PeerConnector, F: PeerTransportFactory<C::Session>> {
     now: MonoTime,
     closed: bool,
     failed: Option<PeerDriverError>,
-    /// Bumped whenever the retained admission route plan is replaced.
-    routes_generation: u64,
     /// Inputs of the last reconciliation that found the authorized roster
-    /// already equal to the desired assignments.
+    /// already equal to the desired assignments. Cleared whenever the
+    /// retained admission route plan is replaced, so no change counter is
+    /// needed (and none can overflow).
     steady: Option<SteadyAssignments>,
+    /// Cumulative connector accept errors and backoffs at the last poll.
+    accept_seen: (u64, u64),
+    /// A discovery source refused a lookup as `Exhausted`. Its counter never
+    /// resets within the source session, so the report stays set.
+    discovery_exhausted: bool,
+}
+fn is_discovery_exhausted(reason: ConnectError) -> bool {
+    reason == ConnectError::Discovery(crate::discovery::DiscoveryError::Exhausted)
 }
 /// While these inputs are unchanged and every core's connection set is its
 /// fixed bootstrap voter set, reconciliation would again find the roster
 /// unchanged and adopt identical routes, so it can be skipped.
 struct SteadyAssignments {
-    routes_generation: u64,
     groups: Vec<(GroupIdentity, ConfigurationId)>,
     roster: Vec<(NodeId, StoreIdentity)>,
 }
 impl SteadyAssignments {
     fn capture<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy, Tr: PeerTransport>(
-        routes_generation: u64,
         owner: &EffectOwner<Q, T, E>,
         roster: &PeerRoster<Tr>,
     ) -> Option<Self> {
@@ -204,7 +221,6 @@ impl SteadyAssignments {
             groups.push((group, core.state().bootstrap.configuration));
         }
         Some(Self {
-            routes_generation,
             groups,
             roster: Self::roster(roster).collect(),
         })
@@ -218,13 +234,9 @@ impl SteadyAssignments {
     }
     fn holds<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy, Tr: PeerTransport>(
         &self,
-        routes_generation: u64,
         owner: &EffectOwner<Q, T, E>,
         roster: &PeerRoster<Tr>,
     ) -> bool {
-        if self.routes_generation != routes_generation {
-            return false;
-        }
         let mut groups = owner.groups();
         for &(expected, configuration) in &self.groups {
             let unchanged = groups.next().is_some_and(|group| {
@@ -340,8 +352,9 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             now,
             closed: false,
             failed: None,
-            routes_generation: 0,
             steady: None,
+            accept_seen: (0, 0),
+            discovery_exhausted: false,
         })
     }
     pub fn usage(&self) -> PeerDriverUsage {
@@ -387,6 +400,24 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     }
     pub fn ingress(&self) -> &IngressRouter {
         &self.parts.ingress
+    }
+    /// Read-only view of the connector, for provider status such as listener
+    /// health. Grants no submit, cancel or close authority.
+    pub fn connector(&self) -> &C {
+        &self.parts.connector
+    }
+    /// The listener is backing off at the last poll time; the same value the
+    /// last poll reported in `PeerDriverProgress::accept_paused`.
+    pub fn accept_paused(&self) -> bool {
+        self.parts
+            .connector
+            .accept_status()
+            .is_some_and(|s| s.paused(self.now))
+    }
+    /// As reported in `PeerDriverProgress::generations_exhausted`: the
+    /// roster's spent generations, or a discovery source refused as spent.
+    pub fn generations_exhausted(&self) -> bool {
+        self.parts.roster.generations_exhausted() || self.discovery_exhausted
     }
     pub fn connector_usage(&self) -> ConnectUsage {
         self.parts.connector.usage()
@@ -458,7 +489,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         routes: BTreeMap<NodeId, PeerRoute<C::Endpoint>>,
     ) {
         self.parts.admission_routes = Some(routes);
-        self.routes_generation += 1;
+        self.steady = None;
     }
     pub(super) fn route_budget(
         parts: &PeerParts<C, F>,
@@ -541,7 +572,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         };
         owner.install_connection_budget(budget);
         self.parts.admission_routes = Some(routes);
-        self.routes_generation += 1;
+        self.steady = None;
         self.now = now;
         Ok(())
     }
@@ -571,7 +602,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         if self
             .steady
             .as_ref()
-            .is_some_and(|s| s.holds(self.routes_generation, owner, &self.parts.roster))
+            .is_some_and(|s| s.holds(owner, &self.parts.roster))
         {
             return Ok(());
         }
@@ -614,8 +645,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         {
             // Adopt changed hints without canceling accepted work or resetting fairness.
             self.parts.routes = routes;
-            self.steady =
-                SteadyAssignments::capture(self.routes_generation, owner, &self.parts.roster);
+            self.steady = SteadyAssignments::capture(owner, &self.parts.roster);
             return Ok(());
         }
         let peers = self.check_assignment_routes(&assignments, &routes, now)?;
@@ -915,7 +945,22 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         self.start_connections(now, b.connection_visits, &mut out)?;
         self.poll_peer_io(outbound, b.peer_visits, &mut out)?;
         self.submit_sends(outbound, b.sends, &mut out)?;
+        self.report_health(&mut out);
         Ok(out)
+    }
+    /// Listener and roster health for observability: no silent stuck state.
+    fn report_health(&mut self, out: &mut PeerDriverProgress) {
+        out.generations_exhausted = self.generations_exhausted();
+        let Some(status) = self.parts.connector.accept_status() else {
+            return;
+        };
+        // A count below the last one is a different inner connector: count
+        // from zero again rather than losing its events.
+        let increase = |now: u64, seen: u64| now.checked_sub(seen).unwrap_or(now);
+        out.accept_errors = increase(status.transient_errors, self.accept_seen.0);
+        out.accept_backoffs = increase(status.backoffs, self.accept_seen.1);
+        out.accept_paused = status.paused(self.now);
+        self.accept_seen = (status.transient_errors, status.backoffs);
     }
     fn poll_connections<O: OutboundQueue>(
         &mut self,
@@ -952,7 +997,8 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 continue;
             }
             match event.result {
-                Err(_) => {
+                Err(reason) => {
+                    self.discovery_exhausted |= is_discovery_exhausted(reason);
                     self.parts
                         .roster
                         .connect_failed(event.ticket, now)
@@ -1035,11 +1081,17 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                             .roster
                             .connect_failed(ticket, now)
                             .map_err(PeerDriverError::Roster)?;
+                        // A spent discovery source fails this attempt only:
+                        // the roster backs off and the condition is reported
+                        // with `generations_exhausted`; the node stays in service.
+                        let exhausted = is_discovery_exhausted(rejected.reason);
                         if rejected.reason != ConnectError::Overloaded
+                            && !exhausted
                             && !matches!(rejected.reason, ConnectError::Discovery(e) if e.retryable())
                         {
                             return Err(PeerDriverError::Connect(rejected.reason));
                         }
+                        self.discovery_exhausted |= exhausted;
                         out.connection_failures += 1;
                     }
                 }

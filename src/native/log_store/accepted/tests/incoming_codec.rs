@@ -71,7 +71,7 @@ fn codec_sees_shared_retained_charge_and_refuses_before_invalid_log_admission_or
         0,
         Some(Suffix {
             from: 1,
-            entries: vec![input],
+            entries: vec![input].into(),
         }),
     ) else {
         unreachable!()

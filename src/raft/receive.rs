@@ -17,17 +17,28 @@ use super::*;
 
 impl Raft {
     pub(super) fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = VecDeque::new();
+        self.receive_inner_into(m, &mut effects)?;
+        Ok(effects.into())
+    }
+    /// Appends this message's effects to `out`; the hot replication arms
+    /// write in place, colder ones append their owned effects.
+    pub(super) fn receive_inner_into(
+        &mut self,
+        m: Message,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         if matches!(
             m.rpc,
             Rpc::LearnerReadinessRequest(_) | Rpc::LearnerReadinessReply { .. }
         ) {
-            return self.receive_readiness(m);
+            return out.append_result(self.receive_readiness(m));
         }
         if matches!(
             m.rpc,
             Rpc::AuthorityRequest { .. } | Rpc::AuthorityReply { .. }
         ) {
-            return self.receive_authority(m);
+            return out.append_result(self.receive_authority(m));
         }
         if let Some(index) = self.retirement_commit(&m) {
             let reply = self.reply(
@@ -38,15 +49,17 @@ impl Raft {
                 },
             );
             return if index > self.durable.commit_index {
-                self.persist(
+                self.persist_into(
                     self.durable.hard_state,
                     index,
                     None,
                     After::Reply,
                     Some(reply),
+                    out,
                 )
             } else {
-                Ok(vec![Effect::Send(reply)])
+                out.push_back(Effect::Send(reply));
+                Ok(())
             };
         }
         self.authenticated_message_source(&m)?;
@@ -54,7 +67,7 @@ impl Raft {
             index, log_term, ..
         } = m.rpc
         {
-            return self.receive_timeout_now(&m, index, log_term);
+            return out.append_result(self.receive_timeout_now(&m, index, log_term));
         }
         let old = self.durable.hard_state;
         let hard = if m.term > old.term {
@@ -72,7 +85,7 @@ impl Raft {
             self.clear_replication_requests();
             self.repair_requests.clear();
         }
-        match &m.rpc {
+        let effects = match &m.rpc {
             Rpc::TimeoutNow { .. } => unreachable!(),
             Rpc::LearnerRepair { .. }
             | Rpc::LearnerRepaired { .. }
@@ -87,17 +100,18 @@ impl Raft {
                 last_term,
             } => self.receive_vote(&m, hard, *last_index, *last_term),
             Rpc::Voted { granted } => self.receive_voted(&m, hard, *granted),
-            Rpc::Append { .. } => self.receive_append(m, hard),
+            Rpc::Append { .. } => return self.receive_append_into(m, hard, out),
             Rpc::Appended {
                 success,
                 matching_index,
-            } => self.receive_appended(&m, hard, *success, *matching_index),
+            } => return self.receive_appended_into(&m, hard, *success, *matching_index, out),
             Rpc::ReadProbe => self.receive_read_probe(&m, hard),
             Rpc::ReadAck => self.receive_read_ack(&m, hard),
             Rpc::Snapshot { .. } => self.receive_snapshot(m, hard),
             Rpc::SnapshotAck { index } => self.receive_snapshot_ack(&m, hard, *index),
             Rpc::Compacted { index, term } => self.receive_compacted(&m, hard, *index, *term),
-        }
+        };
+        out.append_result(effects)
     }
     pub(super) fn validate_replica_message(&self, m: &Message) -> Result<(), RaftError> {
         // Replication and vote requests from an exact locally authorized voter
@@ -220,11 +234,12 @@ impl Raft {
             Ok(Vec::new())
         }
     }
-    fn receive_append(
+    fn receive_append_into(
         &mut self,
         mut m: Message,
         hard: HardState,
-    ) -> Result<Vec<Effect>, RaftError> {
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         let Rpc::Append {
             previous_index,
             previous_term,
@@ -240,27 +255,34 @@ impl Raft {
         if previous_term > m.term
             || ((previous_index == 0) != (previous_term == 0))
             || entries.len() > BatchLimits::MAX_REPLICATION_ENTRIES
-            || entries.iter().map(LogEntry::payload_bytes).sum::<usize>()
-                > self.limits.max_batch_bytes
+            || entries.payload_bytes() > self.limits.max_batch_bytes
         {
             return Err(RaftError::InvalidMessage);
         }
         if m.term < old.term {
-            return Ok(vec![Effect::Send(self.reply(
+            out.push_back(Effect::Send(self.reply(
                 &m,
                 Rpc::Appended {
                     success: false,
                     matching_index: self.durable.last_index(),
                 },
-            ))]);
+            )));
+            return Ok(());
         }
         self.role = Role::Follower;
         self.clear_reads();
         self.vote_context = None;
         self.clear_replication_requests();
         self.repair_requests.clear();
-        let tight_payloads =
-            self.validate_append_entries(&m, previous_index, previous_term, entries)?;
+        if !entries.valid_append(
+            previous_index,
+            previous_term,
+            m.term,
+            m.configuration,
+            self.limits.max_command_bytes,
+        ) {
+            return Err(RaftError::InvalidMessage);
+        }
         if self.durable.term_at(previous_index) != Some(previous_term) {
             let mut reply = self.reply(
                 &m,
@@ -278,28 +300,22 @@ impl Raft {
             );
             reply.term = hard.term;
             return if hard != old {
-                self.persist(
+                self.persist_into(
                     hard,
                     self.durable.commit_index,
                     None,
                     After::Reply,
                     Some(reply),
+                    out,
                 )
             } else {
-                Ok(vec![Effect::Send(reply)])
+                out.push_back(Effect::Send(reply));
+                Ok(())
             };
         }
-        let suffix_offset = self.first_new_entry(entries)?;
-        let bound = match self.decline_new_data(
-            entries,
-            suffix_offset,
-            previous_index,
-            leader_commit,
-            hard,
-            old,
-        ) {
-            std::ops::ControlFlow::Continue(bound) => bound,
-            std::ops::ControlFlow::Break(declined) => return declined,
+        let new = match self.decline_new_data(entries, previous_index, leader_commit, hard, old) {
+            std::ops::ControlFlow::Continue(new) => new,
+            std::ops::ControlFlow::Break(declined) => return out.append_result(declined),
         };
         let matching = entries.last().map_or(previous_index, |e| e.index);
         let commit = self.durable.commit_index.max(leader_commit.min(matching));
@@ -312,16 +328,17 @@ impl Raft {
         );
         reply.term = hard.term;
         // All checks and reply metadata precede consuming the original input.
-        let suffix = suffix_offset.map(|offset| {
+        let suffix = new.map(|(offset, bound)| {
             let Rpc::Append { entries, .. } = &mut m.rpc else {
                 unreachable!()
             };
-            Self::take_append_suffix(entries, offset, tight_payloads)
+            (Self::take_append_suffix(entries, offset), bound)
         });
         if hard != old || suffix.is_some() || commit != self.durable.commit_index {
-            self.persist_bounded(hard, commit, suffix, After::Reply, Some(reply), bound)
+            self.persist_bounded_into(hard, commit, suffix, After::Reply, Some(reply), out)
         } else {
-            Ok(vec![Effect::Send(reply)])
+            out.push_back(Effect::Send(reply));
+            Ok(())
         }
     }
     /// ST2b and round 3 (I3): a follower declines the new entries of an
@@ -336,61 +353,69 @@ impl Raft {
     /// new suffix: data must fit under the mark, noop-only suffixes under the
     /// mark plus the reserve. Entries the log already holds are not written
     /// again, so they are not counted. One walk over the new suffix gives its
-    /// bound and whether it carries data; the bound is returned for staging.
+    /// bound and whether it carries data; the first new entry's offset and
+    /// the bound are returned for staging (`None` when every entry is held).
     /// A volatile core without a bounded WAL stages no bytes and skips it.
     /// R6-1: with a WAL room the decision is on bytes alone; the high-water
     /// latch (`storage_pressure`) is for client admission and declines data
     /// here only for a host that gives no room.
     fn decline_new_data(
         &mut self,
-        entries: &[LogEntry],
-        suffix_offset: Option<usize>,
+        entries: &EntryBatch,
         previous_index: u64,
         leader_commit: u64,
         hard: HardState,
         old: HardState,
-    ) -> std::ops::ControlFlow<Result<Vec<Effect>, RaftError>, Option<usize>> {
+    ) -> std::ops::ControlFlow<Result<Vec<Effect>, RaftError>, NewSuffix> {
         use std::ops::ControlFlow;
-        let Some(offset) = suffix_offset else {
-            return ControlFlow::Continue(None);
+        let offset = match self.first_new_entry(entries) {
+            Ok(Some(offset)) => offset,
+            Ok(None) => return ControlFlow::Continue(None),
+            Err(error) => return ControlFlow::Break(Err(error)),
         };
-        let new = &entries[offset..];
-        let growth = (!self.volatile || self.wal_room.is_some()).then(|| suffix_growth(new));
+        let new_len = entries.len() - offset;
+        let growth = (!self.volatile || self.wal_room.is_some())
+            .then(|| suffix_growth(suffix_slices(entries, offset)));
         let bound = growth.map(|(bound, _)| bound);
         // Every ordinary append: the new suffix fits under the mark (or,
         // without a room, no latch), and the whole retained log plus the new
         // entries fits (the kept prefix is never longer than the log).
         if self.wal_room.map_or(!self.storage_pressure, |room| {
             bound.is_some_and(|bound| bound <= room.data)
-        }) && self.durable.entries.len().saturating_add(new.len())
+        }) && self.durable.entries.len().saturating_add(new_len)
             <= self.limits.retained_entry_capacity()
         {
-            return ControlFlow::Continue(bound);
+            return ControlFlow::Continue(Some((offset, bound)));
         }
-        debug_assert_eq!(new[0].index - 1, previous_index + offset as u64);
-        match self.decline_new_data_slow(new, growth, leader_commit, hard, old) {
+        debug_assert_eq!(entries[offset].index - 1, previous_index + offset as u64);
+        match self.decline_new_data_slow(entries, offset, growth, leader_commit, hard, old) {
             Some(declined) => ControlFlow::Break(declined),
-            None => ControlFlow::Continue(bound),
+            None => ControlFlow::Continue(Some((offset, bound))),
         }
     }
     #[cold]
     #[inline(never)]
     fn decline_new_data_slow(
         &mut self,
-        new: &[LogEntry],
+        entries: &EntryBatch,
+        offset: usize,
         growth: Option<(usize, bool)>,
         leader_commit: u64,
         hard: HardState,
         old: HardState,
     ) -> Option<Result<Vec<Effect>, RaftError>> {
-        let from = new[0].index;
+        let from = entries[offset].index;
         let data = growth.map_or_else(
-            || new.iter().any(|e| !matches!(e.payload, EntryPayload::Noop)),
+            || {
+                suffix_slices(entries, offset)
+                    .flatten()
+                    .any(|e| !matches!(e.payload, EntryPayload::Noop))
+            },
             |(_, data)| data,
         );
         let kept = from.saturating_sub(self.durable.base_index() + 1);
-        let fits =
-            kept.saturating_add(new.len() as u64) <= self.limits.retained_entry_capacity() as u64;
+        let fits = kept.saturating_add((entries.len() - offset) as u64)
+            <= self.limits.retained_entry_capacity() as u64;
         // R5-1: the new suffix's bound against the room for its kind.
         let wal_over = self.wal_room.is_some_and(|room| {
             let bound = growth.map_or(usize::MAX, |(bound, _)| bound);
@@ -416,7 +441,7 @@ impl Raft {
                 commit,
                 Some(Suffix {
                     from,
-                    entries: Vec::new(),
+                    entries: EntryBatch::default(),
                 }),
                 After::Reply,
                 None,
@@ -427,98 +452,80 @@ impl Raft {
             Ok(Vec::new())
         })
     }
-    /// Offset of the first entry this log does not already hold with the
-    /// same term; a held entry with the same term must be identical.
-    fn first_new_entry(&self, entries: &[LogEntry]) -> Result<Option<usize>, RaftError> {
-        for (offset, entry) in entries.iter().enumerate() {
-            match self.durable.entry_at(entry.index) {
-                Some(old_entry) if old_entry.term == entry.term => {
-                    if old_entry != entry {
-                        return Err(RaftError::InvalidMessage);
+    /// Offset of the first entry not already held. Same-term overlap is
+    /// compared by content: a separately allocated batch with the same index
+    /// and term must still be identical.
+    #[inline]
+    fn first_new_entry(&self, entries: &EntryBatch) -> Result<Option<usize>, RaftError> {
+        // Usually the first entry is not held at all: the loop's first step.
+        match entries.first() {
+            None => return Ok(None),
+            Some(first) if self.durable.entry_at(first.index).is_none() => return Ok(Some(0)),
+            Some(_) => {}
+        }
+        self.first_new_overlapping(entries)
+    }
+    fn first_new_overlapping(&self, entries: &EntryBatch) -> Result<Option<usize>, RaftError> {
+        let mut offset = 0;
+        for slice in entries.slices() {
+            for entry in slice {
+                match self.durable.entry_at(entry.index) {
+                    Some(old_entry) if old_entry.term == entry.term => {
+                        if old_entry != entry {
+                            return Err(RaftError::InvalidMessage);
+                        }
                     }
+                    _ => return Ok(Some(offset)),
                 }
-                _ => return Ok(Some(offset)),
+                offset += 1;
             }
         }
         Ok(None)
     }
-    fn take_append_suffix(
-        entries: &mut Vec<LogEntry>,
-        offset: usize,
-        tight_payloads: bool,
-    ) -> Suffix {
+    /// The new suffix shares the received backings; nothing is copied.
+    fn take_append_suffix(entries: &mut EntryBatch, offset: usize) -> Suffix {
         let from = entries[offset].index;
-        // Transfer only the allocation shape produced by the previous clone.
-        // Other shapes retain that clone's raw admission/accounting behavior.
-        let entries = if offset == 0 && entries.capacity() == entries.len() && tight_payloads {
+        let entries = if offset == 0 {
             std::mem::take(entries)
         } else {
-            entries[offset..].to_vec()
+            entries.slice(offset..entries.len()).unwrap_or_default()
         };
         Suffix { from, entries }
     }
-    fn validate_append_entries(
-        &self,
-        m: &Message,
-        previous_index: u64,
-        previous_term: u64,
-        entries: &[LogEntry],
-    ) -> Result<bool, RaftError> {
-        let mut previous = previous_term;
-        let mut tight_payloads = true;
-        for (i, e) in entries.iter().enumerate() {
-            match &e.payload {
-                EntryPayload::Configuration(record) => {
-                    let activated = match &record.change {
-                        crate::membership::ConfigurationChange::Learners(next) => next.id(),
-                        crate::membership::ConfigurationChange::Joint { id, .. }
-                        | crate::membership::ConfigurationChange::Final { id } => *id,
-                    };
-                    if activated > m.configuration {
-                        return Err(RaftError::InvalidMessage);
-                    }
-                    tight_payloads = false;
-                }
-                EntryPayload::Command { .. } | EntryPayload::Noop => {}
-            }
-            if previous_index.checked_add(i as u64 + 1) != Some(e.index)
-                || e.term == 0
-                || e.term < previous
-                || e.term > m.term
-                || e.payload_bytes() > self.limits.max_command_bytes
-            {
-                return Err(RaftError::InvalidMessage);
-            }
-            previous = e.term;
-        }
-        Ok(tight_payloads)
-    }
 
-    fn receive_appended(
+    fn receive_appended_into(
         &mut self,
         m: &Message,
         hard: HardState,
         success: bool,
         matching_index: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         let old = self.durable.hard_state;
         if hard != old {
-            return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
+            return self.persist_into(
+                hard,
+                self.durable.commit_index,
+                None,
+                After::Reply,
+                None,
+                out,
+            );
         }
         if self.role != Role::Leader || m.term != old.term {
-            return Ok(Vec::new());
+            return Ok(());
         }
         if self.is_empty_alias(m) {
-            return self.consume_empty_alias(m, success, matching_index);
+            return out.append_result(self.consume_empty_alias(m, success, matching_index));
         }
         let Some(sent) = self.requests.get(&m.from).copied() else {
-            return Ok(Vec::new());
+            return Ok(());
         };
         if sent.context != m.context || sent.configuration != m.configuration {
-            return Ok(Vec::new());
+            return Ok(());
         }
         if sent.snapshot.is_some() {
-            return Ok(Vec::new());
+            return Ok(());
         }
         self.retire_replication(m.from);
         if success {
@@ -531,22 +538,23 @@ impl Raft {
             let prefix = self.progress[&m.from].max(matching_index);
             self.progress.insert(m.from, prefix);
             self.next_index.insert(m.from, prefix + 1);
-            let mut effects = self.maybe_commit()?;
+            self.maybe_commit_into(out)?;
             if self.pending.is_none()
                 && (prefix < self.durable.last_index()
                     || (self.progress_sends_enabled()
                         && sent.commit_at_start < self.durable.commit_index))
             {
-                effects.push(self.append_for(m.from)?);
+                out.push_back(self.append_for(m.from)?);
             }
-            Ok(effects)
+            Ok(())
         } else {
             let next = self.next_index[&m.from]
                 .saturating_sub(1)
                 .min(matching_index.saturating_add(1))
                 .max(1);
             self.next_index.insert(m.from, next);
-            Ok(vec![self.append_for(m.from)?])
+            out.push_back(self.append_for(m.from)?);
+            Ok(())
         }
     }
     fn receive_read_probe(
@@ -742,12 +750,29 @@ impl Raft {
 }
 /// WAL bound of persisting `new` as one follower update, and whether any of
 /// its entries is data (R5-1). Equal to `LogUpdate::wal_bound` of that update.
-fn suffix_growth(new: &[LogEntry]) -> (usize, bool) {
+fn suffix_growth<'a>(new: impl Iterator<Item = &'a [LogEntry]>) -> (usize, bool) {
     let mut bound = crate::log::UPDATE_WAL_OVERHEAD;
     let mut data = false;
-    for entry in new {
+    for entry in new.flatten() {
         bound = bound.saturating_add(crate::log::entry_wal_bound(entry.payload_bytes()));
         data |= !matches!(entry.payload, EntryPayload::Noop);
     }
     (bound, data)
+}
+/// The offset of an append's first new entry and the WAL bound of staging
+/// the entries from it; `None` when the log already holds every entry.
+type NewSuffix = Option<(usize, Option<usize>)>;
+/// The pieces of `entries` from `offset` on; the skipped prefix's entries
+/// are not visited.
+fn suffix_slices(entries: &EntryBatch, offset: usize) -> impl Iterator<Item = &[LogEntry]> {
+    let mut skip = offset;
+    entries.slices().filter_map(move |slice| {
+        if skip >= slice.len() {
+            skip -= slice.len();
+            return None;
+        }
+        let rest = &slice[skip..];
+        skip = 0;
+        Some(rest)
+    })
 }

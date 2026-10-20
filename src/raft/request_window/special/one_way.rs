@@ -52,7 +52,7 @@ impl Raft {
         m: &Message,
         previous: u64,
         term: u64,
-        entries: &[LogEntry],
+        entries: &EntryBatch,
         commit: u64,
     ) -> bool {
         let Some(joint) = self.membership().joint() else {

@@ -44,7 +44,7 @@ fn original_joint_then_final_parent_updates_promote_without_changing_candidate_s
         1,
         Some(Suffix {
             from: 2,
-            entries: vec![joint],
+            entries: vec![joint].into(),
         }),
         None,
     );
@@ -66,7 +66,7 @@ fn original_joint_then_final_parent_updates_promote_without_changing_candidate_s
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![final_entry],
+            entries: vec![final_entry].into(),
         }),
         None,
     );

@@ -5,6 +5,9 @@ use super::*;
 use crate::log::entry_wal_bound;
 use std::mem::size_of;
 
+mod batch;
+pub use batch::ProposalBatch;
+
 /// Default original-command count for one direct Core batch.
 /// Startup BatchLimits can select a larger bounded envelope.
 pub const MAX_PROPOSAL_BATCH_ENTRIES: usize = 64;
@@ -66,8 +69,10 @@ impl Raft {
                 }
             })
             .collect();
-        let effects = self.persist_proposal_entries(first, entries, wal_bound)?;
-        self.finish_step(effects)
+        let mut effects = VecDeque::new();
+        self.persist_proposal_entries_into(first, entries, Some(wal_bound), &mut effects)?;
+        self.finish_step_into(&mut effects)?;
+        Ok(effects.into())
     }
 
     pub(super) fn begin_step(&mut self) -> Result<(), RaftError> {
@@ -82,19 +87,16 @@ impl Raft {
         Ok(())
     }
 
-    pub(super) fn finish_step(
-        &mut self,
-        mut effects: Vec<Effect>,
-    ) -> Result<Vec<Effect>, RaftError> {
-        effects.extend(self.drive_transfer()?);
-        Ok(effects)
+    pub(super) fn finish_step_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+        out.append_result(self.drive_transfer())
     }
 
-    pub(super) fn propose(
+    pub(super) fn propose_into(
         &mut self,
         operation: OperationId,
         bytes: Vec<u8>,
-    ) -> Result<Vec<Effect>, RaftError> {
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         self.check_proposal_role()?;
         if bytes.len() > self.limits.max_command_bytes {
             return Err(StorageError::Rejected("command byte budget").into());
@@ -115,7 +117,7 @@ impl Raft {
                 bytes: bytes.into(),
             },
         };
-        self.persist_proposal_entries(index, vec![entry], wal_bound)
+        self.persist_proposal_entries_into(index, vec![entry], Some(wal_bound), out)
     }
 
     fn validate_proposal_batch(
@@ -198,22 +200,28 @@ impl Raft {
         }
         Ok(())
     }
-    fn persist_proposal_entries(
+    fn persist_proposal_entries_into(
         &mut self,
         first: u64,
         entries: Vec<LogEntry>,
-        wal_bound: usize,
-    ) -> Result<Vec<Effect>, RaftError> {
-        self.persist_bounded(
+        wal_bound: Option<usize>,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
+        self.persist_bounded_into(
             self.durable.hard_state,
             self.durable.commit_index,
-            Some(Suffix {
-                from: first,
-                entries,
-            }),
+            // Freezing measures the batch's intrinsic facts once; planning,
+            // fan-out and every follower reuse them.
+            Some((
+                Suffix {
+                    from: first,
+                    entries: entries.into(),
+                },
+                wal_bound,
+            )),
             After::LeaderAppend,
             None,
-            Some(wal_bound),
+            out,
         )
     }
     fn check_proposal_role(&self) -> Result<(), RaftError> {

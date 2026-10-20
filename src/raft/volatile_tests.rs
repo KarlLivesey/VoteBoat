@@ -47,7 +47,8 @@ fn volatile_persist_carries_no_entries_and_installs_the_exact_proposal() {
     assert_eq!(core.state(), &before);
     let pending = core.pending.as_ref().unwrap();
     let planned = &pending.next.suffix().unwrap().entries;
-    assert_eq!(planned.capacity(), planned.len());
+    assert_eq!(planned.backing_count(), 1);
+    assert_eq!(planned.allocated_entries(), planned.len());
     let planned_bytes = command_bytes(&planned[0]);
     let (committed, following) = persist_volatile(&mut core, &log, persist)
         .unwrap()
@@ -162,7 +163,10 @@ fn volatile_commit_only_round_borrows_canonical_interval() {
         .persist(
             core.state().hard_state,
             1,
-            Some(Suffix { from: 2, entries }),
+            Some(Suffix {
+                from: 2,
+                entries: entries.into(),
+            }),
             After::Reply,
             None,
         )
@@ -170,14 +174,14 @@ fn volatile_commit_only_round_borrows_canonical_interval() {
     let result = persist_volatile(&mut core, &log, token(&effects)).unwrap();
     assert!(result.committed().is_none());
     assert!(result.following().is_empty());
-    let canonical = core.state().entries[1..].as_ptr();
+    let canonical: *const LogEntry = &core.state().entries[1];
     let canonical_bytes = command_bytes(&core.state().entries[1]);
     let effects = core
         .persist(core.state().hard_state, 3, None, After::Commit, None)
         .unwrap();
     let result = persist_volatile(&mut core, &log, token(&effects)).unwrap();
     let committed = result.committed().unwrap();
-    assert_eq!(committed.as_ptr(), canonical);
+    assert!(std::ptr::eq(&committed[0], canonical));
     assert_eq!(committed.len(), 2);
     assert_eq!(command_bytes(&committed[0]), canonical_bytes);
     assert!(result.following().is_empty());
@@ -238,7 +242,8 @@ fn proposal_batches_collect_a_tight_suffix_before_owned_planning() {
         let suffix = core.pending.as_ref().unwrap().next.suffix();
         let entries = &suffix.unwrap().entries;
         assert_eq!(entries.len(), width);
-        assert_eq!(entries.capacity(), width);
+        assert_eq!(entries.backing_count(), 1);
+        assert_eq!(entries.allocated_entries(), width);
         persist_volatile(&mut core, &log, persist).unwrap();
         assert_eq!(core.state().last_index(), 1 + width as u64);
     }
@@ -266,7 +271,10 @@ fn volatile_plan_moves_the_input_suffix_allocation() {
             .persist(
                 core.state().hard_state,
                 1,
-                Some(Suffix { from: 2, entries }),
+                Some(Suffix {
+                    from: 2,
+                    entries: entries.into(),
+                }),
                 After::Reply,
                 None,
             )
@@ -274,16 +282,274 @@ fn volatile_plan_moves_the_input_suffix_allocation() {
         let pending = core.pending.as_ref().unwrap();
         let planned = &pending.next.suffix().unwrap().entries;
         assert_eq!(planned.len(), 2);
-        (effects, input, planned.as_ptr())
+        (effects, input, planned.first_backing_ptr().unwrap())
     }
     let (mut core, log) = volatile();
     let (effects, input, planned) = plan(&mut core);
     assert_eq!(planned, input);
     persist_volatile(&mut core, &log, token(&effects)).unwrap();
     assert_eq!(core.state().last_index(), 3);
-    // Control: the durable seam keeps a copy for its store in another buffer.
+    // Control: the durable seam keeps a copy of this small batch for its store.
     let mut durable_core = membership_tests::core();
     let (effects, input, planned) = plan(&mut durable_core);
     assert!(matches!(&effects[..], [Effect::Persist(_)]));
     assert_ne!(planned, input);
+}
+
+/// A leader and two followers on volatile logs, all from the same history.
+pub(super) fn volatile_cluster() -> Vec<(Raft, VolatileLog)> {
+    (1..=3u64)
+        .map(|id| {
+            let mut core = core();
+            if id != 1 {
+                core.node = NodeId::new(id).unwrap();
+                core.binding.identity.id = StoreId::new(u128::from(id)).unwrap();
+                core.role = Role::Follower;
+                core.requests.clear();
+                core.progress.clear();
+                core.next_index.clear();
+            }
+            core.volatile = true;
+            core.incarnation = Raft::next_volatile_incarnation().unwrap();
+            let log = VolatileLog::new(core.binding, core.limits).unwrap();
+            (core, log)
+        })
+        .collect()
+}
+/// Run every core to quiescence, each finishing its own effects before its
+/// next message, as the actors do. Returns the nonempty appends sent.
+fn settle(cluster: &mut [(Raft, VolatileLog)], effects: Vec<Effect>) -> Vec<EntryBatch> {
+    let mut inbox: Vec<std::collections::VecDeque<Message>> = vec![Default::default(); 3];
+    let mut sent = Vec::new();
+    let mut work = vec![(0, effects)];
+    loop {
+        while let Some((slot, effects)) = work.pop() {
+            let mut queue: std::collections::VecDeque<Effect> = effects.into();
+            while let Some(effect) = queue.pop_front() {
+                match effect {
+                    Effect::PersistVolatile(token) => {
+                        let (core, log) = &mut cluster[slot];
+                        let (_, following) =
+                            persist_volatile(core, log, token).unwrap().into_parts();
+                        queue.extend(following);
+                    }
+                    Effect::Send(message) => {
+                        if let Rpc::Append { entries, .. } = &message.rpc {
+                            if !entries.is_empty() {
+                                sent.push(entries.clone());
+                            }
+                        }
+                        inbox[(message.to.get() - 1) as usize].push_back(message);
+                    }
+                    _ => {}
+                }
+            }
+        }
+        let Some(slot) = (0..3).find(|slot| !inbox[*slot].is_empty()) else {
+            return sent;
+        };
+        let message = inbox[slot].pop_front().unwrap();
+        work.push((slot, cluster[slot].0.step(Event::Receive(message)).unwrap()));
+    }
+}
+
+#[test]
+fn wide_batches_share_one_backing_from_proposal_to_every_follower() {
+    // A batch of at least the sharing width is frozen once: the leader's
+    // canonical log, both appends and each follower's canonical log hold
+    // ranges of the same backing. A narrower batch is copied per peer.
+    for width in [SHARE_MIN - 1, SHARE_MIN, 64] {
+        let mut cluster = volatile_cluster();
+        let proposals = (0..width)
+            .map(|n| Proposal {
+                operation: OperationId::new(500 + n as u128).unwrap(),
+                bytes: Vec::new(),
+            })
+            .collect();
+        let effects = cluster[0].0.propose_batch(proposals).unwrap();
+        let sent = settle(&mut cluster, effects);
+        let wide = width >= SHARE_MIN;
+        let leader = &cluster[0].0.state().entries;
+        let first = leader.len() - width;
+        assert_eq!(cluster[0].0.state().commit_index, 1 + width as u64);
+        assert_eq!(sent.len(), 2);
+        for append in &sent {
+            assert_eq!(append.len(), width);
+            assert_eq!(std::ptr::eq(&append[0], &leader[first]), wide);
+        }
+        for (follower, _) in &cluster[1..] {
+            let entries = &follower.state().entries;
+            assert_eq!(entries.to_vec(), leader.to_vec());
+            assert_eq!(std::ptr::eq(&entries[first], &leader[first]), wide);
+        }
+    }
+}
+
+/// Every core counter and cursor a sink call could disturb by reading the
+/// caller's earlier effects or by failing after partial output.
+pub(super) fn observed(core: &Raft) -> impl Eq + std::fmt::Debug + use<> {
+    let requests: Vec<_> = core
+        .requests
+        .iter()
+        .map(|(peer, r)| (*peer, r.context, r.start, r.end))
+        .collect();
+    (
+        (
+            core.state().clone(),
+            core.role,
+            core.fenced,
+            core.pending.is_some(),
+        ),
+        (core.request_sequence, core.election_reset),
+        (
+            core.granted_vote_reply,
+            core.leader_contact,
+            core.vote_context,
+        ),
+        (requests, core.progress.clone(), core.next_index.clone()),
+    )
+}
+
+/// Two granted votes this core never emitted, already queued at the end of
+/// an eight-slot ring so that the call's own effects wrap to its start.
+fn wrapped_granted_votes(core: &Raft) -> (VecDeque<Effect>, Vec<Effect>) {
+    let granted: Vec<_> = (2..=3)
+        .map(|peer| {
+            let to = NodeId::new(peer).unwrap();
+            let context = RequestContext {
+                origin: core.binding,
+                sequence: 1,
+            };
+            Effect::Send(core.message(to, context, Rpc::Voted { granted: true }))
+        })
+        .collect();
+    let filler = Effect::Send(core.message(
+        NodeId::new(2).unwrap(),
+        RequestContext {
+            origin: core.binding,
+            sequence: 1,
+        },
+        Rpc::ReadProbe,
+    ));
+    let mut queue = VecDeque::with_capacity(8);
+    let capacity = queue.capacity();
+    queue.extend(std::iter::repeat_n(filler, capacity - granted.len()));
+    // Popping, unlike `clear`, leaves the ring's head where it stopped.
+    while queue.pop_front().is_some() {}
+    queue.extend(granted.iter().cloned());
+    assert_eq!(queue.as_slices().0.len(), granted.len());
+    assert_eq!(queue.capacity(), capacity);
+    (queue, granted)
+}
+
+fn twins() -> ((Raft, VolatileLog), (Raft, VolatileLog)) {
+    (volatile(), volatile())
+}
+
+#[test]
+fn sink_heartbeat_on_a_wrapped_queue_matches_vec_form_through_late_exhaustion() {
+    // Success: the call's effects follow the retained ones across the wrap.
+    let ((mut sink, _), (mut vec, _)) = twins();
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    let capacity = queue.capacity();
+    sink.step_into(Event::Heartbeat, &mut queue).unwrap();
+    let expected = vec.step(Event::Heartbeat).unwrap();
+    assert_eq!(expected.len(), 2);
+    assert_eq!(queue.as_slices(), (&granted[..], &expected[..]));
+    assert_eq!(queue.capacity(), capacity);
+    assert_eq!(observed(&sink), observed(&vec));
+    assert!(sink.granted_vote_reply.is_none());
+    // The first peer's append is built before the second exhausts the request
+    // counter: both forms fail alike and the sink keeps exactly its prefix.
+    let ((mut sink, _), (mut vec, _)) = twins();
+    for core in [&mut sink, &mut vec] {
+        core.request_sequence = u64::MAX - 1;
+    }
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    assert_eq!(
+        sink.step_into(Event::Heartbeat, &mut queue),
+        Err(RaftError::Exhausted)
+    );
+    assert_eq!(vec.step(Event::Heartbeat), Err(RaftError::Exhausted));
+    assert_eq!(queue.as_slices(), (&granted[..], &[][..]));
+    assert_eq!(
+        sink.request_sequence,
+        u64::MAX,
+        "first peer output was built"
+    );
+    assert_eq!(observed(&sink), observed(&vec));
+}
+
+#[test]
+fn sink_volatile_completion_never_reads_earlier_votes_and_fences_like_vec_form() {
+    // Success: following effects match, and the queued grants are neither
+    // remembered nor counted as an election reset.
+    let ((mut sink, sink_log), (mut vec, vec_log)) = twins();
+    let sink_token = token(&propose(&mut sink, 9, vec![1]));
+    let vec_token = token(&propose(&mut vec, 9, vec![1]));
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    let resets = sink.election_reset;
+    let committed = persist_volatile_into(&mut sink, &sink_log, sink_token, &mut queue)
+        .unwrap()
+        .map(|entries| entries.to_vec());
+    let (vec_committed, following) = persist_volatile(&mut vec, &vec_log, vec_token)
+        .unwrap()
+        .into_parts();
+    assert_eq!(committed, vec_committed.map(|entries| entries.to_vec()));
+    assert_eq!(following.len(), 2);
+    assert_eq!(queue.as_slices(), (&granted[..], &following[..]));
+    assert_eq!(observed(&sink), observed(&vec));
+    assert!(sink.granted_vote_reply.is_none());
+    assert_eq!(sink.election_reset, resets);
+    // Late exhaustion after the first peer's append: both forms fence, show
+    // no following output and keep the same completed state; the sink drops
+    // its partially appended peer effect.
+    let ((mut sink, sink_log), (mut vec, vec_log)) = twins();
+    let sink_token = token(&propose(&mut sink, 9, vec![1]));
+    let vec_token = token(&propose(&mut vec, 9, vec![1]));
+    for core in [&mut sink, &mut vec] {
+        core.request_sequence = u64::MAX - 1;
+    }
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    assert!(matches!(
+        persist_volatile_into(&mut sink, &sink_log, sink_token, &mut queue),
+        Err(RaftError::Exhausted)
+    ));
+    assert!(matches!(
+        persist_volatile(&mut vec, &vec_log, vec_token),
+        Err(RaftError::Exhausted)
+    ));
+    assert_eq!(queue.as_slices(), (&granted[..], &[][..]));
+    assert_eq!(
+        sink.request_sequence,
+        u64::MAX,
+        "first peer output was built"
+    );
+    assert!(sink.is_fenced() && !sink.has_pending_dependency());
+    assert_eq!(sink.state().last_index(), 2);
+    assert_eq!(observed(&sink), observed(&vec));
+}
+
+#[test]
+fn sink_receipt_never_remembers_or_resets_for_earlier_queued_votes() {
+    let ((mut sink, _), (mut vec, _)) = twins();
+    for core in [&mut sink, &mut vec] {
+        core.step(Event::Heartbeat).unwrap();
+    }
+    let sent = sink.requests[&NodeId::new(2).unwrap()];
+    let appended = Rpc::Appended {
+        success: true,
+        matching_index: sent.end,
+    };
+    let message = membership_tests::reply(&sink, 2, sent.context, appended);
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    let resets = sink.election_reset;
+    sink.step_into(Event::Receive(message.clone()), &mut queue)
+        .unwrap();
+    let expected = vec.step(Event::Receive(message)).unwrap();
+    assert!(queue.iter().take(2).eq(granted.iter()));
+    assert!(queue.iter().skip(2).eq(expected.iter()));
+    assert_eq!(observed(&sink), observed(&vec));
+    assert!(sink.granted_vote_reply.is_none());
+    assert_eq!(sink.election_reset, resets);
 }

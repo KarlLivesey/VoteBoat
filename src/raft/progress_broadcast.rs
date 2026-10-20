@@ -19,15 +19,15 @@ impl Raft {
             });
         }
         let entries = if sent.start > sent.end {
-            Vec::new()
+            EntryBatch::default()
         } else {
             let start = (sent.start - self.durable.base_index() - 1) as usize;
             let end = (sent.end - self.durable.base_index()) as usize;
             self.durable
                 .entries
-                .get(start..end)
+                .shared_range(start..end)
                 .ok_or(RaftError::WrongCompletion)?
-                .to_vec()
+                .for_message(self.limits.max_batch_bytes)
         };
         Ok(Effect::Send(
             self.scoped_message(
@@ -53,23 +53,37 @@ impl Raft {
             && self.membership().last_configuration_index() <= self.durable.commit_index
     }
 
-    pub(super) fn broadcast_append_progress(&mut self) -> Result<Vec<Effect>, RaftError> {
+    pub(super) fn broadcast_append_progress_into(
+        &mut self,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         if !self.progress_sends_enabled() {
-            return self.broadcast_after_admission();
+            return self.broadcast_after_admission_into(out);
         }
-        self.broadcast_ready_peers()
+        self.broadcast_ready_peers_into(out)
     }
 
+    #[cfg(test)]
     pub(super) fn broadcast_commit_progress(&mut self) -> Result<Vec<Effect>, RaftError> {
-        if !self.progress_sends_enabled() {
-            return self.broadcast();
-        }
-        self.broadcast_ready_peers()
+        let mut effects = VecDeque::new();
+        self.broadcast_commit_progress_into(&mut effects)?;
+        Ok(effects.into())
     }
 
-    fn broadcast_ready_peers(&mut self) -> Result<Vec<Effect>, RaftError> {
-        let mut effects = Vec::new();
-        for peer in self.peers() {
+    pub(super) fn broadcast_commit_progress_into(
+        &mut self,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
+        if !self.progress_sends_enabled() {
+            return self.broadcast_into(out);
+        }
+        self.broadcast_ready_peers_into(out)
+    }
+
+    fn broadcast_ready_peers_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+        self.refresh_peer_order();
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             // Snapshot requests retain their existing fallback. An ordinary
             // request owns its exact range until ACK or explicit invalidation.
             if self
@@ -79,9 +93,9 @@ impl Raft {
             {
                 continue;
             }
-            effects.push(self.append_for(peer)?);
+            out.push_back(self.append_for(peer)?);
         }
-        Ok(effects)
+        Ok(())
     }
 }
 

@@ -78,7 +78,12 @@ fn original_raft_snapshot_ack_above_base_requires_committed_known_prefix() {
         LogicalOutcome::Refused(LogicalRefusal::InvalidResponse)
     );
     let mut hole = a.clone();
-    hole.state.parent.as_mut().unwrap().entries.remove(0);
+    hole.state
+        .parent
+        .as_mut()
+        .unwrap()
+        .entries
+        .edit(|entries| entries.remove(0));
     assert_eq!(
         hole.authorize(&original, representative(1)),
         Err(ApplicationError::InvalidCommand)

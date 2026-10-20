@@ -30,6 +30,7 @@ impl NativeCounterObserver {
                 sampled_at: None,
                 state: None,
                 counters: NodeCounters::default(),
+                network: NetworkHealth::default(),
                 closed: false,
             },
         }
@@ -53,6 +54,7 @@ impl Observer for NativeCounterObserver {
         self.snapshot.counters = self.snapshot.counters.saturating_add(sample.counters);
         self.snapshot.sampled_at = Some(sample.sampled_at);
         self.snapshot.state = Some(sample.state);
+        self.snapshot.network = sample.network;
         Ok(())
     }
     fn snapshot_counters(&self) -> CounterSnapshot {

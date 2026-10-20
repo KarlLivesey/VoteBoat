@@ -144,13 +144,15 @@ impl Connection {
             }
             ["status"] => {
                 let core = node.local().owner.core(b.group).ok_or("missing group")?;
-                self.reply(format!(
+                let mut reply = format!(
                     "OK role={:?} committed={} checkpoint_index={} pending_reads={} evidence=local",
                     core.role(),
                     core.state().commit_index,
                     core.state().base_index(),
                     node.local().reads.usage().requests
-                ));
+                );
+                super::accept_health::AcceptHealth::capture(node.peers()).append(&mut reply);
+                self.reply(reply);
             }
             ["maintenance"] => self.reply(super::setup::maintenance_status(node, b.group)),
             ["quit"] => {

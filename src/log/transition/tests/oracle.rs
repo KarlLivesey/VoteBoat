@@ -22,27 +22,27 @@ fn finite_plain_ballot_commit_suffix_and_budget_cases_match_original_validator()
         None,
         Some(Suffix {
             from: 3,
-            entries: vec![],
+            entries: vec![].into(),
         }),
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1), entry(4, 2)],
+            entries: vec![entry(3, 1), entry(4, 2)].into(),
         }),
         Some(Suffix {
             from: 3,
-            entries: vec![entry(4, 1)],
+            entries: vec![entry(4, 1)].into(),
         }),
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 0)],
+            entries: vec![entry(3, 0)].into(),
         }),
         Some(Suffix {
             from: 2,
-            entries: vec![entry(2, 2)],
+            entries: vec![entry(2, 2)].into(),
         }),
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 1)],
+            entries: vec![entry(4, 1)].into(),
         }),
     ];
     for term in 0..=3 {
@@ -62,7 +62,7 @@ fn finite_plain_ballot_commit_suffix_and_budget_cases_match_original_validator()
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     compare(
@@ -130,7 +130,7 @@ fn checked_index_and_revision_exhaustion_matches_fallback_without_arithmetic_pan
             state.commit_index,
             Some(Suffix {
                 from: u64::MAX - 1,
-                entries: vec![entry(u64::MAX - 1, 1), entry(u64::MAX, 1), entry(1, 1)],
+                entries: vec![entry(u64::MAX - 1, 1), entry(u64::MAX, 1), entry(1, 1)].into(),
             }),
         ),
         LogLimits::default(),
@@ -173,7 +173,7 @@ fn configuration_replacement_fall_back_and_plain_matching_snapshot_uses_compact(
             1,
             Some(Suffix {
                 from: 3,
-                entries: vec![record],
+                entries: vec![record].into(),
             }),
         ),
         snapshot,
@@ -183,7 +183,7 @@ fn configuration_replacement_fall_back_and_plain_matching_snapshot_uses_compact(
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2)],
+                entries: vec![entry(2, 2)].into(),
             }),
         ),
     ] {

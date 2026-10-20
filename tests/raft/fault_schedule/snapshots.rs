@@ -176,7 +176,7 @@ impl Replay {
         if let Some(provider) = self.snapshots.providers.get_mut(&id) {
             restore_application(core, &mut counter, provider)?;
         } else {
-            counter.apply_batch(core.replay_committed())?;
+            counter.apply_batch(&core.replay_committed().contiguous())?;
         }
         Ok(counter)
     }

@@ -37,7 +37,8 @@ fn request(configuration: u64, term: u64) -> Message {
                 index: 1,
                 term,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
             leader_commit: 1,
         },
     }
@@ -105,7 +106,7 @@ fn conformance<S: LogStore>(mut store: S) {
     mismatch.rpc = Rpc::Append {
         previous_index: 2,
         previous_term: 1,
-        entries: vec![],
+        entries: vec![].into(),
         leader_commit: 2,
     };
     let rejection = reply(core.step(Event::Receive(mismatch.clone())).unwrap());

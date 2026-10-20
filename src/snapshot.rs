@@ -411,8 +411,9 @@ fn restore_application_from<A: CheckpointStateMachine>(
     if floor < raft.state().base_index() {
         return Err(CheckpointError::InvalidBoundary);
     }
-    let replay_receipts =
-        next.apply_batch(&raft.replay_committed()[(floor - raft.state().base_index()) as usize..])?;
+    let replay_receipts = next.apply_batch(
+        &raft.replay_committed().contiguous()[(floor - raft.state().base_index()) as usize..],
+    )?;
     *application = next;
     Ok(Restored {
         checkpoint_index: floor,
@@ -961,7 +962,7 @@ fn finish_install_with<A: CheckpointStateMachine, L: LogCheck, S: SnapshotRetent
             reference.index,
             &snapshot.application,
         )?;
-        next.apply_batch(raft.replay_committed())?;
+        next.apply_entries(raft.replay_committed())?;
         store.reconcile_log(Some(reference))?;
         let effects = raft.snapshot_applied(reference, next.applied_index())?;
         *application = next;

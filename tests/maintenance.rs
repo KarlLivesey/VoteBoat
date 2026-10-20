@@ -178,7 +178,7 @@ fn unit(w: &impl PersistenceWorker, g: u128, data: bool) -> Vec<PersistUnit> {
             snapshot: None,
             suffix: data.then(|| Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 7)],
+                entries: vec![entry(1, 1, 7)].into(),
             }),
         },
     }]
@@ -654,7 +654,8 @@ fn limits_under_which_a_batch_can_never_fit_are_refused_before_any_write() {
                     operation: OperationId::new(9).unwrap(),
                     bytes: vec![3; 4000].into(),
                 },
-            }],
+            }]
+            .into(),
         }),
     ) else {
         unreachable!()
@@ -756,7 +757,8 @@ fn noop_update(index: u64, revision: LogRevision) -> LogUpdate {
                 index,
                 term: index,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
     }
 }

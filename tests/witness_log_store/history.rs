@@ -48,7 +48,7 @@ fn actual_histories_keep_pending_visibility_suffix_outcomes_and_stale_sessions()
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 17), entry(2, 1, 29)],
+                entries: vec![entry(1, 1, 17), entry(2, 1, 29)].into(),
             }),
         )])
         .unwrap();
@@ -64,7 +64,7 @@ fn actual_histories_keep_pending_visibility_suffix_outcomes_and_stale_sessions()
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 2, 99)]
+                entries: vec![entry(1, 2, 99)].into()
             })
         )])
         .is_err());
@@ -77,7 +77,7 @@ fn actual_histories_keep_pending_visibility_suffix_outcomes_and_stale_sessions()
             2,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 63)],
+                entries: vec![entry(2, 2, 63)].into(),
             }),
         )],
     );

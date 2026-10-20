@@ -42,7 +42,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             commit_index: 0,
             suffix: Some(Suffix {
                 from: entry.index,
-                entries: vec![entry.clone()],
+                entries: vec![entry.clone()].into(),
             }),
             snapshot: None,
             snapshot_membership: None,
