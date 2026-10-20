@@ -98,7 +98,9 @@ impl<T: Copy + PartialEq + Debug> PeerSlots<T> {
     pub(super) fn is_empty(&self) -> bool {
         self.occupied == 0
     }
-    /// Occupied slots in `NodeId` order (the map's iteration order).
+    /// Occupied slots in `NodeId` order (the map's iteration order). Only
+    /// the debug oracle and tests read the whole view.
+    #[cfg(any(test, debug_assertions))]
     pub(super) fn iter(&self) -> impl Iterator<Item = (&NodeId, &T)> {
         self.slots
             .iter()
