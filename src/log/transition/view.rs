@@ -65,6 +65,9 @@ pub(crate) struct LogView<'a> {
     tail: Option<&'a EntryLog>,
     metadata: LogMetadata,
     removed: usize,
+    // The summary this view's metadata was copied from, and the stamp of
+    // the summarized log it describes (`None` if that log has none).
+    summary: Option<(&'a LogSummary, Option<LogStamp>)>,
 }
 impl<'a> LogView<'a> {
     pub(crate) fn new(base: &'a GroupLog) -> Self {
@@ -73,7 +76,43 @@ impl<'a> LogView<'a> {
             tail: None,
             metadata: LogMetadata::from_log(base),
             removed: 0,
+            summary: None,
         }
+    }
+    /// `summary` describes `base` exactly and `stamp` is `base`'s current
+    /// stamp ([`SummarizedLog`] keeps both so).
+    pub(super) fn summarized(
+        base: &'a GroupLog,
+        summary: &'a LogSummary,
+        stamp: Option<LogStamp>,
+    ) -> Self {
+        Self {
+            base,
+            tail: None,
+            metadata: summary.metadata,
+            removed: 0,
+            summary: Some((summary, stamp)),
+        }
+    }
+    /// The stamp of the summarized log this view was taken from, if any:
+    /// stage a plan made from this view with it.
+    #[inline]
+    pub(crate) fn stamp(&self) -> Option<LogStamp> {
+        self.summary.and_then(|(_, stamp)| stamp)
+    }
+    /// Whether `summary` describes this view's metadata. A view copied from
+    /// that same summary needs no comparison: it borrows the summary, which
+    /// cannot change while the view exists.
+    #[inline]
+    pub(crate) fn summarized_by(&self, summary: &LogSummary) -> bool {
+        if self
+            .summary
+            .is_some_and(|(own, _)| std::ptr::eq(own, summary))
+        {
+            debug_assert!(summary.matches_metadata(&self.metadata));
+            return true;
+        }
+        summary.matches_metadata(&self.metadata)
     }
     /// Prefix/tail were admitted by this owner; metadata describes their exact
     /// accepted version. This is not an unchecked public storage admission API.
@@ -93,6 +132,7 @@ impl<'a> LogView<'a> {
             tail: Some(tail).filter(|tail| !tail.is_empty()),
             metadata,
             removed,
+            summary: None,
         }
     }
     pub(crate) fn metadata(&self) -> &LogMetadata {

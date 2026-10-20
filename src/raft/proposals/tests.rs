@@ -180,18 +180,55 @@ fn plain_append_and_commit_preserve_historical_payloads_and_exact_accounting() {
             .map(LogEntry::retained_payload_bytes)
             .sum::<usize>();
     assert_eq!(core.retained_log_bytes(), Some(old_charge));
-    assert!(core.log_summary.matches(core.state()));
+    assert!(core.durable.summary().matches(core.state()));
     assert_eq!(core.rollback_replicas(), 3);
 }
 
 #[test]
 fn stale_summary_cannot_admit_an_ordinary_transition() {
-    let mut core = leader();
+    // The core cannot hold a stale summary: `SummarizedLog` replaces it at
+    // every change of the log. A summary of another version, passed with the
+    // core's own view (which skips the comparison only for its own summary)
+    // or a rebuilt view, is still refused by every plan the core makes.
+    let core = leader();
     let before = core.state().clone();
     let mut other_revision = before.clone();
     other_revision.revision = LogRevision::new(other_revision.revision.get() + 1).unwrap();
-    core.log_summary = LogSummary::from_validated(&other_revision);
-    assert!(core.propose_batch(vec![proposal(1)]).is_err());
+    let stale = LogSummary::from_validated(&other_revision);
+    let update = LogUpdate {
+        group: before.bootstrap.group,
+        expected_revision: before.revision,
+        hard_state: before.hard_state,
+        commit_index: before.commit_index,
+        suffix: Some(Suffix {
+            from: before.last_index() + 1,
+            entries: vec![LogEntry {
+                index: before.last_index() + 1,
+                term: before.hard_state.term,
+                payload: EntryPayload::Noop,
+            }]
+            .into(),
+        }),
+        snapshot: None,
+        snapshot_membership: None,
+    };
+    let refused = Some(StorageError::Rejected("stale log summary"));
+    for view in [core.durable.view(), LogView::new(core.state())] {
+        let owned = OwnedNextLog::plan_owned(&view, &stale, update.clone(), core.limits);
+        assert_eq!(owned.err(), refused);
+        let copied = OwnedNextLog::plan_copy(&view, &stale, &update, core.limits);
+        assert_eq!(copied.err(), refused);
+        let commit = OwnedNextLog::plan_commit(&view, &stale, before.commit_index, core.limits);
+        assert_eq!(commit.err(), refused);
+        // The same update plans with the log's own summary.
+        assert!(OwnedNextLog::plan_owned(
+            &view,
+            core.durable.summary(),
+            update.clone(),
+            core.limits
+        )
+        .is_ok());
+    }
     assert_eq!(core.state(), &before);
     assert!(core.pending.is_none());
 }
@@ -435,9 +472,10 @@ fn direct_batch_uses_the_same_fence_dependency_and_transfer_guards() {
 #[test]
 fn index_exhaustion_is_rejected_before_pending_state() {
     let mut core = leader();
-    core.durable
-        .entries
-        .edit(|entries| entries.last_mut().unwrap().index = u64::MAX - 1);
+    core.durable.edit(|log| {
+        log.entries
+            .edit(|entries| entries.last_mut().unwrap().index = u64::MAX - 1)
+    });
     assert_eq!(
         core.propose_batch(vec![proposal(1), proposal(2)]),
         Err(RaftError::Exhausted)

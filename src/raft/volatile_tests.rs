@@ -297,7 +297,7 @@ fn volatile_plan_moves_the_input_suffix_allocation() {
 }
 
 /// A leader and two followers on volatile logs, all from the same history.
-fn volatile_cluster() -> Vec<(Raft, VolatileLog)> {
+pub(super) fn volatile_cluster() -> Vec<(Raft, VolatileLog)> {
     (1..=3u64)
         .map(|id| {
             let mut core = core();

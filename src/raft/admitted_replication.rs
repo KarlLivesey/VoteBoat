@@ -107,7 +107,7 @@ impl Raft {
             || self.role != Role::Leader
             || !self.local_voter()
             || self.transfer.is_some()
-            || !self.log_summary.is_plain()
+            || !self.durable.summary().is_plain()
             || !pending.next.is_append()
             || pending.membership.is_some()
             || !matches!(pending.after, After::LeaderAppend)

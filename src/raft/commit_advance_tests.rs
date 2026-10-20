@@ -100,7 +100,10 @@ fn volatile_commit_only_round_is_scalar_and_installs_only_the_commit_index() {
     assert!(result.following().is_empty());
     assert_eq!(core.state(), &advanced(&before, 3));
     assert!(std::ptr::eq(&core.state().entries[0], first));
-    assert_eq!(core.log_summary, LogSummary::from_validated(core.state()));
+    assert_eq!(
+        *core.durable.summary(),
+        LogSummary::from_validated(core.state())
+    );
     assert!(!core.has_pending_dependency());
 }
 
@@ -143,7 +146,10 @@ fn durable_commit_only_round_emits_the_identical_update_and_completes_through_th
     assert!(result.following().is_empty());
     assert_eq!(core.state(), &advanced(&before, 3));
     assert_eq!(core.state(), &store.state(before.bootstrap.group).unwrap());
-    assert_eq!(core.log_summary, LogSummary::from_validated(core.state()));
+    assert_eq!(
+        *core.durable.summary(),
+        LogSummary::from_validated(core.state())
+    );
     assert_eq!(store.submissions, 1);
 }
 
@@ -188,7 +194,9 @@ fn incomplete_commit_only_round_fences_and_keeps_the_last_completed_state() {
     // A failed install fences too: the predecessor check precedes mutation.
     let (mut core, log) = follower(true);
     let persist = token(&commit_only(&mut core, 3));
-    core.durable.hard_state.voted_for = Some(core.node);
+    let node = core.node;
+    core.durable
+        .edit(|log| log.hard_state.voted_for = Some(node));
     let moved = core.state().clone();
     assert!(matches!(
         persist_volatile(&mut core, &log, persist),
@@ -316,7 +324,9 @@ fn pending_and_plan_sizes() {
     assert!(size_of::<After>() <= 16);
     assert!(size_of::<Option<Box<Membership>>>() <= 8);
 }
-const PENDING_BYTES: usize = 1_088;
+// V3d round 3: 1,088 → 1,104 B for the 16-byte install stamp (`Pending` is
+// 16-byte aligned and had no padding left).
+const PENDING_BYTES: usize = 1_104;
 const PLAN_BYTES: usize = 672;
 
 /// Bounds the plan and log types on the composed V2 + V3 tree at their

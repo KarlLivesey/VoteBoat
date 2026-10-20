@@ -15,7 +15,9 @@
 //! Deterministic static-configuration Raft. Host drives elections and delivery.
 //! Every persistence-dependent send/application notification waits for its exact
 //! store/group/revision/generation ticket. No transport or clock is constructed.
-use crate::log::transition::{LogSummary, LogView, OwnedNextLog};
+use crate::log::transition::{LogStamp, OwnedNextLog, SummarizedLog};
+#[cfg(test)]
+use crate::log::transition::{LogSummary, LogView};
 use crate::{
     contracts::{HardState, StorageError},
     identity::*,
@@ -352,6 +354,9 @@ struct Pending {
     ticket: Option<LogTicket>,
     after: After,
     reply: Option<Message>,
+    // The stamp of the view `next` was planned from; the install skips the
+    // predecessor comparison only if it is still the log's current one.
+    planned: Option<LogStamp>,
 }
 #[derive(Clone, Copy)]
 struct Replication {
@@ -374,9 +379,9 @@ pub struct Raft {
     limits: LogLimits,
     batch_limits: BatchLimits,
     batch_limits_locked: bool,
-    durable: GroupLog,
+    // The canonical log and its summary, changed only together at install.
+    durable: SummarizedLog,
     checkpoint_lineage: CheckpointLineage,
-    log_summary: LogSummary,
     membership: Membership,
     role: Role,
     campaigning_enabled: bool,
@@ -503,8 +508,7 @@ impl Raft {
             limits,
             batch_limits: BatchLimits::default(),
             batch_limits_locked: false,
-            log_summary: LogSummary::from_validated(&state),
-            durable: state,
+            durable: SummarizedLog::new(state),
             checkpoint_lineage: CheckpointLineage::new(),
             membership,
             role: Role::Follower,
@@ -810,13 +814,16 @@ impl Raft {
         self.reserve_effects(input_bytes, peers)
     }
     fn rollback_replicas(&self) -> usize {
-        if self.log_summary.matches(&self.durable) && self.log_summary.is_plain() {
-            return self
-                .durable
-                .bootstrap
-                .voter_stores
-                .len()
-                .max(self.membership().replicas().count());
+        if self.durable.summary().is_plain() {
+            // A plain log has no configuration entry or snapshot membership:
+            // its accepted membership is the bootstrap electorate. Only a
+            // pending full plan can name other replicas.
+            let voters = self.durable.bootstrap.voter_stores.len();
+            debug_assert_eq!(self.membership.replicas().count(), voters);
+            return match self.pending.as_ref().and_then(|p| p.membership.as_deref()) {
+                Some(pending) => voters.max(pending.replicas().count()),
+                None => voters,
+            };
         }
         use crate::membership::ConfigurationChange;
         let base = self.durable.snapshot_membership.as_deref();
@@ -1299,13 +1306,10 @@ impl Raft {
             .as_ref()
             .is_some_and(|membership| membership.id() != self.membership.id());
         let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
-        self.log_summary = match p.next.install(&mut self.durable) {
-            Ok(summary) => summary,
-            Err(error) => {
-                self.storage_failed();
-                return Err(error.into());
-            }
-        };
+        if let Err(error) = self.durable.install(p.next, p.planned) {
+            self.storage_failed();
+            return Err(error.into());
+        }
         if !preserves_checkpoint_prefix {
             self.checkpoint_lineage = CheckpointLineage::new();
         }
@@ -1475,12 +1479,10 @@ impl Raft {
         reply: Option<Message>,
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
-        let next = OwnedNextLog::plan_commit(
-            &LogView::new(&self.durable),
-            &self.log_summary,
-            commit_index,
-            self.limits,
-        )?;
+        let view = self.durable.view();
+        let next =
+            OwnedNextLog::plan_commit(&view, self.durable.summary(), commit_index, self.limits)?;
+        let planned = view.stamp();
         let update = if self.volatile {
             None
         } else {
@@ -1494,7 +1496,7 @@ impl Raft {
                 snapshot: None,
             })
         };
-        self.stage_pending_into(next, update, after, reply, out)
+        self.stage_pending_into(next, planned, update, after, reply, out)
     }
     fn persist_update(
         &mut self,
@@ -1520,28 +1522,27 @@ impl Raft {
             // narrow owned batch keeps any spare capacity (the plan charges
             // it, the installed log charges the visible entries); a wide
             // batch was frozen, releasing spare capacity beyond 4 KiB.
-            let next = OwnedNextLog::plan_owned(
-                &LogView::new(&self.durable),
-                &self.log_summary,
-                update,
-                self.limits,
-            )?;
-            self.stage_pending_into(next, None, after, reply, out)
+            let view = self.durable.view();
+            let next =
+                OwnedNextLog::plan_owned(&view, self.durable.summary(), update, self.limits)?;
+            let planned = view.stamp();
+            self.stage_pending_into(next, planned, None, after, reply, out)
         } else {
-            let next = OwnedNextLog::plan_copy(
-                &LogView::new(&self.durable),
-                &self.log_summary,
-                &update,
-                self.limits,
-            )?;
-            self.stage_pending_into(next, Some(update), after, reply, out)
+            let view = self.durable.view();
+            let next =
+                OwnedNextLog::plan_copy(&view, self.durable.summary(), &update, self.limits)?;
+            let planned = view.stamp();
+            self.stage_pending_into(next, planned, Some(update), after, reply, out)
         }
     }
-    /// Make `next` the single pending transition. `update` is the durable
-    /// store's exact input; without one the core is volatile and emits a token.
+    /// Make `next` the single pending transition. `planned` is the stamp of
+    /// the view `next` was planned from (`LogView::stamp`). `update` is the
+    /// durable store's exact input; without one the core is volatile and
+    /// emits a token.
     fn stage_pending_into(
         &mut self,
         next: OwnedNextLog,
+        planned: Option<LogStamp>,
         update: Option<LogUpdate>,
         after: After,
         reply: Option<Message>,
@@ -1586,6 +1587,7 @@ impl Raft {
             ticket: None,
             after,
             reply,
+            planned,
         });
         out.push_back(effect);
         Ok(())
@@ -2014,7 +2016,7 @@ impl Raft {
         index: u64,
     ) -> Result<Option<Box<crate::membership::Membership>>, crate::membership::MembershipError>
     {
-        if self.log_summary.matches(&self.durable) && self.log_summary.is_plain() {
+        if self.durable.summary().is_plain() {
             if index < self.durable.base_index() || index > self.durable.last_index() {
                 return Err(crate::membership::MembershipError::InvalidHistory);
             }
@@ -2193,6 +2195,8 @@ mod completion_tests;
 #[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;
+#[cfg(test)]
+mod summarized_log_tests;
 #[cfg(test)]
 mod volatile_tests;
 
