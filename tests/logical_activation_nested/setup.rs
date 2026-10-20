@@ -252,6 +252,7 @@ pub fn timers(parent: GroupIdentity) -> TimerConfig {
             election_min_ms: 45000,
             election_spread_ms: 15000,
             expirations_per_poll: 32,
+            append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
         }
     } else {
         TimerConfig {
@@ -259,6 +260,7 @@ pub fn timers(parent: GroupIdentity) -> TimerConfig {
             election_min_ms: 6000,
             election_spread_ms: 4000,
             expirations_per_poll: 32,
+            append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
         }
     }
 }

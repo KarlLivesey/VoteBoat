@@ -27,6 +27,7 @@ impl NativeTimingProfile {
             election_min_ms,
             election_spread_ms,
             expirations_per_poll: 32,
+            append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
         }
     }
 }

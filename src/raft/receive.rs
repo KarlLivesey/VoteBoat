@@ -421,13 +421,18 @@ impl Raft {
             let prefix = self.progress[&m.from].max(matching_index);
             self.progress.insert(m.from, prefix);
             self.next_index.insert(m.from, prefix + 1);
+            self.note_ack(m.from);
             self.maybe_commit_into(out)?;
             if self.pending.is_none()
                 && (prefix < self.durable.last_index()
                     || (self.progress_sends_enabled()
                         && sent.commit_at_start < self.durable.commit_index))
             {
-                out.push_back(self.append_for(m.from)?);
+                if prefix < self.durable.last_index() && self.hold_append(m.from) {
+                    self.hold(m.from);
+                } else {
+                    out.push_back(self.append_for(m.from)?);
+                }
             }
             Ok(())
         } else {

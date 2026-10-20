@@ -31,6 +31,8 @@ use std::ops::Range;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 mod admitted_replication;
+mod append_hold;
+pub use append_hold::AppendHold;
 mod batch_limits;
 pub use batch_limits::BatchLimits;
 mod completion;
@@ -198,6 +200,10 @@ pub enum Event {
     },
     Campaign,
     Heartbeat,
+    /// Send every follower Append the leader holds under
+    /// [`AppendHold::QuorumFirst`]. Hosts deliver it when their hold bound
+    /// expires. Idempotent: a non-leader or a leader without holds emits nothing.
+    ReleaseHeldAppends,
     /// Request a local application checkpoint; never establishes quorum evidence.
     Checkpoint,
     /// Request replication-only authorization from one currently trusted voter.
@@ -391,6 +397,13 @@ pub struct Raft {
     progress: BTreeMap<NodeId, u64>,
     next_index: BTreeMap<NodeId, u64>,
     requests: BTreeMap<NodeId, Replication>,
+    append_hold: AppendHold,
+    // Leader only, at most one entry per peer: held peer -> leader tip when held.
+    held: BTreeMap<NodeId, u64>,
+    // Voting peers, most recent successful acknowledgement first.
+    ack_order: Vec<NodeId>,
+    // Leader durable tip before the most recent leader batch became durable.
+    batch_floor: u64,
     admitted_ranges: BTreeMap<NodeId, AdmittedRange>,
     empty_append_aliases: BTreeMap<NodeId, EmptyAppendAlias>,
     // Candidate-only transfer cursors; never quorum replication or ballots.
@@ -519,6 +532,10 @@ impl Raft {
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
             requests: BTreeMap::new(),
+            append_hold: AppendHold::Off,
+            held: BTreeMap::new(),
+            ack_order: Vec::new(),
+            batch_floor: 0,
             admitted_ranges: BTreeMap::new(),
             empty_append_aliases: BTreeMap::new(),
             repair_requests: BTreeMap::new(),
@@ -1093,6 +1110,7 @@ impl Raft {
                 }
                 Ok(Vec::new())
             }
+            Event::ReleaseHeldAppends => self.release_held_into(out).map(|()| Vec::new()),
             Event::Propose { operation, bytes } => self
                 .propose_into(operation, bytes, out)
                 .map(|()| Vec::new()),
@@ -1403,7 +1421,9 @@ impl Raft {
                 }
             }
             After::LeaderAppend => {
-                self.progress.insert(self.node, self.durable.last_index());
+                if let Some(previous) = self.progress.insert(self.node, self.durable.last_index()) {
+                    self.batch_floor = previous;
+                }
                 self.broadcast_append_progress_into(effects)?;
                 self.maybe_commit_into(effects)?;
             }
@@ -1642,6 +1662,9 @@ impl Raft {
             self.progress.insert(peer, 0);
         }
         self.progress.insert(self.node, self.durable.last_index());
+        self.held.clear();
+        self.ack_order = self.voting_peers();
+        self.batch_floor = self.durable.last_index();
         Ok(())
     }
     fn context(&mut self) -> Result<RequestContext, RaftError> {
@@ -1722,6 +1745,7 @@ impl Raft {
         // Replacing it every tick can starve all acknowledgements when the
         // network round trip exceeds the heartbeat interval. Term changes and
         // compaction clear requests; responses retire them before new work.
+        self.held.remove(&peer);
         if let Some(sent) = self.requests.get(&peer).copied() {
             return self.retry_replication(peer, sent);
         }

@@ -12,6 +12,8 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+#[path = "runtime/append_hold.rs"]
+mod append_hold;
 #[path = "runtime/campaign_delay.rs"]
 mod campaign_delay;
 #[path = "runtime/campaigning.rs"]
@@ -1323,6 +1325,7 @@ fn timer_config() -> TimerConfig {
         election_min_ms: 20,
         election_spread_ms: 20,
         expirations_per_poll: 3,
+        append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
     }
 }
 fn heartbeat(term: u64) -> Message {
@@ -1572,6 +1575,14 @@ fn expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns(
     assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 0);
 }
 
+fn create_auto_groups<L: LogStore>(log: &mut L) {
+    append(
+        log,
+        (1..=2)
+            .map(|g| LogMutation::Create(bootstrap(g, 3)))
+            .collect(),
+    );
+}
 struct AutoNode<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> {
     runtime: TimedShard<Q, T, E>,
     log: L,
@@ -1590,13 +1601,19 @@ impl<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> AutoNo
         create: bool,
     ) -> Self {
         if create {
-            append(
-                &mut log,
-                (1..=2)
-                    .map(|g| LogMutation::Create(bootstrap(g, 3)))
-                    .collect(),
-            );
+            create_auto_groups(&mut log);
         }
+        Self::open(id, log, ready, make_timers, entropy, now, timer_config())
+    }
+    fn open(
+        id: u64,
+        log: L,
+        ready: Q,
+        make_timers: impl FnOnce(RuntimeOwner) -> T,
+        entropy: E,
+        now: MonoTime,
+        timers: TimerConfig,
+    ) -> Self {
         let mut shard = Shard::new(owner(log.binding()), small_limits(), ready).unwrap();
         let mut apps = BTreeMap::new();
         for g in 1..=2 {
@@ -1617,7 +1634,7 @@ impl<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> AutoNo
             shard,
             make_timers(owner(log.binding())),
             entropy,
-            timer_config(),
+            timers,
             now,
         )
         .unwrap();
@@ -1754,10 +1771,13 @@ fn partition_auto_leader<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Ele
         .term;
     nodes[leader].runtime.admit(group(1), proposal(1)).unwrap();
     pump_auto(nodes, MonoTime(100), None, delayed);
+    // A follower the quorum did not need gets the write within the hold bound.
+    let held = 100 + timer_config().append_hold_ms;
+    pump_auto(nodes, MonoTime(held), None, delayed);
     for n in nodes.iter() {
         assert_eq!(n.apps[&group(1)].read_applied(2), Ok(7));
     }
-    for ms in 101..=250 {
+    for ms in held + 1..=250 {
         pump_auto(nodes, MonoTime(ms), Some(leader), delayed);
     }
     let replacement = nodes
@@ -1812,6 +1832,7 @@ fn partition_auto_leader<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Ele
         .unwrap();
     nodes[other].runtime.admit(group(2), proposal(1)).unwrap();
     pump_auto(nodes, MonoTime(250), Some(leader), delayed);
+    pump_auto(nodes, settled(), Some(leader), delayed);
     assert!(nodes[leader].reads.is_empty());
     for (i, n) in nodes.iter().enumerate() {
         if i != leader {
@@ -1828,6 +1849,11 @@ fn partition_auto_leader<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Ele
     }
     leader
 }
+/// End of the partitioned phase: 250 ms plus the hold bound, by which a
+/// follower the quorum did not need has the last write too.
+fn settled() -> MonoTime {
+    MonoTime(250 + timer_config().append_hold_ms)
+}
 fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
     nodes: &mut Vec<AutoNode<L, Q, T, E>>,
     restart: impl FnOnce(usize, AutoNode<L, Q, T, E>, MonoTime) -> AutoNode<L, Q, T, E>,
@@ -1835,7 +1861,7 @@ fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Electio
     let mut delayed = Vec::new();
     let leader = partition_auto_leader(nodes, &mut delayed);
     let old = nodes.remove(leader);
-    nodes.insert(leader, restart(leader, old, MonoTime(250)));
+    nodes.insert(leader, restart(leader, old, settled()));
     // Delayed old requests and replies cross recovery; some refer to the old
     // store session and none can replace a current-term authority check.
     for message in delayed.drain(..).take(8) {
@@ -1845,9 +1871,9 @@ fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Electio
                 .admit(message.group, Event::Receive(message.clone()))
                 .unwrap();
         }
-        pump_auto(nodes, MonoTime(250), None, &mut vec![]);
+        pump_auto(nodes, settled(), None, &mut vec![]);
     }
-    for ms in 251..=400 {
+    for ms in settled().0 + 1..=400 {
         pump_auto(nodes, MonoTime(ms), None, &mut delayed);
     }
     assert_eq!(

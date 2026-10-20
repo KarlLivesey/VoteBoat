@@ -14,7 +14,7 @@ struct Window {
 }
 fn routine_control(queued: &Queued, term: u64) -> bool {
     match &queued.event {
-        Event::Heartbeat => true,
+        Event::Heartbeat | Event::ReleaseHeldAppends => true,
         Event::Receive(message) => {
             message.term == term && matches!(&message.rpc, Rpc::Appended { .. })
         }

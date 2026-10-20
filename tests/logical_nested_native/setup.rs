@@ -201,6 +201,7 @@ pub fn timers(parent: GroupIdentity) -> voteboat::runtime::TimerConfig {
             election_min_ms: 45_000,
             election_spread_ms: 15_000,
             expirations_per_poll: 32,
+            append_hold_ms: voteboat::runtime::TimerConfig::DEFAULT_APPEND_HOLD_MS,
         }
     } else if (0..3).any(|slot| parent == middle(slot).group) {
         voteboat::runtime::TimerConfig {
@@ -208,6 +209,7 @@ pub fn timers(parent: GroupIdentity) -> voteboat::runtime::TimerConfig {
             election_min_ms: 6_000,
             election_spread_ms: 4_000,
             expirations_per_poll: 32,
+            append_hold_ms: voteboat::runtime::TimerConfig::DEFAULT_APPEND_HOLD_MS,
         }
     } else {
         voteboat::native::startup::NativeTimingProfile::Throughput.timers()

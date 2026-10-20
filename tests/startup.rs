@@ -660,6 +660,7 @@ fn explicit_startup_timers_validate_before_files_and_use_host_deadlines() {
             election_min_ms: 1000,
             election_spread_ms: 1000,
             expirations_per_poll: 32,
+            append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
         };
         let mut invalid = Vec::new();
         for variant in 0..5 {

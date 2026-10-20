@@ -108,6 +108,7 @@ fn quiet_timers() -> TimerConfig {
         election_min_ms: 1 << 50,
         election_spread_ms: 1,
         expirations_per_poll: 32,
+        append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
     }
 }
 

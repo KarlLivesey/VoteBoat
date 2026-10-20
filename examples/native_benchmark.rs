@@ -173,6 +173,7 @@ fn open_recorded(
             election_min_ms: 1000,
             election_spread_ms: 1000,
             expirations_per_poll: 32,
+            append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
         };
         let app = checked(Counter::new(capacity))?;
         let wake = Arc::new(ThreadWake::current());
@@ -203,6 +204,7 @@ const OFFERED_TIMERS: TimerConfig = TimerConfig {
     election_min_ms: 10000,
     election_spread_ms: 10000,
     expirations_per_poll: 32,
+    append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
 };
 /// Replica `n`'s native startup configuration: the one place the startup
 /// assembly is configured, for the single-process and cluster modes alike.

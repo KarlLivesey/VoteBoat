@@ -295,6 +295,8 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .admit(group(1), proposal(9911))
             .unwrap();
         run.advance(201);
+        // A follower the quorum did not need gets the write within the hold bound.
+        run.advance(201 + timer_config().append_hold_ms);
         for n in &run.nodes {
             assert_eq!(
                 n.apps[&group(1)].read_applied(n.apps[&group(1)].applied_index()),
@@ -302,7 +304,7 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             );
         }
         assert!(run.crash(current, power_loss).is_none());
-        for ms in 202..=300 {
+        for ms in 202 + timer_config().append_hold_ms..=300 {
             run.advance(ms);
         }
         let current = run
@@ -315,6 +317,7 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .admit(group(1), proposal(9911))
             .unwrap();
         run.advance(301);
+        run.advance(301 + timer_config().append_hold_ms);
         for n in &run.nodes {
             assert_eq!(
                 n.apps[&group(1)].read_applied(n.apps[&group(1)].applied_index()),

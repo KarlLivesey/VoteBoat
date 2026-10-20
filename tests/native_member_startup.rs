@@ -380,6 +380,7 @@ fn open_at(
             election_min_ms: 1000,
             election_spread_ms: 1000,
             expirations_per_poll: 32,
+            append_hold_ms: TimerConfig::DEFAULT_APPEND_HOLD_MS,
         },
         Counter::new(100).unwrap(),
         Arc::new(ThreadWake::current()),

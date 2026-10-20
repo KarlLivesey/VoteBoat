@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
+use std::collections::BTreeSet;
 
 #[derive(Clone, Copy, Debug)]
 pub struct TimerConfig {
@@ -20,6 +21,10 @@ pub struct TimerConfig {
     pub election_min_ms: u64,
     pub election_spread_ms: u64,
     pub expirations_per_poll: usize,
+    /// Longest a leader holds a ready follower's next Append under
+    /// [`AppendHold::QuorumFirst`] (the next durable leader batch or heartbeat
+    /// usually ends it sooner). Zero turns holds off. At most `heartbeat_ms`.
+    pub append_hold_ms: u64,
 }
 impl Default for TimerConfig {
     fn default() -> Self {
@@ -28,10 +33,12 @@ impl Default for TimerConfig {
             election_min_ms: 150,
             election_spread_ms: 150,
             expirations_per_poll: 32,
+            append_hold_ms: Self::DEFAULT_APPEND_HOLD_MS,
         }
     }
 }
 impl TimerConfig {
+    pub const DEFAULT_APPEND_HOLD_MS: u64 = 1;
     /// Pure timing validation; changing timers grants no consensus authority.
     pub fn validate(&self) -> Result<(), RuntimeError> {
         if self.heartbeat_ms == 0
@@ -39,6 +46,7 @@ impl TimerConfig {
             || self.election_spread_ms == 0
             || self.expirations_per_poll == 0
             || self.expirations_per_poll > 65536
+            || self.append_hold_ms > self.heartbeat_ms
         {
             return Err(RuntimeError::InvalidLimits);
         }
@@ -52,6 +60,8 @@ pub struct TimerProgress {
     pub blocked: usize,
     /// Maximum lateness observed in this poll, not a contiguous watermark.
     pub max_lateness_ms: u64,
+    /// Held-Append releases admitted in this poll.
+    pub released: usize,
 }
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum Phase {
@@ -81,6 +91,9 @@ pub struct TimedShard<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> {
     config: TimerConfig,
     managed: BTreeMap<GroupIdentity, Managed>,
     pending: VecDeque<GroupIdentity>,
+    // At most one hold deadline per group, with its ordered index.
+    holds: BTreeMap<GroupIdentity, MonoTime>,
+    hold_order: BTreeSet<(MonoTime, GroupIdentity)>,
     last_sequence: u64,
     failed: Option<RuntimeError>,
     closed: bool,
@@ -120,11 +133,17 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
             config,
             managed: BTreeMap::new(),
             pending: VecDeque::new(),
+            holds: BTreeMap::new(),
+            hold_order: BTreeSet::new(),
             last_sequence: 0,
             failed: None,
             closed: false,
         };
         runtime.shard.observe(now)?;
+        let hold = runtime.append_hold();
+        for group in runtime.shard.groups.values_mut() {
+            group.core.set_append_hold(hold);
+        }
         let groups = runtime.shard.groups.keys().copied().collect::<Vec<_>>();
         for group in groups {
             runtime.refresh(group, now, false)?;
@@ -223,14 +242,71 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         force: bool,
     ) -> Result<(), RuntimeError> {
         let result = self.refresh_inner(group, now, force);
+        if result.is_ok() {
+            self.sync_hold(group, now);
+        }
         self.latch(result)
     }
-    pub fn register(&mut self, core: Raft, now: MonoTime) -> Result<(), RuntimeError> {
+    fn append_hold(&self) -> AppendHold {
+        if self.config.append_hold_ms == 0 {
+            AppendHold::Off
+        } else {
+            AppendHold::QuorumFirst
+        }
+    }
+    /// Arm one hold deadline when a step leaves the core holding an Append;
+    /// drop it when a step leaves none. An armed deadline is not moved, so no
+    /// hold outlives `append_hold_ms` from the step that first armed it.
+    fn sync_hold(&mut self, group: GroupIdentity, now: MonoTime) {
+        if self.config.append_hold_ms == 0 {
+            return;
+        }
+        let holding = !self.closed
+            && self
+                .shard
+                .core(group)
+                .is_some_and(|core| !core.is_fenced() && core.has_held_appends());
+        match (holding, self.holds.get(&group).copied()) {
+            (true, None) => {
+                let deadline = MonoTime(now.0.saturating_add(self.config.append_hold_ms));
+                self.holds.insert(group, deadline);
+                self.hold_order.insert((deadline, group));
+            }
+            (false, Some(_)) => self.drop_hold(group),
+            _ => {}
+        }
+    }
+    fn drop_hold(&mut self, group: GroupIdentity) {
+        if let Some(deadline) = self.holds.remove(&group) {
+            self.hold_order.remove(&(deadline, group));
+        }
+    }
+    /// Admit one release per expired hold deadline, earliest first.
+    fn poll_holds(&mut self, now: MonoTime, limit: usize, progress: &mut TimerProgress) {
+        for _ in 0..limit {
+            let Some(&(deadline, group)) = self.hold_order.first() else {
+                break;
+            };
+            if deadline > now {
+                break;
+            }
+            match self.shard.admit(group, Event::ReleaseHeldAppends) {
+                Ok(()) => progress.released += 1,
+                // Keep the deadline: the next poll retries the admission.
+                Err(rejected) if rejected.reason == RuntimeError::Overloaded => break,
+                // A closed, fenced or unknown group has no hold left to bound.
+                Err(_) => {}
+            }
+            self.drop_hold(group);
+        }
+    }
+    pub fn register(&mut self, mut core: Raft, now: MonoTime) -> Result<(), RuntimeError> {
         self.check()?;
         self.shard.observe(now)?;
         if self.closed {
             return Err(RuntimeError::Closed);
         }
+        core.set_append_hold(self.append_hold());
         let group = core.state().bootstrap.group;
         self.shard.register(core)?;
         self.refresh(group, now, false)
@@ -279,7 +355,11 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         if self.closed || self.failed.is_some() {
             return None;
         }
-        self.timers.next_deadline()
+        let hold = self.hold_order.first().map(|(deadline, _)| *deadline);
+        match (self.timers.next_deadline(), hold) {
+            (Some(timer), Some(hold)) => Some(timer.min(hold)),
+            (timer, hold) => timer.or(hold),
+        }
     }
     pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
         self.shard.groups.keys().copied()
@@ -443,6 +523,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
                 Err(rejected) => return Err(rejected.reason),
             }
         }
+        self.poll_holds(now, limit, &mut progress);
         Ok(progress)
     }
     pub fn poll_timers(&mut self, now: MonoTime) -> Result<TimerProgress, RuntimeError> {
@@ -585,6 +666,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         // Cleanup remains available after a provider fault. Invalidate queued
         // tokens before returning unresolved work even if cancellation fails.
         let cancel = self.cancel_managed(group);
+        self.drop_hold(group);
         let stopped = self.shard.stop_group(group)?;
         if let Err(e) = cancel {
             self.failed = Some(e);
@@ -594,6 +676,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub fn close_admission(&mut self) -> Result<(), RuntimeError> {
         self.closed = true;
         self.shard.close_admission();
+        self.holds.clear();
+        self.hold_order.clear();
         let groups = self.managed.keys().copied().collect::<Vec<_>>();
         let mut error = None;
         for group in groups {

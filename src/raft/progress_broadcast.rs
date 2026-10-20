@@ -81,6 +81,9 @@ impl Raft {
     }
 
     fn broadcast_ready_peers_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+        if self.append_hold != AppendHold::Off {
+            return self.broadcast_held_peers_into(out);
+        }
         for peer in self.peers() {
             // Snapshot requests retain their existing fallback. An ordinary
             // request owns its exact range until ACK or explicit invalidation.
