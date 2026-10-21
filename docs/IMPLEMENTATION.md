@@ -20,7 +20,7 @@ work needed to decide PR19.
 | PR24 V3f | Kept and merged | Merge `1e56e9f5`; recorded final-main head `bd714771`; default 2603, all-features 2915, no-default 1346, native-only 1924 and matched 75 passed, zero failures; both reviews, strict checks and enabled hook passed |
 | PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
 | PR15 DR1 | Rejected for this wind-down; closed as parked, not merged | Independent source `66fcf3e0` has both fresh source approvals and strict checks, but its complete final default failed: 2686 passed / 2 failed / 1 ignored |
-| PR23 N1c | Current: reconcile the original network candidate onto qualified main | Exclude both rejected ST2 and DR1 production trees while preserving published history; fresh reviews, full final-head suites and the established fair performance gate remain required |
+| PR23 N1c | Source reconciled; final qualification pending | Original44 + qualified mainb77, both rejected production trees excluded; published ancestry retained. Focused95default/106all pass. Fresh reviews, full final-head suites and fair performance remain required |
 | PR22 N1b | Next: resolve after PR23 | Reconcile the final main, make the N1c disposition and entryless-frame documentation accurate, and complete the established review and validation gates |
 | PR19 N1 | Pending bounded keep/reject decision after PR23 | Only the previously authorized N1d work, two existing review P2 fixes and the recorded performance gate are permitted; park/close if that gate still fails |
 
@@ -43733,3 +43733,41 @@ The compact report/detail/aggregate/commands are preserved unchanged under
 `validation/reliability/n1c-final-n0/`; durable comment `6299071370` retains the
 original record. No performance rerun in this task. Parent owns exact stable
 cumulative comparison with matching actual 16-byte Counter/session protocol.
+
+
+### PR23 independent-main source result (21 October; qualification pending)
+
+The real desired-tree merge `7970d4df` has parents plan `f2170cfe` (atop approved
+original44) and qualified main `b77fd087`. After its committed source audit,
+history-only join `1d5f692a` retained all publishedb959 ancestry with identical
+tree `71dd68a076c04a7c817733831327b82a780ebe9d`. No revert/no-op main merge.
+All main-relative executable changes equal original N1c changes or five exact
+reviewed test-fixture blobs from66fc; 14 rejected-only inputs remain absent.
+V3e/V3f/EO1 and main's actual Counter8B/live benchmark labels remain intact.
+
+Core hold and timed/runtime regression executable identity equals44. Notices
+may be held in two-voter groups; data requires quorum without that peer.
+Byte-limit splits may rehold a spare mid-batch. Original frozen-clock releases,
+post-owner-drain heartbeat and Cancel-before-transfer ordering are preserved.
+
+Actual selected default95/0 and all-feature106/0, including full transfer28/36
+and isolation9/9, pass nonempty named-outcome audits. Corrected focused resource
+samples27564,0violations, cores10-11/actual19/twojobs/incremental0. Earlier
+launcher/path/resource failures remain failed historical attempts with their
+limitations; this is not an all-attempts resource PASS or full-suite green.
+Strict/hook/publication receipts are in the
+[compact source report](../validation/reliability/n1c-independent-main/REPORT.md).
+
+The prior standalone CPU ratios and old70-run8B campaign remain historical,
+including roughly+5% slow-regime p99 and original paired TCP4k p99 caveat.
+No performance result here qualifies this head. PR14/ST2 and PR15/DR1 stay
+rejected/closed/parked; PR24/V3f stays kept/merged. Macro NW1 and LB remain
+incomplete. The next existing gates are parent's two fresh pinned source
+reviews/full5config, then fair exact stable8B baseline/head performance and
+keep/reject decision, followed by remaining PR22/19 wind-down. No new slice.
+
+Strict7 and direct enabled pre-push hook pass rc0/zero diagnostics (127.569s,
+1416 sampled rows/0violations; own target1.084GiB). The same unchanged hook runs
+on the actual nonforce publication. The initial rc127 launch and rc91 resource
+failure remain FAILED attempts; only corrected gates pass. Full final-head
+qualification stays parent-owned/pending.

@@ -1,3 +1,9 @@
+> Historical b959 source preparation, superseded after PR14/PR15 rejection.
+> Both candidates are closed/parked, not merged. Current PR23 excludes their
+> production trees and uses main Counter8B. The16B plans and dependency/status
+> statements below describe that older composition only. Current evidence:
+> [independent-main report](../n1c-independent-main/REPORT.md).
+
 # PR23 cumulative source preparation — qualification pending
 
 Existing PR: https://github.com/KarlLivesey/VoteBoat/pull/23, base `main`,

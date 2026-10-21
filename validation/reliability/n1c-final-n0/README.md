@@ -13,5 +13,7 @@ QUIC paired p99 +17.45%: **performance not cleared**. Main includes V3e + EO1
 absent from the candidate. This cannot isolate N1c/round 3 or qualify the new
 composition. Original standalone .866/.946/.951/.939/.878 and Linux .992 (7/10,
 neutral) remain separate historical results with the slow-regime/TCP4k caveats.
-No measurements are rerun in this reconciliation. Parent owns comparison of
-stable cumulative heads using actual 16-byte Counter/session commands.
+No measurements are rerun in this reconciliation. The prior cumulative16B comparison plan was superseded after PR15 rejection.
+Parent now owns fair comparison of stable independent-main heads using the
+actual qualified-main8B Counter protocol. The four historical report/data files
+remain unchanged; none qualifies the reconciled source.

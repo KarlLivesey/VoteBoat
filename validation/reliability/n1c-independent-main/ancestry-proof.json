@@ -1,0 +1,20 @@
+{
+  "desired_commit": "7970d4df1de9e6110973ea935225c6ed9d41f866",
+  "desired_parents": [
+    "f2170cfefa631a259a84aaa69bd156dcb1d00bf1",
+    "b77fd087b06c5ae76a5a1a25f2cfe3ed6891c339"
+  ],
+  "desired_tree": "71dd68a076c04a7c817733831327b82a780ebe9d",
+  "history_join": "1d5f692a10d51b80d53e86ed1bb58941b178e2f6",
+  "join_parents": [
+    "7970d4df1de9e6110973ea935225c6ed9d41f866",
+    "b95943a3187f8a3c6f48fbcaf2cbd5f6a4e93bad"
+  ],
+  "join_tree": "71dd68a076c04a7c817733831327b82a780ebe9d",
+  "identical_tree": true,
+  "ancestors": [
+    "44b95083e96f7b09ab4e900ed4e1c25042896c2a",
+    "b77fd087b06c5ae76a5a1a25f2cfe3ed6891c339",
+    "b95943a3187f8a3c6f48fbcaf2cbd5f6a4e93bad"
+  ]
+}
