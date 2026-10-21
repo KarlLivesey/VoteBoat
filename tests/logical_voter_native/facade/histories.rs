@@ -13,13 +13,12 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
-use voteboat::identity::OperationId;
 pub fn close_inflight(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant) {
     let ticket = node
         .propose(ClientRequest {
             group: setup::mapping().parent,
-            operation: OperationId::new(8801).unwrap(),
-            bytes: 3_i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 12).unwrap(),
+            bytes: Counter::command(0, 3),
         })
         .unwrap();
     for _ in 0..16 {
@@ -32,12 +31,12 @@ pub fn close_inflight(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Ins
     let rejected = node
         .propose(ClientRequest {
             group: setup::mapping().parent,
-            operation: OperationId::new(8802).unwrap(),
-            bytes: 9_i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 11).unwrap(),
+            bytes: Counter::command(0, 9),
         })
         .unwrap_err();
     assert_eq!(rejected.reason, ClientError::Closed);
-    assert_eq!(rejected.request.bytes, 9_i64.to_le_bytes());
+    assert_eq!(rejected.request.bytes, Counter::command(0, 9));
     let end = Instant::now() + Duration::from_secs(15);
     loop {
         step(bridge, node, clock, 4);
@@ -62,12 +61,12 @@ pub fn close_inflight(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Ins
     }
 }
 pub fn requests(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant) {
-    let operation = OperationId::new(8800).unwrap();
+    let operation = Counter::operation(1, 10).unwrap();
     let ticket = node
         .propose(ClientRequest {
             group: setup::mapping().parent,
             operation,
-            bytes: 7_i64.to_le_bytes().to_vec(),
+            bytes: Counter::command(0, 7),
         })
         .unwrap();
     for _ in 0..32 {

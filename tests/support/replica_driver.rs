@@ -160,8 +160,8 @@ impl Fixture {
                 &self.apps[&group(g)],
                 ClientRequest {
                     group: group(g),
-                    operation: OperationId::new(g).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, g as u64).unwrap(),
+                    bytes: Counter::command(0, 7),
                 },
             )
             .unwrap()

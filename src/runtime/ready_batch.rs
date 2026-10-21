@@ -155,6 +155,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         }
         let limits = self.limits;
         let ordinary = self.control_profile.is_none();
+        let room = self.wal.room();
         let group = self.live(ticket)?;
         if group.core.has_pending_dependency() {
             return Err(RuntimeError::DependencyPending);
@@ -165,10 +166,41 @@ impl<Q: ReadyScheduler> Shard<Q> {
         else {
             return self.step_next_checked(ticket, now, |core, event| check(core, event, &[]));
         };
+        // I5: the batch's WAL bound must fit under the high-water mark; a
+        // first proposal that does not is refused on its own (and counted)
+        // by the single-step path, later ones wait for the next visit. The
+        // selected prefix's bound is kept running (R4-3): each selected
+        // proposal is added once, not once per later candidate.
+        let mut counted = 0;
+        let mut selected_bound = 0usize;
+        let mut check = |core: &Raft, event: &Event, selected: &[ReadyProposal]| {
+            check(core, event, selected)?;
+            let Some(room) = room else {
+                return Ok(());
+            };
+            let Event::Propose { bytes, .. } = event else {
+                return Ok(());
+            };
+            for p in selected.get(counted..).unwrap_or_default() {
+                selected_bound = selected_bound
+                    .saturating_add(crate::log::entry_wal_bound(p.command.bytes.len()));
+            }
+            counted = selected.len();
+            let bound =
+                super::wal_account::proposal_bound(bytes.len()).saturating_add(selected_bound);
+            if bound > room {
+                Err(RaftError::StoragePressure)
+            } else {
+                Ok(())
+            }
+        };
         if let Err(error) = check(&group.core, &group.queues[1].front().unwrap().event, &[]) {
             return self.step_next_checked(ticket, now, |_, _| Err(error.clone()));
         }
+        let before = group.core.pending_wal_bytes();
         let stepped = collect(group, window, &mut check);
+        let after = group.core.pending_wal_bytes();
+        self.wal.track(before, after);
         if stepped.result.is_ok() && !self.connections_steady() {
             self.retain_connection_history(ticket.group)?;
         }

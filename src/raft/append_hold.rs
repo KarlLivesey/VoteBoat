@@ -123,8 +123,10 @@ impl Raft {
         self.held.insert(peer, self.durable.last_index());
     }
     /// A held peer that owes entries up to its mark is released by any later
-    /// durable leader batch, so a held Append carries at most two batches. A
-    /// held commit notice (the peer had every entry) is decided afresh.
+    /// durable leader batch, within the Append entry/byte limits. A byte-limited
+    /// release can rehold the spare mid-batch after its partial acknowledgement;
+    /// its next release still uses the exact remaining range. A held commit
+    /// notice (the peer had every entry) is decided afresh.
     fn hold_due(&self, peer: NodeId, last: u64) -> bool {
         self.held.get(&peer).is_some_and(|mark| {
             *mark < last && self.next_index.get(&peer).is_some_and(|next| next <= mark)

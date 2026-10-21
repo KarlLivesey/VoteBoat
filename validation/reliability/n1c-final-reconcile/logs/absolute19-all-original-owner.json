@@ -1,0 +1,27 @@
+{
+  "name": "absolute19-all-original-owner",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "-j",
+    "2",
+    "--all-features",
+    "--test",
+    "effect_owner",
+    "--",
+    "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+    "native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport",
+    "native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport",
+    "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+    "native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups",
+    "persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable",
+    "persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge",
+    "--test-threads=2"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+  "exit": 0,
+  "seconds": 30.90864610671997
+}

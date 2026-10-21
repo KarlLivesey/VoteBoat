@@ -101,8 +101,8 @@ fn ballot(request: Message, final_retained: bool) -> Message {
         ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
         1,
     );
-    command(&mut log, 900, 7);
-    command(&mut log, 901, 3);
+    command(&mut log, 9, 7);
+    command(&mut log, 10, 3);
     advance(&mut log, Stage::FinalAccepted);
     let mut peer = Raft::recover_member(
         request.to,

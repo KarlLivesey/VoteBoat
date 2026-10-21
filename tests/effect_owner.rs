@@ -53,8 +53,8 @@ mod application_results {
     }
     fn propose(id: u128, value: i64) -> Event {
         Event::Propose {
-            operation: OperationId::new(id).unwrap(),
-            bytes: value.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, value),
         }
     }
     fn start(owner: &mut Owner, worker: &mut HostWorker, g: u128, app: &mut Counter) {
@@ -106,7 +106,7 @@ mod application_results {
         );
         assert!(!r.is_drained());
         let receipts = r.complete(output).unwrap();
-        assert_eq!(receipts[0].operation, OperationId::new(5).unwrap());
+        assert_eq!(receipts[0].operation, Counter::operation(1, 5).unwrap());
         assert_eq!(r.usage(), ApplicationResultUsage::default());
         assert!(r.is_drained());
     }
@@ -370,8 +370,8 @@ mod client_admission {
         let mut store = HostLogStore::new(1);
         let mut runtime = timed(1, &mut store, 1, 1);
         let event = || Event::Propose {
-            operation: OperationId::new(1).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 1).unwrap(),
+            bytes: Counter::command(0, 7),
         };
         let first = runtime.admit_tracked(group(1), event()).unwrap();
         runtime.admit(group(1), Event::Heartbeat).unwrap();
@@ -443,8 +443,8 @@ mod client_admission {
     fn request(g: u128, id: u128, delta: i64) -> ClientRequest {
         ClientRequest {
             group: group(g),
-            operation: OperationId::new(id).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, delta),
         }
     }
     fn drive<A: ProposalAdmission>(
@@ -508,7 +508,7 @@ mod client_admission {
             .unwrap_err();
         assert_eq!(
             rejected.reason,
-            ClientError::Application(ApplicationError::DedupCapacity)
+            ClientError::Application(ApplicationError::SessionWindow)
         );
         assert_eq!(apps[&group(1)].applied_index(), 1);
         drive(
@@ -546,7 +546,12 @@ mod client_admission {
     }
     #[test]
     fn cancelled_queued_wait_retains_capacity_until_execution_then_retry_returns_original() {
-        let (mut owner, mut worker, mut clients, mut results, mut apps) = setup(1, 1);
+        // Window 4, so only the queued command's reservation can refuse.
+        let (mut owner, mut worker, mut clients, mut results, apps) = setup(1, 4);
+        let mut apps: BTreeMap<_, _> = apps
+            .into_iter()
+            .map(|(g, inner)| (g, Reserving { inner, slots: 1 }))
+            .collect();
         let ticket = clients
             .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
             .unwrap();
@@ -581,7 +586,13 @@ mod client_admission {
             "cancel cannot produce a second completion"
         );
         assert!(clients.is_drained());
-        assert_eq!(apps[&group(1)].read_applied(2), Ok(7));
+        assert_eq!(apps[&group(1)].inner.read_applied(2), Ok(7));
+        // Executed, the command no longer holds the reservation: the refusal
+        // depended on it being queued.
+        let novel = request(1, 2, 8);
+        assert!(apps[&group(1)]
+            .validate_proposal(novel.operation, &novel.bytes, std::iter::empty())
+            .is_ok());
         clients
             .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
             .unwrap();
@@ -642,8 +653,8 @@ mod client_admission {
             .admit(
                 group(1),
                 Event::Propose {
-                    operation: OperationId::new(1).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, 1).unwrap(),
+                    bytes: Counter::command(0, 7),
                 },
             )
             .unwrap();
@@ -674,7 +685,7 @@ mod client_admission {
                 .submit(&mut owner, &apps[&group(1)], request(1, 2, 5))
                 .unwrap_err()
                 .reason,
-            ClientError::Application(ApplicationError::DedupCapacity)
+            ClientError::Application(ApplicationError::SessionWindow)
         );
         clients
             .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
@@ -854,6 +865,103 @@ mod client_admission {
         assert!(clients.is_drained());
         assert!(results.is_drained());
     }
+    /// A pending-aware host layer: admission reserves one slot per distinct
+    /// operation ID among the queued commands and the candidate, at most
+    /// `slots`. Counter's own admission reads only applied state, so a refusal
+    /// from this layer proves the router passed the queued commands to
+    /// admission, on both the singleton and the ready-batch paths.
+    struct Reserving<A> {
+        inner: A,
+        slots: usize,
+    }
+    impl<A> Reserving<A> {
+        fn reserve(
+            &self,
+            reserved: &mut std::collections::BTreeSet<OperationId>,
+            operation: OperationId,
+        ) -> Result<(), ApplicationError> {
+            reserved.insert(operation);
+            if reserved.len() > self.slots {
+                return Err(ApplicationError::DedupCapacity);
+            }
+            Ok(())
+        }
+    }
+    impl<A: StateMachine> StateMachine for Reserving<A> {
+        type Receipt = A::Receipt;
+        fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
+            self.inner.validate_group(group)
+        }
+        fn applied_index(&self) -> u64 {
+            self.inner.applied_index()
+        }
+        fn apply_batch(
+            &mut self,
+            entries: &[LogEntry],
+        ) -> Result<Vec<A::Receipt>, ApplicationError> {
+            self.inner.apply_batch(entries)
+        }
+    }
+    impl<A: BoundedStateMachine> BoundedStateMachine for Reserving<A>
+    where
+        A::Receipt: ApplicationReceipt,
+    {
+        fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
+            self.inner.receipt_bytes_bound(entries)
+        }
+    }
+    impl<A: ReadableStateMachine> ReadableStateMachine for Reserving<A> {
+        type Query = A::Query;
+        type ReadResult = A::ReadResult;
+        fn read_at(
+            &self,
+            required_index: u64,
+            query: A::Query,
+        ) -> Result<A::ReadResult, ApplicationError> {
+            self.inner.read_at(required_index, query)
+        }
+    }
+    impl<A: ProposalAdmission> ProposalAdmission for Reserving<A>
+    where
+        A::Receipt: ApplicationReceipt,
+    {
+        fn supports_ready_batch(&self) -> bool {
+            self.inner.supports_ready_batch()
+        }
+        fn prepare_ready_admission<'pending>(
+            &self,
+            pending: impl Iterator<Item = (OperationId, &'pending [u8])>,
+        ) -> Option<ReadyAdmission<'_>> {
+            let pending: Vec<_> = pending.collect();
+            let mut reserved: std::collections::BTreeSet<_> =
+                pending.iter().map(|(id, _)| *id).collect();
+            let mut inner = self.inner.prepare_ready_admission(pending.into_iter())?;
+            Some(Box::new(move |operation, bytes| {
+                self.reserve(&mut reserved, operation)?;
+                inner(operation, bytes)
+            }))
+        }
+        fn validate_proposal_context(
+            &self,
+            core: &Raft,
+            operation: OperationId,
+            bytes: &[u8],
+        ) -> Result<(), ApplicationError> {
+            self.inner.validate_proposal_context(core, operation, bytes)
+        }
+        fn validate_proposal<'a>(
+            &self,
+            operation: OperationId,
+            bytes: &[u8],
+            pending: impl Iterator<Item = (OperationId, &'a [u8])>,
+        ) -> Result<usize, ApplicationError> {
+            let pending: Vec<_> = pending.collect();
+            let mut reserved = pending.iter().map(|(id, _)| *id).collect();
+            self.reserve(&mut reserved, operation)?;
+            self.inner
+                .validate_proposal(operation, bytes, pending.into_iter())
+        }
+    }
     struct HostApplication(Counter, usize, Option<u64>);
     impl StateMachine for HostApplication {
         type Receipt = CounterReceipt;
@@ -894,7 +1002,7 @@ mod client_admission {
             pending: impl Iterator<Item = (OperationId, &'a [u8])>,
         ) -> Result<usize, ApplicationError> {
             // A host's deterministic command syntax can be stricter than Counter.
-            if bytes != 7i64.to_le_bytes() {
+            if bytes.get(8..) != Some(&7i64.to_le_bytes()[..]) {
                 return Err(ApplicationError::InvalidCommand);
             }
             self.0
@@ -1558,8 +1666,8 @@ fn application_boundary_and_one_use_read_are_checked_before_release() {
         .admit(
             group(1),
             Event::Propose {
-                operation: OperationId::new(1).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, 1).unwrap(),
+                bytes: Counter::command(0, 7),
             },
         )
         .unwrap();
@@ -1710,8 +1818,8 @@ fn bulk_leases_leave_a_reserved_visit_for_control() {
             .admit(
                 group(g),
                 Event::Propose {
-                    operation: OperationId::new(1).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, 1).unwrap(),
+                    bytes: Counter::command(0, 7),
                 },
             )
             .unwrap();
@@ -2347,8 +2455,8 @@ mod native {
                     &n.apps[&group(g)],
                     ClientRequest {
                         group: group(g),
-                        operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, operation as u64).unwrap(),
+                        bytes: Counter::command(0, delta),
                     },
                 )
                 .unwrap();
@@ -2527,8 +2635,8 @@ mod native {
                     &n.apps[&group],
                     ClientRequest {
                         group,
-                        operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, operation as u64).unwrap(),
+                        bytes: Counter::command(0, delta),
                     },
                 )
                 .unwrap();
@@ -2565,8 +2673,8 @@ mod native {
                     &n.apps[&group],
                     ClientRequest {
                         group,
-                        operation: OperationId::new(99).unwrap(),
-                        bytes: 100i64.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, 99).unwrap(),
+                        bytes: Counter::command(0, 100),
                     },
                 )
                 .unwrap();
@@ -2727,8 +2835,8 @@ mod native {
                                 index: 1,
                                 term: 1,
                                 payload: EntryPayload::Command {
-                                    operation: OperationId::new(1).unwrap(),
-                                    bytes: 7i64.to_le_bytes().to_vec().into(),
+                                    operation: Counter::operation(1, 1).unwrap(),
+                                    bytes: Counter::command(0, 7).into(),
                                 },
                             }]
                             .into(),
@@ -3079,6 +3187,7 @@ mod snapshot_routes {
     use super::*;
     use voteboat::{contracts::StorageError, snapshot::*, snapshot_worker::*};
     mod envelopes;
+    mod eo1_repro;
     mod recovery_budget;
     mod reservation;
     pub(super) struct Worker {
@@ -3088,7 +3197,7 @@ mod snapshot_routes {
         reject: bool,
         bad_ticket: bool,
         closed: bool,
-        allowance: usize,
+        pub(super) allowance: usize,
         images: BTreeMap<GroupIdentity, Snapshot>,
         pub(super) hold: std::rc::Rc<std::cell::Cell<Option<GroupIdentity>>>,
         pub(super) checkpoint_supported: bool,
@@ -3240,8 +3349,8 @@ mod snapshot_routes {
             index: 1,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(1).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, 1).unwrap(),
+                bytes: Counter::command(0, 7).into(),
             },
         }])
         .unwrap();
@@ -3746,8 +3855,8 @@ mod ingress {
                     index: 1,
                     term: 1,
                     payload: EntryPayload::Command {
-                        operation: OperationId::new(g).unwrap(),
-                        bytes: 1i64.to_le_bytes().to_vec().into(),
+                        operation: Counter::operation(1, g as u64).unwrap(),
+                        bytes: Counter::command(0, 1).into(),
                     },
                 }]
                 .into(),

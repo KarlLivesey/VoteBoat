@@ -10,7 +10,7 @@ fn initial() -> Vec<Action> {
     vec![
         Action::Campaign(1),
         Action::Pump,
-        Action::TryCounter(1, 9911, 9),
+        Action::TryCounter(1, 1, 9),
         Action::Pump,
     ]
 }
@@ -53,7 +53,7 @@ fn every_snapshot_phase_survives_process_and_power_loss_with_original_retry() {
                 op(1, Operation::Stale),
                 Action::Campaign(1),
                 Action::Pump,
-                Action::TryCounter(1, 9911, 9),
+                Action::TryCounter(1, 1, 9),
                 Action::Pump,
                 Action::Read(1, 100),
                 Action::Pump,
@@ -123,7 +123,7 @@ fn a_replaced_snapshot_retains_the_old_log_anchor_through_every_new_phase_cut() 
         for prefix in 1..=5 {
             let mut actions = initial();
             actions.extend(phases(1));
-            actions.extend([Action::TryCounter(1, 9912, 4), Action::Pump]);
+            actions.extend([Action::TryCounter(1, 2, 4), Action::Pump]);
             let replacement = [
                 op(1, Operation::Begin),
                 op(1, Operation::Write),
@@ -153,7 +153,7 @@ fn lagging_actual_follower_installs_pinned_snapshot_and_recovers_original_operat
     let mut actions = initial();
     actions.extend([
         Action::Isolate(3),
-        Action::TryCounter(1, 9912, 4),
+        Action::TryCounter(1, 2, 4),
         Action::Pump,
         op(1, Operation::Begin),
         op(1, Operation::Write),
@@ -169,7 +169,7 @@ fn lagging_actual_follower_installs_pinned_snapshot_and_recovers_original_operat
         Action::PowerLoss(3),
         Action::Campaign(1),
         Action::Pump,
-        Action::TryCounter(1, 9911, 9),
+        Action::TryCounter(1, 1, 9),
         Action::Pump,
     ]);
     let mut run = execute(&Trace { seed: 297, actions });
@@ -193,7 +193,7 @@ fn false_snapshot_seal_sync_is_replayed_reduced_and_rejected_before_voting() {
     let trace = Trace { seed: 298, actions };
     let target = LostPrefix {
         node: 1,
-        operation: Some(OperationId::new(9911).unwrap()),
+        operation: Some(Counter::operation(1, 1).unwrap()),
         stage: FailureStage::SnapshotRecoveryLost,
     };
     assert_eq!(replay(&trace), Err(target.clone()));
@@ -232,7 +232,7 @@ fn seeded_snapshot_network_and_restart_histories_replay_exactly_without_vacuous_
                 Action::DuplicateOldest,
                 Action::DeliverNewest,
                 Action::Pump,
-                Action::TryCounter(1, 10000 + u128::from(round), 1),
+                Action::TryCounter(1, 3 + u128::from(round), 1),
                 Action::Pump,
                 op(id, Operation::Begin),
             ]);
@@ -284,7 +284,7 @@ fn aborted_replacement_stage_preserves_actual_published_log_anchor() {
     let mut actions = initial();
     actions.extend(phases(1));
     actions.extend([
-        Action::TryCounter(1, 9912, 4),
+        Action::TryCounter(1, 2, 4),
         Action::Pump,
         op(1, Operation::Begin),
         op(1, Operation::Write),
@@ -315,7 +315,7 @@ fn compacted_snapshot_composes_with_delayed_wal_completion_and_uncertain_origina
             actions.extend(phases(1));
             actions.extend([
                 Action::Delay(1),
-                Action::TryCounter(1, 9912, 4),
+                Action::TryCounter(1, 2, 4),
                 op(1, Operation::Begin),
             ]);
             if synced {
@@ -329,7 +329,7 @@ fn compacted_snapshot_composes_with_delayed_wal_completion_and_uncertain_origina
             for _ in 0..4 {
                 actions.extend([Action::Sync(1), Action::Complete(1), Action::Pump]);
             }
-            actions.push(Action::TryCounter(1, 9912, 4));
+            actions.push(Action::TryCounter(1, 2, 4));
             for _ in 0..4 {
                 actions.extend([Action::Sync(1), Action::Complete(1), Action::Pump]);
             }

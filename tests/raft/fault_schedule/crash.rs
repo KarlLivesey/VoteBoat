@@ -38,7 +38,7 @@ pub(super) fn assert_original_counter(run: &Replay, id: u64) {
     assert_eq!(application.read_applied(application.applied_index()), Ok(9));
     assert_eq!(receipts.iter().filter(|r| !r.duplicate).count(), 1);
     assert!(receipts.iter().all(|r| {
-        r.operation == OperationId::new(9911).unwrap() && r.outcome == CounterOutcome::Value(9)
+        r.operation == Counter::operation(1, 1).unwrap() && r.outcome == CounterOutcome::Value(9)
     }));
 }
 
@@ -102,7 +102,7 @@ fn uncertain_counter_write_recovers_and_original_id_applies_once() {
         run.action(&Action::Campaign(1)).unwrap();
         run.action(&Action::Pump).unwrap();
         run.action(&Action::Delay(1)).unwrap();
-        run.action(&Action::TryCounter(1, 9911, 9)).unwrap();
+        run.action(&Action::TryCounter(1, 1, 9)).unwrap();
         run.action(&Action::FailSync(1)).unwrap();
         assert_eq!(counter(&run, 1).0.read_applied(0), Ok(0));
         assert_eq!(run.point().queued, 0);
@@ -115,7 +115,7 @@ fn uncertain_counter_write_recovers_and_original_id_applies_once() {
         run.action(&Action::Heartbeat(1)).unwrap();
         run.action(&Action::Pump).unwrap();
         assert!(run.point().held.is_empty());
-        run.action(&Action::TryCounter(1, 9911, 9)).unwrap();
+        run.action(&Action::TryCounter(1, 1, 9)).unwrap();
         finish_local(&mut run, 1);
         assert_original_counter(&run, 1);
         assert_eq!(counter(&run, 1).1.len(), if power_loss { 1 } else { 2 });
@@ -134,7 +134,7 @@ fn uncertain_counter_write_recovers_and_original_id_applies_once() {
         run.action(&Action::Heartbeat(1)).unwrap();
         run.action(&Action::Pump).unwrap();
         assert!(run.point().held.is_empty());
-        run.action(&Action::TryCounter(1, 9911, 9)).unwrap();
+        run.action(&Action::TryCounter(1, 1, 9)).unwrap();
         finish_local(&mut run, 1);
         run.action(&Action::Heartbeat(1)).unwrap();
         run.action(&Action::Pump).unwrap();
@@ -161,7 +161,7 @@ fn composed_process_crashes_and_failed_syncs_replay_exactly() {
         for _ in 0..3 {
             actions.extend([Action::Sync(1), Action::Complete(1), Action::Pump]);
         }
-        actions.push(Action::TryCounter(1, 9911, 9));
+        actions.push(Action::TryCounter(1, 1, 9));
         if round == 0 {
             actions.extend([Action::FailSync(1), Action::ProcessCrash(1)]);
         } else {

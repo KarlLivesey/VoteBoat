@@ -458,3 +458,33 @@ fn host_provider_padded_images_have_stable_reservations_and_bad_boundary_never_f
     assert!(bad.routed().scoped_fences().is_empty());
     assert!(bad.export(op(200), 65536).is_err());
 }
+
+#[test]
+fn scoped_source_configuration_is_compared_exactly_at_readiness() {
+    // Round 5: the export bound is the scoped source's own configuration and
+    // the scoped-fence limit is its inner Routed layer's; either difference
+    // is refused at readiness in both directions.
+    let base = selected(65536);
+    let declared = base.deployment_requirements().unwrap();
+    assert_eq!(
+        declared.identity.family,
+        voteboat::raft::ApplicationFamily::SCOPED_TRANSFER_SOURCE
+    );
+    assert_eq!(base.validate_deployment_requirements(declared), Ok(()));
+    let fences = ScopedTransferSource::new(
+        routed()
+            .with_scoped_fencing(3)
+            .unwrap_or_else(|e| panic!("{:?}", e.0)),
+        65536,
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    for other in [selected(65535), fences] {
+        assert_eq!(other.schema_version(), base.schema_version());
+        for (replica, leader) in [(&base, &other), (&other, &base)] {
+            assert_eq!(
+                replica.validate_deployment_requirements(leader.deployment_requirements().unwrap()),
+                Err(ApplicationError::UnsupportedSchema)
+            );
+        }
+    }
+}

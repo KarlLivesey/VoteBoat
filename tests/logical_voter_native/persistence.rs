@@ -132,8 +132,8 @@ fn command(index: u64, delta: i64) -> LogEntry {
         index,
         term: 7,
         payload: EntryPayload::Command {
-            operation: OperationId::new(8000 + u128::from(index)).unwrap(),
-            bytes: delta.to_le_bytes().to_vec().into(),
+            operation: voteboat::application::Counter::operation(1, index).unwrap(),
+            bytes: voteboat::application::Counter::command(0, delta).into(),
         },
     }
 }

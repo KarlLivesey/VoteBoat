@@ -105,8 +105,8 @@ fn incoming() -> Snapshot {
         index: 2,
         term: 2,
         payload: EntryPayload::Command {
-            operation: OperationId::new(91).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec().into(),
+            operation: Counter::operation(1, 91).unwrap(),
+            bytes: Counter::command(0, 7).into(),
         },
     };
     let entries = vec![assignment, command];
@@ -120,7 +120,7 @@ fn incoming() -> Snapshot {
             bootstrap,
             index: 2,
             term: 2,
-            application_schema: 1,
+            application_schema: Counter::new(100).unwrap().schema_version(),
         },
         application: app.checkpoint(4096).unwrap(),
     }
@@ -150,8 +150,8 @@ fn conformance<L: LogStore>(log: &mut L) {
             index: 3,
             term: 2,
             payload: EntryPayload::Command {
-                operation: OperationId::new(91).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, 91).unwrap(),
+                bytes: Counter::command(0, 7).into(),
             },
         }])
         .unwrap();
@@ -238,7 +238,9 @@ fn invalid_identity_schema_data_and_budget_do_not_mutate_storage() {
         match variant {
             0 => local = node(1),
             1 => snapshots.identity.store = identity(5),
-            2 => image.metadata.application_schema = 2,
+            2 => {
+                image.metadata.application_schema = Counter::new(100).unwrap().schema_version() + 1
+            }
             3 => image.application.clear(),
             4 => snapshots.limits.max_application_bytes = 32,
             _ => unreachable!(),

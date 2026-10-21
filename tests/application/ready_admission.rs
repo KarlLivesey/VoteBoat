@@ -1,187 +1,152 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-//! Differential controls against the unchanged per-command Counter validator.
+// Unless explicitly acquired and licensed from Licensor under another license,
+// the contents of this file are subject to the Reciprocal Public License
+// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
+// not copy or use this file in either source code or executable form, except
+// in compliance with the terms and conditions of the RPL.
+//
+// All software distributed under the RPL is provided strictly on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
+// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+// rights and limitations under the RPL.
+//! Ready-batch admission equals the full validator and never reads pending.
 use super::*;
 use std::cell::Cell;
 
-fn operation(id: u128) -> OperationId {
-    OperationId::new(id).unwrap()
-}
-
-fn differential(
-    counter: &Counter,
-    pending: &[(u128, Vec<u8>)],
-    candidates: &[(u128, Vec<u8>)],
-) -> Vec<Result<usize, ApplicationError>> {
-    let before = counter.checkpoint(4096).unwrap();
-    let pending_items = || {
-        pending
-            .iter()
-            .map(|(id, bytes)| (operation(*id), bytes.as_slice()))
-    };
-    let mut prepared = counter.prepare_ready_admission(pending_items()).unwrap();
-    let mut successful = Vec::new();
-    let mut results = Vec::new();
-    for (id, bytes) in candidates {
-        let original = counter.validate_proposal(
-            operation(*id),
-            bytes,
-            pending_items().chain(
-                successful
-                    .iter()
-                    .map(|(id, bytes): &(u128, &[u8])| (operation(*id), *bytes)),
-            ),
-        );
-        let result = prepared(operation(*id), bytes);
-        assert_eq!(result, original);
-        results.push(result);
-        if result.is_err() {
-            break;
-        }
-        successful.push((*id, bytes.as_slice()));
-    }
-    drop(prepared);
-    assert_eq!(counter.checkpoint(4096).unwrap(), before);
-    results
-}
-
-#[test]
-fn exact_ready_reservations_match_growing_prefix_oracle_across_small_states() {
-    let choices = [
-        (1, 1i64.to_le_bytes().to_vec()),
-        (1, 2i64.to_le_bytes().to_vec()),
-        (2, (-1i64).to_le_bytes().to_vec()),
-        (4, i64::MAX.to_le_bytes().to_vec()),
-        (3, vec![0; 7]),
-    ];
-    let mut comparisons = 0;
-    for capacity in 1..=4 {
-        for applied in 0..=capacity {
-            let mut counter = Counter::new(capacity).unwrap();
-            let entries: Vec<_> = (1..=applied)
-                .map(|id| command(id as u64, id as u128, id as i64))
-                .collect();
-            counter.apply_batch(&entries).unwrap();
-            for pending_len in 0..=3 {
-                for mut pending_code in 0..4usize.pow(pending_len) {
-                    let pending: Vec<_> = (0..pending_len)
-                        .map(|_| {
-                            let id = (pending_code % 4 + 1) as u128;
-                            pending_code /= 4;
-                            // Pending syntax is not validated by this seam.
-                            (id, vec![id as u8; 3])
-                        })
-                        .collect();
-                    for mut candidate_code in 0..choices.len().pow(3) {
-                        let candidates: Vec<_> = (0..3)
-                            .map(|_| {
-                                let candidate = choices[candidate_code % choices.len()].clone();
-                                candidate_code /= choices.len();
-                                candidate
-                            })
-                            .collect();
-                        differential(&counter, &pending, &candidates);
-                        comparisons += 1;
-                    }
-                }
+/// Candidate bytes: valid acknowledgements in both directions, malformed
+/// lengths and an acknowledgement that is not below the sequence.
+fn candidates() -> Vec<(OperationId, Vec<u8>)> {
+    let mut all = Vec::new();
+    for session in 1..=3 {
+        for sequence in 1..=6 {
+            for ack in [0, 1, sequence - 1, sequence] {
+                all.push((op(session, sequence), Counter::command(ack, 1)));
             }
+            all.push((op(session, sequence), vec![0; 15]));
         }
     }
-    assert_eq!(comparisons, 148_750);
+    for nonce in [1, 2] {
+        all.push((OperationId::new(nonce).unwrap(), Vec::new()));
+        all.push((OperationId::new(nonce).unwrap(), vec![0; 16]));
+    }
+    all
+}
+
+/// Small states: registrations, executed sequences and acknowledgements.
+fn states() -> Vec<Counter> {
+    let mut states = Vec::new();
+    for window in 1..=3 {
+        let limits = SessionLimits::new(2, window, 1).unwrap();
+        for history in 0..6u64 {
+            let mut counter = Counter::with_limits(limits).unwrap();
+            let mut entries = vec![register(1, 1)];
+            for sequence in 1..=history {
+                entries.push(add(
+                    sequence + 1,
+                    1 + sequence % 2,
+                    sequence,
+                    sequence / 3,
+                    2,
+                ));
+            }
+            counter.apply_batch(&entries).unwrap();
+            states.push(counter);
+        }
+    }
+    states
 }
 
 #[test]
-fn pending_overflow_is_deferred_behind_candidate_syntax_and_stops_consumption() {
-    let counter = Counter::new(1).unwrap();
-    let observed = Cell::new(0);
-    let pending = [1, 1, 2, 3].into_iter().map(|id| {
-        observed.set(observed.get() + 1);
-        (operation(id), &[][..])
-    });
-    let mut prepared = counter.prepare_ready_admission(pending).unwrap();
-    assert_eq!(observed.get(), 3);
-    assert_eq!(
-        prepared(operation(1), &[0; 7]),
-        Err(ApplicationError::InvalidCommand)
-    );
-    assert_eq!(observed.get(), 3);
-    drop(prepared);
-    let overflow = [(1, vec![]), (1, vec![7]), (2, vec![]), (3, vec![])];
-    assert_eq!(
-        differential(&counter, &overflow, &[(1, vec![0; 8])]),
-        vec![Err(ApplicationError::DedupCapacity)]
-    );
-    assert_eq!(
-        differential(&counter, &overflow, &[(1, vec![0; 9])]),
-        vec![Err(ApplicationError::InvalidCommand)]
-    );
+fn prepared_admission_equals_the_validator_for_every_small_state() {
+    let mut comparisons = 0;
+    for counter in states() {
+        let before = counter.checkpoint(1 << 16).unwrap();
+        let mut prepared = counter.prepare_ready_admission(std::iter::empty()).unwrap();
+        for (operation, bytes) in candidates() {
+            let expected = counter.validate_proposal(operation, &bytes, std::iter::empty());
+            assert_eq!(prepared(operation, &bytes), expected);
+            assert_eq!(
+                counter.validate_proposal_bounded(operation, &bytes, usize::MAX),
+                Some(expected)
+            );
+            comparisons += 1;
+        }
+        drop(prepared);
+        assert_eq!(counter.checkpoint(1 << 16).unwrap(), before);
+    }
+    assert_eq!(comparisons, 18 * 94);
 }
 
 #[test]
-fn context_owns_pending_ids_without_borrowing_temporary_payloads() {
+fn admission_never_reads_pending_commands() {
     let counter = Counter::new(2).unwrap();
-    let mut prepared = {
-        let temporary = [(operation(1), vec![3; 128])];
-        counter
-            .prepare_ready_admission(temporary.iter().map(|(id, bytes)| (*id, bytes.as_slice())))
-            .unwrap()
+    let observed = Cell::new(0);
+    let pending = || {
+        (1..=1000).map(|sequence| {
+            observed.set(observed.get() + 1);
+            (op(1, sequence), &[][..])
+        })
     };
+    let mut prepared = counter.prepare_ready_admission(pending()).unwrap();
     let bound = std::mem::size_of::<CounterReceipt>();
-    assert_eq!(prepared(operation(1), &[0; 8]), Ok(bound));
-    assert_eq!(prepared(operation(2), &[0; 8]), Ok(bound));
+    // Every candidate is decided by the window over applied state alone.
+    assert_eq!(prepared(op(1, 1), &Counter::command(0, 1)), Ok(bound));
+    assert_eq!(prepared(op(1, 2), &Counter::command(0, 1)), Ok(bound));
     assert_eq!(
-        prepared(operation(3), &[0; 8]),
-        Err(ApplicationError::DedupCapacity)
+        prepared(op(1, 3), &Counter::command(0, 1)),
+        Err(ApplicationError::SessionWindow)
     );
+    assert_eq!(prepared(op(1, 3), &Counter::command(1, 1)), Ok(bound));
+    drop(prepared);
+    assert_eq!(
+        counter.validate_proposal(op(1, 3), &Counter::command(0, 1), pending()),
+        Err(ApplicationError::SessionWindow)
+    );
+    assert_eq!(
+        counter.validate_proposal_bounded(op(1, 2), &Counter::command(0, 1), 1_000_000),
+        Some(Ok(bound))
+    );
+    assert_eq!(observed.get(), 0);
 }
 
 #[test]
-fn applied_conflicts_and_overflow_stay_original_application_outcomes() {
+fn applied_conflicts_overflow_and_expired_ids_admit_for_terminal_truth() {
     let mut counter = Counter::new(2).unwrap();
     counter
         .apply_batch(&[command(1, 1, i64::MAX), command(2, 2, 1)])
         .unwrap();
     let bound = std::mem::size_of::<CounterReceipt>();
-    assert_eq!(
-        differential(
-            &counter,
-            &[(1, vec![0; 8]), (2, vec![1; 8])],
-            &[
-                (1, 0i64.to_le_bytes().to_vec()),
-                (2, 1i64.to_le_bytes().to_vec()),
-            ],
-        ),
-        vec![Ok(bound), Ok(bound)]
-    );
+    // Retained duplicates and conflicts admit; apply returns the original.
+    for (sequence, delta) in [(1, 0), (2, 1)] {
+        assert_eq!(
+            counter.validate_proposal(
+                op(1, sequence),
+                &Counter::command(0, delta),
+                std::iter::empty()
+            ),
+            Ok(bound)
+        );
+    }
     let receipts = counter
         .apply_batch(&[command(3, 1, 0), command(4, 2, 1)])
         .unwrap();
     assert_eq!(receipts[0].outcome, CounterOutcome::OperationConflict);
     assert_eq!(receipts[1].outcome, CounterOutcome::Overflow);
     assert!(receipts.iter().all(|receipt| receipt.duplicate));
-    assert_eq!(counter.remaining_operations(), 0);
-}
-
-#[test]
-fn dropping_and_repreparing_after_replay_and_restore_has_no_reservation_history() {
-    let mut counter = Counter::new(3).unwrap();
-    differential(
-        &counter,
-        &[(1, vec![0; 8])],
-        &[(2, vec![0; 8]), (2, vec![1; 8])],
-    );
-    assert_eq!(counter.remaining_operations(), 3);
-    counter.apply_batch(&[command(1, 1, 4)]).unwrap();
-    let image = counter.checkpoint(4096).unwrap();
-    let mut restored = Counter::new(3).unwrap();
-    restored.restore_checkpoint(1, 1, &image).unwrap();
-    let pending = [(1, vec![9; 8]), (2, vec![0; 8])];
-    let candidates = [(1, vec![7; 8]), (3, vec![1; 8]), (4, vec![0; 8])];
+    // Acknowledge both, then a late copy of sequence 1 admits and reads Expired.
+    counter.apply_batch(&[add(5, 1, 3, 2, 0)]).unwrap();
     assert_eq!(
-        differential(&counter, &pending, &candidates),
-        differential(&restored, &pending, &candidates)
+        counter.validate_proposal(op(1, 1), &Counter::command(0, i64::MAX), std::iter::empty()),
+        Ok(bound)
     );
-    restored.apply_batch(&[command(2, 2, 5)]).unwrap();
-    assert_eq!(restored.remaining_operations(), 1);
-    differential(&restored, &[], &[(3, vec![0; 8]), (4, vec![0; 8])]);
+    let late = counter.apply_batch(&[command(6, 1, i64::MAX)]).unwrap();
+    assert_eq!(
+        late[0].outcome,
+        CounterOutcome::Refused(SessionRefusal::Expired)
+    );
+    assert_eq!(counter.read_applied(6), Ok(i64::MAX));
+    assert_eq!(counter.retained_receipts(), 1);
 }

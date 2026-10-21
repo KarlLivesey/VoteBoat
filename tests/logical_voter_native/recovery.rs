@@ -51,9 +51,13 @@ pub fn refusal_is_atomic(image: &VerifiedLogicalImage, restored: &super::applica
     ));
     assert_eq!(applied.checkpoint(4096).unwrap(), before);
     for (schema, fail_restore, expected) in [
-        (2, false, CheckpointError::InvalidBoundary),
         (
-            1,
+            Counter::new(16).unwrap().schema_version() + 1,
+            false,
+            CheckpointError::InvalidBoundary,
+        ),
+        (
+            Counter::new(16).unwrap().schema_version(),
             true,
             CheckpointError::Application(ApplicationError::InvalidCheckpoint),
         ),

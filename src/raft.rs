@@ -43,6 +43,8 @@ pub use completion::{
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
+mod peer_slots;
+use peer_slots::PeerSlots;
 mod progress_broadcast;
 mod proposals;
 pub use proposals::{Proposal, ProposalBatch, MAX_PROPOSAL_BATCH_ENTRIES};
@@ -184,10 +186,12 @@ pub enum Event {
     CancelLeadershipTransfer {
         context: RequestContext,
     },
+    /// Boxed so the requirements' full application identity does not widen
+    /// every `Event`.
     CheckLearnerReadiness {
         learner: PeerIdentity,
         session: StoreSession,
-        requirements: ReadinessRequirements,
+        requirements: Box<ReadinessRequirements>,
     },
     CancelLearnerReadiness,
     /// Host-authorized administrative input; public network configuration
@@ -331,6 +335,11 @@ pub enum RaftError {
     StaleRead,
     StaleTransfer,
     NotApplied,
+    /// Retryable backpressure, nothing proposed: the group's retained log is
+    /// at its data budget (`LogLimits::max_entries_per_group`) until a
+    /// checkpoint compacts it, or the node's WAL has no room for more data
+    /// until a rewrite. Clients see it as `StoragePressure`.
+    StoragePressure,
     Storage(StorageError),
 }
 impl From<StorageError> for RaftError {
@@ -339,6 +348,32 @@ impl From<StorageError> for RaftError {
     }
 }
 
+/// Why a leader gave up its role without a higher term (ST2 round 3, I1).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum StepDownReason {
+    /// Elected with a retained log at `LogLimits::retained_entry_capacity`
+    /// whose uncommitted part alone fills it, so no checkpoint can make room
+    /// for the current-term noop. Another replica, with a shorter log, can win
+    /// and truncate that suffix.
+    RetainedEntryCapacity,
+    /// Elected while the node's WAL account had no room for the
+    /// current-term noop under the high-water mark plus the control reserve
+    /// (ST2 round 4, R4-1). Nothing was appended; the replica does not
+    /// campaign again until one noop fits.
+    WalCapacity,
+}
+/// A recorded step-down: the term the leader gave up and why.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct StepDown {
+    pub term: u64,
+    pub reason: StepDownReason,
+}
+/// Campaign attempts a replica skips after a capacity step-down, so a
+/// replica with a shorter log can win first. It counts attempts, not time,
+/// and also skips explicit, operator and transfer campaigns: one explicit
+/// `Campaign` can be a no-op while it lasts.
+const CAPACITY_CAMPAIGN_HOLDOFF: u8 = 2;
+
 #[derive(Clone, Debug)]
 enum After {
     Campaign,
@@ -346,9 +381,16 @@ enum After {
     LeaderAppend,
     Commit,
     Compact,
-    // Snapshot references are boxed: every round moves `Pending`.
+    // Snapshot references are boxed: every round stages a `Pending`.
     CheckpointCompact(Box<SnapshotRef>),
     SnapshotInstall(Box<SnapshotRef>),
+}
+/// What the core still uses of an installed `Pending` once its plan is spent.
+struct Installed {
+    membership: Option<Box<Membership>>,
+    after: After,
+    reply: Option<Message>,
+    preserves_checkpoint_prefix: bool,
 }
 struct Pending {
     next: OwnedNextLog,
@@ -359,12 +401,15 @@ struct Pending {
     membership: Option<Box<Membership>>,
     ticket: Option<LogTicket>,
     after: After,
+    // Upper bound of the durable update's WAL bytes (zero for a volatile
+    // core), counted by the host until the transition completes (I5).
+    wal_bytes: usize,
     reply: Option<Message>,
     // The stamp of the view `next` was planned from; the install skips the
     // predecessor comparison only if it is still the log's current one.
     planned: Option<LogStamp>,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Replication {
     context: RequestContext,
     configuration: ConfigurationId,
@@ -379,6 +424,14 @@ struct PendingRead {
     acknowledgements: BTreeSet<NodeId>,
 }
 
+/// The node's WAL account room for one step (ST2 round 5, R5-1): bytes left
+/// under the high-water mark (`data`) and under the mark plus the control
+/// reserve (`noop`). Volatile host input.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct WalRoom {
+    pub data: usize,
+    pub noop: usize,
+}
 pub struct Raft {
     node: NodeId,
     binding: StoreBinding,
@@ -396,7 +449,14 @@ pub struct Raft {
     granted_vote_reply: Option<send_window::GrantedVoteReply>,
     progress: BTreeMap<NodeId, u64>,
     next_index: BTreeMap<NodeId, u64>,
-    requests: BTreeMap<NodeId, Replication>,
+    // Leader slots per peer: retired in place, cleared with every
+    // configuration or leadership change (see `peer_slots`).
+    requests: PeerSlots<Replication>,
+    admitted_ranges: PeerSlots<AdmittedRange>,
+    empty_append_aliases: PeerSlots<EmptyAppendAlias>,
+    // Hot broadcasts' peer order for one accepted configuration id.
+    peer_order: Vec<NodeId>,
+    peer_order_for: Option<ConfigurationId>,
     append_hold: AppendHold,
     // Leader only, at most one entry per peer: held peer -> leader tip when held.
     held: BTreeMap<NodeId, u64>,
@@ -407,8 +467,6 @@ pub struct Raft {
     // Set when a leader's commit first covers its latest configuration entry;
     // that commit notice is never held. Cleared by the next heartbeat.
     configuration_notice: bool,
-    admitted_ranges: BTreeMap<NodeId, AdmittedRange>,
-    empty_append_aliases: BTreeMap<NodeId, EmptyAppendAlias>,
     // Candidate-only transfer cursors; never quorum replication or ballots.
     repair_requests: BTreeMap<NodeId, Replication>,
     batched_joint_repair: bool,
@@ -430,11 +488,51 @@ pub struct Raft {
     election_reset: u64,
     authority_request: Option<authority::PendingAuthority>,
     replication_permit: Option<authority::ReplicationPermit>,
-    learner_readiness: Option<LearnerReadinessRequest>,
-    ready_learner: Option<ReadyLearner>,
+    // Boxed: readiness requirements carry the full application identity
+    // (about 400 bytes), which the per-write core state need not hold inline.
+    learner_readiness: Option<Box<LearnerReadinessRequest>>,
+    ready_learner: Option<Box<ReadyLearner>>,
     readiness_check: Option<Message>,
     transfer: Option<LeadershipTransfer>,
     leader_contact: Option<(StoreBinding, NodeId, u64)>,
+    // A leader elected while its retained log was at `max_entries_per_group`
+    // owes its current-term noop; it appends it once compaction frees space.
+    leader_noop_pending: bool,
+    /// Volatile host input (ST2b): the node's WAL is in its high-water
+    /// state. Only a host that gives no `wal_room` makes a follower decline
+    /// new data entries on it; with a room the follower decides on bytes
+    /// alone (R6-1).
+    storage_pressure: bool,
+    /// Volatile host input (R4-1): the node's WAL account holds one more
+    /// leader noop under the high-water mark plus the control reserve. While
+    /// false this core does not campaign and steps down instead of placing
+    /// its noop.
+    wal_noop_room: bool,
+    /// Volatile host input (R5-1): the node's WAL account room for this step,
+    /// `None` without a bounded WAL. A follower checks the validated new
+    /// suffix of an append against it: data under the mark, noop-only under
+    /// the mark plus the reserve.
+    wal_room: Option<WalRoom>,
+    /// Campaigns not started and step-downs because no noop fitted
+    /// (saturating).
+    wal_noop_refusals: u64,
+    /// Follower appends declined because their new suffix's WAL bound did
+    /// not fit `wal_room`, and of those the noop-only ones (R5-1,
+    /// saturating).
+    wal_declined_appends: u64,
+    wal_noop_declined_appends: u64,
+    // ST2 round 3 (I1): capacity step-downs, the last one, and how many
+    // election timeouts this replica still lets pass without campaigning.
+    capacity_step_downs: u64,
+    last_step_down: Option<StepDown>,
+    campaign_holdoff: u8,
+    // Follower appends whose new data this core declined (I3, saturating), and
+    // proposals refused at the retained-entry data budget (I2, saturating).
+    declined_appends: u64,
+    entry_budget_refusals: u64,
+    // As leader, per peer: heartbeat rounds since its last successful append
+    // acknowledgement while it lags the last index (I3, volatile).
+    stalled_rounds: PeerSlots<u64>,
     // The core's log is the only copy: completions use `PersistVolatile` tokens.
     volatile: bool,
     // Nonzero only for a volatile core: the `recover_volatile` call that made it.
@@ -534,14 +632,16 @@ impl Raft {
             granted_vote_reply: None,
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
-            requests: BTreeMap::new(),
+            requests: PeerSlots::new(),
+            admitted_ranges: PeerSlots::new(),
+            empty_append_aliases: PeerSlots::new(),
+            peer_order: Vec::new(),
+            peer_order_for: None,
             append_hold: AppendHold::Off,
             held: BTreeMap::new(),
             ack_order: Vec::new(),
             batch_floor: 0,
             configuration_notice: false,
-            admitted_ranges: BTreeMap::new(),
-            empty_append_aliases: BTreeMap::new(),
             repair_requests: BTreeMap::new(),
             batched_joint_repair: false,
             snapshot_joint_repair: false,
@@ -567,6 +667,19 @@ impl Raft {
             readiness_check: None,
             transfer: None,
             leader_contact: None,
+            leader_noop_pending: false,
+            storage_pressure: false,
+            wal_noop_room: true,
+            wal_room: None,
+            wal_noop_refusals: 0,
+            wal_declined_appends: 0,
+            wal_noop_declined_appends: 0,
+            capacity_step_downs: 0,
+            last_step_down: None,
+            campaign_holdoff: 0,
+            declined_appends: 0,
+            entry_budget_refusals: 0,
+            stalled_rounds: PeerSlots::new(),
             volatile: false,
             incarnation: 0,
         })
@@ -643,7 +756,7 @@ impl Raft {
             || state.last_term() > state.hard_state.term
             || !state.hard_state.follows(HardState::default())
             || state.validate_ballot().is_err()
-            || state.entries.len() > limits.max_entries_per_group
+            || state.entries.len() > limits.retained_entry_capacity()
             || state
                 .snapshot_membership
                 .as_ref()
@@ -719,6 +832,130 @@ impl Raft {
         Ok(())
     }
 
+    /// The selected store limits this core enforces, including the
+    /// retained-entry budget that automatic checkpoints keep it under.
+    pub fn log_limits(&self) -> LogLimits {
+        self.limits
+    }
+    /// In-memory bytes of the retained log beyond the durable base (entry
+    /// records plus payloads): the live part a WAL rewrite must keep. An
+    /// estimate for maintenance scheduling, never durability evidence.
+    pub fn live_log_bytes(&self) -> usize {
+        self.retained_log_bytes().unwrap_or(usize::MAX)
+    }
+    /// True while a leader elected at the retained-entry limit has not yet
+    /// appended its current-term noop. Proposals and reads refuse with typed
+    /// errors until a checkpoint frees space; the role stays stable.
+    pub fn leader_noop_pending(&self) -> bool {
+        self.role == Role::Leader && self.leader_noop_pending
+    }
+    /// Upper bound of the WAL bytes of the staged durable transition, until
+    /// it completes or the core fails; zero when nothing is staged.
+    pub fn pending_wal_bytes(&self) -> usize {
+        self.pending.as_ref().map_or(0, |p| p.wal_bytes)
+    }
+    /// Capacity step-downs of this core (see [`StepDownReason`]) and the last.
+    pub fn capacity_step_downs(&self) -> (u64, Option<StepDown>) {
+        (self.capacity_step_downs, self.last_step_down)
+    }
+    /// Follower appends whose new data entries this core declined, for WAL
+    /// pressure, the in-flight byte budget or its retained-entry capacity.
+    pub fn declined_appends(&self) -> u64 {
+        self.declined_appends
+    }
+    /// Proposals refused at the retained-entry data budget.
+    pub fn entry_budget_refusals(&self) -> u64 {
+        self.entry_budget_refusals
+    }
+    /// As leader, the peer that has gone longest without a successful append
+    /// acknowledgement while lagging the last index, in heartbeat rounds. A
+    /// follower that keeps declining (or is down) shows here. Only current
+    /// replicas are tracked (at most the current replica count minus one
+    /// entries; cleared at every configuration change). Local scheduling
+    /// observation, not quorum evidence.
+    pub fn replica_stall(&self) -> Option<(NodeId, u64)> {
+        if self.role != Role::Leader {
+            return None;
+        }
+        let membership = self.membership();
+        self.stalled_rounds
+            .iter()
+            .filter(|(node, rounds)| {
+                **rounds > 0 && membership.replicas().any(|(replica, _)| replica == **node)
+            })
+            .max_by_key(|(_, rounds)| **rounds)
+            .map(|(node, rounds)| (*node, *rounds))
+    }
+    /// Refuse new data entries once the retained log is at the data budget;
+    /// the noop reserve above it is the current leader's alone (I1).
+    #[inline]
+    fn check_data_budget(&mut self, count: usize) -> Result<(), RaftError> {
+        if self
+            .durable
+            .entries
+            .len()
+            .checked_add(count)
+            .is_some_and(|n| n <= self.limits.max_entries_per_group)
+        {
+            return Ok(());
+        }
+        self.refuse_data_budget()
+    }
+    #[cold]
+    #[inline(never)]
+    fn refuse_data_budget(&mut self) -> Result<(), RaftError> {
+        self.entry_budget_refusals = self.entry_budget_refusals.saturating_add(1);
+        Err(RaftError::StoragePressure)
+    }
+    /// Host-set WAL high-water state (ST2b). While set on a core whose host
+    /// gives no WAL room (`set_wal_room(None)`), a follower keeps leader
+    /// contact, term and commit records but declines appends that carry new
+    /// data entries; the leader resends the same range on its next heartbeat.
+    /// With a room the follower takes whatever fits it (R6-1): a node uses
+    /// the state only for client admission. Volatile scheduling input, never
+    /// persisted or replicated.
+    pub fn storage_pressure(&self) -> bool {
+        self.storage_pressure
+    }
+    pub(crate) fn set_storage_pressure(&mut self, on: bool) {
+        self.storage_pressure = on;
+    }
+    /// Host-set (R4-1): whether the node's WAL account holds one more leader
+    /// noop. Volatile scheduling input, set before every step and completion.
+    #[inline]
+    pub(crate) fn set_wal_noop_room(&mut self, room: bool) {
+        self.wal_noop_room = room;
+    }
+    /// Host-set (R5-1): the node's WAL account room, set before every
+    /// received message is stepped (only an append reads it). Volatile
+    /// scheduling input, never persisted or replicated.
+    #[inline]
+    pub(crate) fn set_wal_room(&mut self, room: Option<WalRoom>) {
+        self.wal_room = room;
+    }
+    /// Campaigns this replica did not start, and leader roles it gave up,
+    /// because the node's WAL had no room for a noop (R4-1, saturating).
+    pub fn wal_noop_refusals(&self) -> u64 {
+        self.wal_noop_refusals
+    }
+    /// Follower appends declined because their new suffix's WAL bound did
+    /// not fit the node's WAL room, and of those the noop-only ones (R5-1,
+    /// saturating).
+    pub fn wal_declined_appends(&self) -> (u64, u64) {
+        (self.wal_declined_appends, self.wal_noop_declined_appends)
+    }
+    /// As leader, whether every other replica has acknowledged `index`, so a
+    /// compaction there leaves no replica behind the new base (which would
+    /// need a full snapshot). Always true for a non-leader. Local scheduling
+    /// input only, not quorum evidence.
+    pub fn replicas_acknowledged(&self, index: u64) -> bool {
+        self.role != Role::Leader
+            || self
+                .membership()
+                .replicas()
+                .filter(|(node, _)| *node != self.node)
+                .all(|(node, _)| self.progress.get(&node).is_some_and(|p| *p >= index))
+    }
     pub fn role(&self) -> Role {
         self.role
     }
@@ -1077,7 +1314,7 @@ impl Raft {
                 learner,
                 session,
                 requirements,
-            } => self.request_learner_readiness(learner, session, requirements),
+            } => self.request_learner_readiness(learner, session, *requirements),
             Event::CancelLearnerReadiness => {
                 self.cancel_learner_readiness();
                 Ok(Vec::new())
@@ -1109,9 +1346,14 @@ impl Raft {
                     transfer.signal_sent = false;
                 }
                 if self.role == Role::Leader {
-                    self.broadcast_into(out)?;
-                    self.configuration_notice = false;
-                    out.extend(self.read_probes());
+                    self.count_stalled_replicas();
+                    out.extend(self.retry_leader_noop()?);
+                    // Stepped down at capacity: no more heartbeats.
+                    if self.role == Role::Leader {
+                        self.broadcast_into(out)?;
+                        self.configuration_notice = false;
+                        out.extend(self.read_probes());
+                    }
                 }
                 Ok(Vec::new())
             }
@@ -1157,6 +1399,20 @@ impl Raft {
         }
         if !self.local_voter() {
             return Err(RaftError::NotVoter);
+        }
+        if self.campaign_holdoff > 0 && self.role != Role::Leader {
+            // After a capacity step-down: let this election timeout pass so
+            // a replica with a shorter log can win first (I1).
+            self.campaign_holdoff -= 1;
+            self.reset_election()?;
+            return Ok(Vec::new());
+        }
+        if !self.wal_noop_room && self.role != Role::Leader {
+            // R4-1: a leader could not place its noop, so it could never
+            // commit. Wait for room (a rewrite, or a larger budget).
+            self.wal_noop_refusals = self.wal_noop_refusals.saturating_add(1);
+            self.reset_election()?;
+            return Ok(Vec::new());
         }
         self.reset_election()?;
         self.transfer = None;
@@ -1320,23 +1576,24 @@ impl Raft {
         &mut self,
         out: &mut VecDeque<Effect>,
     ) -> Result<Option<Range<usize>>, RaftError> {
-        let Some(p) = self.pending.take() else {
-            return Err(RaftError::WrongCompletion);
-        };
         let previous_commit = self.durable.commit_index;
-        let configuration_changed = p
+        let installed = match self.install_pending_plan() {
+            Ok(installed) => installed,
+            Err(RaftError::Storage(error)) => {
+                // The plan is intact; the fence discards it, as before.
+                self.storage_failed();
+                return Err(error.into());
+            }
+            Err(error) => return Err(error),
+        };
+        let configuration_changed = installed
             .membership
             .as_ref()
             .is_some_and(|membership| membership.id() != self.membership.id());
-        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
-        if let Err(error) = self.durable.install(p.next, p.planned) {
-            self.storage_failed();
-            return Err(error.into());
-        }
-        if !preserves_checkpoint_prefix {
+        if !installed.preserves_checkpoint_prefix {
             self.checkpoint_lineage = CheckpointLineage::new();
         }
-        if let Some(membership) = p.membership {
+        if let Some(membership) = installed.membership {
             self.membership = *membership;
         }
         if configuration_changed {
@@ -1373,7 +1630,7 @@ impl Raft {
             self.next_index.clear();
         }
         let committed = if self.durable.commit_index > previous_commit
-            && !matches!(p.after, After::SnapshotInstall(_))
+            && !matches!(installed.after, After::SnapshotInstall(_))
         {
             Some(
                 (previous_commit - self.durable.base_index()) as usize
@@ -1384,11 +1641,34 @@ impl Raft {
         };
         let mark = out.len();
         out.extend(retirement);
-        self.after_durable(p.after, p.reply, out)?;
+        self.after_durable(installed.after, installed.reply, out)?;
         if self.remember_granted_vote(out.range(mark..)) {
             self.reset_election()?;
         }
         Ok(committed)
+    }
+    /// Install the pending plan where it lies (no move of `Pending` or its
+    /// plan). On success the slot is emptied and the parts the core still
+    /// uses are returned; the spent plan is dropped with the slot. On error
+    /// nothing changes: the log, its summary and stamp, and the pending
+    /// transition are as they were (`Storage`). Without a pending transition
+    /// it returns `WrongCompletion`. The only installer of `self.pending`.
+    fn install_pending_plan(&mut self) -> Result<Installed, RaftError> {
+        let Some(p) = self.pending.as_mut() else {
+            return Err(RaftError::WrongCompletion);
+        };
+        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
+        self.durable.install(&mut p.next, p.planned)?;
+        let installed = Installed {
+            membership: p.membership.take(),
+            after: std::mem::replace(&mut p.after, After::Commit),
+            reply: p.reply.take(),
+            preserves_checkpoint_prefix,
+        };
+        // Cleared only here, after the install succeeded: nothing between
+        // this point and the end of the round can see the spent plan.
+        self.pending = None;
+        Ok(installed)
     }
     fn after_durable(
         &mut self,
@@ -1487,9 +1767,24 @@ impl Raft {
         reply: Option<Message>,
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
+        let suffix = suffix.map(|suffix| (suffix, None));
+        self.persist_bounded_into(hard_state, commit_index, suffix, after, reply, out)
+    }
+    /// As `persist_into`, with the suffix's update WAL bound when the caller
+    /// already computed it while building the entries (R4-3).
+    fn persist_bounded_into(
+        &mut self,
+        hard_state: HardState,
+        commit_index: u64,
+        suffix: Option<(Suffix, Option<usize>)>,
+        after: After,
+        reply: Option<Message>,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         if suffix.is_none() && hard_state == self.durable.hard_state {
             return self.persist_commit_into(commit_index, after, reply, out);
         }
+        let (suffix, wal_bound) = suffix.map_or((None, None), |(s, bound)| (Some(s), bound));
         let update = LogUpdate {
             snapshot_membership: None,
             group: self.durable.bootstrap.group,
@@ -1499,7 +1794,7 @@ impl Raft {
             suffix,
             snapshot: None,
         };
-        self.persist_update_into(update, after, reply, out)
+        self.persist_update_bounded_into(update, after, reply, wal_bound, out)
     }
     /// A round that only advances the commit index (or only the revision) plans
     /// a scalar advance. A durable store still receives the same update.
@@ -1517,7 +1812,7 @@ impl Raft {
         let update = if self.volatile {
             None
         } else {
-            Some(LogUpdate {
+            let update = LogUpdate {
                 snapshot_membership: None,
                 group: self.durable.bootstrap.group,
                 expected_revision: self.durable.revision,
@@ -1525,7 +1820,9 @@ impl Raft {
                 commit_index,
                 suffix: None,
                 snapshot: None,
-            })
+            };
+            let wal_bytes = update.wal_bound();
+            Some((update, wal_bytes))
         };
         self.stage_pending_into(next, planned, update, after, reply, out)
     }
@@ -1546,6 +1843,16 @@ impl Raft {
         reply: Option<Message>,
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
+        self.persist_update_bounded_into(update, after, reply, None, out)
+    }
+    fn persist_update_bounded_into(
+        &mut self,
+        update: LogUpdate,
+        after: After,
+        reply: Option<Message>,
+        wal_bound: Option<usize>,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         // A volatile core is the only owner of its log: move the update into
         // the plan instead of keeping a copy for a store to validate again.
         if self.volatile {
@@ -1563,18 +1870,25 @@ impl Raft {
             let next =
                 OwnedNextLog::plan_copy(&view, self.durable.summary(), &update, self.limits)?;
             let planned = view.stamp();
-            self.stage_pending_into(next, planned, Some(update), after, reply, out)
+            let wal_bytes = match wal_bound {
+                Some(bound) => {
+                    debug_assert_eq!(bound, update.wal_bound());
+                    bound
+                }
+                None => update.wal_bound(),
+            };
+            self.stage_pending_into(next, planned, Some((update, wal_bytes)), after, reply, out)
         }
     }
     /// Make `next` the single pending transition. `planned` is the stamp of
     /// the view `next` was planned from (`LogView::stamp`). `update` is the
-    /// durable store's exact input; without one the core is volatile and
-    /// emits a token.
+    /// durable store's exact input with its WAL bound; without one the core
+    /// is volatile and emits a token.
     fn stage_pending_into(
         &mut self,
         next: OwnedNextLog,
         planned: Option<LogStamp>,
-        update: Option<LogUpdate>,
+        update: Option<(LogUpdate, usize)>,
         after: After,
         reply: Option<Message>,
         out: &mut VecDeque<Effect>,
@@ -1585,8 +1899,9 @@ impl Raft {
             .transpose()
             .map_err(|_| RaftError::InvalidRecovery)?;
         let metadata = next.metadata();
+        let wal_bytes = update.as_ref().map_or(0, |(_, bytes)| *bytes);
         let effect = match update {
-            Some(update) => Effect::Persist(update),
+            Some((update, _)) => Effect::Persist(update),
             None => Effect::PersistVolatile(VolatilePersist {
                 incarnation: self.incarnation,
                 revision: metadata.revision,
@@ -1596,7 +1911,7 @@ impl Raft {
         let accepted_membership = membership.as_deref().unwrap_or(&self.membership);
         if self
             .learner_readiness
-            .as_ref()
+            .as_deref()
             .or_else(|| self.ready_learner.as_ref().map(|r| r.request()))
             .is_some_and(|r| {
                 r.term != metadata.hard_state.term
@@ -1612,12 +1927,19 @@ impl Raft {
         {
             self.clear_reads();
         }
+        // A plan is staged only into an empty slot: a live plan is never
+        // replaced, and a spent one was cleared by its install.
+        debug_assert!(
+            self.pending.is_none(),
+            "a pending transition was replaced before its install or fence"
+        );
         self.pending = Some(Pending {
             next,
             membership,
             ticket: None,
             after,
             reply,
+            wal_bytes,
             planned,
         });
         out.push_back(effect);
@@ -1634,6 +1956,29 @@ impl Raft {
             .map(|(node, _)| node)
             .filter(|node| *node != self.node)
             .collect()
+    }
+    /// Rebuild the hot broadcasts' peer order in place when the accepted
+    /// configuration id changed. Only a leader reads it, and a leader's
+    /// membership changes only through its own strictly increasing ids. An id
+    /// is not unique across a truncation (a follower's uncommitted entry can be
+    /// replaced by another with the same id), so every election resets it.
+    fn refresh_peer_order(&mut self) {
+        // Only a leader reads the cached order; a follower never refreshes it.
+        debug_assert_eq!(self.role, Role::Leader);
+        let id = self.membership().id();
+        if self.peer_order_for != Some(id) {
+            let mut order = std::mem::take(&mut self.peer_order);
+            order.clear();
+            order.extend(
+                self.membership()
+                    .replicas()
+                    .map(|(node, _)| node)
+                    .filter(|node| *node != self.node),
+            );
+            self.peer_order = order;
+            self.peer_order_for = Some(id);
+        }
+        debug_assert_eq!(self.peer_order, self.peers(), "cached peer order");
     }
     fn voting_peers(&self) -> Vec<NodeId> {
         self.peers()
@@ -1654,6 +1999,10 @@ impl Raft {
         self.repair_requests.clear();
         self.progress.clear();
         self.next_index.clear();
+        // The stall map is bounded by the current replicas (R4-2): a removed
+        // peer is never visited again, and a changed store identity starts
+        // from zero like its progress.
+        self.stalled_rounds.clear();
         if self.role == Role::Candidate {
             self.role = Role::Follower;
         }
@@ -1714,6 +2063,8 @@ impl Raft {
     }
     fn become_leader(&mut self) -> Result<Vec<Effect>, RaftError> {
         self.role = Role::Leader;
+        // A configuration id seen while following may name other replicas.
+        self.peer_order_for = None;
         self.progress.clear();
         self.next_index.clear();
         self.clear_replication_requests();
@@ -1724,6 +2075,103 @@ impl Raft {
             .checked_add(1)
             .ok_or(RaftError::Exhausted)?;
         self.initialize_replication()?;
+        self.leader_noop_pending = false;
+        self.stalled_rounds.clear();
+        if !self.wal_noop_room {
+            return self.step_down_for(StepDownReason::WalCapacity);
+        }
+        if self.durable.entries.len() >= self.limits.retained_entry_capacity() {
+            // Only reachable when the noop reserve above the data budget is
+            // used up (I1). If a checkpoint up to the commit index could make
+            // room, lead without the noop until it does: followers stay
+            // quiet, proposals and reads refuse typed. Otherwise no step of
+            // this leader can ever commit; step down so a replica with a
+            // shorter log can win.
+            if self.noop_unplaceable() {
+                return self.step_down_for(StepDownReason::RetainedEntryCapacity);
+            }
+            self.leader_noop_pending = true;
+            return self.broadcast();
+        }
+        self.append_leader_noop(next)
+    }
+    /// At capacity with an uncommitted part that alone fills it: compaction
+    /// stops at the commit index, which only this term's noop can advance.
+    fn noop_unplaceable(&self) -> bool {
+        self.durable
+            .last_index()
+            .saturating_sub(self.durable.commit_index)
+            >= self.limits.retained_entry_capacity() as u64
+    }
+    fn step_down_for(&mut self, reason: StepDownReason) -> Result<Vec<Effect>, RaftError> {
+        self.role = Role::Follower;
+        self.leader_noop_pending = false;
+        self.transfer = None;
+        self.leader_contact = None;
+        self.clear_reads();
+        self.votes.clear();
+        self.vote_context = None;
+        self.clear_replication_requests();
+        self.repair_requests.clear();
+        self.progress.clear();
+        self.next_index.clear();
+        self.stalled_rounds.clear();
+        self.cancel_learner_readiness();
+        self.capacity_step_downs = self.capacity_step_downs.saturating_add(1);
+        if reason == StepDownReason::WalCapacity {
+            self.wal_noop_refusals = self.wal_noop_refusals.saturating_add(1);
+        }
+        self.last_step_down = Some(StepDown {
+            term: self.durable.hard_state.term,
+            reason,
+        });
+        self.campaign_holdoff = CAPACITY_CAMPAIGN_HOLDOFF;
+        self.reset_election()?;
+        Ok(Vec::new())
+    }
+    /// As leader, once per heartbeat: a peer that lags the last index and
+    /// has had no successful acknowledgement since the last heartbeat adds a
+    /// round; a successful acknowledgement or catching up clears it.
+    fn count_stalled_replicas(&mut self) {
+        let last = self.durable.last_index();
+        for peer in self.peers() {
+            if self.progress.get(&peer).is_some_and(|p| *p >= last) {
+                self.stalled_rounds.remove(&peer);
+            } else {
+                // Absent: acknowledged since the last heartbeat (or new).
+                let rounds = self
+                    .stalled_rounds
+                    .get(&peer)
+                    .map_or(0, |rounds| rounds.saturating_add(1));
+                self.stalled_rounds.insert(peer, rounds);
+            }
+        }
+    }
+    /// Append the deferred noop when space allows and nothing is staged. Any
+    /// current-term entry already serves the noop's commit purpose.
+    fn retry_leader_noop(&mut self) -> Result<Vec<Effect>, RaftError> {
+        if !self.leader_noop_pending || self.pending.is_some() {
+            return Ok(Vec::new());
+        }
+        let last = self.durable.last_index();
+        if self.durable.term_at(last) == Some(self.durable.hard_state.term) {
+            self.leader_noop_pending = false;
+            return Ok(Vec::new());
+        }
+        if self.durable.entries.len() >= self.limits.retained_entry_capacity() {
+            if self.noop_unplaceable() {
+                return self.step_down_for(StepDownReason::RetainedEntryCapacity);
+            }
+            return Ok(Vec::new());
+        }
+        if !self.wal_noop_room {
+            return self.step_down_for(StepDownReason::WalCapacity);
+        }
+        let effects = self.append_leader_noop(last.checked_add(1).ok_or(RaftError::Exhausted)?)?;
+        self.leader_noop_pending = false;
+        Ok(effects)
+    }
+    fn append_leader_noop(&mut self, next: u64) -> Result<Vec<Effect>, RaftError> {
         let entry = LogEntry {
             index: next,
             term: self.durable.hard_state.term,
@@ -1746,7 +2194,10 @@ impl Raft {
         Ok(effects.into())
     }
     fn broadcast_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
-        for peer in self.peers() {
+        self.refresh_peer_order();
+        // `append_for` never changes membership, so the order stays fixed.
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             out.push_back(self.append_for(peer)?);
         }
         Ok(())
@@ -2222,14 +2673,20 @@ pub fn persist_effect<S: LogStore>(
 #[path = "raft/append_prefix_tests.rs"]
 mod append_prefix_tests;
 #[cfg(test)]
+mod capacity_tests;
+#[cfg(test)]
 mod checkpoint_tests;
 #[cfg(test)]
 mod commit_advance_tests;
 #[cfg(test)]
 mod completion_tests;
 #[cfg(test)]
+mod install_in_place_tests;
+#[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;
+#[cfg(test)]
+mod peer_slots_tests;
 #[cfg(test)]
 mod summarized_log_tests;
 #[cfg(test)]

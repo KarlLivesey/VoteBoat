@@ -26,7 +26,8 @@ use std::{
 
 /// Exclusive per-replica native snapshot I/O. begin_slot truncates only the
 /// inactive slot. append must finish all bytes or fail. sync_slot covers data
-/// and its directory entry before any root may reference it;
+/// and its directory entry before any root may reference it (an entry already
+/// made durable in this session need not be synchronized again);
 /// publish_manifest must sync a temporary file, replace the root atomically,
 /// then sync its directory. Reads refuse oversize data before allocating.
 pub trait SnapshotIo {
@@ -41,6 +42,12 @@ pub trait SnapshotIo {
 pub struct FileSnapshotIo {
     directory: PathBuf,
     _lock: File,
+    /// Whether each slot file's directory entry was made durable in this
+    /// session. A slot is rewritten in place (same inode, truncated), so after
+    /// the first directory sync only its data and size need syncing. Starts
+    /// false in every session: a file created by a crashed earlier session
+    /// may have a volatile entry.
+    entry_durable: [bool; 2],
 }
 impl FileSnapshotIo {
     fn lock(directory: &Path) -> io::Result<File> {
@@ -77,6 +84,7 @@ impl FileSnapshotIo {
         Ok(Self {
             directory,
             _lock: lock,
+            entry_durable: [false; 2],
         })
     }
     pub fn open(directory: impl AsRef<Path>) -> io::Result<Self> {
@@ -86,6 +94,7 @@ impl FileSnapshotIo {
         Ok(Self {
             directory,
             _lock: lock,
+            entry_durable: [false; 2],
         })
     }
     fn slot_path(&self, slot: u8) -> io::Result<PathBuf> {
@@ -116,12 +125,21 @@ impl SnapshotIo for FileSnapshotIo {
         Self::read_bounded(&self.slot_path(slot)?, limit)
     }
     fn begin_slot(&mut self, slot: u8, prefix: &[u8]) -> io::Result<()> {
-        OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(self.slot_path(slot)?)?
-            .write_all(prefix)
+        let path = self.slot_path(slot)?;
+        let mut file = match OpenOptions::new().write(true).truncate(true).open(&path) {
+            Ok(file) => file,
+            Err(e) if e.kind() == io::ErrorKind::NotFound => {
+                // A new directory entry: the next sync_slot must persist it.
+                self.entry_durable[usize::from(slot)] = false;
+                OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .open(&path)?
+            }
+            Err(e) => return Err(e),
+        };
+        file.write_all(prefix)
     }
     fn append_slot(&mut self, slot: u8, bytes: &[u8]) -> io::Result<()> {
         OpenOptions::new()
@@ -134,7 +152,16 @@ impl SnapshotIo for FileSnapshotIo {
             .write(true)
             .open(self.slot_path(slot)?)?
             .sync_all()?;
-        File::open(&self.directory)?.sync_all()
+        // Ordering O4 (docs/IMPLEMENTATION.md, ST2 round 2): the entry must be
+        // durable before a durable root references the slot. Once synced in
+        // this session it cannot change: the store never removes or renames a
+        // slot, and begin_slot truncates the same inode in place.
+        let entry = &mut self.entry_durable[usize::from(slot)];
+        if !*entry {
+            File::open(&self.directory)?.sync_all()?;
+            *entry = true;
+        }
+        Ok(())
     }
     fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
         let temp = self.directory.join("MANIFEST.next");
@@ -182,6 +209,9 @@ pub struct NativeSnapshotStore<I: SnapshotIo, C: SnapshotCodec = NativeSnapshotC
     stage: Option<Stage>,
     next_generation: u64,
     fenced: bool,
+    /// The generation this session sealed and published for the log; the
+    /// publishing job compares it byte for byte before anything uses it.
+    verified: Option<SnapshotGeneration>,
 }
 impl<I: SnapshotIo> NativeSnapshotStore<I> {
     pub fn create(
@@ -243,6 +273,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             stage: None,
             next_generation: 0,
             fenced: false,
+            verified: None,
         })
     }
     pub fn recover_with_codec(
@@ -307,7 +338,51 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             stage: None,
             next_generation,
             fenced: false,
+            verified: None,
         })
+    }
+    /// Install a sealed image as the root, and with `pin` also as a log
+    /// anchor, in one manifest publication. `seal` already read back and
+    /// decoded the stored bytes in this session and nothing writes a staged
+    /// slot, so the pin needs no second read (ST2 round 2).
+    fn publish_root(
+        &mut self,
+        sealed: SealedSnapshot,
+        pin: bool,
+    ) -> Result<SnapshotReceipt, StorageError> {
+        let stage = self.active_stage(sealed.ticket)?;
+        if stage.sealed != Some(sealed) {
+            return Err(StorageError::StaleTicket);
+        }
+        let root = Root {
+            slot: stage.slot,
+            generation: sealed.ticket.generation,
+            length: sealed.file_bytes,
+            checksum: sealed.checksum,
+            metadata: stage.metadata.clone(),
+        };
+        let mut pins = self.pins.clone();
+        if pin {
+            if pins.len() >= 2 {
+                return Err(StorageError::Rejected("snapshot pin budget"));
+            }
+            pins.insert(root.generation, root.clone());
+        }
+        if let Err(e) =
+            self.io
+                .publish_manifest(&manifest(self.identity, self.binding, Some(&root), &pins))
+        {
+            return Err(self.failed(e));
+        }
+        let receipt = SnapshotReceipt {
+            sealed,
+            metadata: root.metadata.clone(),
+        };
+        self.verified = pin.then_some(root.generation);
+        self.root = Some(root);
+        self.pins = pins;
+        self.stage = None;
+        Ok(receipt)
     }
     fn live(&self) -> Result<(), StorageError> {
         if self.fenced {
@@ -490,32 +565,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotStore for NativeSnapshotStore<I, C
         Ok(sealed)
     }
     fn publish(&mut self, sealed: SealedSnapshot) -> Result<SnapshotReceipt, StorageError> {
-        let stage = self.active_stage(sealed.ticket)?;
-        if stage.sealed != Some(sealed) {
-            return Err(StorageError::StaleTicket);
-        }
-        let root = Root {
-            slot: stage.slot,
-            generation: sealed.ticket.generation,
-            length: sealed.file_bytes,
-            checksum: sealed.checksum,
-            metadata: stage.metadata.clone(),
-        };
-        if let Err(e) = self.io.publish_manifest(&manifest(
-            self.identity,
-            self.binding,
-            Some(&root),
-            &self.pins,
-        )) {
-            return Err(self.failed(e));
-        }
-        let receipt = SnapshotReceipt {
-            sealed,
-            metadata: root.metadata.clone(),
-        };
-        self.root = Some(root);
-        self.stage = None;
-        Ok(receipt)
+        self.publish_root(sealed, false)
     }
     fn abort(&mut self, ticket: SnapshotTicket) -> Result<(), StorageError> {
         self.active_stage(ticket)?;
@@ -616,6 +666,17 @@ fn recover_root<I: SnapshotIo, C: SnapshotCodec>(
     })
 }
 impl<I: SnapshotIo, C: SnapshotCodec> SnapshotRetention for NativeSnapshotStore<I, C> {
+    fn publish_for_log(&mut self, sealed: SealedSnapshot) -> Result<SnapshotReceipt, StorageError> {
+        self.publish_root(sealed, true)
+    }
+    fn verified_this_session(&self, reference: SnapshotRef) -> bool {
+        !self.fenced
+            && self.verified == Some(reference.generation)
+            && self
+                .pins
+                .get(&reference.generation)
+                .is_some_and(|p| p.reference(self.identity) == reference)
+    }
     fn latest_reference(&self) -> Result<Option<SnapshotRef>, StorageError> {
         self.live()?;
         Ok(self.root.as_ref().map(|r| r.reference(self.identity)))
@@ -704,6 +765,19 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotRetention for NativeSnapshotStore<
             .as_ref()
             .map(|r| BTreeMap::from([(r.generation, r.clone())]))
             .unwrap_or_default();
+        // Already the durable state: every manifest publication of a live
+        // store completed before memory changed, so rewriting identical
+        // contents would add only flushes.
+        if self.root.as_ref().map(Root::descriptor) == root.as_ref().map(Root::descriptor)
+            && self.pins.len() == pins.len()
+            && self
+                .pins
+                .iter()
+                .zip(&pins)
+                .all(|((g, p), (h, q))| g == h && p.descriptor() == q.descriptor())
+        {
+            return Ok(());
+        }
         if let Err(e) =
             self.io
                 .publish_manifest(&manifest(self.identity, self.binding, root.as_ref(), &pins))

@@ -117,8 +117,8 @@ impl Comparison {
                 self.native.act(
                     id,
                     Event::Propose {
-                        operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, operation as u64).unwrap(),
+                        bytes: Counter::command(0, delta),
                     },
                 )?;
                 self.reference.write(id, operation, delta);
@@ -166,15 +166,18 @@ impl Comparison {
             .iter()
             .filter_map(|entry| match &entry.payload {
                 EntryPayload::Command { operation, bytes } => Some((
-                    operation.get(),
-                    i64::from_le_bytes(bytes.as_slice().try_into().unwrap()),
+                    u128::from(operation.get() as u64),
+                    i64::from_le_bytes(bytes[8..].try_into().unwrap()),
                 )),
                 _ => None,
             })
             .collect()
     }
     fn counter(&self, id: u64) -> Counter {
-        let mut app = Counter::new(MAX_ACTIONS).unwrap();
+        // Trace operations are sequences of the built-in session numbered
+        // seed × 1000 + step and never acknowledged, so the window must cover
+        // the largest of them, as the reference model's unbounded table does.
+        let mut app = Counter::new(1_000_000).unwrap();
         app.apply_batch(&self.native.cluster.applied[&id]).unwrap();
         app
     }

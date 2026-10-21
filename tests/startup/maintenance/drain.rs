@@ -32,8 +32,8 @@ fn drain(protocol: NativePeerProtocol) {
     let rejected = h.nodes[0]
         .propose(ClientRequest {
             group: group(),
-            operation: OperationId::new(100).unwrap(),
-            bytes: Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap(),
+            operation: Counter::operation(1, 10).unwrap(),
+            bytes: Maintenance::<HostApplication>::data(&Counter::command(0, 7), 100).unwrap(),
         })
         .unwrap_err();
     assert_eq!(rejected.reason, ClientError::Draining);

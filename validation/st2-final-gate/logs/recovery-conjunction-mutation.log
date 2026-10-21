@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e)
+    Finished `test` profile [unoptimized] target(s) in 4.05s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-a647f3ef0d23c1ec)
+
+running 1 test
+shared recovery fixture port namespace: /tmp/voteboat-test-ports
+maintenance recovery files: /home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e/target/scratch/voteboat-shared-repair-4079652-Quic-1792528795444735956
+protocol=Quic phase=initial-write
+protocol=Quic phase=survivor-write
+protocol=Quic phase=automatic-checkpoint
+protocol=Quic phase=reopen
+protocol=Quic phase=arm-recovery
+covered automatic checkpoint: original=ScheduledCheckpoint { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 6 }, target_index: 2, executed: false } step=OwnerStep { admission: Some(AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 6 }), proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 12324 }, operation: None, read: None, error: Some(NotApplied) } durable_base=3 commit=3
+
+thread 'shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery' (4079653) panicked at examples/benchmark/shared_recovery/maintenance.rs:223:55:
+called `Result::unwrap()` on an `Err` value: "foreground failed: Unknown(LeadershipChanged)"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... FAILED
+
+failures:
+
+failures:
+    shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 64 filtered out; finished in 20.13s
+
+error: test failed, to rerun pass `--example native_benchmark`

@@ -78,8 +78,8 @@ fn history(quic: bool) {
     let duplicate = leader_request(&mut c, &["configure", OP]);
     assert!(duplicate.contains("operation=24101"), "{duplicate}");
     assert!(duplicate.contains("action=completed"), "{duplicate}");
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "24110", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "6", "0", "3"]).contains("Value(10)"));
     if quic {
         let leader = c.leader();
         let minimum = field(&c.ok(leader, &["status"]), "committed=");
@@ -98,8 +98,8 @@ fn history(quic: bool) {
     assert_eq!(leader_request(&mut c, &["configure", OP]), duplicate);
     let (_, recovered) = leadership::status(&mut c, "19701", "phase=Completed");
     assert_eq!(recovered, handoff);
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "24110", "3"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "6", "0", "3"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     assert_eq!(
         fs::read_to_string(c.admin_plan.as_ref().unwrap()).unwrap(),

@@ -167,7 +167,7 @@ fn history(quic: bool) {
     for id in 1..=3 {
         c.start(id, "recover-member");
     }
-    assert!(authenticated_write(&c, &["add", "21100", "42"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "42"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=42\n");
     let leader = c.leader();
     assert!(c
@@ -234,7 +234,7 @@ fn unknown_configuration_reply_keeps_original_durable_record_without_rerouting()
         c.start(id, "recover-member");
     }
     assert!(leader_request(&mut c, &["configure-record", record]).contains("operation=17920"));
-    assert!(authenticated_write(&c, &["add", "21100", "42"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "42"]).contains("duplicate=true"));
     c.stop();
 }
 
@@ -259,6 +259,6 @@ fn committed_reply_is_not_preparing_evidence_and_does_not_reroute() {
     );
     let receipt = leader_request(&mut c, &["configure-record", record]);
     assert!(receipt.contains("duplicate=true"), "{receipt}");
-    assert!(authenticated_write(&c, &["add", "21100", "42"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "42"]).contains("duplicate=true"));
     c.stop();
 }

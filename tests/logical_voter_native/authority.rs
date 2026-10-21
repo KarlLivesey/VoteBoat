@@ -378,8 +378,8 @@ fn already_admitted_append_cannot_overtake_retained_original_vote_capsule() {
         index: 1,
         term: 7,
         payload: EntryPayload::Command {
-            operation: OperationId::new(8051).unwrap(),
-            bytes: 5_i64.to_le_bytes().to_vec().into(),
+            operation: voteboat::application::Counter::operation(1, 1).unwrap(),
+            bytes: voteboat::application::Counter::command(0, 5).into(),
         },
     };
     let later = tracked_input(

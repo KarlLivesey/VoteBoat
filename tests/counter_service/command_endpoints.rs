@@ -54,26 +54,26 @@ fn history(quic: bool) {
     cluster.command_principal = Some(1);
     assert_eq!(cluster.routed(&["read"]), "OK value=0\n");
     assert_eq!(
-        String::from_utf8(cluster.request(leader, &["add", "18701", "7"]).stdout).unwrap(),
+        String::from_utf8(cluster.request(leader, &["add", "1", "1", "0", "7"]).stdout).unwrap(),
         "ERR AUTHORIZATION\n"
     );
     cluster.command_principal = Some(2);
-    assert!(authenticated_write(&cluster, &["add", "18701", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "1", "0", "7"]).contains("Value(7)"));
     cluster.command_principal = Some(3);
     cluster.ok(leader, &["checkpoint"]);
     let mut lost = cluster.children[leader - 1].take().unwrap();
     lost.kill().unwrap();
     lost.wait().unwrap();
     assert_ne!(cluster.leader(), leader);
-    assert!(authenticated_write(&cluster, &["add", "18701", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
     cluster.stop();
     for id in 1..=3 {
         cluster.start(id, "recover");
     }
     cluster.leader();
-    assert!(authenticated_write(&cluster, &["add", "18701", "7"]).contains("duplicate=true"));
-    assert!(authenticated_write(&cluster, &["add", "18702", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "1", "2", "0", "3"]).contains("Value(10)"));
     assert_eq!(cluster.routed(&["read"]), "OK value=10\n");
     cluster.stop();
     for id in 1..=3 {
@@ -266,7 +266,7 @@ fn command_route_tls_interruption_never_reroutes_an_unknown_write() {
     });
     let second = cluster.take_listener(102);
     second.set_nonblocking(true).unwrap();
-    let output = cluster.target("auto", &["add", "18701", "7"]);
+    let output = cluster.target("auto", &["add", "1", "1", "0", "7"]);
     assert!(!output.status.success());
     assert!(String::from_utf8_lossy(&output.stdout).starts_with("UNKNOWN "));
     assert_eq!(first.join().unwrap(), *b"3\n");

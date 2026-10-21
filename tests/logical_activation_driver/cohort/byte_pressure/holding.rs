@@ -69,7 +69,11 @@ impl Held {
     }
     pub fn complete(self, parent: &mut fixture::FacadeNode) {
         self.assert_retained(parent);
-        clients::applied(&self.client, OperationId::new(33301).unwrap(), true);
+        clients::applied(
+            &self.client,
+            voteboat::application::Counter::operation(1, 1).unwrap(),
+            true,
+        );
         parent.complete_client(self.client).unwrap();
         for output in self.reads {
             assert!(matches!(

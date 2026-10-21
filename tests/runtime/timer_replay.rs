@@ -248,7 +248,7 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .unwrap();
         run.nodes[other]
             .runtime
-            .admit(group(2), proposal(9911))
+            .admit(group(2), proposal(1))
             .unwrap();
         run.advance(121);
         // A follower the quorum did not need gets the write within the hold bound.
@@ -295,7 +295,7 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .unwrap();
         run.nodes[current]
             .runtime
-            .admit(group(1), proposal(9911))
+            .admit(group(1), proposal(1))
             .unwrap();
         run.advance(201);
         // A follower the quorum did not need gets the write within the hold bound.
@@ -317,7 +317,7 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .unwrap();
         run.nodes[current]
             .runtime
-            .admit(group(1), proposal(9911))
+            .admit(group(1), proposal(1))
             .unwrap();
         run.advance(301);
         run.advance(301 + timer_config().append_hold_ms);

@@ -19,12 +19,12 @@ fn own_checkpoint_and_original_suffix_restore_busy_and_active_state() {
     let i = intent(1);
     begin(&mut a, &i);
     begin(&mut a, &intent(2));
-    let bytes = a.business(&6i64.to_le_bytes()).unwrap();
-    a.apply_batch(&[entry(3, op(100), bytes)]).unwrap();
+    let bytes = a.business(&Counter::command(0, 6)).unwrap();
+    a.apply_batch(&[entry(3, business_op(1), bytes)]).unwrap();
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app(3);
     restored
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 3, &checkpoint)
+        .restore_checkpoint(a.schema_version(), 3, &checkpoint)
         .unwrap();
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), checkpoint);
     assert_eq!(restored.active(), Some(ops(1).begin));
@@ -45,7 +45,11 @@ fn own_checkpoint_and_original_suffix_restore_busy_and_active_state() {
         )
         .unwrap(),
     );
-    let retry = entry(6, op(100), a.business(&6i64.to_le_bytes()).unwrap());
+    let retry = entry(
+        6,
+        business_op(1),
+        a.business(&Counter::command(0, 6)).unwrap(),
+    );
     for e in [outcome, release, retry] {
         a.apply_batch(std::slice::from_ref(&e)).unwrap();
         restored.apply_batch(&[e]).unwrap();
@@ -73,29 +77,29 @@ fn invalid_restore_is_atomic_and_rejects_history_materialization_and_profile() {
     let mut restored = app(2);
     for end in 0..checkpoint.len() {
         assert!(restored
-            .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 3, &checkpoint[..end])
+            .restore_checkpoint(a.schema_version(), 3, &checkpoint[..end])
             .is_err());
         assert_eq!(restored.checkpoint(usize::MAX).unwrap(), original);
     }
     let mut changed = checkpoint.clone();
     *changed.last_mut().unwrap() ^= 1;
     assert!(restored
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 3, &changed)
+        .restore_checkpoint(a.schema_version(), 3, &changed)
         .is_err());
     assert!(restored
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 2, &checkpoint)
+        .restore_checkpoint(a.schema_version(), 2, &checkpoint)
         .is_err());
     assert_eq!(
         restored.restore_checkpoint(restored.inner.schema_version(), 3, &checkpoint),
         Err(ApplicationError::UnsupportedSchema)
     );
     assert!(app(3)
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 3, &checkpoint)
+        .restore_checkpoint(a.schema_version(), 3, &checkpoint)
         .is_err());
     let mut changed = checkpoint.clone();
     changed[8 + 8 + 16] ^= 1;
     assert!(restored
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 3, &changed)
+        .restore_checkpoint(a.schema_version(), 3, &changed)
         .is_err());
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), original);
 }

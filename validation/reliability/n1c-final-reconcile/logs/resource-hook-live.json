@@ -1,0 +1,153 @@
+{
+  "time": 1792541254.4442184,
+  "processes": [
+    {
+      "pid": 265243,
+      "command": "python3 target/reconcile-run.py hook-precommit sh .githooks/pre-push ",
+      "threads": [
+        {
+          "tid": 265243,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "pid": 265786,
+      "command": "sh .githooks/pre-push ",
+      "threads": [
+        {
+          "tid": 265786,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "pid": 266366,
+      "command": "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo-clippy clippy --locked --offline --keep-going --all-targets -- -D warnings ",
+      "threads": [
+        {
+          "tid": 266366,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "pid": 266373,
+      "command": "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo check --locked --offline --keep-going --all-targets ",
+      "threads": [
+        {
+          "tid": 266373,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 266381,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 266412,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 268085,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 268102,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "pid": 268086,
+      "command": "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/clippy-driver /home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name startup --edition=2021 tests/startup.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,metadata -C embed-bitcode=no -C debuginfo=2 --warn=clippy::all --deny=unsafe_code --deny=clippy::too_many_lines --deny=clippy::cognitive_complexity --test --cfg feature=\"default\" --cfg feature=\"native\" --cfg feature=\"tls\" --check-cfg cfg(docsrs,test) --check-cfg cfg(feature, values(\"default\", \"native\", \"quic\", \"tls\")) -C metadata=92e3dd41ff832e93 -C extra-filename=-680c67a99f730873 --out-dir /home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps -L dependency=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps --extern libc=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/liblibc-4d2751311ebb874e.rmeta --extern raft_reference=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/libraft-cf67092afab35d5f.rmeta --extern ring=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/libring-ce97d7a6faadfc82.rmeta --extern rustls=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/librustls-b3f6389cb5421697.rmeta --extern slog=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/libslog-5a9b4935aa71312e.rmeta --extern voteboat=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/libvoteboat-e4da37e3daf1a483.rmeta -L native=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/build/ring-b4b4d2c63cd52e10/out --cfg voteboat_checkpoint_debug_oracle --check-cfg cfg(voteboat_checkpoint_debug_oracle) ",
+      "threads": [
+        {
+          "tid": 268086,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 268087,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 268088,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "pid": 268103,
+      "command": "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/clippy-driver /home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name insertion --edition=2021 tests/insertion.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,metadata -C embed-bitcode=no -C debuginfo=2 --warn=clippy::all --deny=unsafe_code --deny=clippy::too_many_lines --deny=clippy::cognitive_complexity --test --cfg feature=\"default\" --cfg feature=\"native\" --cfg feature=\"tls\" --check-cfg cfg(docsrs,test) --check-cfg cfg(feature, values(\"default\", \"native\", \"quic\", \"tls\")) -C metadata=846363d948c4830f -C extra-filename=-dba845b33cdde3b5 --out-dir /home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps -L dependency=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps --extern libc=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/liblibc-4d2751311ebb874e.rmeta --extern raft_reference=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/libraft-cf67092afab35d5f.rmeta --extern ring=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/libring-ce97d7a6faadfc82.rmeta --extern rustls=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/librustls-b3f6389cb5421697.rmeta --extern slog=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/libslog-5a9b4935aa71312e.rmeta --extern voteboat=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/libvoteboat-e4da37e3daf1a483.rmeta -L native=/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/build/ring-b4b4d2c63cd52e10/out --cfg voteboat_checkpoint_debug_oracle --check-cfg cfg(voteboat_checkpoint_debug_oracle) ",
+      "threads": [
+        {
+          "tid": 268103,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 268104,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 268105,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    }
+  ]
+}

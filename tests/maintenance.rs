@@ -15,6 +15,7 @@
 #![cfg(feature = "native")]
 mod support;
 use std::{
+    collections::BTreeSet,
     sync::{Arc, Condvar, Mutex},
     time::{Duration, Instant},
 };
@@ -202,7 +203,7 @@ fn maintenance(w: &mut impl PersistenceWorker) -> ReclaimEvent {
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-fn finish(w: &mut NativeLogWorker<Store>) -> Result<Store, StorageError> {
+fn finish<L: LogStore + Send + 'static>(w: &mut NativeLogWorker<L>) -> Result<L, StorageError> {
     w.close();
     let deadline = Instant::now() + Duration::from_secs(5);
     loop {
@@ -246,8 +247,12 @@ fn cleanup_runs_between_complete_barriers_and_retains_credits_through_close() {
         vec!["append", "barrier", "enter", "exit", "append", "barrier"]
     );
 }
+/// ST2 round 3 (I4): a rewrite has its own admission slot. It takes neither
+/// data nor control credits (round 2 charged it to the data credits, which
+/// held batches keep, so it could be refused for ever), runs one at a time,
+/// and leaves both reserves to persistence work; `usage` still reports it.
 #[test]
-fn maintenance_uses_data_admission_and_preserves_control_reserve() {
+fn maintenance_has_its_own_admission_and_preserves_both_reserves() {
     let limits = WorkerLimits {
         max_requests: 2,
         control_requests: 1,
@@ -256,17 +261,26 @@ fn maintenance_uses_data_admission_and_preserves_control_reserve() {
     let (mut w, g, _release) = setup(Outcome::Success, limits);
     w.submit_reclaim(1024).unwrap();
     wait_entered(&g);
-    let data = unit(&w, 2, true);
-    let pointer = data.as_ptr();
-    let rejected = w.submit(data).unwrap_err();
+    assert_eq!(w.submit_reclaim(1024), Err(WorkerError::Overloaded));
+    let data = w.submit(unit(&w, 2, true)).unwrap();
+    let control = w.submit(unit(&w, 1, false)).unwrap();
+    assert_eq!(w.usage().requests, 3);
+    // Both persistence credits are now in use; the original units come back.
+    let more = unit(&w, 1, false);
+    let pointer = more.as_ptr();
+    let rejected = w.submit(more).unwrap_err();
     assert_eq!(rejected.reason, WorkerError::Overloaded);
     assert_eq!(rejected.units.as_ptr(), pointer);
-    w.submit(unit(&w, 1, false)).unwrap();
-    assert_eq!(w.usage().requests, 2);
     release(&g);
     maintenance(&mut w);
-    event(&mut w);
-    event(&mut w);
+    let mut durable = BTreeSet::new();
+    while durable.len() < 2 {
+        if let WorkerEvent::Durable { request, .. } = event(&mut w) {
+            durable.insert(request.sequence);
+        }
+    }
+    assert_eq!(durable, [data.sequence, control.sequence].into());
+    assert_eq!(w.usage().requests, 0);
     drop(finish(&mut w).unwrap());
 }
 #[test]
@@ -366,4 +380,518 @@ fn capability_and_byte_limits_reject_before_ownership_or_sequence_consumption() 
     release(&gate);
     assert_eq!(maintenance(&mut worker).result.unwrap().after_bytes, 1);
     drop(finish(&mut worker).unwrap());
+}
+
+/// A store whose physical log is "full" for data until a rewrite frees it
+/// (when `frees` is set): the shape of `NativeLogStore`'s capacity refusal.
+struct FullStore {
+    inner: HostLogStore,
+    full: bool,
+    frees: bool,
+    trace: Arc<Mutex<Vec<&'static str>>>,
+}
+impl LogStore for FullStore {
+    fn binding(&self) -> StoreBinding {
+        self.inner.binding()
+    }
+    fn limits(&self) -> LogLimits {
+        self.inner.limits()
+    }
+    fn state(&self, g: GroupIdentity) -> Result<GroupLog, StorageError> {
+        self.inner.state(g)
+    }
+    fn append_batch(&mut self, m: Vec<LogMutation>) -> Result<Vec<LogTicket>, StorageError> {
+        self.inner.append_batch(m)
+    }
+    fn append_batch_within_capacity(
+        &mut self,
+        m: Vec<LogMutation>,
+    ) -> Result<Vec<LogTicket>, AppendRefused> {
+        let data = m.iter().any(
+            |m| matches!(m, LogMutation::Update(u) if u.suffix.as_ref().is_some_and(|s| !s.entries.is_empty())),
+        );
+        if self.full && data {
+            self.trace.lock().unwrap().push("full");
+            return Err(AppendRefused::Full(m));
+        }
+        self.trace.lock().unwrap().push("append");
+        self.inner.append_batch(m).map_err(AppendRefused::Failed)
+    }
+    fn barrier(&mut self, t: &[LogTicket]) -> Result<DurableLog, StorageError> {
+        self.inner.barrier(t)
+    }
+    fn fetch_range(
+        &self,
+        g: GroupIdentity,
+        v: LogGeneration,
+        f: u64,
+        n: usize,
+        b: usize,
+    ) -> Result<Vec<LogEntry>, StorageError> {
+        self.inner.fetch_range(g, v, f, n, b)
+    }
+    fn supports_reclaim(&self) -> bool {
+        true
+    }
+    fn physical_usage(&self) -> Option<WalUsage> {
+        // The usable capacity its limits imply (the worker refuses a store
+        // whose largest batch exceeds it); "full" reports all of it in use.
+        let limits = self.inner.limits();
+        let capacity = limits.max_wal_bytes - limits.control_reserve_bytes;
+        Some(WalUsage {
+            bytes: if self.full { capacity } else { 10 },
+            capacity,
+            parked: 0,
+        })
+    }
+    fn reclaim(&mut self, _max_bytes: usize) -> Result<LogReclaimed, StorageError> {
+        self.trace.lock().unwrap().push("reclaim");
+        if self.frees {
+            self.full = false;
+        }
+        Ok(LogReclaimed {
+            before_bytes: 1000,
+            after_bytes: if self.full { 1000 } else { 10 },
+        })
+    }
+}
+fn full_worker(frees: bool) -> (NativeLogWorker<FullStore>, Arc<Mutex<Vec<&'static str>>>) {
+    full_worker_with(frees, WorkerLimits::default(), 2)
+}
+fn full_worker_with(
+    frees: bool,
+    limits: WorkerLimits,
+    groups: u128,
+) -> (NativeLogWorker<FullStore>, Arc<Mutex<Vec<&'static str>>>) {
+    let mut inner = HostLogStore::new(1);
+    append(
+        &mut inner,
+        (1..=groups)
+            .map(|g| LogMutation::Create(bootstrap(g, 3)))
+            .collect(),
+    );
+    let trace = Arc::new(Mutex::new(Vec::new()));
+    let worker = NativeLogWorker::spawn(
+        FullStore {
+            inner,
+            full: true,
+            frees,
+            trace: trace.clone(),
+        },
+        StorageWorkerGeneration::new(1).unwrap(),
+        limits,
+        Arc::new(ThreadWake::current()),
+    )
+    .unwrap();
+    (worker, trace)
+}
+fn wait_parked(w: &impl PersistenceWorker, parked: bool) {
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while (w.wal_usage().unwrap().parked > 0) != parked {
+        assert!(Instant::now() < deadline);
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+}
+
+/// ST2b: a batch that does not fit is held on the WAL thread, never failed:
+/// no event at all until a rewrite makes room, control work for other groups
+/// still passes, and after the rewrite the held batch is written and durable
+/// before the rewrite's own event. No capacity refusal reaches a core.
+#[test]
+fn a_batch_that_does_not_fit_is_held_until_a_rewrite_and_never_failed() {
+    let (mut w, trace) = full_worker(true);
+    let data = w.submit(unit(&w, 1, true)).unwrap();
+    wait_parked(&w, true);
+    assert!(w.poll(8).is_empty(), "a held batch reports nothing");
+    assert_eq!(w.usage().requests, 1, "its admission credit is kept");
+    // Control work (here a hard-state update for another group) still runs.
+    let control = w.submit(unit(&w, 2, false)).unwrap();
+    assert!(matches!(event(&mut w), WorkerEvent::Written { request, .. } if request == control));
+    assert!(matches!(event(&mut w), WorkerEvent::Durable { request, .. } if request == control));
+    // The same group cannot queue behind its held batch.
+    assert_eq!(
+        w.submit(unit(&w, 1, true)).unwrap_err().reason,
+        WorkerError::Overloaded
+    );
+    let reclaim = w.submit_reclaim(1024).unwrap();
+    assert!(matches!(event(&mut w), WorkerEvent::Written { request, .. } if request == data));
+    assert!(matches!(event(&mut w), WorkerEvent::Durable { request, .. } if request == data));
+    assert_eq!(maintenance(&mut w).request, reclaim);
+    wait_parked(&w, false);
+    let store = finish(&mut w).unwrap();
+    assert_eq!(store.inner.state(group(1)).unwrap().last_index(), 1);
+    assert_eq!(
+        *trace.lock().unwrap(),
+        vec!["full", "append", "reclaim", "append"]
+    );
+}
+
+/// Closed while a batch is still held and a rewrite cannot free room: the
+/// WAL thread rewrites once, then reports the never-written batch as a
+/// non-fatal refusal so the owner can finish shutting down.
+#[test]
+fn a_batch_still_held_at_close_is_refused_after_one_rewrite() {
+    let (mut w, trace) = full_worker(false);
+    let data = w.submit(unit(&w, 1, true)).unwrap();
+    wait_parked(&w, true);
+    w.close();
+    match event(&mut w) {
+        WorkerEvent::Failed { request, error, .. } => {
+            assert_eq!(request, data);
+            assert_eq!(error, StorageError::Rejected("WAL capacity at close"));
+        }
+        other => panic!("{other:?}"),
+    }
+    let store = finish(&mut w).unwrap();
+    assert_eq!(store.inner.state(group(1)).unwrap().last_index(), 0);
+    assert_eq!(*trace.lock().unwrap(), vec!["full", "reclaim", "full"]);
+}
+
+/// ST2 round 3 (I4, Codex P1-1): parked data batches keep their admission
+/// credits, so a rewrite admitted against those same credits could never be
+/// submitted, and only a rewrite unparks them. With every data credit held by
+/// a parked batch, the rewrite is still admitted at once and every parked
+/// batch is then written.
+#[test]
+fn a_rewrite_is_admitted_while_parked_batches_hold_every_data_credit() {
+    let limits = WorkerLimits {
+        max_requests: 4,
+        control_requests: 1,
+        ..Default::default()
+    };
+    let (mut w, _trace) = full_worker_with(true, limits, 3);
+    let parked: Vec<_> = (1..=3)
+        .map(|g| w.submit(unit(&w, g, true)).unwrap())
+        .collect();
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while w.wal_usage().unwrap().parked < 3 * parked_cost(&w) {
+        assert!(Instant::now() < deadline);
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    let mut refusals = 0;
+    let reclaim = loop {
+        match w.submit_reclaim(1024) {
+            Ok(ticket) => break ticket,
+            Err(error) => {
+                assert_eq!(error, WorkerError::Overloaded);
+                refusals += 1;
+                assert!(refusals < 100, "100 consecutive rewrite refusals");
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+        }
+    };
+    assert_eq!(refusals, 0, "the rewrite has its own admission");
+    let mut durable = BTreeSet::new();
+    while durable.len() < 3 {
+        if let WorkerEvent::Durable { request, .. } = event(&mut w) {
+            durable.insert(request.sequence);
+        }
+    }
+    assert_eq!(
+        durable,
+        parked.iter().map(|t| t.sequence).collect::<BTreeSet<_>>()
+    );
+    assert_eq!(maintenance(&mut w).request, reclaim);
+    wait_parked(&w, false);
+    drop(finish(&mut w).unwrap());
+}
+/// Owner-side cost of one `unit(.., true)` batch, as the worker publishes it.
+fn parked_cost(w: &impl PersistenceWorker) -> usize {
+    batch_cost(&unit(w, 1, true), 1, w.limits()).unwrap().0
+}
+
+/// ST2 round 3 (I5, Codex P1-2): limits under which a valid command can never
+/// fit the WAL. 8 KiB WAL, 4 KiB control reserve (4 KiB usable for data),
+/// 8 KiB batches, a 4,000-byte command after a three-voter bootstrap: the
+/// batch can never fit next to the bootstrap image, however often the WAL is
+/// rewritten. It must be refused before it is accepted (here, when the worker
+/// is configured), never held for ever.
+#[test]
+fn limits_under_which_a_batch_can_never_fit_are_refused_before_any_write() {
+    use voteboat::native::log_store::{FileLogIo, NativeLogStore};
+    let path =
+        std::env::temp_dir().join(format!("voteboat-impossible-batch-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&path);
+    std::fs::create_dir_all(&path).unwrap();
+    let limits = LogLimits {
+        max_wal_bytes: 8192,
+        control_reserve_bytes: 4096,
+        max_batch_bytes: 8192,
+        max_command_bytes: 6000,
+        ..Default::default()
+    };
+    let mut store =
+        NativeLogStore::create(FileLogIo::create(&path).unwrap(), identity(1), limits).unwrap();
+    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let state = store.state(group(1)).unwrap();
+    let spawned = NativeLogWorker::spawn(
+        store,
+        StorageWorkerGeneration::new(1).unwrap(),
+        WorkerLimits {
+            batch_bytes: 8192,
+            ..Default::default()
+        },
+        Arc::new(ThreadWake::current()),
+    );
+    let mut w = match spawned {
+        Err(error) => {
+            assert_eq!(error, WorkerError::InvalidLimits);
+            std::fs::remove_dir_all(&path).unwrap();
+            return;
+        }
+        Ok(w) => w,
+    };
+    let LogMutation::Update(update) = update(
+        &state,
+        1,
+        0,
+        Some(Suffix {
+            from: 1,
+            entries: vec![LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Command {
+                    operation: OperationId::new(9).unwrap(),
+                    bytes: vec![3; 4000].into(),
+                },
+            }]
+            .into(),
+        }),
+    ) else {
+        unreachable!()
+    };
+    let mut units = unit(&w, 1, true);
+    units[0].update = update;
+    let accepted = w.submit(units);
+    let outcome = match accepted {
+        Err(rejected) => format!("refused at admission: {:?}", rejected.reason),
+        Ok(ticket) => {
+            let mut written = false;
+            for _ in 0..3 {
+                let deadline = Instant::now() + Duration::from_secs(5);
+                while w.wal_usage().unwrap().parked == 0 && !written {
+                    for e in w.poll(8) {
+                        written |=
+                            matches!(e, WorkerEvent::Durable { request, .. } if request == ticket);
+                    }
+                    assert!(Instant::now() < deadline);
+                    std::thread::park_timeout(Duration::from_millis(1));
+                }
+                if written {
+                    break;
+                }
+                let reclaimed = w.submit_reclaim(8192).unwrap();
+                assert_eq!(maintenance(&mut w).request, reclaimed);
+            }
+            format!(
+                "accepted; written {written}; still held {} bytes after 3 rewrites",
+                w.wal_usage().unwrap().parked
+            )
+        }
+    };
+    w.close();
+    let _ = std::fs::remove_dir_all(&path);
+    panic!("an impossible batch was accepted instead of refused at configuration: {outcome}");
+}
+
+/// A `Send` in-memory journal for worker tests (`ModelIo` is single-threaded).
+/// WAL bytes and the published manifest.
+type Journal = (Vec<u8>, Option<Vec<u8>>);
+#[derive(Clone, Default)]
+struct SharedIo(Arc<Mutex<Journal>>);
+impl voteboat::native::log_store::JournalIo for SharedIo {
+    fn supports_replacement(&self) -> bool {
+        true
+    }
+    fn replace_log(&mut self, bytes: &[u8], manifest: &[u8]) -> std::io::Result<()> {
+        *self.0.lock().unwrap() = (bytes.to_vec(), Some(manifest.to_vec()));
+        Ok(())
+    }
+    fn read_manifest(&mut self) -> std::io::Result<Vec<u8>> {
+        self.0
+            .lock()
+            .unwrap()
+            .1
+            .clone()
+            .ok_or(std::io::ErrorKind::NotFound.into())
+    }
+    fn read_log(&mut self, limit: usize) -> std::io::Result<Vec<u8>> {
+        let d = self.0.lock().unwrap();
+        if d.0.len() > limit {
+            return Err(std::io::Error::other("oversized WAL"));
+        }
+        Ok(d.0.clone())
+    }
+    fn append(&mut self, bytes: &[u8]) -> std::io::Result<()> {
+        self.0.lock().unwrap().0.extend_from_slice(bytes);
+        Ok(())
+    }
+    fn sync_log(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+    fn truncate_log(&mut self, len: u64) -> std::io::Result<()> {
+        self.0.lock().unwrap().0.truncate(len as usize);
+        Ok(())
+    }
+    fn publish_manifest(&mut self, b: &[u8]) -> std::io::Result<()> {
+        self.0.lock().unwrap().1 = Some(b.to_vec());
+        Ok(())
+    }
+}
+
+/// One update adding a noop at `index` in term `index`, commit 0.
+fn noop_update(index: u64, revision: LogRevision) -> LogUpdate {
+    LogUpdate {
+        snapshot_membership: None,
+        group: group(1),
+        expected_revision: revision,
+        hard_state: HardState {
+            term: index,
+            voted_for: None,
+        },
+        commit_index: 0,
+        snapshot: None,
+        suffix: Some(Suffix {
+            from: index,
+            entries: vec![LogEntry {
+                index,
+                term: index,
+                payload: EntryPayload::Noop,
+            }]
+            .into(),
+        }),
+    }
+}
+fn noop_unit(w: &impl PersistenceWorker, index: u64, revision: LogRevision) -> Vec<PersistUnit> {
+    let mut units = unit(w, 1, false);
+    units[0].update = noop_update(index, revision);
+    units
+}
+/// The next completion of the submitted noop, or `None` once it is held.
+fn noop_outcome(w: &mut impl PersistenceWorker) -> Option<WorkerEvent> {
+    let deadline = Instant::now() + Duration::from_secs(5);
+    loop {
+        if let Some(e) = w.poll(1).pop() {
+            if !matches!(e, WorkerEvent::Written { .. }) {
+                return Some(e);
+            }
+            continue;
+        }
+        if w.wal_usage().unwrap().parked > 0 {
+            return None;
+        }
+        assert!(Instant::now() < deadline);
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+}
+/// Persist one noop per update, rewriting whenever one is held, until one
+/// fails: `Ok((index, error))`; `Err((index, wal bytes))` when one stays held
+/// through three successful rewrites in a row.
+fn persist_noops_until_refused(
+    w: &mut impl PersistenceWorker,
+    mut revision: LogRevision,
+    max_bytes: usize,
+) -> Result<(u64, StorageError), (u64, usize)> {
+    let mut index = 0;
+    loop {
+        index += 1;
+        assert!(index < 20_000, "the live image never filled the WAL");
+        let ticket = w.submit(noop_unit(w, index, revision)).unwrap();
+        let mut rewrites_while_held = 0;
+        loop {
+            match noop_outcome(w) {
+                Some(WorkerEvent::Durable { request, .. }) => {
+                    assert_eq!(request, ticket);
+                    revision = LogRevision::new(revision.get() + 1).unwrap();
+                    break;
+                }
+                Some(WorkerEvent::Failed { request, error, .. }) => {
+                    assert_eq!(request, ticket);
+                    return Ok((index, error));
+                }
+                Some(other) => panic!("{other:?}"),
+                None if rewrites_while_held == 3 => {
+                    return Err((index, w.wal_usage().unwrap().bytes));
+                }
+                None => {
+                    let r = w.submit_reclaim(max_bytes).unwrap();
+                    let reclaimed = maintenance(w);
+                    assert_eq!(reclaimed.request, r);
+                    reclaimed.result.unwrap();
+                    rewrites_while_held += 1;
+                }
+            }
+        }
+    }
+}
+
+/// ST2 round 4 (R4-1, GPT-6.1-Sol round-3 P1-1): live noops are entries a
+/// rewrite must keep. Sol's limits (64 KiB WAL, 4 KiB reserve, 1 KiB batches,
+/// 512-byte commands) and a three-voter group; each update adds one noop at
+/// a new term with commit 0 (elections whose leaders never learned an
+/// acknowledgement), rewriting whenever a batch is held. Once the live image
+/// leaves no room, the held noop can never fit: after the next successful
+/// rewrite the worker completes it with a typed, non-fatal refusal instead of
+/// holding it for ever (on 522a08c8 noop 3,831 stayed held through three
+/// successful rewrites at 65,410 bytes). Recovery: reopen the unchanged
+/// journal with a larger `max_wal_bytes`; every earlier noop is there and
+/// the next one is written. (A node never gets here: its WAL account refuses
+/// noops that do not fit under the high-water mark plus the reserve; see
+/// `startup::backpressure::live_noops_past_the_reserve_*`.)
+#[test]
+fn live_noops_that_fill_the_wal_fail_typed_after_a_rewrite_and_recover_with_a_larger_budget() {
+    use voteboat::native::log_store::NativeLogStore;
+    let limits = LogLimits {
+        max_wal_bytes: 65_536,
+        control_reserve_bytes: 4096,
+        max_batch_bytes: 1024,
+        max_command_bytes: 512,
+        ..Default::default()
+    };
+    let io = SharedIo::default();
+    let mut store = NativeLogStore::create(io.clone(), identity(1), limits).unwrap();
+    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let revision = store.state(group(1)).unwrap().revision;
+    let mut w = NativeLogWorker::spawn(
+        store,
+        StorageWorkerGeneration::new(1).unwrap(),
+        WorkerLimits {
+            batch_bytes: 1024,
+            ..Default::default()
+        },
+        Arc::new(ThreadWake::current()),
+    )
+    .unwrap();
+    let (index, error) = match persist_noops_until_refused(&mut w, revision, limits.max_wal_bytes) {
+        Ok(failed) => failed,
+        Err((index, bytes)) => {
+            w.close();
+            panic!(
+                "noop {index} is still held after three successful rewrites \
+                 ({bytes} WAL bytes, no completion, no typed failure)"
+            );
+        }
+    };
+    assert_eq!(
+        error,
+        StorageError::Rejected("WAL live image leaves no room")
+    );
+    let live = index - 1;
+    assert!(live > 1000, "only {live} live noops");
+    let store = finish(&mut w).unwrap();
+    assert_eq!(store.state(group(1)).unwrap().last_index(), live);
+    drop(store);
+    // Typed recovery: the operator raises the budget and reopens.
+    let larger = LogLimits {
+        max_wal_bytes: 1 << 20,
+        ..limits
+    };
+    let mut store = NativeLogStore::recover(io, identity(1), larger).unwrap();
+    let state = store.state(group(1)).unwrap();
+    assert_eq!(state.last_index(), live);
+    append(
+        &mut store,
+        vec![LogMutation::Update(noop_update(index, state.revision))],
+    );
+    assert_eq!(store.state(group(1)).unwrap().last_index(), index);
 }

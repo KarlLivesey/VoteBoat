@@ -78,13 +78,13 @@ fn history(quic: bool) {
     }
     c.command_principal = Some(1);
     assert_eq!(c.routed(&["read"]), "OK value=0\n");
-    let denied = c.request(leader, &["add", "18801", "9"]);
+    let denied = c.request(leader, &["add", "1", "1", "0", "9"]);
     assert_eq!(
         String::from_utf8(denied.stdout).unwrap(),
         "ERR AUTHORIZATION\n"
     );
     c.command_principal = Some(2);
-    assert!(authenticated_write(&c, &["add", "18801", "9"]).contains("Value(9)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "9"]).contains("Value(9)"));
     c.command_principal = Some(3);
     c.ok(leader, &["checkpoint"]);
     c.stop();
@@ -92,7 +92,7 @@ fn history(quic: bool) {
         c.start(id, "recover");
     }
     c.leader();
-    assert!(authenticated_write(&c, &["add", "18801", "9"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "9"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=9\n");
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();
@@ -126,7 +126,7 @@ fn discovery_failure_never_submits_a_command_or_uses_stale_addresses() {
     }
     wait_for_source(&mut c);
     c.ok(1, &["status"]);
-    let out = c.request(2, &["add", "18802", "99"]);
+    let out = c.request(2, &["add", "1", "2", "0", "99"]);
     assert!(!out.status.success());
     assert!(String::from_utf8_lossy(&out.stderr).contains("Missing"));
     assert!(!String::from_utf8_lossy(&out.stdout).contains("UNKNOWN"));
@@ -138,7 +138,7 @@ fn discovery_failure_never_submits_a_command_or_uses_stale_addresses() {
         original.replace("node1.voteboat.test", "wrong.voteboat.test"),
     )
     .unwrap();
-    let out = c.request(1, &["add", "18803", "99"]);
+    let out = c.request(1, &["add", "1", "3", "0", "99"]);
     assert!(!out.status.success());
     assert!(String::from_utf8_lossy(&out.stderr)
         .contains("authentication failed before command submission"));
@@ -158,7 +158,7 @@ fn discovery_is_opt_in_and_requires_authentication_before_opening_storage() {
         c.start(id, "create");
     }
     wait_for_source(&mut c);
-    let out = c.request(1, &["add", "18804", "99"]);
+    let out = c.request(1, &["add", "1", "4", "0", "99"]);
     assert!(!out.status.success());
     assert!(String::from_utf8_lossy(&out.stderr).contains("discovery upgrade refused"));
     c.discover_via = None;
@@ -195,7 +195,7 @@ fn discovery_scope_and_startup_validation_fail_before_submission() {
     }
     wait_for_source(&mut c);
     c.command_principal = Some(1);
-    let out = c.request(1, &["add", "18805", "99"]);
+    let out = c.request(1, &["add", "1", "5", "0", "99"]);
     assert!(!out.status.success());
     assert!(String::from_utf8_lossy(&out.stderr).contains("discovery upgrade refused"));
     c.command_principal = Some(3);

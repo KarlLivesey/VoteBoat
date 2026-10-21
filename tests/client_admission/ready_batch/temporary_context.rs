@@ -32,6 +32,10 @@ impl Observations {
         self.guards.borrow_mut().clear();
     }
 }
+/// The counter sequence of a built-in-session operation, as the test's IDs.
+fn sequence(operation: OperationId) -> u128 {
+    u128::from(operation.get() as u64)
+}
 struct TemporaryLease(Rc<Observations>);
 impl Drop for TemporaryLease {
     fn drop(&mut self) {
@@ -73,7 +77,7 @@ impl HostApplication {
         bytes: &[u8],
         reserved: &mut BTreeSet<OperationId>,
     ) -> Result<usize, ApplicationError> {
-        if bytes.len() != 8 {
+        if bytes.len() != COUNTER_COMMAND_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
         reserved.insert(operation);
@@ -81,12 +85,12 @@ impl HostApplication {
             return Err(ApplicationError::DedupCapacity);
         }
         if let Some((id, error)) = self.observations.reject.get() {
-            if id == operation.get() {
+            if id == sequence(operation) {
                 return Err(error);
             }
         }
         Ok(std::mem::size_of::<CounterReceipt>()
-            + usize::from(self.observations.bad_bound.get() == Some(operation.get())))
+            + usize::from(self.observations.bad_bound.get() == Some(sequence(operation))))
     }
 }
 impl ProposalAdmission for HostApplication {
@@ -99,8 +103,11 @@ impl ProposalAdmission for HostApplication {
         operation: OperationId,
         _: &[u8],
     ) -> Result<(), ApplicationError> {
-        self.observations.guards.borrow_mut().push(operation.get());
-        if self.observations.guard_reject.get() == Some(operation.get()) {
+        self.observations
+            .guards
+            .borrow_mut()
+            .push(sequence(operation));
+        if self.observations.guard_reject.get() == Some(sequence(operation)) {
             Err(ApplicationError::NotApplied)
         } else {
             Ok(())
@@ -115,7 +122,7 @@ impl ProposalAdmission for HostApplication {
         self.observations
             .reference
             .borrow_mut()
-            .push(operation.get());
+            .push(sequence(operation));
         let mut reserved = pending.map(|(id, _)| id).collect();
         self.validate(operation, bytes, &mut reserved)
     }
@@ -134,7 +141,7 @@ impl ProposalAdmission for HostApplication {
         self.observations.pending.borrow_mut().push(
             pending
                 .iter()
-                .map(|(id, bytes)| (id.get(), bytes.clone()))
+                .map(|(id, bytes)| (sequence(*id), bytes.clone()))
                 .collect(),
         );
         let mut reserved = pending.iter().map(|(id, _)| *id).collect();
@@ -151,7 +158,7 @@ impl ProposalAdmission for HostApplication {
             self.observations
                 .prepared
                 .borrow_mut()
-                .push(operation.get());
+                .push(sequence(operation));
             self.validate(operation, bytes, &mut reserved)
         }))
     }
@@ -244,7 +251,7 @@ fn lazy_context_sees_all_pending_and_drops_before_application() {
     );
     assert!(pending[0]
         .iter()
-        .all(|(_, bytes)| bytes == &1i64.to_le_bytes()));
+        .all(|(_, bytes)| bytes == &Counter::command(0, 1)));
     drop(pending);
     drive(
         &mut owner,

@@ -148,7 +148,7 @@ fn host_application_nested_capacity_bounds_and_group_constraints_are_preserved()
     let bytes = data(10, 7);
     let expected = size_of::<RoutedReceipt<HeapReceipt>>() + 8;
     assert_eq!(
-        app.validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty()),
+        app.validate_proposal(op(1), &bytes, std::iter::empty()),
         Ok(expected)
     );
     let write = entry(2, 1, bytes.clone());
@@ -245,7 +245,7 @@ fn scoped_profile_preserves_host_receipt_and_read_capacity_contracts() {
     let bytes = data(100, 7);
     let expected = size_of::<RoutedReceipt<HeapReceipt>>() + 8;
     assert_eq!(
-        a.validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty()),
+        a.validate_proposal(op(1), &bytes, std::iter::empty()),
         Ok(expected)
     );
     assert_eq!(
@@ -302,9 +302,9 @@ fn control_read_view_charges_host_nested_capacity_and_preserves_admission() {
     view.apply_batch(&[boot]).unwrap();
     let bytes = data(10, 7);
     assert_eq!(
-        view.validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty()),
+        view.validate_proposal(op(1), &bytes, std::iter::empty()),
         view.routed()
-            .validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty())
+            .validate_proposal(op(1), &bytes, std::iter::empty())
     );
     let result = view.apply_batch(&[entry(2, 1, bytes)]).unwrap().remove(0);
     assert_eq!(result.nested_bytes(8), Ok(8));

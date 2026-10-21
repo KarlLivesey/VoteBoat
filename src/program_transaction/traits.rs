@@ -27,9 +27,56 @@ impl StateMachine for ProgramApplication {
             Err(ApplicationError::InvalidCommand)
         }
     }
+    /// Lifetime transaction records until TX1 (audit S6).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
+        use crate::raft::DeploymentPlan;
+        // Plan: this group (decides the role), the profile version, the
+        // coordinator and participant counts, then each catalog group in
+        // order (3 words each), at most 3 + 3 + 16 × 3 = 54 words; then a
+        // participant's opening keys in id order: id, opening (an initial
+        // input no committed entry binds). An image that does not fit the
+        // plan overflows the profile and readiness refuses it.
+        let (coordinators, participants) =
+            (self.profile.coordinators(), self.profile.participants());
+        let limit = crate::raft::MAX_DEPLOYMENT_PLAN_WORDS;
+        let mut plan = Vec::with_capacity(
+            (6 + 3 * (coordinators.len() + participants.len()) + 2 * self.keys.len())
+                .min(limit + 2),
+        );
+        plan.extend(DeploymentPlan::group_words(self.group));
+        plan.extend([
+            self.profile.version(),
+            coordinators.len() as u64,
+            participants.len() as u64,
+        ]);
+        for group in coordinators.iter().chain(participants) {
+            plan.extend(DeploymentPlan::group_words(*group));
+        }
+        for (id, key) in &self.keys {
+            // Past the bound the profile overflows whatever follows, so stop
+            // building (a refusal, never a truncated plan).
+            if plan.len() >= limit {
+                break;
+            }
+            plan.extend([id.get(), key.opening as u64]);
+        }
         Some(ReadinessRequirements {
             application_schema: PROGRAM_SCHEMA,
+            // Words: coordinator transaction and key capacities, each of which
+            // decides whether a committed command is recorded.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::PROGRAM_TRANSACTION,
+                [
+                    self.limits.coordinator_transactions() as u64,
+                    self.limits.keys() as u64,
+                    0,
+                    0,
+                ],
+            ),
+            inner_profile: crate::raft::InnerProfile::LEAF.planned(&plan),
             command_bytes: PROGRAM_COMMAND_BYTES,
             snapshot_bytes: codec::checkpoint_bound(self),
         })

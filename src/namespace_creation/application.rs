@@ -290,6 +290,12 @@ where
         let r = self.inner.owner_requirements();
         ReadinessRequirements {
             application_schema: O::SCHEMA,
+            // No configuration of its own: its routed limits are the inner
+            // Routed layer's, and the plan is the group's deployment plan.
+            identity: crate::raft::LayerIdentity::family(
+                crate::raft::ApplicationFamily::CREATED_NAMESPACE,
+            ),
+            inner_profile: crate::raft::InnerProfile::wrapping(r),
             command_bytes: r
                 .command_bytes
                 .max(self.binding.len())
@@ -319,8 +325,21 @@ where
     fn validate_group(&self, g: GroupIdentity) -> Result<(), ApplicationError> {
         self.inner.validate_group(g)
     }
+    /// The namespace binding (plan and owner bootstrap) has applied: only its
+    /// exact bytes make it ready, and restore compares it.
+    fn deployment_bound(&self) -> bool {
+        self.ready.is_some() && self.inner.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
+    }
+    /// Wraps lifetime-bounded routed owners until DR2/DH1 (audit S3, S4). An undeclared
+    /// inner application stays undeclared.
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.inner.retention(),
+        )
     }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())

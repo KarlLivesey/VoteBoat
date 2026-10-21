@@ -36,9 +36,13 @@ fn finish(c: &mut Cluster) {
     );
     drain::joined(c, 3);
     assert!(
-        authenticated_write(c, &["group", "7", "3", "add", "42", "5"]).contains("duplicate=true")
+        authenticated_write(c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("duplicate=true")
     );
-    assert!(authenticated_write(c, &["group", "8", "2", "add", "43", "1"]).contains("Value(9)"));
+    assert!(
+        authenticated_write(c, &["group", "8", "2", "add", "1", "2", "0", "1"])
+            .contains("Value(9)")
+    );
     assert_eq!(c.routed(&["group", "1", "1", "read"]), "OK value=3\n");
     c.stop();
 }

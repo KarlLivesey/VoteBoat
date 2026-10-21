@@ -39,28 +39,56 @@ fn record(expected: u64) -> ConfigurationRecord {
 fn app() -> ReadinessRequirements {
     ReadinessRequirements {
         application_schema: 1,
+        identity: voteboat::raft::LayerIdentity::UNREGISTERED,
+        inner_profile: voteboat::raft::InnerProfile::LEAF,
         command_bytes: 64,
         snapshot_bytes: 4096,
     }
 }
 #[test]
 fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
-    use voteboat::application::*;
-    let mut counter = Counter::new(10000).unwrap();
-    let entries = (1..=10000)
-        .map(|index| LogEntry {
+    use voteboat::{application::*, retention::SessionLimits};
+    // The counter service limits filled to their steady-state maximum: every
+    // session holds a full window of unacknowledged outcomes.
+    let limits = SessionLimits::default();
+    let mut counter = Counter::with_limits(limits).unwrap();
+    let mut entries = Vec::new();
+    let sessions = limits.sessions() as u64;
+    let entry = |index: u64, operation: OperationId, bytes: Vec<u8>| LogEntry {
+        index,
+        term: 7,
+        payload: EntryPayload::Command {
+            operation,
+            bytes: bytes.into(),
+        },
+    };
+    for nonce in 1..sessions {
+        let index = entries.len() as u64 + 1;
+        entries.push(entry(
             index,
-            term: 7,
-            payload: EntryPayload::Command {
-                operation: OperationId::new(index as u128).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec().into(),
-            },
-        })
-        .collect::<Vec<_>>();
+            OperationId::new(u128::from(nonce)).unwrap(),
+            Vec::new(),
+        ));
+    }
+    for session in 1..=sessions {
+        for sequence in 1..=limits.window() {
+            let index = entries.len() as u64 + 1;
+            let operation = Counter::operation(session, sequence).unwrap();
+            entries.push(entry(index, operation, Counter::command(0, 1)));
+        }
+    }
+    let applied = entries.len() as u64;
     counter.apply_batch(&entries).unwrap();
+    assert_eq!(counter.retained_receipts(), limits.retained_receipts());
     let required = counter.readiness_requirements();
     let image = counter.checkpoint(required.snapshot_bytes).unwrap();
-    assert_eq!(image.len(), 330032);
+    // Nonces retire at each session's first command, so the full image is the
+    // bound minus the registration section.
+    assert_eq!(
+        image.len(),
+        required.snapshot_bytes - limits.registrations() * 24
+    );
+    assert_eq!(required.snapshot_bytes, 279_108);
     let bootstrap = bootstrap(1, 3);
     let membership = Membership::replay(&bootstrap, &[], 0).unwrap();
     let record = record(1);
@@ -80,7 +108,8 @@ fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
         let Rpc::Snapshot { snapshot } = &mut message.rpc else {
             unreachable!()
         };
-        snapshot.metadata.index = 10000;
+        snapshot.metadata.index = applied;
+        snapshot.metadata.application_schema = Counter::schema(limits);
         snapshot.application = image.clone();
         if codec.format_version() == 1 {
             snapshot.metadata.membership = None;
@@ -94,7 +123,7 @@ fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
         let Rpc::Snapshot { snapshot } = &decoded[0].rpc else {
             unreachable!()
         };
-        let mut restored = Counter::new(10000).unwrap();
+        let mut restored = Counter::with_limits(limits).unwrap();
         restored
             .restore_checkpoint(
                 snapshot.metadata.application_schema,
@@ -102,8 +131,11 @@ fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
                 &snapshot.application,
             )
             .unwrap();
-        assert_eq!(restored.remaining_operations(), 0);
-        assert_eq!(restored.read_applied(10000).unwrap(), 10000);
+        assert_eq!(restored.retained_receipts(), limits.retained_receipts());
+        assert_eq!(
+            restored.read_applied(applied).unwrap(),
+            limits.retained_receipts() as i64
+        );
     }
 }
 fn request<'a>(

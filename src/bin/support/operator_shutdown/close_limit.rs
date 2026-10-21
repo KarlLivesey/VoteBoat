@@ -8,6 +8,7 @@ use voteboat::{
     secure::{SessionBinding, SessionState},
     snapshot_worker::SnapshotWorker,
     transport::{PeerDrainStatus, TransportState, TransportUsage},
+    worker::PersistenceWorker,
 };
 
 struct DelayedPeers {

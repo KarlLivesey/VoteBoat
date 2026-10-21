@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::{harness, lower::Lower, progress, setup, Top, UpperBridge};
-use voteboat::{application::CounterOutcome, identity::OperationId, logical_voter::*, runtime::*};
+use voteboat::{
+    application::{Counter, CounterOutcome},
+    logical_voter::*,
+    runtime::*,
+};
 pub fn request(
     lower: &mut Lower<'_>,
     bridge: &mut UpperBridge<'_>,
@@ -11,9 +15,10 @@ pub fn request(
     value: i64,
     expected: i64,
 ) {
-    let operation = OperationId::new(operation).unwrap();
+    // `operation` is the sequence in the counter's built-in session.
+    let operation = Counter::operation(1, operation as u64).unwrap();
     let bytes = top.local().applications[&setup::top().group]
-        .business(&value.to_le_bytes())
+        .business(&Counter::command(0, value))
         .unwrap();
     let ticket = top
         .propose(ClientRequest {

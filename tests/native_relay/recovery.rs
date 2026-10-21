@@ -13,8 +13,8 @@ use voteboat::{
 fn history(protocol: NativePeerProtocol) {
     let mut c = Cluster::new(protocol);
     c.campaign();
-    write(&mut c, 35221, 3);
-    write(&mut c, 35222, 4);
+    write(&mut c, 21, 3);
+    write(&mut c, 22, 4);
     c.until(|c| (0..3).all(|i| c.value(i) == 7));
     for b in &mut c.boats {
         b.control(group(352), NodeControl::Checkpoint).unwrap();
@@ -53,10 +53,10 @@ fn history(protocol: NativePeerProtocol) {
         assert_eq!(c.value(i), 7);
     }
     c.campaign();
-    let retry = write(&mut c, 35222, 4);
+    let retry = write(&mut c, 22, 4);
     assert!(retry.duplicate);
     assert_eq!(read(&mut c), 7);
-    write(&mut c, 35223, 5);
+    write(&mut c, 23, 5);
     assert_eq!(read(&mut c), 12);
     c.until(|c| (0..3).all(|i| c.value(i) == 12));
     std::fs::remove_dir_all(finish(c)).unwrap();

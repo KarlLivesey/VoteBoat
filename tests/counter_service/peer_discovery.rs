@@ -51,7 +51,7 @@ fn history(quic: bool) {
         start(&mut c, id, "create");
     }
     c.leader();
-    assert!(authenticated_write(&c, &["add", "20921", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("Value(7)"));
     // Discovery releases the command socket after each lookup, so ordinary
     // administration on the source remains available while replicas connect.
     assert!(c.ok(3, &["discovery-status"]).contains("generation=10"));
@@ -59,7 +59,7 @@ fn history(quic: bool) {
     child.kill().unwrap();
     child.wait().unwrap();
     c.leader();
-    assert!(authenticated_write(&c, &["add", "20922", "2"]).contains("Value(9)"));
+    assert!(authenticated_write(&c, &["add", "1", "2", "0", "2"]).contains("Value(9)"));
     start(&mut c, 3, "recover");
     c.leader();
     if quic {
@@ -71,8 +71,8 @@ fn history(quic: bool) {
         start(&mut c, id, "recover");
     }
     c.leader();
-    assert!(authenticated_write(&c, &["add", "20921", "7"]).contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "20922", "2"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "2", "0", "2"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=9\n");
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();
@@ -112,7 +112,7 @@ fn rotated_data(c: &Cluster, duplicate: bool) {
         vec![("1", "1")]
     };
     for (group, inc) in groups {
-        let reply = authenticated_write(c, &["group", group, inc, "add", "20923", "4"]);
+        let reply = authenticated_write(c, &["group", group, inc, "add", "1", "3", "0", "4"]);
         assert!(reply.contains("Value(4)"), "{reply}");
         if duplicate {
             assert!(reply.contains("duplicate=true"), "{reply}");

@@ -128,7 +128,13 @@ fn durable_pending(c: &Cluster, missing: usize, checkpoint: bool) {
                 SnapshotLimits::default(),
             )
             .unwrap();
-            let mut app = Maintenance::new(group, 2, 64, Counter::new(10000).unwrap()).unwrap();
+            let mut app = Maintenance::new(
+                group,
+                3,
+                64,
+                Counter::with_limits(voteboat::retention::SessionLimits::default()).unwrap(),
+            )
+            .unwrap();
             let (core, _) = recover_member_replica(
                 NodeId::new(node as u64).unwrap(),
                 group,
@@ -197,8 +203,14 @@ fn history(quic: bool) {
     for node in 1..=3 {
         c.start(node, "create");
     }
-    assert!(authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("Value(5)"));
-    assert!(authenticated_write(&c, &["group", "8", "2", "add", "42", "8"]).contains("Value(8)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("Value(5)")
+    );
+    assert!(
+        authenticated_write(&c, &["group", "8", "2", "add", "1", "1", "0", "8"])
+            .contains("Value(8)")
+    );
     let leader = groups::leader(&mut c, "7", "3");
     permissions(&mut c, leader);
     let target = leader % 3 + 1;
@@ -249,12 +261,16 @@ fn history(quic: bool) {
     status(&mut c, ("7", "3"), OP, "phase=Cancelled");
     status(&mut c, ("1", "1"), OP, "phase=Absent");
     assert!(
-        authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("duplicate=true")
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("duplicate=true")
     );
     assert_eq!(c.routed(&["group", "8", "2", "read"]), "OK value=8\n");
     group_admin::configure(&mut c, "7", "3");
     group_admin::configure(&mut c, "7", "3");
-    assert!(authenticated_write(&c, &["group", "7", "3", "add", "43", "1"]).contains("Value(6)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "2", "0", "1"])
+            .contains("Value(6)")
+    );
     c.stop();
     for node in 1..=3 {
         c.start(node, "recover");
@@ -281,18 +297,20 @@ fn group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints(
 }
 
 #[test]
-fn group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints() {
-    for original in [false, true] {
+fn group_maintenance_schema_cannot_reinterpret_existing_counter_stores() {
+    for (original, checkpoint) in [(false, true), (true, true), (false, false), (true, false)] {
         let mut c = groups::setup(false);
         c.leadership_maintenance = original;
         for node in 1..=3 {
             c.start(node, "create");
         }
         assert!(c
-            .routed(&["group", "7", "3", "add", "42", "5"])
+            .routed(&["group", "7", "3", "add", "1", "1", "0", "5"])
             .contains("Value(5)"));
         let leader = groups::leader(&mut c, "7", "3");
-        c.ok(leader, &["group", "7", "3", "checkpoint"]);
+        if checkpoint {
+            c.ok(leader, &["group", "7", "3", "checkpoint"]);
+        }
         c.stop();
         c.leadership_maintenance = !original;
         c.start(leader, "recover");
@@ -303,6 +321,17 @@ fn group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints() {
                 let log = c.service_log(leader);
                 assert!(!log.contains("ready node="), "{log}");
                 assert!(log.contains("Error:"), "{log}");
+                // With a checkpoint the stored schema differs from the
+                // selected profile's and recovery stops before restore and
+                // replay. A store with no checkpoint records no schema; replay
+                // refuses the first entry of the other profile, before
+                // readiness and without installing anything.
+                let refusal = if checkpoint {
+                    "detail: \"InvalidBoundary\""
+                } else {
+                    "detail: \"Application(InvalidCommand)\""
+                };
+                assert!(log.contains(refusal), "{log}");
                 c.children[leader - 1] = None;
                 break;
             }

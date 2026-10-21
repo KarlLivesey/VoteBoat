@@ -1,0 +1,147 @@
+{
+  "time": 1792541091.8047807,
+  "note": "Outer sequence controller was observed back at -4 after its start-time assertion; corrected here. Inner per-case controller, Cargo and all live test threads were already19.",
+  "processes": [
+    {
+      "pid": 251930,
+      "command": "python3 target/reconcile-focused.py default all ",
+      "threads": [
+        {
+          "tid": 251930,
+          "before": -4,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "pid": 252726,
+      "command": "python3 target/reconcile-run.py absolute19-default-original-owner cargo +stable test --locked --offline -j 2 --test effect_owner -- native::automatic_hundred_group_checkpoints_reclaim_and_reopen native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport native::native_shared_peer_quota_pressure_reconnect_restart_and_retry native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge --test-threads=2 ",
+      "threads": [
+        {
+          "tid": 252726,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "pid": 253000,
+      "command": "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo test --locked --offline -j 2 --test effect_owner -- native::automatic_hundred_group_checkpoints_reclaim_and_reopen native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport native::native_shared_peer_quota_pressure_reconnect_restart_and_retry native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge --test-threads=2 ",
+      "threads": [
+        {
+          "tid": 253000,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253015,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "pid": 253026,
+      "command": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de/target/debug/deps/effect_owner-84037e790a73cc22 native::automatic_hundred_group_checkpoints_reclaim_and_reopen native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport native::native_shared_peer_quota_pressure_reconnect_restart_and_retry native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge --test-threads=2 ",
+      "threads": [
+        {
+          "tid": 253026,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253104,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253385,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253668,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253669,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253670,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253671,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253672,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        },
+        {
+          "tid": 253673,
+          "before": 19,
+          "nice": 19,
+          "affinity": [
+            10,
+            11
+          ]
+        }
+      ]
+    }
+  ]
+}

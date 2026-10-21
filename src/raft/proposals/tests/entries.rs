@@ -167,13 +167,23 @@ fn a_builder_is_rechecked_under_the_receiving_cores_own_limits() {
         spare,
         rejected_with("proposal allocation count budget"),
     );
+    // The retained-entry data budget is typed backpressure for every width,
+    // as for `propose` and `propose_batch` (ST2 round 3, I1/I2), and counted.
     let mut narrow = leader();
     narrow.limits.max_entries_per_group = narrow.state().entries.len() + 2;
     refused(
         &mut narrow,
         staged(&wide, &three),
-        rejected_with("proposal retained entry budget"),
+        RaftError::StoragePressure,
     );
+    assert_eq!(narrow.entry_budget_refusals(), 1);
+    narrow.limits.max_entries_per_group = narrow.state().entries.len();
+    refused(
+        &mut narrow,
+        staged(&wide, &three[..1]),
+        RaftError::StoragePressure,
+    );
+    assert_eq!(narrow.entry_budget_refusals(), 2);
     // The recorded peak: the final push holds the whole entry allocation, the
     // first two shared payloads, the third raw Vec and its shared copy.
     let large: Vec<_> = (1..=3)

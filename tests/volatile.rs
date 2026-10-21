@@ -161,8 +161,8 @@ impl Cluster {
         let proposals = operations
             .iter()
             .map(|&(operation, delta)| Proposal {
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .collect();
         let r = self.replicas.get_mut(&id).unwrap();
@@ -191,8 +191,8 @@ impl Cluster {
         self.act(
             id,
             Event::Propose {
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             },
         );
         self.pump();
@@ -416,8 +416,8 @@ fn history(cluster: &mut Cluster) {
     cluster.act(
         1,
         Event::Propose {
-            operation: OperationId::new(90).unwrap(),
-            bytes: 99i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 90).unwrap(),
+            bytes: Counter::command(0, 99),
         },
     );
     cluster.pump();
@@ -509,8 +509,8 @@ fn volatile_wrong_binding_or_stale_token_fences_and_recovers_completed_state() {
     let effects = r
         .core
         .step(Event::Propose {
-            operation: OperationId::new(2).unwrap(),
-            bytes: 9i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 2).unwrap(),
+            bytes: Counter::command(0, 9),
         })
         .unwrap();
     let [Effect::PersistVolatile(persist)] = effects[..] else {
@@ -970,6 +970,8 @@ fn learners_proposal(state: &GroupLog) -> ConfigurationProposal {
         readiness: Vec::new(),
         requirements: ReadinessRequirements {
             application_schema: 1,
+            identity: voteboat::raft::LayerIdentity::UNREGISTERED,
+            inner_profile: voteboat::raft::InnerProfile::LEAF,
             command_bytes: 1024,
             snapshot_bytes: 1024,
         },

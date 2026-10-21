@@ -1,0 +1,36 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e)
+    Finished `test` profile [unoptimized] target(s) in 3.56s
+     Running tests/fixture_isolation.rs (target/debug/deps/fixture_isolation-d3fde1a88cc889ca)
+
+running 9 tests
+test fallback_child ... ok
+test lease_child ... ok
+test namespace_modes_are_repaired_independently_of_umask ... ok
+
+thread 'adoption_keeps_the_unused_half_and_reclaim_proves_release' (4085097) panicked at tests/support/ports.rs:251:34:
+127.0.0.1:61004 not released by its owner: Address already in use (os error 98)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'adoption_keeps_the_unused_half_and_reclaim_proves_release' (4085097) panicked at tests/support/ports.rs:251:34:
+127.0.0.1:61004 not released by its owner: Address already in use (os error 98)
+test adoption_keeps_the_unused_half_and_reclaim_proves_release ... FAILED
+test lease_holds_across_handoff_and_processes ... ok
+
+thread 'panic_releases_port_lease_and_serial_guard_without_cascades' (4085105) panicked at tests/fixture_isolation.rs:174:9:
+intentional fixture failure
+test panic_releases_port_lease_and_serial_guard_without_cascades ... ok
+test unwritable_shared_namespace_uses_diagnosed_fallback ... ok
+test offset_layouts_keep_every_listener_pair_leased_through_handoff ... ok
+test candidates_exclude_ephemeral_and_all_legacy_service_ladders ... ok
+
+failures:
+
+failures:
+    adoption_keeps_the_unused_half_and_reclaim_proves_release
+
+test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+error: test failed, to rerun pass `--test fixture_isolation`

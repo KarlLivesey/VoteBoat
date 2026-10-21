@@ -200,6 +200,12 @@ pub trait PersistenceWorker {
     fn reclaim_limit(&self) -> Option<usize> {
         None
     }
+    /// Latest published physical log occupancy for the automatic reclaim
+    /// trigger and operator status; None when the provider has no bounded
+    /// physical log. May lag the worker by one window. Creates no work.
+    fn wal_usage(&self) -> Option<crate::log::WalUsage> {
+        None
+    }
     /// Optional bounded background work; scoped close drains accepted cleanup.
     /// Terminal polling releases worker admission credits. Results cannot stand
     /// in for Written/Durable events. Rejected cleanup performs no work.

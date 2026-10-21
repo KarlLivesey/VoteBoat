@@ -152,7 +152,8 @@ pub struct MetadataServingTarget {
     target_configuration: ConfigurationId,
     profile: ContentDigest,
     pub(super) active: Option<Active>,
-    directory_bound: ReadinessRequirements,
+    /// The initial directory's command and snapshot byte bounds.
+    directory_bound: (usize, usize),
 }
 impl MetadataServingTarget {
     pub fn new(
@@ -166,7 +167,8 @@ impl MetadataServingTarget {
             return Err(ApplicationError::InvalidCommand);
         }
         let source_profile = source.profile();
-        let directory_bound = source.source().initial.directory().readiness_requirements();
+        let directory = source.source().initial.directory().readiness_requirements();
+        let directory_bound = (directory.command_bytes, directory.snapshot_bytes);
         let target = MetadataAuthorityTarget::new(
             source.source().clone(),
             plan,
@@ -268,14 +270,21 @@ impl MetadataServingTarget {
         let inner = self.target.readiness_requirements();
         ReadinessRequirements {
             application_schema: self.schema_version(),
+            // Words: the target's (source export bound and initial
+            // directory); plan: the target's, then the target configuration.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::METADATA_SERVING,
+                self.target.source.configuration_words(),
+            ),
+            inner_profile: crate::raft::InnerProfile::LEAF.planned(&{
+                let [high, low, source] = self.target.plan_words();
+                [high, low, source, self.target_configuration.get()]
+            }),
             command_bytes: inner
                 .command_bytes
                 .max(ACTIVATION_BYTES)
-                .max(self.directory_bound.command_bytes),
-            snapshot_bytes: 60
-                + inner.snapshot_bytes
-                + ACTIVATION_BYTES
-                + self.directory_bound.snapshot_bytes,
+                .max(self.directory_bound.0),
+            snapshot_bytes: 60 + inner.snapshot_bytes + ACTIVATION_BYTES + self.directory_bound.1,
         }
     }
     fn inner_noop(&mut self, index: u64, term: u64) -> Result<(), ApplicationError> {
@@ -453,8 +462,16 @@ impl StateMachine for MetadataServingTarget {
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.target.validate_group(group)
     }
+    /// Its exact bootstrap is forwarded as the target's, which stages it.
+    fn deployment_bound(&self) -> bool {
+        self.target.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.target.applied_index()
+    }
+    /// Lifetime history until DH1 (audit S4, S8).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
     }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())
@@ -656,7 +673,7 @@ impl CheckpointStateMachine for MetadataServingTarget {
                 let len = r.u32()? as usize;
                 if at <= previous
                     || at > applied
-                    || len > self.directory_bound.command_bytes
+                    || len > self.directory_bound.0
                     || next.reserved_operation(operation)
                     || history.contains_operation(operation)
                     || active.tail.contains_key(&operation)

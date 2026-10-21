@@ -97,7 +97,7 @@ pub(super) fn application() -> LogicalApplication {
             operation: OperationId::new(10).unwrap(),
             expected: ConfigurationId::new(1).unwrap(),
             configuration: ConfigurationId::new(2).unwrap(),
-            source_application_schema: 1,
+            source_application_schema: Counter::new(16).unwrap().schema_version(),
         },
     )
     .unwrap()
@@ -134,7 +134,7 @@ pub(super) fn enrollment(app: &LogicalApplication) -> LogicalLearnerEnrollment {
             membership: Some(Box::new(membership)),
             index: 1,
             term: 1,
-            application_schema: 1,
+            application_schema: Counter::new(16).unwrap().schema_version(),
         },
         application: counter.checkpoint(4096).unwrap(),
     };

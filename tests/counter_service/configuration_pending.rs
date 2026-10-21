@@ -17,7 +17,7 @@ pub(super) fn setup(quic: bool) -> Cluster {
     for node in 1..=3 {
         c.start(node, "create");
     }
-    assert!(authenticated_write(&c, &["add", "21100", "42"]).contains("Value(42)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "42"]).contains("Value(42)"));
     c.stop();
     let policy = c.root.join("pending-policy.txt");
     fs::write(
@@ -106,7 +106,7 @@ fn history(quic: bool) {
     assert!(committed.contains("operation=21101"), "{committed}");
     let duplicate = leader_request(&mut c, &["configure-record", RECORD]);
     assert!(duplicate.contains("duplicate=true"), "{duplicate}");
-    assert!(authenticated_write(&c, &["add", "21100", "42"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "42"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=42\n");
     c.stop();
     for node in 1..=3 {
@@ -120,7 +120,7 @@ fn history(quic: bool) {
         leader_request(&mut c, &["configure-record", RECORD]),
         duplicate
     );
-    assert!(authenticated_write(&c, &["add", "21100", "42"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "42"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=42\n");
     c.stop();
 }

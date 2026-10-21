@@ -461,6 +461,8 @@ impl<R: ApplicationReceipt, V> LogicalReleaseCoordinator<R, V> {
                     ApplicationError::NotApplied => 5,
                     ApplicationError::InvalidCheckpoint => 6,
                     ApplicationError::UnsupportedSchema => 7,
+                    ApplicationError::SessionWindow => 8,
+                    ApplicationError::RetentionUndeclared => 9,
                 },
             ],
         };

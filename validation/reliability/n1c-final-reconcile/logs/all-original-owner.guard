@@ -1,0 +1,7 @@
+free_gb=2851 (min 500)
+target_gb=64 (cap 150) cargo_build_dirs=1
+live_worktrees=3 (cap 5) prunable=0 worktree_target_gb=5 (cap 120)
+linux_tmp_voteboat_dirs=242 (cap 300) linux_tmp_gb=1 (cap 10)
+mac_loop_gb=10 (cap 40) mac_voteboat_dirs=2 (cap 3)
+OK: disk within budget
+own_target_bytes=2714071040 cap=42949672960

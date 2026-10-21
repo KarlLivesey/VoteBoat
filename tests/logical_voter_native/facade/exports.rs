@@ -80,7 +80,7 @@ fn history(protocol: NativePeerProtocol, abort: bool) {
     );
     restart::elect(&mut bridge, &mut node, clock);
     assert_eq!(
-        restart::write(&mut bridge, &mut node, clock, 9601, 5).outcome,
+        restart::write(&mut bridge, &mut node, clock, 6, 5).outcome,
         CounterOutcome::Value(5)
     );
     node.checkpoint().unwrap();

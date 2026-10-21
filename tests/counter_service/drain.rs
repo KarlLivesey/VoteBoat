@@ -22,7 +22,7 @@ pub(super) fn cluster_with_tls(quic: bool, tls: Option<PathBuf>) -> Cluster {
         c.start(id, "create");
     }
     c.leader();
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("Value(7)"));
     c
 }
 fn begin(c: &Cluster, source: usize, target: usize) -> String {
@@ -109,7 +109,7 @@ fn history(quic: bool) {
         ],
     );
     assert!(!changed.status.success());
-    let blocked = c.request(source, &["add", "19702", "3"]);
+    let blocked = c.request(source, &["add", "1", "15", "0", "3"]);
     assert!(!blocked.status.success());
     assert!(String::from_utf8_lossy(&blocked.stdout).contains("Draining"));
     if quic {
@@ -121,7 +121,7 @@ fn history(quic: bool) {
         .ok(source, &["drain-stop", "1", "19701"])
         .contains("stopping=true"));
     joined(&mut c, source);
-    assert!(authenticated_write(&c, &["add", "19702", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "15", "0", "3"]).contains("Value(10)"));
     c.start(source, "recover");
     wait_status(&c, source, "phase=Active");
     let blocked = c.request(source, &["read"]);
@@ -134,7 +134,7 @@ fn history(quic: bool) {
     c.start(source, "recover");
     wait_status(&c, source, "phase=Cancelled");
     wait_status(&c, source, "resuming=false");
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     c.stop();
 }
@@ -281,7 +281,7 @@ fn lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable() {
         cancelled.contains(&format!("target={target} ")),
         "{cancelled}"
     );
-    assert!(authenticated_write(&c, &["add", "19703", "2"]).contains("Value(9)"));
+    assert!(authenticated_write(&c, &["add", "1", "3", "0", "2"]).contains("Value(9)"));
     kill(&mut c, source);
     c.start(source, "recover");
     wait_status(&c, source, "phase=Cancelled");
@@ -353,7 +353,7 @@ fn failed_journal_publication_stops_service_and_preserves_recovery_evidence() {
         .status
         .success());
     assert_eq!(
-        authenticated_write(&c, &["add", "19700", "7"]),
+        authenticated_write(&c, &["add", "1", "1", "0", "7"]),
         "OK outcome=Value(7) duplicate=true\n"
     );
     assert_eq!(c.routed(&["read"]), "OK value=7\n");

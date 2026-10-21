@@ -34,6 +34,8 @@ mod local_drain;
 mod peer_credentials;
 #[path = "node_readiness.rs"]
 mod readiness;
+#[path = "node_retention.rs"]
+mod retention;
 #[path = "node_network.rs"]
 mod selected_network;
 type Parts = NodeParts<
@@ -66,6 +68,18 @@ fn parts(voters: u64, networking: bool) -> Parts {
 fn boat(parts: Parts) -> Boat {
     Boat::from_parts(parts, NodeLimits::default(), MonoTime(0))
         .unwrap_or_else(|r| panic!("{:?}", r.reason))
+}
+/// The explicit opt-out: no automatic maintenance is installed.
+fn bounded(parts: Parts) -> Boat {
+    Boat::from_parts(
+        parts,
+        NodeLimits {
+            retention: RetentionMode::LifetimeBounded,
+            ..Default::default()
+        },
+        MonoTime(0),
+    )
+    .unwrap_or_else(|r| panic!("{:?}", r.reason))
 }
 fn settle(n: &mut Boat) {
     for _ in 0..100 {
@@ -174,8 +188,12 @@ fn admin_request(group_id: u128, operation: u128, finalizing: bool) -> Configura
             },
             readiness: vec![],
             requirements: ReadinessRequirements {
-                application_schema: 1,
-                command_bytes: 8,
+                application_schema: Counter::new(100).unwrap().schema_version(),
+                identity: voteboat::raft::LayerIdentity::family(
+                    voteboat::raft::ApplicationFamily::COUNTER,
+                ),
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
+                command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                 snapshot_bytes: 4096,
             },
         },
@@ -257,7 +275,7 @@ fn configuration_receipts_wait_for_durability_and_joint_then_final_commit() {
         ConfigurationId::new(3).unwrap()
     );
     // Administration uses the same polling path as application admission.
-    n.propose(request(500)).unwrap();
+    n.propose(request(5)).unwrap();
     admin_settle(&mut n);
     let reply = n.poll_client().unwrap();
     assert!(matches!(
@@ -580,8 +598,8 @@ fn configuration_status_resumes_a_lost_joint_reply_through_fresh_authorization()
 fn request(op: u128) -> ClientRequest {
     ClientRequest {
         group: group(1),
-        operation: OperationId::new(op).unwrap(),
-        bytes: 7i64.to_le_bytes().to_vec(),
+        operation: Counter::operation(1, op as u64).unwrap(),
+        bytes: Counter::command(0, 7),
     }
 }
 fn shutdown(n: &mut Boat) {
@@ -899,7 +917,19 @@ fn unsupported_snapshot_and_invalid_driver_limits_reject_before_any_service_or_i
     assert!(!rejected.parts.local.persistence.closed);
     let mut p = *rejected.parts;
     p.local.snapshots = None;
-    let mut n = boat(p);
+    // A snapshot-less node cannot checkpoint, so it is lifetime-bounded by
+    // construction: the default refuses it and returns every part.
+    let rejected = match Boat::from_parts(p, NodeLimits::default(), MonoTime(0)) {
+        Err(r) => r,
+        Ok(_) => panic!("snapshot-less node must choose LifetimeBounded"),
+    };
+    assert_eq!(
+        rejected.reason,
+        NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)
+    );
+    assert!(!rejected.parts.local.persistence.closed);
+    let mut n = bounded(*rejected.parts);
+    assert_eq!(n.retention(), RetentionMode::LifetimeBounded);
     assert_eq!(
         n.control(group(1), NodeControl::Checkpoint),
         Err(NodeError::MissingSnapshots)

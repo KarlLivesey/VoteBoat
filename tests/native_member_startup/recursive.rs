@@ -156,7 +156,7 @@ fn partial_final_restart(protocol: NativePeerProtocol, compacted_joint: bool) {
         .unwrap();
     assert_eq!(voter_promise.configuration, cid(11));
     assert_eq!(voter_promise.candidate_store, identity(3));
-    let index = apply_partial_final(&mut nodes, &clock, OperationId::new(902).unwrap());
+    let index = apply_partial_final(&mut nodes, &clock, Counter::operation(1, 12).unwrap());
     shutdown(nodes, &clock);
     check_partial_final_files(&root, index, voter_promise);
     std::fs::remove_dir_all(root).unwrap();
@@ -349,12 +349,12 @@ fn promise_before_restart(mut nodes: Vec<Service>, clock: &Instant) -> GroupLog 
         nodes[0].local().owner.core(group()).unwrap().role(),
         Role::Candidate
     );
-    let operation = OperationId::new(902).unwrap();
+    let operation = Counter::operation(1, 12).unwrap();
     let rejected = nodes[0]
         .propose(ClientRequest {
             group: group(),
             operation,
-            bytes: 7i64.to_le_bytes().to_vec(),
+            bytes: Counter::command(0, 7),
         })
         .unwrap_err();
     assert_eq!(
@@ -371,7 +371,7 @@ fn apply_partial_final(nodes: &mut [Service], clock: &Instant, operation: Operat
         .propose(ClientRequest {
             group: group(),
             operation,
-            bytes: 7i64.to_le_bytes().to_vec(),
+            bytes: Counter::command(0, 7),
         })
         .unwrap();
     let mut index = None;

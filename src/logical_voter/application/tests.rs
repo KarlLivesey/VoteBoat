@@ -517,6 +517,7 @@ fn stale_read_capsule_cannot_release_after_new_write() {
 }
 
 mod authority;
+mod bootstrap_binding;
 mod control_profile;
 mod eligibility;
 mod enrollment;

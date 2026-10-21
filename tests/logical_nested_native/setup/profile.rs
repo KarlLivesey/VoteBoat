@@ -77,12 +77,22 @@ pub fn assert_static_scope(app: &LogicalApplication) {
 }
 pub fn physical_log_limits() -> LogLimits {
     let command = lower_limits().max_command_bytes;
+    let batch = command
+        .checked_mul(2)
+        .unwrap()
+        .max(physical_transport_limits().decoded_bytes);
+    let reserve = LogLimits::default().control_reserve_bytes;
     LogLimits {
         max_command_bytes: command,
-        max_batch_bytes: command
-            .checked_mul(2)
-            .unwrap()
-            .max(physical_transport_limits().decoded_bytes),
+        max_batch_bytes: batch,
+        // ST2 I5: the WAL above the 75% high-water mark must hold the largest
+        // batch plus the control reserve, so the usable WAL is four times that.
+        max_wal_bytes: batch
+            .checked_add(reserve)
+            .and_then(|b| b.checked_mul(4))
+            .and_then(|u| u.checked_add(reserve))
+            .unwrap(),
+        control_reserve_bytes: reserve,
         ..LogLimits::default()
     }
     .validate()
@@ -263,6 +273,12 @@ fn whole_static_history_and_cross_layer_capabilities_are_declared_before_activat
     );
     assert!(lower.control_action_bytes >= 2 * lower.max_command_bytes);
     assert!(physical_log_limits().max_command_bytes >= lower.max_command_bytes);
+    let physical = physical_log_limits();
+    let usable = physical.max_wal_bytes - physical.control_reserve_bytes;
+    assert_eq!(physical.max_wal_bytes, 139_591_680);
+    assert!(
+        usable - usable * 75 / 100 >= physical.max_batch_bytes + physical.control_reserve_bytes
+    );
     persistence_limits(upper);
     persistence_limits(lower);
     physical_ingress_limits();

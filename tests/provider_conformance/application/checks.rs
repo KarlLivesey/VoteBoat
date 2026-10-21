@@ -100,10 +100,18 @@ fn invalid_batches<S: Scenario>(app: &mut S::App) {
         ApplicationError::InvalidCommand,
     );
     rejected_batch::<S>(app, &[S::command(5, 3, 5)], ApplicationError::IndexGap);
-    rejected_batch::<S>(
-        app,
+    // A novel command beyond capacity is a typed refusal of a committed entry:
+    // the batch applies, the boundary advances and only earlier commands act.
+    let mut probe = app.clone();
+    batch::<S>(
+        &mut probe,
         &[S::command(4, 3, 5), S::command(5, 4, 6)],
-        ApplicationError::DedupCapacity,
+        vec![S::replies(true)[3].clone(), S::overflow()],
+    );
+    assert_eq!(
+        S::value(probe.read_at(5, S::query()).unwrap()),
+        S::expected_value(true),
+        "a refused command changed application state"
     );
 }
 fn restore_refusal<S: Scenario>(target: &mut S::App, schema: u64, index: u64, bytes: &[u8]) {
@@ -148,16 +156,18 @@ fn cold_replay<S: Scenario>(original: &S::App, bytes: &[u8]) {
     ];
     batch::<S>(&mut restored, &entries, S::replies(true));
     read::<S>(&restored, true);
-    rejected_batch::<S>(
-        &mut restored,
-        &[S::command(8, 4, 1)],
-        ApplicationError::DedupCapacity,
-    );
-    let receipts = restored.apply_batch(&[S::command(8, 1, 7)]).unwrap();
+    let mut probe = restored.clone();
+    batch::<S>(&mut probe, &[S::command(8, 4, 1)], vec![S::overflow()]);
+    read::<S>(&probe, true);
+    let retry = S::command(8, 1, 7);
+    let receipts = restored.apply_batch(std::slice::from_ref(&retry)).unwrap();
     assert_eq!(receipts.len(), 1);
+    let EntryPayload::Command { operation, .. } = retry.payload else {
+        unreachable!()
+    };
     assert_eq!(
         (receipts[0].index(), receipts[0].operation()),
-        (8, OperationId::new(1).unwrap())
+        (8, operation)
     );
     assert_eq!(S::reply(&receipts[0]), S::replies(true).remove(0));
     assert_eq!(restored.applied_index(), 8);
@@ -205,6 +215,8 @@ fn deployment<S: Scenario>(app: &S::App) {
         assert_eq!(
             app.validate_deployment_requirements(ReadinessRequirements {
                 application_schema: 1,
+                identity: voteboat::raft::LayerIdentity::UNREGISTERED,
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 8,
                 snapshot_bytes: 4096,
             }),

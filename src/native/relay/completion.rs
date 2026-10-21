@@ -16,10 +16,20 @@ impl RelayRequestScopes {
             .filter(|s| matches!(s, OriginalScope::Request(_)))
             .count()
     }
-    pub(in crate::native::relay) fn retained_bytes(&self) -> usize {
+    /// Includes each window's separately owned readiness request.
+    pub(crate) fn retained_bytes(&self) -> usize {
         std::mem::size_of::<Self>()
             + self.scopes.capacity() * std::mem::size_of::<OriginalScope>()
-            + self.request_count() * std::mem::size_of::<RequestWindow>()
+            + self
+                .scopes
+                .iter()
+                .map(|s| match s {
+                    OriginalScope::Request(w) => {
+                        std::mem::size_of::<RequestWindow>() + w.owned_bytes()
+                    }
+                    _ => 0,
+                })
+                .sum::<usize>()
     }
     pub fn ticket(&self) -> SendTicket {
         self.ticket

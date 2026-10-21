@@ -113,7 +113,7 @@ impl<'a> Ledger<'a> {
                 >= self.window.div_ceil(self.groups)
     }
     fn admit(&mut self, row: usize, replica: usize, ticket: ClientTicket) -> Result<(), Failure> {
-        if ticket.operation.get() != self.rows[row].operation as u128
+        if ticket.operation != Counter::operation(1, self.rows[row].operation as u64).unwrap()
             || ticket.group != self.rows[row].group
             || self.pending.contains_key(&(replica, ticket.sequence))
             || self.full(ticket.group)
@@ -303,8 +303,8 @@ fn measure<L: LogStore + Send + 'static>(
             };
             let request = ClientRequest {
                 group,
-                operation: OperationId::new(ledger.rows[row].operation as u128).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, ledger.rows[row].operation as u64).unwrap(),
+                bytes: Counter::command(0, 1),
             };
             match replicas[replica].propose(request) {
                 Ok(ticket) => ledger.admit(row, replica, ticket)?,
@@ -515,28 +515,28 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     let joined = close(replicas, clock);
     checked_stage(root, "verification", verified, joined)?;
     observe::capture(&mut storage, "after_create_join", &traces);
-    eprintln!("phase=recovery-verification mode=offered");
-    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
-    let recovered_bases = maintenance.bases(&replicas);
-    let recovered = verify_offered_recovery(
-        &mut replicas,
-        clock,
-        groups,
-        &maintenance,
-        RecoveryCheck {
+    let retries = if serving_only(" mode=offered") {
+        0
+    } else {
+        eprintln!("phase=recovery-verification mode=offered");
+        let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
+        let recovered_bases = maintenance.bases(&replicas);
+        let check = RecoveryCheck {
             warmup: &warmup,
             ledger: &ledger,
             expected: &expected,
             compacted_bases: &compacted_bases,
             last: &last,
-        },
-    );
-    let joined = close(replicas, clock);
-    let retries = checked_stage(root, "recovery", recovered, joined)?;
-    if maintenance_config.is_some() {
-        write_bases(root, &compacted_bases, &recovered_bases)?;
-    }
-    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+        };
+        let recovered = verify_offered_recovery(&mut replicas, clock, groups, &maintenance, check);
+        let joined = close(replicas, clock);
+        let retries = checked_stage(root, "recovery", recovered, joined)?;
+        if maintenance_config.is_some() {
+            write_bases(root, &compacted_bases, &recovered_bases)?;
+        }
+        observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+        retries
+    };
     config.publication.write_storage(root, &storage)?;
     report_offered(
         &config,
@@ -832,7 +832,7 @@ mod tests {
             ),
             sequence,
             group: l.rows[row].group,
-            operation: OperationId::new(l.rows[row].operation as u128).unwrap(),
+            operation: Counter::operation(1, l.rows[row].operation as u64).unwrap(),
         }
     }
     fn applied(ticket: ClientTicket, index: u64, value: i64) -> ClientOutcome<CounterReceipt> {

@@ -73,7 +73,7 @@ fn assert_retry(snapshot: &Snapshot) {
     assert_eq!(snapshot.application, checkpoint(&application()));
     let mut restored = Counter::new(20).unwrap();
     restored
-        .restore_checkpoint(1, 3, &snapshot.application)
+        .restore_checkpoint(restored.schema_version(), 3, &snapshot.application)
         .unwrap();
     restored.apply_batch(&[command(4, 1, 7)]).unwrap();
     assert_eq!(
@@ -81,7 +81,7 @@ fn assert_retry(snapshot: &Snapshot) {
         Ok(10),
         "original ID must remain deduplicated"
     );
-    assert_eq!(restored.remaining_operations(), 18);
+    assert_eq!(restored.retained_receipts(), 2);
 }
 #[test]
 fn changed_or_truncated_decode_fences_before_sync_and_preserves_pinned_retry_checkpoint() {

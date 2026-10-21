@@ -44,6 +44,8 @@ fn uncommitted_configuration_and_in_flight_configuration_changes_cannot_overlap_
         readiness: Vec::new(),
         requirements: ReadinessRequirements {
             application_schema: 1,
+            identity: crate::raft::LayerIdentity::UNREGISTERED,
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: 1024,
             snapshot_bytes: 4096,
         },

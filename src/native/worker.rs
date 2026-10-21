@@ -18,8 +18,9 @@
 //! original appends, completion scopes, admission credits and FIFO are retained.
 use crate::{contracts::StorageError, identity::*, log::*, runtime::VisitTicket, worker::*};
 use std::{
-    collections::{BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, VecDeque},
     sync::{
+        atomic::{AtomicUsize, Ordering},
         mpsc::{self, Receiver, SyncSender, TryRecvError, TrySendError},
         Arc,
     },
@@ -54,6 +55,10 @@ enum Work {
         max_bytes: usize,
     },
 }
+/// Fixed owner-side bytes of the one in-flight rewrite request.
+const RECLAIM_BYTES: usize = std::mem::size_of::<Work>()
+    + std::mem::size_of::<Retained>()
+    + std::mem::size_of::<ReclaimEvent>();
 struct Retained {
     usage: WorkerUsage,
     control: bool,
@@ -76,6 +81,12 @@ pub struct NativeLogWorker<L: LogStore + Send + 'static> {
     usage: WorkerUsage,
     data: WorkerUsage,
     fenced: bool,
+    // Physical log bytes the WAL thread publishes after each window and
+    // reclaim, with the store's fixed usable capacity, and the cost of the
+    // batches it holds until a rewrite makes room.
+    wal_bytes: Arc<AtomicUsize>,
+    wal_parked: Arc<AtomicUsize>,
+    wal_capacity: Option<usize>,
 }
 impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
     /// The supplied store must be quiescent. Recover group states/cores before
@@ -84,7 +95,7 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
     /// abandons observation, not accepted writes; use close/poll/try_reclaim for
     /// deterministic shutdown and store return. No host executor is shut down.
     pub fn spawn(
-        mut store: L,
+        store: L,
         generation: StorageWorkerGeneration,
         limits: WorkerLimits,
         wake: Arc<dyn WorkerWake>,
@@ -102,55 +113,43 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
         let max_pending_units = store.limits().max_pending_units;
         let reclaim_supported = store.supports_reclaim();
         let max_reclaim_bytes = store.limits().max_wal_bytes;
-        let (sender, requests) = mpsc::sync_channel::<Work>(limits.max_requests);
+        let initial = store.physical_usage();
+        // ST2 round 3 (I5): a batch the store may encode that is larger than
+        // its whole usable data capacity could never be written, however
+        // often the WAL is rewritten; refuse the configuration instead of
+        // holding such a batch for ever. Nodes check the stricter headroom
+        // above their high-water mark.
+        if initial.is_some_and(|u| store.limits().max_batch_bytes > u.capacity) {
+            return Err(WorkerError::InvalidLimits);
+        }
+        let wal_capacity = initial.map(|u| u.capacity);
+        let wal_bytes = Arc::new(AtomicUsize::new(initial.map_or(0, |u| u.bytes)));
+        let wal_parked = Arc::new(AtomicUsize::new(0));
+        let published = Published {
+            bytes: wal_bytes.clone(),
+            parked: wal_parked.clone(),
+        };
+        // One slot beyond the admitted requests is the rewrite's own (I4): it
+        // can always be queued, whatever data is queued or held.
+        let (sender, requests) = mpsc::sync_channel::<Work>(limits.max_requests + 1);
         let (out, events) = mpsc::sync_channel(limits.max_requests * 2);
         let (reclaim_out, reclaims) = mpsc::sync_channel(1);
+        let wal = WalThread {
+            store,
+            binding,
+            limits,
+            max_pending_units,
+            max_reclaim_bytes,
+            fenced: false,
+            parked: VecDeque::new(),
+            out,
+            reclaim_out,
+            wake,
+            published,
+        };
         let thread = thread::Builder::new()
             .name("voteboat-wal".into())
-            .spawn(move || {
-                let mut fenced = false;
-                let mut deferred = None;
-                while let Some(work) = deferred.take().or_else(|| requests.recv().ok()) {
-                    let batch = match work {
-                        Work::Persist(batch) => batch,
-                        Work::Reclaim { ticket, max_bytes } => {
-                            let mut result = if fenced {
-                                Err(StorageError::Fenced)
-                            } else {
-                                match store.reclaim(max_bytes) {
-                                    Ok(r)
-                                        if r.after_bytes <= r.before_bytes
-                                            && r.after_bytes <= max_bytes =>
-                                    {
-                                        Ok(r)
-                                    }
-                                    Ok(_) => Err(StorageError::Corrupt(
-                                        "reclamation result outside budget",
-                                    )),
-                                    Err(e) => Err(e),
-                                }
-                            };
-                            if store.binding() != binding.store {
-                                result =
-                                    Err(StorageError::Corrupt("maintenance changed store binding"));
-                            }
-                            if result.as_ref().is_err_and(fatal) {
-                                fenced = true;
-                            }
-                            let _ = reclaim_out.send(ReclaimEvent {
-                                request: ticket,
-                                result,
-                            });
-                            wake.wake();
-                            continue;
-                        }
-                    };
-                    let batches =
-                        ready_window(batch, &requests, &mut deferred, limits, max_pending_units);
-                    persist_window(&mut store, batches, binding, &mut fenced, &out, &*wake);
-                }
-                store
-            })
+            .spawn(move || wal.run(requests))
             .map_err(|_| WorkerError::Exhausted)?;
         Ok(Self {
             binding,
@@ -168,6 +167,9 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
             usage: WorkerUsage::default(),
             data: WorkerUsage::default(),
             fenced: false,
+            wal_bytes,
+            wal_parked,
+            wal_capacity,
         })
     }
     fn admission(
@@ -239,7 +241,9 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
     fn release(&mut self, sequence: u64) {
         if let Some(r) = self.retained.remove(&sequence) {
             if r.reclaim {
+                // The rewrite was never charged to the request credits.
                 self.reclaim_pending = false;
+                return;
             }
             for v in r.visits {
                 self.groups.remove(&v.group);
@@ -253,6 +257,128 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
                 self.data.bytes -= r.usage.bytes;
             }
         }
+    }
+}
+/// The WAL thread's state: the store, its fence, and the batches it holds
+/// because their encoding does not fit yet (ST2b). Nothing of a held batch
+/// was written; held batches are retried after each successful rewrite,
+/// before newer work. One that still does not fit right after a successful
+/// rewrite (the WAL is then its live image) is reported failed with the
+/// typed, non-fatal `Rejected("WAL live image leaves no room")` (R4-1). A
+/// node's WAL account keeps every transition it admits within the mark plus
+/// the reserve, so there this is reached only from a live state recovered
+/// past that point.
+struct WalThread<L: LogStore> {
+    store: L,
+    binding: WorkerBinding,
+    limits: WorkerLimits,
+    max_pending_units: usize,
+    max_reclaim_bytes: usize,
+    fenced: bool,
+    parked: VecDeque<Batch>,
+    out: SyncSender<WorkerEvent>,
+    reclaim_out: SyncSender<ReclaimEvent>,
+    wake: Arc<dyn WorkerWake>,
+    published: Published,
+}
+impl<L: LogStore> WalThread<L> {
+    fn run(mut self, requests: Receiver<Work>) -> L {
+        let mut deferred = None;
+        while let Some(work) = deferred.take().or_else(|| requests.recv().ok()) {
+            match work {
+                Work::Persist(batch) => {
+                    let batches = ready_window(
+                        batch,
+                        &requests,
+                        &mut deferred,
+                        self.limits,
+                        self.max_pending_units,
+                    );
+                    self.persist(batches);
+                }
+                Work::Reclaim { ticket, max_bytes } => self.reclaim(ticket, max_bytes),
+            }
+        }
+        self.close();
+        self.store
+    }
+    fn persist(&mut self, batches: Vec<Batch>) {
+        self.persist_window(batches);
+        fail_parked(&mut self.parked, self.fenced, &self.out, &*self.wake);
+        publish_usage(&self.store, &self.published, &self.parked);
+    }
+    fn reclaim(&mut self, ticket: ReclaimTicket, max_bytes: usize) {
+        let mut result = if self.fenced {
+            Err(StorageError::Fenced)
+        } else {
+            match self.store.reclaim(max_bytes) {
+                Ok(r) if r.after_bytes <= r.before_bytes && r.after_bytes <= max_bytes => Ok(r),
+                Ok(_) => Err(StorageError::Corrupt("reclamation result outside budget")),
+                Err(e) => Err(e),
+            }
+        };
+        if self.store.binding() != self.binding.store {
+            result = Err(StorageError::Corrupt("maintenance changed store binding"));
+        }
+        if result.as_ref().is_err_and(fatal) {
+            self.fenced = true;
+        }
+        // A rewrite is the only operation that shrinks the WAL: retry held
+        // batches first, so their events precede the reclaim event.
+        if result.is_ok() && !self.fenced && !self.parked.is_empty() {
+            let batches = self.parked.drain(..).collect();
+            self.persist_window(batches);
+            // ST2 round 4 (R4-1): the WAL now holds only its live image, so a
+            // batch that still does not fit never will until the live log
+            // shrinks. Report it typed and non-fatal instead of holding it
+            // for ever. A node's WAL account keeps admitted transitions under
+            // the high-water mark plus the reserve; a live state recovered
+            // past it can still reach this, typed.
+            if !self.fenced {
+                fail_held(
+                    &mut self.parked,
+                    StorageError::Rejected("WAL live image leaves no room"),
+                    &self.out,
+                    &*self.wake,
+                );
+            }
+            fail_parked(&mut self.parked, self.fenced, &self.out, &*self.wake);
+            publish_usage(&self.store, &self.published, &self.parked);
+        } else {
+            fail_parked(&mut self.parked, self.fenced, &self.out, &*self.wake);
+            publish_usage(&self.store, &self.published, &self.parked);
+        }
+        let _ = self.reclaim_out.send(ReclaimEvent {
+            request: ticket,
+            result,
+        });
+        self.wake.wake();
+    }
+    /// Closed with batches still held: rewrite once and retry. A batch that
+    /// still does not fit was never written and is reported failed so the
+    /// owner can finish its shutdown.
+    fn close(&mut self) {
+        if !self.parked.is_empty() && !self.fenced {
+            if let Err(error) = self.store.reclaim(self.max_reclaim_bytes) {
+                self.fenced |= fatal(&error);
+            }
+            let batches = self.parked.drain(..).collect();
+            self.persist(batches);
+        }
+        let error = if self.fenced {
+            StorageError::Fenced
+        } else {
+            StorageError::Rejected("WAL capacity at close")
+        };
+        for batch in self.parked.drain(..) {
+            let _ = self.out.send(WorkerEvent::Failed {
+                request: batch.ticket,
+                visits: batch.units.iter().map(|u| u.visit).collect(),
+                error: error.clone(),
+            });
+            self.wake.wake();
+        }
+        publish_usage(&self.store, &self.published, &self.parked);
     }
 }
 // Gather only work already in the FIFO. A deferred item is never overtaken.
@@ -291,78 +417,97 @@ struct PendingBarrier {
     request: WorkerTicket,
     visits: Vec<VisitTicket>,
 }
-fn persist_window<L: LogStore>(
-    store: &mut L,
-    batches: Vec<Batch>,
-    binding: WorkerBinding,
-    fenced: &mut bool,
-    out: &SyncSender<WorkerEvent>,
-    wake: &dyn WorkerWake,
-) {
-    let count = batches.iter().map(|b| b.units.len()).sum();
-    let mut tickets = Vec::with_capacity(count);
-    let mut pending = Vec::with_capacity(batches.len());
-    let mut window_failure = None;
-    for batch in batches {
-        let visits = batch.units.iter().map(|u| u.visit).collect::<Vec<_>>();
-        let result = if *fenced {
-            Err(StorageError::Fenced)
-        } else {
-            store.append_batch(
-                batch
-                    .units
-                    .into_iter()
-                    .map(|u| LogMutation::Update(u.update))
-                    .collect(),
-            )
-        };
-        let result = result.and_then(|admitted| {
-            if admitted.len() != visits.len()
-                || visits.iter().any(|v| {
-                    admitted
-                        .iter()
-                        .filter(|t| t.binding == binding.store && t.group == v.group)
-                        .count()
-                        != 1
-                })
-            {
-                Err(StorageError::Corrupt("worker admission scope mismatch"))
+impl<L: LogStore> WalThread<L> {
+    fn persist_window(&mut self, batches: Vec<Batch>) {
+        let (store, binding, fenced, parked) = (
+            &mut self.store,
+            self.binding,
+            &mut self.fenced,
+            &mut self.parked,
+        );
+        let (published, out, wake) = (&self.published, &self.out, &*self.wake);
+        let count = batches.iter().map(|b| b.units.len()).sum();
+        let mut tickets = Vec::with_capacity(count);
+        let mut pending = Vec::with_capacity(batches.len());
+        let mut window_failure = None;
+        for batch in batches {
+            let visits = batch.units.iter().map(|u| u.visit).collect::<Vec<_>>();
+            let result = if *fenced {
+                Err(StorageError::Fenced)
             } else {
-                Ok(admitted)
-            }
-        });
-        match result {
-            Ok(admitted) => {
-                let admissions = visits
-                    .iter()
-                    .map(|v| (*v, *admitted.iter().find(|t| t.group == v.group).unwrap()))
-                    .collect();
-                let _ = out.send(WorkerEvent::Written {
-                    request: batch.ticket,
-                    admissions,
-                });
-                wake.wake();
-                tickets.extend(admitted);
-                pending.push(PendingBarrier {
-                    request: batch.ticket,
-                    visits,
-                });
-            }
-            Err(error) => {
-                if fatal(&error) && !*fenced {
-                    window_failure = Some(error.clone());
+                match store.append_batch_within_capacity(
+                    batch
+                        .units
+                        .into_iter()
+                        .map(|u| LogMutation::Update(u.update))
+                        .collect(),
+                ) {
+                    Ok(admitted) => Ok(admitted),
+                    Err(AppendRefused::Failed(error)) => Err(error),
+                    Err(AppendRefused::Full(mutations)) => match unpark(&visits, mutations) {
+                        Some(units) => {
+                            parked.push_back(Batch {
+                                ticket: batch.ticket,
+                                units,
+                                bytes: batch.bytes,
+                            });
+                            continue;
+                        }
+                        None => Err(StorageError::Corrupt("store returned another batch")),
+                    },
                 }
-                *fenced |= fatal(&error);
-                let _ = out.send(WorkerEvent::Failed {
-                    request: batch.ticket,
-                    visits,
-                    error,
-                });
-                wake.wake();
+            };
+            let result = result.and_then(|admitted| {
+                if admitted.len() != visits.len()
+                    || visits.iter().any(|v| {
+                        admitted
+                            .iter()
+                            .filter(|t| t.binding == binding.store && t.group == v.group)
+                            .count()
+                            != 1
+                    })
+                {
+                    Err(StorageError::Corrupt("worker admission scope mismatch"))
+                } else {
+                    Ok(admitted)
+                }
+            });
+            match result {
+                Ok(admitted) => {
+                    let admissions = visits
+                        .iter()
+                        .map(|v| (*v, *admitted.iter().find(|t| t.group == v.group).unwrap()))
+                        .collect();
+                    let _ = out.send(WorkerEvent::Written {
+                        request: batch.ticket,
+                        admissions,
+                    });
+                    wake.wake();
+                    tickets.extend(admitted);
+                    pending.push(PendingBarrier {
+                        request: batch.ticket,
+                        visits,
+                    });
+                }
+                Err(error) => {
+                    if fatal(&error) && !*fenced {
+                        window_failure = Some(error.clone());
+                    }
+                    *fenced |= fatal(&error);
+                    let _ = out.send(WorkerEvent::Failed {
+                        request: batch.ticket,
+                        visits,
+                        error,
+                    });
+                    wake.wake();
+                }
             }
         }
+        // Published before any `Durable` event of this window (I5): an owner that
+        // sees a transition complete then reads a length that includes it.
+        publish_usage(store, published, parked);
+        finish_persist_window(store, fenced, tickets, pending, window_failure, out, wake);
     }
-    finish_persist_window(store, fenced, tickets, pending, window_failure, out, wake);
 }
 
 fn finish_persist_window<L: LogStore>(
@@ -419,6 +564,65 @@ fn finish_persist_window<L: LogStore>(
     }
 }
 
+/// Rebuild a held batch from the mutations the store handed back unchanged.
+fn unpark(visits: &[VisitTicket], mutations: Vec<LogMutation>) -> Option<Vec<PersistUnit>> {
+    if mutations.len() != visits.len() {
+        return None;
+    }
+    visits
+        .iter()
+        .zip(mutations)
+        .map(|(visit, m)| match m {
+            LogMutation::Update(update) if update.group == visit.group => Some(PersistUnit {
+                visit: *visit,
+                update,
+            }),
+            _ => None,
+        })
+        .collect()
+}
+/// A fenced store writes nothing more: held batches fail with the fence.
+fn fail_parked(
+    parked: &mut VecDeque<Batch>,
+    fenced: bool,
+    out: &SyncSender<WorkerEvent>,
+    wake: &dyn WorkerWake,
+) {
+    if fenced {
+        fail_held(parked, StorageError::Fenced, out, wake);
+    }
+}
+fn fail_held(
+    parked: &mut VecDeque<Batch>,
+    error: StorageError,
+    out: &SyncSender<WorkerEvent>,
+    wake: &dyn WorkerWake,
+) {
+    for batch in parked.drain(..) {
+        let _ = out.send(WorkerEvent::Failed {
+            request: batch.ticket,
+            visits: batch.units.iter().map(|u| u.visit).collect(),
+            error: error.clone(),
+        });
+        wake.wake();
+    }
+}
+struct Published {
+    bytes: Arc<AtomicUsize>,
+    parked: Arc<AtomicUsize>,
+}
+/// Relaxed stores once per window. Stored before the window's events are
+/// sent, so the channel orders them before the owner's receipt; otherwise
+/// scheduling hints only.
+fn publish_usage<L: LogStore>(store: &L, published: &Published, parked: &VecDeque<Batch>) {
+    if let Some(usage) = store.physical_usage() {
+        published.bytes.store(usage.bytes, Ordering::Relaxed);
+    }
+    let held = parked.iter().map(|b| b.bytes).sum();
+    if published.parked.load(Ordering::Relaxed) != held {
+        published.parked.store(held, Ordering::Relaxed);
+    }
+}
 fn fatal(error: &StorageError) -> bool {
     matches!(
         error,
@@ -432,11 +636,25 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
     fn limits(&self) -> WorkerLimits {
         self.limits
     }
+    /// Admitted persistence work plus an in-flight rewrite, which has its
+    /// own admission slot and is reported here only for observation.
     fn usage(&self) -> WorkerUsage {
-        self.usage
+        let mut usage = self.usage;
+        if self.reclaim_pending {
+            usage.requests += 1;
+            usage.bytes += RECLAIM_BYTES;
+        }
+        usage
     }
     fn reclaim_limit(&self) -> Option<usize> {
         self.reclaim_supported.then_some(self.max_reclaim_bytes)
+    }
+    fn wal_usage(&self) -> Option<WalUsage> {
+        self.wal_capacity.map(|capacity| WalUsage {
+            bytes: self.wal_bytes.load(Ordering::Relaxed),
+            capacity,
+            parked: self.wal_parked.load(Ordering::Relaxed),
+        })
     }
     fn submit_reclaim(&mut self, max_bytes: usize) -> Result<ReclaimTicket, WorkerError> {
         if self.fenced {
@@ -451,17 +669,13 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
         if max_bytes == 0 || max_bytes > self.max_reclaim_bytes {
             return Err(WorkerError::BatchTooLarge);
         }
-        let bytes = std::mem::size_of::<Work>()
-            + std::mem::size_of::<Retained>()
-            + std::mem::size_of::<ReclaimEvent>();
-        if self.reclaim_pending
-            || self.usage.requests == self.limits.max_requests
-            || self.data.requests >= self.limits.max_requests - self.limits.control_requests
-            || bytes > self.limits.max_bytes.saturating_sub(self.usage.bytes)
-            || bytes
-                > (self.limits.max_bytes - self.limits.control_bytes)
-                    .saturating_sub(self.data.bytes)
-        {
+        let bytes = RECLAIM_BYTES;
+        // ST2 round 3 (I4): the rewrite is the only operation that frees
+        // space for held batches, and held batches keep their credits, so it
+        // has its own admission: one at a time, a dedicated channel slot, and
+        // no request or byte credits (its fixed bytes are bounded by the one
+        // slot).
+        if self.reclaim_pending {
             return Err(WorkerError::Overloaded);
         }
         let sequence = self.sequence.checked_add(1).ok_or(WorkerError::Exhausted)?;
@@ -485,10 +699,6 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
         }
         self.sequence = sequence;
         self.reclaim_pending = true;
-        self.usage.requests += 1;
-        self.usage.bytes += bytes;
-        self.data.requests += 1;
-        self.data.bytes += bytes;
         self.retained.insert(
             sequence,
             Retained {

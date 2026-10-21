@@ -291,8 +291,8 @@ impl Harness {
         let ticket = self.nodes[leader]
             .propose(ClientRequest {
                 group: g,
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .unwrap();
         let until = Instant::now() + Duration::from_secs(10);
@@ -302,7 +302,7 @@ impl Harness {
                 assert_eq!(output.ticket(), ticket);
                 let result = self.nodes[leader].complete_client(output).unwrap();
                 assert!(
-                    matches!(result,ClientOutcome::Applied{receipt:CounterReceipt{duplicate:found,operation:op,outcome:CounterOutcome::Value(value),..},..} if found==duplicate && op.get()==operation && value==expected),
+                    matches!(result,ClientOutcome::Applied{receipt:CounterReceipt{duplicate:found,operation:op,outcome:CounterOutcome::Value(value),..},..} if found==duplicate && u128::from(op.get() as u64)==operation && value==expected),
                     "{result:?}"
                 );
                 return;
@@ -592,7 +592,7 @@ fn history(protocol: NativePeerProtocol, mixed: bool) {
     assert!(!h.nodes[0]
         .membership_drain_ready(&h.plan, &h.journal)
         .unwrap());
-    h.write(group_id(1), 501, 2, false, 9);
+    h.write(group_id(1), 50, 2, false, 9);
     let batch = driver
         .coordinator
         .poll(&h.journal, h.plan.assignments().len(), |g| {
@@ -638,7 +638,7 @@ fn history(protocol: NativePeerProtocol, mixed: bool) {
         h.write(group_id(g), 100 + g as u128, 7, true, 7);
         h.write(
             group_id(g),
-            600 + g as u128,
+            60 + g as u128,
             1,
             false,
             if g == 1 { 10 } else { 8 },

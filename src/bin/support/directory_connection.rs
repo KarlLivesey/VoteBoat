@@ -197,6 +197,7 @@ impl Connection {
                     .append(&mut reply);
                 self.reply(reply);
             }
+            ["maintenance"] => self.reply(super::setup::maintenance_status(owner.node(), c.group)),
             ["initialize"] => self.submit(owner, c, c.bootstrap)?,
             ["publish", operation] => {
                 self.submit(owner, c, super::directory_plan::op(operation)?)?
@@ -263,6 +264,10 @@ impl Connection {
                         receipt.outcome,
                         receipt.duplicate
                     ),
+                    // Retryable backpressure, nothing proposed (ST2 round 3).
+                    ClientOutcome::NotProposed(voteboat::raft::RaftError::StoragePressure) => {
+                        "ERR StoragePressure".into()
+                    }
                     other => format!("UNKNOWN {other:?}; retry original plan operation"),
                 });
             }

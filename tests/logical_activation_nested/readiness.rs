@@ -19,6 +19,8 @@ pub fn cancellation(lower: &mut Lower<'_>, nodes: &mut [Middle]) {
             support::node(201),
             ReadinessRequirements {
                 application_schema: 1,
+                identity: voteboat::raft::LayerIdentity::UNREGISTERED,
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 1,
                 snapshot_bytes: 1,
             },
@@ -97,6 +99,8 @@ pub fn closed(nodes: &mut [Middle]) {
                 support::node(201),
                 ReadinessRequirements {
                     application_schema: 1,
+                    identity: voteboat::raft::LayerIdentity::UNREGISTERED,
+                    inner_profile: voteboat::raft::InnerProfile::LEAF,
                     command_bytes: 1,
                     snapshot_bytes: 1,
                 }

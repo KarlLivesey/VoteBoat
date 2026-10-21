@@ -192,6 +192,9 @@ fn checkpoint_survivors(
         .collect()
 }
 
+/// The foreground write's sequence in the built-in session: distinct from the
+/// workload's sequences (at most 4 × GROUPS) and inside the 128-entry window.
+const FOREGROUND: u64 = 100;
 fn repair(h: &Harness, replicas: &mut [Replica<SharedLog>], forced: &BTreeMap<GroupIdentity, u64>) {
     let mut totals = PollTotals::default();
     for g in 1..=GROUPS {
@@ -218,8 +221,8 @@ fn repair(h: &Harness, replicas: &mut [Replica<SharedLog>], forced: &BTreeMap<Gr
                 let ticket = ns[n]
                     .propose(ClientRequest {
                         group: group_id(GROUPS),
-                        operation: OperationId::new(900_001).unwrap(),
-                        bytes: 0i64.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, FOREGROUND).unwrap(),
+                        bytes: Counter::command(0, 0),
                     })
                     .map_err(|e| format!("foreground refused: {:?}", e.reason))?;
                 foreground = Some((n, ticket));

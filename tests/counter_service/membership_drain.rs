@@ -181,11 +181,14 @@ fn history(quic: bool) {
     assert!(c
         .ok(source, &["drain-node", "1", "19701"])
         .contains("ready=true"));
-    assert!(!c.request(source, &["add", "19752", "3"]).status.success());
+    assert!(!c
+        .request(source, &["add", "1", "14", "0", "3"])
+        .status
+        .success());
     c.ok(source, &["drain-stop", "1", "19701"]);
     drain::joined(&mut c, source);
-    assert!(authenticated_write(&c, &["add", "19752", "3"]).contains("Value(10)"));
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "14", "0", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     c.stop();
 }
 #[test]

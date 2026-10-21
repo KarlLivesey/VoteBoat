@@ -317,16 +317,22 @@ impl IndependentChild {
     }
     fn exercise(&self, nodes: &mut [Node<Child>], clock: &Instant, compact: bool) {
         let (g, hint, key, delta) = (self.group, self.hint, self.key, self.delta);
-        let bytes =
-            encode_routed(hint, &[key], &delta.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap();
-        let (receipt, uncertain) = propose_recovering_observed(nodes, clock, g, 1, bytes.clone());
-        assert_eq!(receipt.operation, OperationId::new(1).unwrap());
+        let bytes = encode_routed(
+            hint,
+            &[key],
+            &Counter::command(0, delta),
+            MAX_ROUTED_COMMAND_BYTES,
+        )
+        .unwrap();
+        let (receipt, uncertain) =
+            propose_recovering_observed(nodes, clock, g, counter_op(1), bytes.clone());
+        assert_eq!(receipt.operation, OperationId::new(counter_op(1)).unwrap());
         assert!(matches!(receipt.outcome,
             RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(value), duplicate, .. })
                 if value == delta && (!duplicate || uncertain)
         ));
         assert!(matches!(
-            propose(nodes, clock, g, 1, bytes).outcome,
+            propose(nodes, clock, g, counter_op(1), bytes).outcome,
             RoutedOutcome::Applied(CounterReceipt {
                 duplicate: true,
                 ..
@@ -405,10 +411,15 @@ impl IndependentChild {
             || child(self.group, self.manifest.clone()),
         );
         campaign(&mut ns, clock, self.group);
-        let bytes =
-            encode_routed(hint, &[key], &delta.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap();
+        let bytes = encode_routed(
+            hint,
+            &[key],
+            &Counter::command(0, delta),
+            MAX_ROUTED_COMMAND_BYTES,
+        )
+        .unwrap();
         assert!(
-            matches!(propose(&mut ns, clock, self.group, 1, bytes).outcome, RoutedOutcome::Applied(CounterReceipt {outcome: CounterOutcome::Value(v), duplicate: true, ..}) if v == delta)
+            matches!(propose(&mut ns, clock, self.group, counter_op(1), bytes).outcome, RoutedOutcome::Applied(CounterReceipt {outcome: CounterOutcome::Value(v), duplicate: true, ..}) if v == delta)
         );
         assert_eq!(
             read(

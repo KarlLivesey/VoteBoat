@@ -28,7 +28,7 @@ fn setup(quic: bool) -> (Cluster, voteboat::membership::Membership) {
     }
     let leader = cluster.leader();
     assert!(cluster
-        .ok(leader, &["add", "18000", "42"])
+        .ok(leader, &["add", "1", "11", "0", "42"])
         .contains("Value(42)"));
     // The fixture inspects node1's local recovery next. A quorum receipt does
     // not establish that every follower has learned this commit yet.
@@ -56,7 +56,7 @@ fn state(cluster: &Cluster, id: usize, value: i64) -> GroupLog {
         id as u64,
         lifecycle_store(id),
         value,
-        (18000, 42),
+        (11, 42),
     )
 }
 
@@ -121,8 +121,8 @@ fn finish(cluster: &mut Cluster, leader: usize, joint: &str, finalize: &str) {
         assert!(Instant::now() < deadline, "final record did not replicate");
         std::thread::park_timeout(Duration::from_millis(5));
     }
-    assert!(authenticated_write(cluster, &["add", "18003", "1"]).contains("Value(43)"));
-    let original = authenticated_write(cluster, &["add", "18000", "42"]);
+    assert!(authenticated_write(cluster, &["add", "1", "12", "0", "1"]).contains("Value(43)"));
+    let original = authenticated_write(cluster, &["add", "1", "11", "0", "42"]);
     assert!(original.contains("duplicate=true") && original.contains("Value(42)"));
     assert_eq!(cluster.routed(&["read"]), "OK value=43\n");
     wait_committed(cluster, leader);
@@ -226,7 +226,7 @@ fn history(quic: bool, checkpoint: bool) {
     let (mut cluster, membership) = setup(quic);
     let leader = cluster.leader();
     assert!(cluster
-        .ok(leader, &["add", "18002", "0"])
+        .ok(leader, &["add", "1", "13", "0", "0"])
         .contains("Value(42)"));
     let (joint, finalize) = plan_removal(&membership, leader);
     unread_joint(&mut cluster, leader, &joint);
@@ -246,7 +246,7 @@ fn history(quic: bool, checkpoint: bool) {
         replacement, leader,
         "demoted learner cannot win an election"
     );
-    assert!(authenticated_write(&cluster, &["add", "18003", "1"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "1", "12", "0", "1"]).contains("duplicate=true"));
     assert_eq!(cluster.routed(&["read"]), "OK value=43\n");
     cluster.stop();
     verify_files(&cluster, leader);

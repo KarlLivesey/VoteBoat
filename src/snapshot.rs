@@ -228,6 +228,22 @@ pub trait SnapshotRetention: SnapshotStore {
     /// Caller supplies the one authoritative durable log reference. Select it
     /// as root and release all other log anchors; owned transport images are separate.
     fn reconcile_log(&mut self, reference: Option<SnapshotRef>) -> Result<(), StorageError>;
+    /// Publish `sealed` as the root and pin it as a log anchor. The default
+    /// is `publish` then `pin_for_log`; a store may make both durable in one
+    /// root update, which never exposes a state the two calls could not.
+    fn publish_for_log(&mut self, sealed: SealedSnapshot) -> Result<SnapshotReceipt, StorageError> {
+        let receipt = self.publish(sealed)?;
+        self.pin_for_log(receipt.reference())?;
+        Ok(receipt)
+    }
+    /// True only when this store session sealed and published `reference`
+    /// itself through `publish_for_log` and the image is still pinned (so its
+    /// slot cannot have been rewritten since the publishing job compared it
+    /// with its input). Callers may then skip re-reading it. The default
+    /// never claims this, so every load stays verified.
+    fn verified_this_session(&self, _reference: SnapshotRef) -> bool {
+        false
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

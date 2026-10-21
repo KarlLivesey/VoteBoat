@@ -95,9 +95,14 @@ fn limits() -> RoutedLimits {
     RoutedLimits {
         operations: 64,
         semantic_bytes: 4096,
-        payload_bytes: 8,
+        payload_bytes: COUNTER_COMMAND_BYTES,
         inner_checkpoint_bytes: 32 + 33 * 64,
     }
+}
+/// Operation `n`: sequence `n` of the inner counter's built-in session. Routed
+/// control commands accept any ID, so every test operation uses this layout.
+fn op(n: u128) -> OperationId {
+    Counter::operation(1, n as u64).unwrap()
 }
 fn fresh() -> RoutedApplication<Counter, HostPolicy> {
     RoutedApplication::new(
@@ -114,7 +119,7 @@ fn entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
         index,
         term: 1,
         payload: EntryPayload::Command {
-            operation: OperationId::new(operation).unwrap(),
+            operation: op(operation),
             bytes: bytes.into(),
         },
     }
@@ -132,7 +137,7 @@ fn data(key: u8, delta: i64) -> Vec<u8> {
     encode_routed(
         hint(key),
         &[key],
-        &delta.to_le_bytes(),
+        &Counter::command(0, delta),
         MAX_ROUTED_COMMAND_BYTES,
     )
     .unwrap()
@@ -150,7 +155,7 @@ fn bootstrap_binds_owner_namespace_policy_and_initial_application_before_service
         Err(ApplicationError::InvalidCommand)
     );
     let bytes = data(10, 7);
-    let operation = OperationId::new(1).unwrap();
+    let operation = op(1);
     assert_eq!(
         app.validate_proposal(operation, &bytes, std::iter::empty()),
         Err(ApplicationError::NotApplied)
@@ -199,10 +204,154 @@ fn bootstrap_binds_owner_namespace_policy_and_initial_application_before_service
 }
 
 #[test]
+fn startup_binding_does_not_refuse_skew_at_readiness() {
+    // Sol, round 3: Routed's own schema is a fixed constant, so Routed around
+    // Counter::new(4) and Counter::new(7) declared the same requirements and
+    // the smaller replica failed the committed bootstrap entry instead of
+    // being refused at readiness. The inner profile is now declared and
+    // compared, so each refuses the other before any entry.
+    let routed = |window| {
+        RoutedApplication::new(
+            group(20),
+            grant(),
+            Counter::new(window).unwrap(),
+            HostPolicy,
+            limits(),
+        )
+        .unwrap_or_else(|r| panic!("{:?}", r.error))
+    };
+    let (small, large) = (routed(4), routed(7));
+    assert_eq!(small.schema_version(), large.schema_version());
+    for (replica, leader) in [(&small, &large), (&large, &small)] {
+        let declared = leader.deployment_requirements().unwrap();
+        assert_eq!(
+            declared.inner_profile.schemas(),
+            Some(vec![leader.application().schema_version()])
+        );
+        assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+        assert_eq!(
+            replica.validate_deployment_requirements(declared),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+    }
+    // Defence in depth, unchanged: had readiness been bypassed, the committed
+    // binding still stops the skewed replica before any data.
+    let bootstrap = large.bootstrap_command(MAX_ROUTED_COMMAND_BYTES).unwrap();
+    let mut leader = large.clone();
+    assert!(leader
+        .apply_batch(&[entry(1, 10000, bootstrap.clone())])
+        .is_ok());
+    let mut skewed = small.clone();
+    assert_eq!(
+        skewed.apply_batch(&[entry(1, 10000, bootstrap)]).err(),
+        Some(ApplicationError::InvalidCommand)
+    );
+    assert_eq!(skewed.applied_index(), 0);
+}
+#[test]
+fn wrapper_own_routed_limits_are_refused_at_readiness() {
+    // Sol, round 4: identical Counter::new(4) inners and only
+    // RoutedLimits.operations differing (4 / 7). The smaller replica accepted
+    // the larger declaration, then failed the first bootstrap entry. Routed's
+    // own limits are now its configuration words, compared exactly, so each
+    // refuses the other at readiness; every other limit field likewise.
+    let routed = |config: RoutedLimits| {
+        RoutedApplication::new(
+            group(20),
+            grant(),
+            Counter::new(4).unwrap(),
+            HostPolicy,
+            config,
+        )
+        .unwrap_or_else(|r| panic!("{:?}", r.error))
+    };
+    let base = limits();
+    let skews = [
+        (
+            RoutedLimits {
+                operations: 4,
+                ..base
+            },
+            RoutedLimits {
+                operations: 7,
+                ..base
+            },
+        ),
+        (
+            base,
+            RoutedLimits {
+                semantic_bytes: base.semantic_bytes - 1,
+                ..base
+            },
+        ),
+        (
+            base,
+            RoutedLimits {
+                payload_bytes: base.payload_bytes - 1,
+                ..base
+            },
+        ),
+        (
+            base,
+            RoutedLimits {
+                inner_checkpoint_bytes: base.inner_checkpoint_bytes + 1,
+                ..base
+            },
+        ),
+    ];
+    for (small, large) in skews {
+        let (small, large) = (routed(small), routed(large));
+        assert_eq!(small.schema_version(), large.schema_version());
+        for (replica, leader) in [(&small, &large), (&large, &small)] {
+            let declared = leader.deployment_requirements().unwrap();
+            let actual = replica.deployment_requirements().unwrap();
+            assert_eq!(declared.inner_profile, actual.inner_profile);
+            assert_ne!(declared.identity, actual.identity);
+            assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+            assert_eq!(
+                replica.validate_deployment_requirements(declared),
+                Err(ApplicationError::UnsupportedSchema)
+            );
+        }
+    }
+    // Sol's exact pair, and the binding still stops a forced bootstrap.
+    let small = routed(RoutedLimits {
+        operations: 4,
+        ..base
+    });
+    let mut large = routed(RoutedLimits {
+        operations: 7,
+        ..base
+    });
+    let bootstrap = large.bootstrap_command(MAX_ROUTED_COMMAND_BYTES).unwrap();
+    large
+        .apply_batch(&[entry(1, 10000, bootstrap.clone())])
+        .unwrap();
+    assert_eq!(large.applied_index(), 1);
+    let mut skewed = small.clone();
+    assert_eq!(
+        skewed.apply_batch(&[entry(1, 10000, bootstrap)]).err(),
+        Some(ApplicationError::InvalidCommand)
+    );
+    assert_eq!(skewed.applied_index(), 0);
+    // The scoped-fence limit is configuration too.
+    let scoped = |maximum| {
+        routed(base)
+            .with_scoped_fencing(maximum)
+            .unwrap_or_else(|r| panic!("{:?}", r.0))
+    };
+    let (two, three) = (scoped(2), scoped(3));
+    assert_eq!(two.schema_version(), three.schema_version());
+    assert_eq!(
+        two.validate_deployment_requirements(three.deployment_requirements().unwrap()),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+}
+#[test]
 fn admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload() {
     let mut app = initialized();
     let bytes = data(10, 7);
-    app.validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty())
+    app.validate_proposal(op(1), &bytes, std::iter::empty())
         .unwrap();
     let first = app.apply_batch(&[entry(2, 1, bytes)]).unwrap().remove(0);
     assert!(matches!(
@@ -215,7 +364,7 @@ fn admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload() {
     ));
     let mut refreshed = hint(10);
     refreshed.generation = RouteGeneration::new(99).unwrap();
-    let retry = encode_routed(refreshed, &[10], &7i64.to_le_bytes(), 1000).unwrap();
+    let retry = encode_routed(refreshed, &[10], &Counter::command(0, 7), 1000).unwrap();
     assert!(matches!(
         app.apply_batch(&[entry(3, 1, retry)]).unwrap()[0].outcome,
         RoutedOutcome::Applied(CounterReceipt {
@@ -242,9 +391,9 @@ fn admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload() {
             4 => changed.bucket = 11,
             _ => changed.scheme.version = 2,
         }
-        let bytes = encode_routed(changed, &[10], &5i64.to_le_bytes(), 1000).unwrap();
+        let bytes = encode_routed(changed, &[10], &Counter::command(0, 5), 1000).unwrap();
         assert!(app
-            .validate_proposal(OperationId::new(2).unwrap(), &bytes, std::iter::empty())
+            .validate_proposal(op(2), &bytes, std::iter::empty())
             .is_err());
         assert!(matches!(
             app.apply_batch(&[entry(6 + field, 2, bytes)]).unwrap()[0].outcome,
@@ -261,11 +410,11 @@ fn durable_local_fence_rejects_previously_admitted_data_and_reads_without_thaw()
     let mut app = initialized();
     app.apply_batch(&[entry(2, 1, data(10, 7))]).unwrap();
     let queued = data(10, 3);
-    app.validate_proposal(OperationId::new(2).unwrap(), &queued, std::iter::empty())
+    app.validate_proposal(op(2), &queued, std::iter::empty())
         .unwrap();
     let epoch = grant().input().epoch;
     let fence = encode_fence(epoch);
-    app.validate_proposal(OperationId::new(500).unwrap(), &fence, std::iter::empty())
+    app.validate_proposal(op(500), &fence, std::iter::empty())
         .unwrap();
     let receipt = app
         .apply_batch(&[entry(3, 500, fence.clone()), entry(4, 2, queued)])
@@ -290,11 +439,7 @@ fn durable_local_fence_rejects_previously_admitted_data_and_reads_without_thaw()
         RoutedRead::Rejected(RoutingError::Fenced)
     );
     assert!(app
-        .validate_proposal(
-            OperationId::new(1).unwrap(),
-            &data(10, 7),
-            std::iter::empty()
-        )
+        .validate_proposal(op(1), &data(10, 7), std::iter::empty())
         .is_err());
     assert_eq!(
         app.apply_batch(&[entry(5, 500, fence.clone())]).unwrap()[0].outcome,
@@ -366,7 +511,7 @@ fn malformed_commands_and_failed_batches_leave_the_application_unchanged() {
 fn semantic_and_inner_capacity_reservations_preserve_control_space() {
     let mut config = limits();
     config.operations = 1;
-    config.semantic_bytes = 9;
+    config.semantic_bytes = 1 + COUNTER_COMMAND_BYTES;
     let mut app = RoutedApplication::new(
         group(20),
         grant(),
@@ -379,26 +524,18 @@ fn semantic_and_inner_capacity_reservations_preserve_control_space() {
     app.apply_batch(&[entry(1, 10000, binding)]).unwrap();
     let bytes = data(10, 7);
     assert!(app
-        .validate_proposal(
-            OperationId::new(1).unwrap(),
-            &bytes,
-            [(OperationId::new(1).unwrap(), bytes.as_slice())].into_iter()
-        )
+        .validate_proposal(op(1), &bytes, [(op(1), bytes.as_slice())].into_iter())
         .is_ok());
     assert_eq!(
-        app.validate_proposal(
-            OperationId::new(2).unwrap(),
-            &bytes,
-            [(OperationId::new(1).unwrap(), bytes.as_slice())].into_iter()
-        ),
+        app.validate_proposal(op(2), &bytes, [(op(1), bytes.as_slice())].into_iter()),
         Err(ApplicationError::DedupCapacity)
     );
     app.apply_batch(&[entry(2, 1, bytes.clone())]).unwrap();
     assert!(app
-        .validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty())
+        .validate_proposal(op(1), &bytes, std::iter::empty())
         .is_ok());
     assert_eq!(
-        app.validate_proposal(OperationId::new(2).unwrap(), &bytes, std::iter::empty()),
+        app.validate_proposal(op(2), &bytes, std::iter::empty()),
         Err(ApplicationError::DedupCapacity)
     );
     let before = app.checkpoint(100000).unwrap();
@@ -408,7 +545,7 @@ fn semantic_and_inner_capacity_reservations_preserve_control_space() {
     );
     assert_eq!(app.checkpoint(100000).unwrap(), before);
     let fence = encode_fence(grant().input().epoch);
-    app.validate_proposal(OperationId::new(99).unwrap(), &fence, std::iter::empty())
+    app.validate_proposal(op(99), &fence, std::iter::empty())
         .unwrap();
     app.apply_batch(&[entry(3, 99, fence)]).unwrap();
     assert!(app.fence().is_some());

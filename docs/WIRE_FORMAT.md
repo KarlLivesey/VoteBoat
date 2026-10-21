@@ -229,9 +229,28 @@ not ballots, read probes or term updates. See
 Format 4 retains format 3 and adds tags 12/13. Both carry learner node (`u64`),
 store ID (16 bytes), store incarnation (`u64`), learner store session (`u64`),
 required committed index (`u64`), its term (`u64`), application schema (`u64`),
-required command bytes (`u64`) and snapshot bytes (`u64`). Tag 13 appends one
-Boolean readiness byte. Byte counts convert to `usize` with checked conversion.
-They are capability requirements, not payload lengths or allocation requests.
+required command bytes (`u64`), snapshot bytes (`u64`), the application's own
+layer identity, and the inner profile. A layer identity is the protocol family
+(`u16`, see `raft::ApplicationFamily`) followed by four configuration words
+(`u64` each), the layer's decision-affecting configuration. The inner profile
+is a layer count (`u8`, at most 7) followed by that many layers, outermost
+first, each a non-zero application schema (`u64`) and its layer identity,
+naming the applications inside a wrapper (zero layers for a leaf
+application). A count above 7 or a zero schema is refused, and an overflowed
+profile is never encoded. Any family value decodes; an unknown one simply
+never equals the receiver's own. The deployment plan follows: a word count
+(`u8`, at most 192, `raft::MAX_DEPLOYMENT_PLAN_WORDS`; a larger count is
+refused before any word is read) and that many `u64` words, segments of a header word
+(`depth << 32 | count`, count at least 1) and the layer's own words, depths
+strictly increasing and at most the profile's layer count (`raft::DeploymentPlan`);
+a plan that is not canonical is refused. Tag 13 appends one Boolean readiness byte.
+Byte counts convert to `usize` with checked conversion. They are capability
+requirements, not payload lengths or allocation requests. The inner profile
+was added by DR1 round 4, the layer identities by DR1 round 5 and the
+deployment plan by DR1 round 6 (PR 15; its limit is 192 words, not the
+128 first planned), without a new format number: the crate is unpublished and mixed-revision peers
+fail the frame with a typed decode error (`Truncated`, or trailing bytes)
+rather than misreading it.
 
 Group/configuration/term/context come from the envelope. For tag 12 the leader
 is the sender and learner is the recipient; context origin equals sender binding.

@@ -442,7 +442,7 @@ impl<'a> Decoder<'a> {
             1 => {
                 let from = self.u64()?;
                 let count = self.u32()? as usize;
-                if count > limits.max_entries_per_group
+                if count > limits.retained_entry_capacity()
                     || count > self.b.len().saturating_sub(self.offset) / 17
                 {
                     return Err(StorageError::Corrupt("entry count budget"));

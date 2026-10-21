@@ -153,7 +153,9 @@ fn prepare(quic: bool) -> Cluster {
         c.start(id, "create");
     }
     c.leader();
-    assert!(c.routed(&["add", "700", "42"]).contains("Value(42)"));
+    assert!(c
+        .routed(&["add", "1", "2", "0", "42"])
+        .contains("Value(42)"));
     c.stop();
     let text = input("1 - m:3 v:1 v:2 v:3", "-", &[1, 2, 3]);
     let generated = plan(
@@ -167,7 +169,7 @@ fn prepare(quic: bool) -> Cluster {
     for id in 1..=3 {
         c.start(id, "recover-member");
     }
-    finish_lifecycle_operation(&c, &[1, 2], "1000", "701");
+    finish_lifecycle_operation(&c, &[1, 2], "1000", "18");
     c.stop();
     configure_fourth_tls(&mut c);
     let deployment = c.root.join("placement.deployment");
@@ -183,7 +185,7 @@ fn history(quic: bool) {
     for id in [1, 2] {
         c.start(id, "recover-member");
     }
-    finish_lifecycle_operation(&c, &[1, 2], "1001", "702");
+    finish_lifecycle_operation(&c, &[1, 2], "1001", "19");
     // No fourth process exists yet: generated future joint cannot promote it.
     for id in [1, 2] {
         let status = c.ok(id, &["configuration-status", "1002"]);
@@ -196,7 +198,7 @@ fn history(quic: bool) {
     for id in [1, 2, 4] {
         c.start(id, "recover-member");
     }
-    finish_lifecycle_operation(&c, &[2, 4], "1002", "703");
+    finish_lifecycle_operation(&c, &[2, 4], "1002", "20");
     for id in [1, 2, 4] {
         c.ok(id, &["checkpoint"]);
     }
@@ -208,9 +210,9 @@ fn history(quic: bool) {
     }
     let leader = c.leader();
     assert!(c
-        .ok(leader, &["add", "700", "42"])
+        .ok(leader, &["add", "1", "2", "0", "42"])
         .contains("duplicate=true"));
-    finish_lifecycle_operation(&c, &[2, 4], "1002", "704");
+    finish_lifecycle_operation(&c, &[2, 4], "1002", "21");
     c.stop();
     inspect_lifecycle(&c, &[2, 4], 6, &[2, 4], &[1], &[1000, 1001, 1002], 42);
     fs::remove_dir_all(&c.root).unwrap();

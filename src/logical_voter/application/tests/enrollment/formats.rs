@@ -3,6 +3,12 @@
 use super::*;
 use crate::logical_voter::codec::Decoder;
 
+// DR1 regenerated both v6 files: the parent is a Counter, whose schema (in the
+// enrollment plan) now encodes its session limits (`0x0F00_0004` for one
+// session × 16 × one nonce) and whose embedded checkpoints are `VBCTR002`
+// with each retained receipt's acknowledgement. DR1 round 3 regenerated both
+// again: the Counter format is 5 (`0x0F00_0005`) and its checkpoints are
+// `VBCTR003`, with a 16-byte closure record in the ledger header.
 const V6_EMPTY: &[u8] = include_bytes!("../formats/v6-candidate-empty.bin");
 const V6_ENROLLED: &[u8] = include_bytes!("../formats/v6-candidate-enrolled.bin");
 /// LV1 outputs (candidate checkpoint v3, schema 4), now legacy fixtures.

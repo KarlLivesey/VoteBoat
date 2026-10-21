@@ -133,7 +133,7 @@ fn prepared() -> Replay {
     for action in [
         Action::Campaign(1),
         Action::Pump,
-        Action::TryCounter(1, 9911, 9),
+        Action::TryCounter(1, 1, 9),
         Action::Pump,
     ] {
         run.action(&action).unwrap();
@@ -162,7 +162,7 @@ fn cached_leadership_cannot_replace_fresh_read_quorum_or_one_use() {
     assert_eq!(last(&run), &Outcome::NoBarrier);
     run.action(&Action::Campaign(2)).unwrap();
     run.action(&Action::Pump).unwrap();
-    run.action(&Action::TryCounter(2, 9912, 3)).unwrap();
+    run.action(&Action::TryCounter(2, 2, 3)).unwrap();
     run.action(&Action::Pump).unwrap();
     run.action(&Action::Heartbeat(1)).unwrap();
     run.action(&Action::Pump).unwrap();
@@ -238,7 +238,7 @@ fn lagging_application_restart_and_fencing_cannot_reuse_read_authority() {
     run.action(&Action::ServeCounter(1, 3)).unwrap();
     assert_eq!(last(&run), &Outcome::Value(9));
     run.action(&Action::Delay(1)).unwrap();
-    run.action(&Action::TryCounter(1, 9912, 1)).unwrap();
+    run.action(&Action::TryCounter(1, 2, 1)).unwrap();
     run.action(&Action::FailSync(1)).unwrap();
     run.action(&Action::ServeCounter(1, 3)).unwrap();
     assert_eq!(last(&run), &Outcome::Refused(RaftError::Fenced));
@@ -251,7 +251,7 @@ fn read_cancel_crash_and_partition_schedule_replays_exact_authority() {
         actions: vec![
             Action::Campaign(1),
             Action::Pump,
-            Action::TryCounter(1, 9911, 9),
+            Action::TryCounter(1, 1, 9),
             Action::Pump,
             Action::Read(1, 1),
             Action::DeliverNewest,

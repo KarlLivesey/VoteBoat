@@ -195,10 +195,11 @@ impl Raft {
     ///
     /// The batch is checked against this core's own limits, whichever core
     /// created it: count and allocated capacity within `max_proposal_entries`
-    /// and the largest command within `max_command_bytes`; for two or more
-    /// entries also the retained-entry budget and the recorded staging peak
-    /// within `max_batch_bytes`. A single entry keeps the `Event::Propose`
-    /// ceiling. Each entry then receives this core's next index and current
+    /// and the largest command within `max_command_bytes`; the retained-entry
+    /// data budget (`RaftError::StoragePressure` at it, counted as for
+    /// `propose_batch`); for two or more entries also the recorded staging
+    /// peak within `max_batch_bytes`. A single entry keeps the
+    /// `Event::Propose` ceiling. Each entry then receives this core's next index and current
     /// term in place, and the same allocation becomes the persisted suffix.
     /// Reserve effects with `effect_reservation(batch.retained_bytes())` and
     /// separately reserve individual application receipts, as for
@@ -243,11 +244,13 @@ impl Raft {
             entry.index = first + offset as u64;
             entry.term = term;
         }
-        self.persist_proposal_entries_into(first, entries, out)?;
+        // No bound computed here: a volatile core stages no WAL bytes, and a
+        // durable one bounds the update once at staging (ST2).
+        self.persist_proposal_entries_into(first, entries, None, out)?;
         self.finish_step_into(out)
     }
 
-    fn validate_entry_batch(&self, batch: &ProposalBatch) -> Result<u64, RaftError> {
+    fn validate_entry_batch(&mut self, batch: &ProposalBatch) -> Result<u64, RaftError> {
         let count = batch.entries.len();
         let limit = self.batch_limits.max_proposal_entries;
         if count == 0 || count > limit {
@@ -256,16 +259,9 @@ impl Raft {
         if batch.entries.capacity() > limit {
             return Err(StorageError::Rejected("proposal allocation count budget").into());
         }
-        if count > 1
-            && self
-                .durable
-                .entries
-                .len()
-                .checked_add(count)
-                .is_none_or(|n| n > self.limits.max_entries_per_group)
-        {
-            return Err(StorageError::Rejected("proposal retained entry budget").into());
-        }
+        // ST2: every batch, like `propose` and `propose_batch`, stops at the
+        // data budget; the noop reserve above it is the leader's (I1).
+        self.check_data_budget(count)?;
         let first = self
             .durable
             .last_index()

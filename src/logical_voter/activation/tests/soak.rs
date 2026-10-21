@@ -330,7 +330,7 @@ fn two_hundred_thousand_distinct_business_writes_keep_bounded_wrapper_state() {
             let checkpoint = s.a.checkpoint(usize::MAX).unwrap();
             let mut restored = wrapper();
             restored
-                .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, s.a.applied_index(), &checkpoint)
+                .restore_checkpoint(s.a.schema_version(), s.a.applied_index(), &checkpoint)
                 .unwrap();
             assert_eq!(restored.checkpoint(usize::MAX).unwrap(), checkpoint);
             s.shadow = Some((restored, 1_000));

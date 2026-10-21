@@ -1,0 +1,113 @@
+{
+  "DR1 reviewed invariant sources": {
+    "revision": "79829e871b2c4131700f51a7c2df978db8fc7618",
+    "files": [
+      {
+        "path": "src/retention.rs",
+        "same": true,
+        "sha256": "4e932400b891aba0c4052a5a4f2ac349534a92a87745f1da1b32cf222bed22a5"
+      },
+      {
+        "path": "src/application/counter.rs",
+        "same": true,
+        "sha256": "bbdb7cb296a9b9e64ca5a97a73b0831e7c8fca06cb331eae7c96d47dcd65ef49"
+      },
+      {
+        "path": "src/raft/readiness.rs",
+        "same": true,
+        "sha256": "13adf74a3a92c0f832056ed11dde99633b9192bc14913b4392e635ba34a5ac9c"
+      },
+      {
+        "path": "src/logical_voter/codec.rs",
+        "same": true,
+        "sha256": "4c788106cea9f3af0a5eff76b472c3ea39264e9278d29dc8272daecd527d2137"
+      },
+      {
+        "path": "src/logical_voter/codec/commands.rs",
+        "same": true,
+        "sha256": "52213bdff31442644a1df74ff55b601076f37d2cc9acf1bcf115972100444aad"
+      },
+      {
+        "path": "src/logical_voter/codec/enrollment.rs",
+        "same": false,
+        "sha256": "431fd6420270a6189fee55fcd6ea12755bd42476bc01c56f13f6f6009461ddf6"
+      },
+      {
+        "path": "src/logical_voter/enrollment.rs",
+        "same": true,
+        "sha256": "b85276bd63c664b51098d95e8a835268af8c0a67c0baebea9a8baa4989ff3493"
+      },
+      {
+        "path": "src/logical_voter/traits.rs",
+        "same": true,
+        "sha256": "27979a7e078ea12ef65d73aa65d29d29b53b8af7c774cbf72811d64af70962be"
+      },
+      {
+        "path": "src/transaction/traits.rs",
+        "same": true,
+        "sha256": "2d77a24a25adbadb11006bf61a385090d13ee540b8d558ae7e88a46772d3e176"
+      },
+      {
+        "path": "src/program_transaction/traits.rs",
+        "same": true,
+        "sha256": "96437e3de712980536706a91f37ca34195bd91f2f27e1e006d6dcfcd5d935311"
+      }
+    ]
+  },
+  "ST2/main preserved sources": {
+    "revision": "219ad7bb8489c19012c8298d1021ddd959861782",
+    "files": [
+      {
+        "path": "src/raft/proposals.rs",
+        "same": true,
+        "sha256": "5ea0156132232a1d2775e3f5016187ba29c8df7242b65ea8cb4a7d94825e31e9"
+      },
+      {
+        "path": "src/raft/receive.rs",
+        "same": true,
+        "sha256": "ed9aae291755b261609b53834478128354338378d6d97985714e9c38ecf2fc5f"
+      },
+      {
+        "path": "src/log/entries.rs",
+        "same": true,
+        "sha256": "734d13c33a91ac1f9fc26cff4e9e1c97c40150434bc19c68ef964538af7b14c5"
+      },
+      {
+        "path": "src/log/transition/summarized.rs",
+        "same": true,
+        "sha256": "6bd151712ebfde679588ebeb92fd82162fdbd75db02fd318121fe7f0c15d017e"
+      },
+      {
+        "path": "src/native/log_store/accepted.rs",
+        "same": true,
+        "sha256": "3cc901f975ae841ed86dfc416c06065544e0c6c388145d5f7ccfeb6b90795ab8"
+      },
+      {
+        "path": "src/raft/peer_slots.rs",
+        "same": true,
+        "sha256": "2f09e4a85708be30be74ba26ec4bede5ff7e949a2a50dcb76f492f72f1a7da45"
+      },
+      {
+        "path": "src/runtime/effects/continuation_tests.rs",
+        "same": true,
+        "sha256": "4e2983460c34b25e23d1d446b315371b5f6f6ca80ee9c6049ac2c39ce5e3ae0e"
+      },
+      {
+        "path": "tests/transfer_service.rs",
+        "same": true,
+        "sha256": "85648ca5e54c6aa80be8771b96a45ed2434b64cbefef4bcb28751f80bd63ceca"
+      },
+      {
+        "path": "tests/support/ports.rs",
+        "same": true,
+        "sha256": "ca7ea4d0f95a67d2acd9ff294e7efe641e2fc47a4242d1b73c9fc10059a029d1"
+      },
+      {
+        "path": "examples/benchmark/test_process.rs",
+        "same": true,
+        "sha256": "31a54f8bd4a0110c074bfd899770d312bca16ff853a3aa4661bb17d2906d9700"
+      }
+    ]
+  },
+  "mechanical adaptation": "DR1 codec/enrollment uses EntryBatch conversion and clones its sole decoded entry; complete bootstrap comparison unchanged."
+}

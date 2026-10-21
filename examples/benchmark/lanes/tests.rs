@@ -73,6 +73,7 @@ fn assignments_preserve_totals_and_never_overlap() {
     }
 }
 fn history(protocol: NativePeerProtocol) {
+    let _owner = crate::test_process::owner();
     let root = root(&format!("{protocol:?}"));
     let config = Config {
         lanes: 2,
@@ -134,6 +135,7 @@ fn quic_two_lanes_share_groups_and_recover() {
 }
 #[test]
 fn failed_lane_aborts_prepared_lanes_and_joins_hosts() {
+    let _owner = crate::test_process::owner();
     let root = root("failure");
     std::fs::create_dir(root.join("lane2")).unwrap();
     let config = Config {
@@ -155,6 +157,7 @@ fn failed_lane_aborts_prepared_lanes_and_joins_hosts() {
 
 #[test]
 fn uneven_three_lane_workload_keeps_exact_global_counts() {
+    let _owner = crate::test_process::owner();
     let root = root("uneven");
     let config = Config {
         lanes: 3,
@@ -180,6 +183,7 @@ fn uneven_three_lane_workload_keeps_exact_global_counts() {
 }
 #[test]
 fn partial_replica_startup_joins_previously_opened_nodes() {
+    let _owner = crate::test_process::owner();
     let root = root("partial-replica");
     std::fs::write(root.join("replica2"), b"injected path conflict").unwrap();
     let clock = Instant::now();

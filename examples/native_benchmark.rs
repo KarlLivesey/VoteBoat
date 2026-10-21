@@ -40,12 +40,24 @@ use voteboat::{
 mod lanes;
 #[path = "../src/bin/support/quic_hint.rs"]
 mod quic_hint;
+/// Automatic checkpoints and WAL reclaim run unless `--maintenance` drives
+/// explicit ones, which the automatic schedule would contend with.
+static RETENTION: std::sync::OnceLock<RetentionMode> = std::sync::OnceLock::new();
+fn node_limits() -> NodeLimits {
+    NodeLimits {
+        retention: RETENTION.get().copied().unwrap_or_default(),
+        ..Default::default()
+    }
+}
 #[path = "benchmark/shared.rs"]
 mod shared;
 #[cfg(test)]
 #[path = "../tests/support/ports.rs"]
 #[allow(dead_code)] // The shared test lease; these fixtures use only part of it.
 mod test_ports;
+#[cfg(test)]
+#[path = "benchmark/test_process.rs"]
+mod test_process;
 type Failure = Box<dyn std::error::Error>;
 type Replica<
     L = voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::FileLogIo>,
@@ -246,7 +258,7 @@ fn replica_startup(
             .collect(),
         tls: tls(n),
         entropy_seed: n + 17,
-        limits: NodeLimits::default(),
+        limits: node_limits(),
         ready_visit_items,
     })
 }
@@ -506,8 +518,8 @@ fn workload_observed<L: LogStore + Send + 'static>(
             let ticket = ns[replica]
                 .propose(ClientRequest {
                     group,
-                    operation: OperationId::new(operation).unwrap(),
-                    bytes: 1i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, operation as u64).unwrap(),
+                    bytes: Counter::command(0, 1),
                 })
                 .map_err(|e| format!("admission refused; invalid run: {:?}", e.reason))?;
             if pending
@@ -643,8 +655,8 @@ fn retry_group_once<L: LogStore + Send + 'static>(
     let ticket = replicas[replica]
         .propose(ClientRequest {
             group,
-            operation: OperationId::new(operation as u128).unwrap(),
-            bytes: 1i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, operation as u64).unwrap(),
+            bytes: Counter::command(0, 1),
         })
         .map_err(|e| format!("retry refused: {:?}", e.reason))?;
     let mut changed = false;
@@ -891,6 +903,9 @@ fn run_selected(
     let ready_visit_items = config.ready_visit_items;
     let capacity_profile = config.capacity_profile;
     let publication = config.publication;
+    if config.maintenance.is_some() {
+        let _ = RETENTION.set(RetentionMode::LifetimeBounded);
+    }
     if config.shared {
         run(config, clock, |mode| {
             shared::open_partition(
@@ -1018,19 +1033,9 @@ fn run<L: LogStore + Send + 'static>(
     verify(&mut replicas, clock, capacity, groups, &last)?;
     close(replicas, clock)?;
     observe::capture(&mut storage, "after_create_join", &traces);
-    eprintln!("phase=recovery-verification");
-    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
-    let recovery_retries = verify_recovered_workload(
-        &mut replicas,
-        clock,
-        groups,
-        &last,
-        &warmup,
-        &measured,
-        capacity,
-    )?;
-    close(replicas, clock)?;
-    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+    let recovery_retries = recovery_phase(&open_cluster, clock, &mut storage, |replicas| {
+        verify_recovered_workload(replicas, clock, groups, &last, &warmup, &measured, capacity)
+    })?;
     write_run_reports(
         &config,
         &placement,
@@ -1040,6 +1045,32 @@ fn run<L: LogStore + Send + 'static>(
         &storage,
         !traces.is_empty(),
     )
+}
+/// Measurement harness only: with `VOTEBOAT_BENCH_SKIP_RECOVERY` set, a run
+/// ends after the serving workload, so the process CPU is serving CPU and not
+/// the post-run recovery check (ST2 round 3 CPU reporting).
+fn serving_only(mode: &str) -> bool {
+    let skip = std::env::var_os("VOTEBOAT_BENCH_SKIP_RECOVERY").is_some();
+    if skip {
+        eprintln!("phase=recovery-verification{mode} skipped");
+    }
+    skip
+}
+fn recovery_phase<L: LogStore + Send + 'static>(
+    open_cluster: impl Fn(NativeOpenMode) -> Result<(Vec<Replica<L>>, Vec<observe::Trace>), Failure>,
+    clock: &Instant,
+    storage: &mut Vec<(String, usize, observe::Totals)>,
+    verify: impl FnOnce(&mut [Replica<L>]) -> Result<usize, Failure>,
+) -> Result<usize, Failure> {
+    if serving_only("") {
+        return Ok(0);
+    }
+    eprintln!("phase=recovery-verification");
+    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
+    let retries = verify(&mut replicas)?;
+    close(replicas, clock)?;
+    observe::capture(storage, "after_recover_join", &recovered_traces);
+    Ok(retries)
 }
 fn write_run_reports(
     config: &RunConfig<'_>,
@@ -1099,12 +1130,14 @@ fn collect_workload_receipts<L: LogStore + Send + 'static>(
             if receipt.operation != ticket.operation || receipt.duplicate {
                 return Err("invalid useful-write receipt".into());
             }
-            if value != ((receipt.operation.get() - 1) / groups as u128 + 1) as i64 {
+            // The low half is the write's sequence in the built-in session.
+            let sequence = u128::from(receipt.operation.get() as u64);
+            if value != ((sequence - 1) / groups as u128 + 1) as i64 {
                 return Err("receipt disagrees with round-robin group history".into());
             }
             samples.push(Sample {
                 group: ticket.group,
-                operation: receipt.operation.get(),
+                operation: sequence,
                 submitted_ns: submitted,
                 completed_ns: completed,
                 index: receipt.index,
@@ -1181,7 +1214,7 @@ fn report_run(
         ""
     };
     let ready_settings = ready_items::settings(config.ready_visit_items);
-    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings}\n",
+    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=16 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings}\n",
         if shared { "shared" } else { "startup" }, placement, measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
     let mut output = exclusive(&root.join("summary.txt"))?;
     output.write_all(summary.as_bytes())?;

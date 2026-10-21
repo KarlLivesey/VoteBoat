@@ -18,13 +18,13 @@ pub struct WriteProgress {
     watch: Watchdog,
     attempts: Vec<ClientAttempt>,
     operation: OperationId,
-    bytes: [u8; 8],
+    bytes: [u8; 16],
     result: Option<WriteResult>,
     convergence_start: Option<Instant>,
     converged: bool,
 }
 impl WriteProgress {
-    pub fn new(operation: OperationId, bytes: [u8; 8]) -> Self {
+    pub fn new(operation: OperationId, bytes: [u8; 16]) -> Self {
         Self {
             watch: Watchdog::new(),
             attempts: Vec::with_capacity(requests::ATTEMPTS),

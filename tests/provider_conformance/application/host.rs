@@ -47,7 +47,13 @@ impl HostSet {
             }
         } else {
             if self.operations.len() == self.capacity {
-                return Err(ApplicationError::DedupCapacity);
+                // A committed command beyond capacity is a typed refusal.
+                return Ok(Receipt {
+                    index,
+                    operation,
+                    reply: "refused".to_owned(),
+                    duplicate,
+                });
             }
             self.operations.insert(operation, value);
             self.value = value;
@@ -88,6 +94,9 @@ impl BoundedStateMachine for HostSet {
 }
 impl StateMachine for HostSet {
     type Receipt = Receipt;
+    fn retention(&self) -> Retention {
+        Retention::LifetimeBounded
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }
@@ -223,6 +232,9 @@ impl Scenario for HostCase {
         } else {
             vec![("set=7".to_owned(), false), ("set=11".to_owned(), false)]
         }
+    }
+    fn overflow() -> Self::Reply {
+        ("refused".to_owned(), false)
     }
     fn query() -> String {
         "value".to_owned()

@@ -6,15 +6,18 @@ use super::{
     requests,
     watchdog::ClientAttempt,
 };
-use voteboat::{application::*, identity::OperationId, raft::RaftError, runtime::*};
+use voteboat::{application::*, raft::RaftError, runtime::*};
 pub fn write(host: &mut Host<'_, '_>, operation: u128, value: i64, duplicate: bool) -> WriteResult {
     host.phase = if duplicate {
         "upper_retry"
     } else {
         "upper_write"
     };
-    let operation = OperationId::new(operation).unwrap();
-    let bytes = value.to_le_bytes();
+    // `operation` is the sequence in the counter's built-in session.
+    let operation = voteboat::application::Counter::operation(1, operation as u64).unwrap();
+    let bytes: [u8; 16] = voteboat::application::Counter::command(0, value)
+        .try_into()
+        .unwrap();
     assert!(host.writes.len() < 2);
     let record = host.writes.len();
     host.writes.push(WriteProgress::new(operation, bytes));

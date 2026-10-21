@@ -313,7 +313,10 @@ impl Raft {
                 Ok(())
             };
         }
-        let suffix_offset = self.first_new_entry(entries)?;
+        let new = match self.decline_new_data(entries, previous_index, leader_commit, hard, old) {
+            std::ops::ControlFlow::Continue(new) => new,
+            std::ops::ControlFlow::Break(declined) => return out.append_result(declined),
+        };
         let matching = entries.last().map_or(previous_index, |e| e.index);
         let commit = self.durable.commit_index.max(leader_commit.min(matching));
         let mut reply = self.reply(
@@ -325,18 +328,129 @@ impl Raft {
         );
         reply.term = hard.term;
         // All checks and reply metadata precede consuming the original input.
-        let suffix = suffix_offset.map(|offset| {
+        let suffix = new.map(|(offset, bound)| {
             let Rpc::Append { entries, .. } = &mut m.rpc else {
                 unreachable!()
             };
-            Self::take_append_suffix(entries, offset)
+            (Self::take_append_suffix(entries, offset), bound)
         });
         if hard != old || suffix.is_some() || commit != self.durable.commit_index {
-            self.persist_into(hard, commit, suffix, After::Reply, Some(reply), out)
+            self.persist_bounded_into(hard, commit, suffix, After::Reply, Some(reply), out)
         } else {
             out.push_back(Effect::Send(reply));
             Ok(())
         }
+    }
+    /// ST2b and round 3 (I3): a follower declines the new entries of an
+    /// append when they do not fit its node's WAL room, or when they would
+    /// exceed its retained-entry capacity. It keeps leader contact, term and
+    /// commit for the verified prefix and sends no reply, so the leader resends
+    /// the range on its next heartbeat; the core stays free to apply,
+    /// checkpoint and compact. A suffix that conflicts with held entries is
+    /// still truncated (a control record with no entries): truncation is what
+    /// frees a deposed leader's space, and declining it could last for ever on
+    /// an idle group. The WAL check (R4-1, R5-1) bounds exactly the validated
+    /// new suffix: data must fit under the mark, noop-only suffixes under the
+    /// mark plus the reserve. Entries the log already holds are not written
+    /// again, so they are not counted. One walk over the new suffix gives its
+    /// bound and whether it carries data; the first new entry's offset and
+    /// the bound are returned for staging (`None` when every entry is held).
+    /// A volatile core without a bounded WAL stages no bytes and skips it.
+    /// R6-1: with a WAL room the decision is on bytes alone; the high-water
+    /// latch (`storage_pressure`) is for client admission and declines data
+    /// here only for a host that gives no room.
+    fn decline_new_data(
+        &mut self,
+        entries: &EntryBatch,
+        previous_index: u64,
+        leader_commit: u64,
+        hard: HardState,
+        old: HardState,
+    ) -> std::ops::ControlFlow<Result<Vec<Effect>, RaftError>, NewSuffix> {
+        use std::ops::ControlFlow;
+        let offset = match self.first_new_entry(entries) {
+            Ok(Some(offset)) => offset,
+            Ok(None) => return ControlFlow::Continue(None),
+            Err(error) => return ControlFlow::Break(Err(error)),
+        };
+        let new_len = entries.len() - offset;
+        let growth = (!self.volatile || self.wal_room.is_some())
+            .then(|| suffix_growth(suffix_slices(entries, offset)));
+        let bound = growth.map(|(bound, _)| bound);
+        // Every ordinary append: the new suffix fits under the mark (or,
+        // without a room, no latch), and the whole retained log plus the new
+        // entries fits (the kept prefix is never longer than the log).
+        if self.wal_room.map_or(!self.storage_pressure, |room| {
+            bound.is_some_and(|bound| bound <= room.data)
+        }) && self.durable.entries.len().saturating_add(new_len)
+            <= self.limits.retained_entry_capacity()
+        {
+            return ControlFlow::Continue(Some((offset, bound)));
+        }
+        debug_assert_eq!(entries[offset].index - 1, previous_index + offset as u64);
+        match self.decline_new_data_slow(entries, offset, growth, leader_commit, hard, old) {
+            Some(declined) => ControlFlow::Break(declined),
+            None => ControlFlow::Continue(Some((offset, bound))),
+        }
+    }
+    #[cold]
+    #[inline(never)]
+    fn decline_new_data_slow(
+        &mut self,
+        entries: &EntryBatch,
+        offset: usize,
+        growth: Option<(usize, bool)>,
+        leader_commit: u64,
+        hard: HardState,
+        old: HardState,
+    ) -> Option<Result<Vec<Effect>, RaftError>> {
+        let from = entries[offset].index;
+        let data = growth.map_or_else(
+            || {
+                suffix_slices(entries, offset)
+                    .flatten()
+                    .any(|e| !matches!(e.payload, EntryPayload::Noop))
+            },
+            |(_, data)| data,
+        );
+        let kept = from.saturating_sub(self.durable.base_index() + 1);
+        let fits = kept.saturating_add((entries.len() - offset) as u64)
+            <= self.limits.retained_entry_capacity() as u64;
+        // R5-1: the new suffix's bound against the room for its kind.
+        let wal_over = self.wal_room.is_some_and(|room| {
+            let bound = growth.map_or(usize::MAX, |(bound, _)| bound);
+            bound > if data { room.data } else { room.noop }
+        });
+        let latched = data && self.storage_pressure && self.wal_room.is_none();
+        if fits && !wal_over && !latched {
+            return None;
+        }
+        self.declined_appends = self.declined_appends.saturating_add(1);
+        if wal_over {
+            self.wal_declined_appends = self.wal_declined_appends.saturating_add(1);
+            if !data {
+                self.wal_noop_declined_appends = self.wal_noop_declined_appends.saturating_add(1);
+            }
+        }
+        let matching = from - 1;
+        let commit = self.durable.commit_index.max(leader_commit.min(matching));
+        let conflict = from <= self.durable.last_index();
+        Some(if conflict {
+            self.persist(
+                hard,
+                commit,
+                Some(Suffix {
+                    from,
+                    entries: EntryBatch::default(),
+                }),
+                After::Reply,
+                None,
+            )
+        } else if hard != old || commit != self.durable.commit_index {
+            self.persist(hard, commit, None, After::Reply, None)
+        } else {
+            Ok(Vec::new())
+        })
     }
     /// Offset of the first entry not already held. Same-term overlap is
     /// compared by content: a separately allocated batch with the same index
@@ -417,6 +531,9 @@ impl Raft {
         if success {
             if matching_index != sent.end {
                 return Err(RaftError::InvalidMessage);
+            }
+            if !self.stalled_rounds.is_empty() {
+                self.stalled_rounds.remove(&m.from);
             }
             let prefix = self.progress[&m.from].max(matching_index);
             self.progress.insert(m.from, prefix);
@@ -636,4 +753,32 @@ impl Raft {
         }
         Ok(effects)
     }
+}
+/// WAL bound of persisting `new` as one follower update, and whether any of
+/// its entries is data (R5-1). Equal to `LogUpdate::wal_bound` of that update.
+fn suffix_growth<'a>(new: impl Iterator<Item = &'a [LogEntry]>) -> (usize, bool) {
+    let mut bound = crate::log::UPDATE_WAL_OVERHEAD;
+    let mut data = false;
+    for entry in new.flatten() {
+        bound = bound.saturating_add(crate::log::entry_wal_bound(entry.payload_bytes()));
+        data |= !matches!(entry.payload, EntryPayload::Noop);
+    }
+    (bound, data)
+}
+/// The offset of an append's first new entry and the WAL bound of staging
+/// the entries from it; `None` when the log already holds every entry.
+type NewSuffix = Option<(usize, Option<usize>)>;
+/// The pieces of `entries` from `offset` on; the skipped prefix's entries
+/// are not visited.
+fn suffix_slices(entries: &EntryBatch, offset: usize) -> impl Iterator<Item = &[LogEntry]> {
+    let mut skip = offset;
+    entries.slices().filter_map(move |slice| {
+        if skip >= slice.len() {
+            skip -= slice.len();
+            return None;
+        }
+        let rest = &slice[skip..];
+        skip = 0;
+        Some(rest)
+    })
 }

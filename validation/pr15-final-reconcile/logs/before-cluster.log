@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-9e098eb7)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.27s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-96be7697c8541537)
+
+running 1 test
+
+thread 'offered::cluster::tests::three_process_tcp_cluster_completes_an_offered_run_with_consistent_counters' (116079) panicked at examples/benchmark/cluster.rs:991:9:
+nodes exited [(1, ExitStatus(unix_wait_status(25856)))]; logs in /tmp/voteboat-cluster-116078-tcp-0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test offered::cluster::tests::three_process_tcp_cluster_completes_an_offered_run_with_consistent_counters ... FAILED
+
+failures:
+
+failures:
+    offered::cluster::tests::three_process_tcp_cluster_completes_an_offered_run_with_consistent_counters
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 56 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--example native_benchmark`

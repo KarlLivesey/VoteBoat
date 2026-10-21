@@ -63,8 +63,8 @@ fn retry_after_recovery(mut store: NativeLogStore<ModelIo>, retained: bool) {
     applied = app.applied_index();
     let effects = core
         .step(Event::Propose {
-            operation: voteboat::identity::OperationId::new(1).unwrap(),
-            bytes: 1i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 1).unwrap(),
+            bytes: Counter::command(0, 1),
         })
         .unwrap();
     settle(&mut core, &mut store, effects);
@@ -73,7 +73,7 @@ fn retry_after_recovery(mut store: NativeLogStore<ModelIo>, retained: bool) {
         .apply_batch(&replay[replay.partition_point(|entry| entry.index <= applied)..])
         .unwrap();
     assert_eq!(receipts.len(), 1);
-    assert_eq!(receipts[0].operation.get(), 1);
+    assert_eq!(receipts[0].operation, Counter::operation(1, 1).unwrap());
     assert_eq!(receipts[0].duplicate, retained);
     assert_eq!(receipts[0].outcome, CounterOutcome::Value(1));
     assert_eq!(
@@ -99,8 +99,8 @@ fn publication_cut(commit_phase: bool, fault: Fault) {
     let (mut store, mut core) = setup_aggregate(io.clone());
     let proposals = (1..=ORIGINALS)
         .map(|id| Proposal {
-            operation: voteboat::identity::OperationId::new(id).unwrap(),
-            bytes: 1i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, 1),
         })
         .collect();
     let before_proposal = core.state().clone();

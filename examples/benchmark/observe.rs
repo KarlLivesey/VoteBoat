@@ -163,6 +163,18 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
         &mut self,
         mutations: Vec<LogMutation>,
     ) -> Result<Vec<LogTicket>, StorageError> {
+        self.append_batch_within_capacity(mutations)
+            .map_err(|refused| match refused {
+                AppendRefused::Full(_) => StorageError::Rejected("WAL capacity/control reserve"),
+                AppendRefused::Failed(error) => error,
+            })
+    }
+    // The native WAL worker appends through this method; forward it (and the
+    // occupancy below) so the observed store keeps the provider's behaviour.
+    fn append_batch_within_capacity(
+        &mut self,
+        mutations: Vec<LogMutation>,
+    ) -> Result<Vec<LogTicket>, AppendRefused> {
         let units = mutations.len();
         let mut commands = 0;
         let mut groups = Vec::with_capacity(units);
@@ -181,7 +193,7 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
             });
         }
         let start = Instant::now();
-        let result = self.inner.append_batch(mutations);
+        let result = self.inner.append_batch_within_capacity(mutations);
         let ns = start.elapsed().as_nanos();
         self.trace.update(|t| {
             t.append_calls += 1;
@@ -212,6 +224,9 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
     }
     fn supports_reclaim(&self) -> bool {
         self.inner.supports_reclaim()
+    }
+    fn physical_usage(&self) -> Option<WalUsage> {
+        self.inner.physical_usage()
     }
     fn reclaim(&mut self, max_bytes: usize) -> Result<LogReclaimed, StorageError> {
         self.inner.reclaim(max_bytes)

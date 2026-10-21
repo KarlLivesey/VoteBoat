@@ -24,7 +24,11 @@ fn intent(op: u128, target: u64) -> LeadershipIntent {
     }
 }
 fn app(capacity: usize) -> Maintenance<Counter> {
-    Maintenance::new(group(1), 8001, capacity, Counter::new(1).unwrap()).unwrap()
+    Maintenance::new(group(1), 1, capacity, Counter::new(1).unwrap()).unwrap()
+}
+/// The schema of `app`: format 1 above the inner Counter's schema.
+fn schema() -> u64 {
+    maintenance_schema(1, Counter::new(1).unwrap().schema_version()).unwrap()
 }
 fn command(index: u64, term: u64, c: LeadershipCommand) -> LogEntry {
     LogEntry {
@@ -41,8 +45,8 @@ fn data(index: u64, op: u128, value: i64) -> LogEntry {
         index,
         term: 1,
         payload: EntryPayload::Command {
-            operation: OperationId::new(op).unwrap(),
-            bytes: Maintenance::<Counter>::data(&value.to_le_bytes(), 100)
+            operation: Counter::operation(1, op as u64).unwrap(),
+            bytes: Maintenance::<Counter>::data(&Counter::command(0, value), 100)
                 .unwrap()
                 .into(),
         },
@@ -59,22 +63,25 @@ fn recorded(app: &mut Maintenance<Counter>, entry: LogEntry) -> LeadershipRecord
 }
 #[test]
 fn data_and_administration_retries_remain_independent_and_survive_checkpoint() {
+    // The data command (sequence 1 of the counter's built-in session) and the
+    // administrative intent share one operation ID in separate namespaces.
+    const SHARED: u128 = 1 << 64 | 1;
     let mut a = app(2);
-    a.apply_batch(&[data(1, 10, 7)]).unwrap();
+    a.apply_batch(&[data(1, 1, 7)]).unwrap();
     let original = recorded(
         &mut a,
-        command(2, 1, LeadershipCommand::Begin(intent(10, 2))),
+        command(2, 1, LeadershipCommand::Begin(intent(SHARED, 2))),
     );
     assert_eq!(a.inner().read_applied(2), Ok(7));
     assert_eq!(
         recorded(
             &mut a,
-            command(3, 1, LeadershipCommand::Begin(intent(10, 2)))
+            command(3, 1, LeadershipCommand::Begin(intent(SHARED, 2)))
         ),
         original
     );
     let complete = LeadershipCommand::Complete {
-        intent: intent(10, 2),
+        intent: intent(SHARED, 2),
         index: 2,
         term: 2,
     };
@@ -85,13 +92,13 @@ fn data_and_administration_retries_remain_independent_and_survive_checkpoint() {
     );
     let bytes = a.checkpoint(10000).unwrap();
     let mut recovered = app(2);
-    recovered.restore_checkpoint(8001, 4, &bytes).unwrap();
+    recovered.restore_checkpoint(schema(), 4, &bytes).unwrap();
     assert_eq!(
-        recovered.record(OperationId::new(10).unwrap()),
+        recovered.record(OperationId::new(SHARED).unwrap()),
         Some(result)
     );
     assert_eq!(recorded(&mut recovered, command(5, 3, complete)), result);
-    let receipt = recovered.apply_batch(&[data(6, 10, 7)]).unwrap().remove(0);
+    let receipt = recovered.apply_batch(&[data(6, 1, 7)]).unwrap().remove(0);
     assert!(matches!(
         receipt,
         MaintenanceReceipt::Data(CounterReceipt {
@@ -208,20 +215,18 @@ fn malformed_batches_and_checkpoint_refusals_leave_the_original_state_unchanged(
     assert!(a.apply_batch(&[data(2, 1, 7), invalid]).is_err());
     assert_eq!(a.checkpoint(10000).unwrap(), original);
     for end in 0..original.len() {
-        assert!(a.restore_checkpoint(8001, 1, &original[..end]).is_err());
+        assert!(a.restore_checkpoint(schema(), 1, &original[..end]).is_err());
         assert_eq!(a.checkpoint(10000).unwrap(), original);
     }
     let mut trailing = original.clone();
     trailing.push(0);
-    assert!(a.restore_checkpoint(8001, 1, &trailing).is_err());
+    assert!(a.restore_checkpoint(schema(), 1, &trailing).is_err());
     assert!(a.restore_checkpoint(8002, 1, &original).is_err());
-    assert!(app(1).restore_checkpoint(8001, 1, &original).is_err());
-    assert!(
-        Maintenance::new(group(2), 8001, 2, Counter::new(1).unwrap())
-            .unwrap()
-            .restore_checkpoint(8001, 1, &original)
-            .is_err()
-    );
+    assert!(app(1).restore_checkpoint(schema(), 1, &original).is_err());
+    assert!(Maintenance::new(group(2), 1, 2, Counter::new(1).unwrap())
+        .unwrap()
+        .restore_checkpoint(schema(), 1, &original)
+        .is_err());
     assert_eq!(a.checkpoint(10000).unwrap(), original);
 }
 #[test]
@@ -249,7 +254,15 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
     };
     assert!(app(1).apply_batch(&[e]).is_err());
     assert!(Counter::new(1).unwrap().apply_batch(&[c]).is_err());
-    assert!(Maintenance::new(group(1), 1, 1, Counter::new(1).unwrap()).is_err());
+    // The wrapper's schema never equals the inner one for any format: the
+    // format sits above every bit of the inner schema (5 for
+    // `Counter::new(1)`).
+    let inner = Counter::new(1).unwrap().schema_version();
+    for format in 1..=MAX_MAINTENANCE_FORMAT {
+        let numbered = Maintenance::new(group(1), format, 1, Counter::new(1).unwrap()).unwrap();
+        assert_eq!(numbered.schema_version(), format << 60 | inner);
+        assert_ne!(numbered.schema_version(), inner);
+    }
     let mut old = Counter::new(1).unwrap();
     old.apply_batch(&[LogEntry {
         index: 1,
@@ -257,7 +270,7 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
         payload: EntryPayload::Noop,
     }])
     .unwrap();
-    assert!(Maintenance::new(group(1), 8001, 1, old).is_err());
+    assert!(Maintenance::new(group(1), 1, 1, old).is_err());
 }
 
 #[cfg(feature = "native")]
@@ -353,4 +366,252 @@ fn every_torn_native_record_recovers_old_or_complete_administrative_state() {
             }
         }
     }
+}
+
+#[test]
+fn maintenance_around_an_undeclared_application_is_refused_at_readiness() {
+    // A host application that reports an envelope but declares no retention
+    // rule. Maintenance keeps a lifetime table of its own, but it must not
+    // hide the inner application's missing declaration.
+    #[derive(Clone)]
+    struct Legacy;
+    impl StateMachine for Legacy {
+        type Receipt = ();
+        fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
+            Some(Counter::new(1).unwrap().readiness_requirements())
+        }
+        fn applied_index(&self) -> u64 {
+            0
+        }
+        fn apply_batch(&mut self, _: &[LogEntry]) -> Result<Vec<()>, ApplicationError> {
+            Ok(vec![])
+        }
+    }
+    impl CheckpointStateMachine for Legacy {
+        fn schema_version(&self) -> u64 {
+            7
+        }
+        fn checkpoint(&self, _: usize) -> Result<Vec<u8>, ApplicationError> {
+            Ok(vec![])
+        }
+        fn restore_checkpoint(&mut self, _: u64, _: u64, _: &[u8]) -> Result<(), ApplicationError> {
+            Ok(())
+        }
+    }
+    let wrapped = Maintenance::new(group(1), 3, 64, Legacy).unwrap();
+    let declared = wrapped.deployment_requirements().unwrap();
+    assert_eq!(wrapped.retention(), Retention::Undeclared);
+    assert_eq!(
+        wrapped.validate_deployment_requirements(declared),
+        Err(ApplicationError::RetentionUndeclared)
+    );
+    // A declared inner application keeps the wrapper's own rule.
+    let counter = Maintenance::new(group(1), 3, 64, Counter::new(1).unwrap()).unwrap();
+    assert_eq!(counter.retention(), Retention::LifetimeBounded);
+    let declared = counter.deployment_requirements().unwrap();
+    assert_eq!(counter.validate_deployment_requirements(declared), Ok(()));
+    // The rule a wrapper reports is the weaker of its own and its inner one.
+    let sessions = Retention::Sessions(voteboat::retention::SessionLimits::default());
+    for (own, inner, reported) in [
+        (
+            Retention::LifetimeBounded,
+            Retention::Undeclared,
+            Retention::Undeclared,
+        ),
+        (
+            Retention::Stateless,
+            Retention::Undeclared,
+            Retention::Undeclared,
+        ),
+        (
+            Retention::LifetimeBounded,
+            sessions,
+            Retention::LifetimeBounded,
+        ),
+        (
+            Retention::Stateless,
+            Retention::LifetimeBounded,
+            Retention::LifetimeBounded,
+        ),
+        (Retention::Fenced, sessions, sessions),
+    ] {
+        assert_eq!(Retention::wrapping(own, inner), reported);
+    }
+}
+
+#[test]
+fn an_old_schema_two_maintenance_checkpoint_is_refused_by_schema_before_replay() {
+    // Before DR1 the leadership-maintenance profile was schema 2, and DR1's
+    // first Counter was schema 2 as well. Counter schemas now carry format 5
+    // in the low byte and maintenance schemas a format in the top four bits,
+    // so neither equals 1, 2 or 3, and a checkpoint of another profile format
+    // is refused by the exact schema check that snapshot install performs
+    // before restore and replay.
+    let old = Maintenance::new(group(1), 2, 64, Counter::new(4).unwrap()).unwrap();
+    let image = old.checkpoint(usize::MAX).unwrap();
+    for window in [1, 4, 32] {
+        assert_eq!(
+            Counter::new(window).unwrap().schema_version() & 0xff,
+            u64::from(COUNTER_FORMAT)
+        );
+    }
+    let mut plain = Counter::new(4).unwrap();
+    assert_eq!(
+        plain.restore_checkpoint(old.schema_version(), 0, &image),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    // The current profile (format 3) refuses it too; snapshot install
+    // compares the schema exactly before calling restore at all.
+    let mut profile = Maintenance::new(group(1), 3, 64, Counter::new(4).unwrap()).unwrap();
+    for schema in [old.schema_version(), profile.schema_version()] {
+        assert!(schema >> 60 != 0 && ![1, 2, 3].contains(&schema));
+    }
+    assert_eq!(
+        profile.restore_checkpoint(old.schema_version(), 0, &image),
+        Err(ApplicationError::InvalidCheckpoint)
+    );
+    assert_ne!(profile.schema_version(), old.schema_version());
+}
+
+#[test]
+fn wrapped_counters_with_different_session_limits_refuse_each_other_before_any_entry() {
+    use voteboat::retention::SessionLimits;
+    // Reviewer reproducer (round 2, P2): the same profile format and
+    // maintenance capacity around Counters with 2 and 3 sessions. With one
+    // schema for both, both accepted the larger declaration, and after
+    // registrations 77, 88, 99 the command (2, 1, 0, +7) was `Expired`
+    // (value 0) on one replica and executed (value 7) on the other.
+    let wrap = |sessions| {
+        let limits = SessionLimits::new(sessions, 4, 4).unwrap();
+        Maintenance::new(group(1), 3, 64, Counter::with_limits(limits).unwrap()).unwrap()
+    };
+    let (small, large) = (wrap(2), wrap(3));
+    assert_ne!(small.schema_version(), large.schema_version());
+    for (replica, leader) in [(&small, &large), (&large, &small)] {
+        let declared = leader.deployment_requirements().unwrap();
+        assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+        assert_eq!(
+            replica.validate_deployment_requirements(declared),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+        assert_eq!(replica.applied_index(), 0);
+    }
+    // The schema is the format above the inner identity, exactly.
+    let inner = Counter::schema(SessionLimits::new(2, 4, 4).unwrap());
+    assert_eq!(
+        small.schema_version(),
+        maintenance_schema(3, inner).unwrap()
+    );
+    assert_eq!(small.schema_version(), 3 << 60 | inner);
+    // The service profile: format 3 around the service's Counter limits.
+    let service = Maintenance::new(
+        group(1),
+        3,
+        64,
+        Counter::with_limits(SessionLimits::default()).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        service.schema_version(),
+        maintenance_schema(3, Counter::schema(SessionLimits::default())).unwrap()
+    );
+    // Formats outside 1..=15 and inner schemas using the top four bits are
+    // refused, so the map stays injective.
+    for format in [0, MAX_MAINTENANCE_FORMAT + 1, 8001] {
+        assert!(Maintenance::new(group(1), format, 64, Counter::new(1).unwrap()).is_err());
+    }
+    assert_eq!(maintenance_schema(1, 1 << 60), None);
+    assert!(Maintenance::new(group(1), 1, 64, service).is_err());
+}
+
+/// Begin and Complete operation `op` at `index` and `index + 1`.
+fn begin_and_complete(app: &mut Maintenance<Counter>, op: u128, index: u64) {
+    let begin = LeadershipCommand::Begin(intent(op, 2));
+    recorded(app, command(index, 1, begin));
+    let complete = LeadershipCommand::Complete {
+        intent: intent(op, 2),
+        index,
+        term: 1,
+    };
+    recorded(app, command(index + 1, 1, complete));
+}
+
+#[test]
+fn opus_r4_maintenance_capacity_skew() {
+    // Opus, round 4 (P3-1): capacity 2 and 4 around Counter::new(1). The
+    // capacity-2 replica accepted the capacity-4 declaration (a larger
+    // snapshot envelope); the reverse was InvalidCheckpoint. The capacity is
+    // now the layer's configuration word, so both directions are refused
+    // with the same typed compatibility error before any entry.
+    let (small, large) = (app(2), app(4));
+    assert_eq!(small.schema_version(), large.schema_version());
+    let (s, l) = (
+        small.deployment_requirements().unwrap(),
+        large.deployment_requirements().unwrap(),
+    );
+    assert_eq!(s.inner_profile, l.inner_profile);
+    assert_eq!(s.identity.configuration[0], 2);
+    assert_eq!(l.identity.configuration[0], 4);
+    assert_eq!(
+        small.validate_deployment_requirements(l),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(
+        large.validate_deployment_requirements(s),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    // A larger envelope is still accepted for the same configuration.
+    assert_eq!(
+        small.validate_deployment_requirements(voteboat::raft::ReadinessRequirements {
+            snapshot_bytes: l.snapshot_bytes,
+            ..s
+        }),
+        Ok(())
+    );
+    // Why readiness must refuse: the committed stream diverges at the third
+    // Begin (the capacity table itself is DR2's reclamation work).
+    let (mut small, mut large) = (small, large);
+    for (op, index) in [(10, 1), (11, 3)] {
+        begin_and_complete(&mut small, op, index);
+        begin_and_complete(&mut large, op, index);
+    }
+    let third = command(5, 1, LeadershipCommand::Begin(intent(12, 2)));
+    assert_eq!(
+        small.apply_batch(std::slice::from_ref(&third)).err(),
+        Some(ApplicationError::DedupCapacity)
+    );
+    assert!(large.apply_batch(&[third]).is_ok());
+}
+
+#[test]
+fn wrapper_own_capacity_is_refused_at_readiness() {
+    // Sol, round 4: capacity 2 and 4 around Counter::new(4); the smaller
+    // replica accepted the larger declaration, then returned DedupCapacity
+    // at index 5 and stayed at applied 4. Now refused at readiness for every
+    // pair of distinct capacities, in both directions.
+    let wrap =
+        |capacity| Maintenance::new(group(1), 3, capacity, Counter::new(4).unwrap()).unwrap();
+    for (a, b) in [(2, 4), (1, 2), (63, 64), (64, MAX_MAINTENANCE_RECORDS)] {
+        let (a, b) = (wrap(a), wrap(b));
+        for (replica, leader) in [(&a, &b), (&b, &a)] {
+            let declared = leader.deployment_requirements().unwrap();
+            assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+            assert_eq!(
+                replica.validate_deployment_requirements(declared),
+                Err(ApplicationError::UnsupportedSchema)
+            );
+        }
+    }
+    let (mut small, mut large) = (wrap(2), wrap(4));
+    for (op, index) in [(1, 1), (2, 3)] {
+        begin_and_complete(&mut small, op, index);
+        begin_and_complete(&mut large, op, index);
+    }
+    let third = command(5, 1, LeadershipCommand::Begin(intent(3, 2)));
+    assert!(large.apply_batch(std::slice::from_ref(&third)).is_ok());
+    assert_eq!(
+        small.apply_batch(&[third]).err(),
+        Some(ApplicationError::DedupCapacity)
+    );
+    assert_eq!(small.applied_index(), 4);
 }

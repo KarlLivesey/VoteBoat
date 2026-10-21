@@ -141,7 +141,7 @@ fn history(quic: bool) {
     );
     assert_eq!(fs::read_to_string(&path).unwrap(), original);
     probe(&c, 11, true);
-    assert!(authenticated_write(&c, &["add", "20911", "9"]).contains("Value(9)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "9"]).contains("Value(9)"));
     let leader = c.leader();
     c.ok(leader, &["checkpoint"]);
     c.stop();
@@ -151,7 +151,7 @@ fn history(quic: bool) {
     }
     wait_for_source(&mut c);
     probe(&c, 11, true);
-    assert!(authenticated_write(&c, &["add", "20911", "9"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "9"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=9\n");
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();

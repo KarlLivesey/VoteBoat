@@ -552,7 +552,7 @@ impl ClusterSetup<'_> {
             }),
         };
         // Failed construction retains its directory; successful runs join workers explicitly.
-        let replica = Node::from_parts(parts, NodeLimits::default(), now)
+        let replica = Node::from_parts(parts, crate::node_limits(), now)
             .map_err(|e| format!("node assembly failed: {:?}", e.reason))?;
         Ok((replica, trace))
     }

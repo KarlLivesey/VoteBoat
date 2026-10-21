@@ -35,6 +35,9 @@ impl StateMachine for App {
     fn deployment_requirements(&self) -> Option<voteboat::raft::ReadinessRequirements> {
         self.0.deployment_requirements()
     }
+    fn retention(&self) -> voteboat::application::Retention {
+        self.0.retention()
+    }
 }
 impl BoundedStateMachine for App {
     fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
@@ -48,7 +51,7 @@ impl ProposalAdmission for App {
         operation: OperationId,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if bytes.len() != 8 || operation == OperationId::new(900).unwrap() {
+        if bytes.len() != COUNTER_COMMAND_BYTES || operation == Counter::operation(1, 9).unwrap() {
             return Err(ApplicationError::InvalidCommand);
         }
         Ok(())
@@ -122,6 +125,8 @@ impl LogicalResponseCodec for App {
             CounterOutcome::Value(v) => (1, v),
             CounterOutcome::Overflow => (2, 0),
             CounterOutcome::OperationConflict => (3, 0),
+            CounterOutcome::Registered(session) => (4, session as i64),
+            CounterOutcome::Refused(refusal) => (5, refusal as i64),
         };
         out[24] = tag;
         out[25..33].copy_from_slice(&value.to_le_bytes());

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 //! Bounded original commands sharing one ordered persistence transition.
 use super::*;
+use crate::log::entry_wal_bound;
 use std::mem::size_of;
 
 mod batch;
@@ -43,22 +44,33 @@ impl Raft {
     pub fn propose_batch(&mut self, proposals: Vec<Proposal>) -> Result<Vec<Effect>, RaftError> {
         self.begin_step()?;
         self.check_proposal_role()?;
-        let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
+        let first = self
+            .validate_proposal_batch(&proposals, proposals.capacity())
+            .inspect_err(|e| {
+                if *e == RaftError::StoragePressure {
+                    self.entry_budget_refusals = self.entry_budget_refusals.saturating_add(1);
+                }
+            })?;
         self.validate_conversion_peak(&proposals, proposals.capacity())?;
+        // The staged update's WAL bound, built in the same pass (R4-3).
+        let mut wal_bound = crate::log::UPDATE_WAL_OVERHEAD;
         let entries = proposals
             .into_iter()
             .enumerate()
-            .map(|(offset, proposal)| LogEntry {
-                index: first + offset as u64,
-                term: self.durable.hard_state.term,
-                payload: EntryPayload::Command {
-                    operation: proposal.operation,
-                    bytes: proposal.bytes.into(),
-                },
+            .map(|(offset, proposal)| {
+                wal_bound = wal_bound.saturating_add(entry_wal_bound(proposal.bytes.len()));
+                LogEntry {
+                    index: first + offset as u64,
+                    term: self.durable.hard_state.term,
+                    payload: EntryPayload::Command {
+                        operation: proposal.operation,
+                        bytes: proposal.bytes.into(),
+                    },
+                }
             })
             .collect();
         let mut effects = VecDeque::new();
-        self.persist_proposal_entries_into(first, entries, &mut effects)?;
+        self.persist_proposal_entries_into(first, entries, Some(wal_bound), &mut effects)?;
         self.finish_step_into(&mut effects)?;
         Ok(effects.into())
     }
@@ -89,11 +101,14 @@ impl Raft {
         if bytes.len() > self.limits.max_command_bytes {
             return Err(StorageError::Rejected("command byte budget").into());
         }
+        self.check_data_budget(1)?;
         let index = self
             .durable
             .last_index()
             .checked_add(1)
             .ok_or(RaftError::Exhausted)?;
+        let wal_bound =
+            crate::log::UPDATE_WAL_OVERHEAD.saturating_add(entry_wal_bound(bytes.len()));
         let entry = LogEntry {
             index,
             term: self.durable.hard_state.term,
@@ -102,7 +117,7 @@ impl Raft {
                 bytes: bytes.into(),
             },
         };
-        self.persist_proposal_entries_into(index, vec![entry], out)
+        self.persist_proposal_entries_into(index, vec![entry], Some(wal_bound), out)
     }
 
     fn validate_proposal_batch(
@@ -124,7 +139,8 @@ impl Raft {
             .checked_add(count)
             .is_none_or(|n| n > self.limits.max_entries_per_group)
         {
-            return Err(StorageError::Rejected("proposal retained entry budget").into());
+            // The noop reserve above the data budget is the leader's (I1).
+            return Err(RaftError::StoragePressure);
         }
         let first = self
             .durable
@@ -188,17 +204,21 @@ impl Raft {
         &mut self,
         first: u64,
         entries: Vec<LogEntry>,
+        wal_bound: Option<usize>,
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
-        self.persist_into(
+        self.persist_bounded_into(
             self.durable.hard_state,
             self.durable.commit_index,
             // Freezing measures the batch's intrinsic facts once; planning,
             // fan-out and every follower reuse them.
-            Some(Suffix {
-                from: first,
-                entries: entries.into(),
-            }),
+            Some((
+                Suffix {
+                    from: first,
+                    entries: entries.into(),
+                },
+                wal_bound,
+            )),
             After::LeaderAppend,
             None,
             out,

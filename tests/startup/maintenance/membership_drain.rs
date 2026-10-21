@@ -313,8 +313,8 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool, final_observation: Ob
     assert!(matches!(
         h.submit(
             0,
-            OperationId::new(19722).unwrap(),
-            Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap()
+            Counter::operation(1, 2).unwrap(),
+            Maintenance::<HostApplication>::data(&Counter::command(0, 7), 100).unwrap()
         ),
         ClientOutcome::Applied { .. }
     ));
@@ -374,8 +374,8 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool, final_observation: Ob
     drain_wire_nodes_with(vec![source], h.clock, || h.poll());
     let outcome = h.submit(
         0,
-        OperationId::new(19723).unwrap(),
-        Maintenance::<HostApplication>::data(&3i64.to_le_bytes(), 100).unwrap(),
+        Counter::operation(1, 3).unwrap(),
+        Maintenance::<HostApplication>::data(&Counter::command(0, 3), 100).unwrap(),
     );
     assert!(
         matches!(outcome, ClientOutcome::Applied { .. }),
@@ -383,8 +383,8 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool, final_observation: Ob
     );
     let outcome = h.submit(
         0,
-        OperationId::new(19722).unwrap(),
-        Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap(),
+        Counter::operation(1, 2).unwrap(),
+        Maintenance::<HostApplication>::data(&Counter::command(0, 7), 100).unwrap(),
     );
     assert!(
         matches!(

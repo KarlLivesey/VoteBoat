@@ -447,6 +447,12 @@ where
         let inner = self.initial.retirement_requirements();
         ReadinessRequirements {
             application_schema: RETIREMENT_GUARD_SCHEMA,
+            // No configuration of its own; the anchor is derived from the
+            // inner application's initial checkpoint.
+            identity: crate::raft::LayerIdentity::family(
+                crate::raft::ApplicationFamily::RETIREMENT_GUARD,
+            ),
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: inner.command_bytes.max(MAX_RETIREMENT_COMMAND_BYTES),
             snapshot_bytes: 80
                 + inner.snapshot_bytes.max(
@@ -463,8 +469,24 @@ where
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.initial.validate_group(group)
     }
+    /// Wraps lifetime-bounded transfer owners until DR2/AD1 (audit S3, T4). An undeclared
+    /// inner application stays undeclared.
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.initial.retention(),
+        )
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
+    }
+    /// The anchor is the owner's initial checkpoint, fixed by the owner's
+    /// binding: bound once the owner's is. A retired guard applied a proof
+    /// that matched the anchor exactly.
+    fn deployment_bound(&self) -> bool {
+        self.owner
+            .as_ref()
+            .map_or(self.retired.is_some(), S::deployment_bound)
     }
     fn applied_index(&self) -> u64 {
         self.applied
@@ -599,14 +621,14 @@ where
         bytes: &[u8],
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError> {
-        if bytes.len() > self.readiness_requirements().command_bytes {
+        // Computed once: the requirements value carries the whole identity.
+        let command_bytes = self.readiness_requirements().command_bytes;
+        if bytes.len() > command_bytes {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut next = self.clone();
         for (position, (operation, bytes)) in pending.enumerate() {
-            if position >= crate::routed::MAX_ROUTED_PENDING
-                || bytes.len() > self.readiness_requirements().command_bytes
-            {
+            if position >= crate::routed::MAX_ROUTED_PENDING || bytes.len() > command_bytes {
                 return Err(ApplicationError::ReceiptBudget);
             }
             let index = next

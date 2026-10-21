@@ -96,6 +96,9 @@ pub enum ClientError {
     Draining,
     Fenced,
     Overloaded,
+    /// Retryable backpressure: the node's WAL is above its high-water mark
+    /// while maintenance reclaims space. Nothing was admitted; retry later.
+    StoragePressure,
     RequestTooLarge,
     Exhausted,
     StaleTicket,

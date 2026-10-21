@@ -4,12 +4,12 @@
 use super::*;
 use std::mem::size_of;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct AdmittedRange {
     ticket: LogTicket,
     context: RequestContext,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct EmptyAppendAlias {
     original: Replication,
     successor: RequestContext,
@@ -235,12 +235,19 @@ impl Raft {
         self.configuration_notice = false;
         self.admitted_ranges.clear();
         self.empty_append_aliases.clear();
+        // ST2 stall slots are leader-local too. A follower may replace a
+        // same-id configuration by truncation without configuration_changed.
+        if self.role != Role::Leader {
+            self.stalled_rounds.clear();
+        }
     }
     pub(super) fn broadcast_after_admission_into(
         &mut self,
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
-        for peer in self.peers() {
+        self.refresh_peer_order();
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             if self.admitted_ranges.get(&peer).is_some_and(|range| {
                 range.ticket.revision == self.durable.revision
                     && self

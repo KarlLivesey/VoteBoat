@@ -27,6 +27,8 @@ use voteboat::{
     quorum::*,
     runtime::*,
 };
+#[path = "startup/backpressure.rs"]
+mod backpressure;
 #[path = "startup/connection_generations.rs"]
 mod connection_generations;
 #[path = "startup/discovery.rs"]
@@ -41,6 +43,8 @@ mod multi;
 mod peer_rotation;
 #[path = "startup/ready_items.rs"]
 mod ready_items;
+#[path = "startup/retention.rs"]
+mod retention;
 #[path = "startup/shutdown_clock.rs"]
 mod shutdown_clock;
 #[path = "startup/timing_profile.rs"]
@@ -51,6 +55,9 @@ impl StateMachine for HostApplication {
     type Receipt = CounterReceipt;
     fn deployment_requirements(&self) -> Option<voteboat::raft::ReadinessRequirements> {
         self.0.deployment_requirements()
+    }
+    fn retention(&self) -> voteboat::application::Retention {
+        self.0.retention()
     }
     fn applied_index(&self) -> u64 {
         self.0.applied_index()
@@ -251,8 +258,12 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
                     group(),
                     operation,
                     ReadinessRequirements {
-                        application_schema: 1,
-                        command_bytes: 8,
+                        application_schema: Counter::new(100).unwrap().schema_version(),
+                        identity: voteboat::raft::LayerIdentity::family(
+                            voteboat::raft::ApplicationFamily::COUNTER,
+                        ),
+                        inner_profile: voteboat::raft::InnerProfile::LEAF,
+                        command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                         snapshot_bytes: 4096,
                     },
                 )
@@ -303,8 +314,8 @@ fn host_application_and_non_demo_identities_write_and_recover_through_startup() 
     });
     n.propose(ClientRequest {
         group: group(),
-        operation: OperationId::new(1).unwrap(),
-        bytes: 7i64.to_le_bytes().to_vec(),
+        operation: Counter::operation(1, 1).unwrap(),
+        bytes: Counter::command(0, 7),
     })
     .unwrap();
     // Keep a single monotonic domain across the two drive phases.
@@ -431,8 +442,8 @@ fn stopping_one_startup_does_not_stop_another_or_the_shared_host_wake() {
     let before = wake.0.load(Ordering::Relaxed);
     b.propose(ClientRequest {
         group: b_group,
-        operation: OperationId::new(1).unwrap(),
-        bytes: 9i64.to_le_bytes().to_vec(),
+        operation: Counter::operation(1, 1).unwrap(),
+        bytes: Counter::command(0, 9),
     })
     .unwrap();
     let mut reply = None;
@@ -770,8 +781,12 @@ fn startup_configuration_request(
             },
             readiness: vec![],
             requirements: ReadinessRequirements {
-                application_schema: 1,
-                command_bytes: 8,
+                application_schema: Counter::new(100).unwrap().schema_version(),
+                identity: voteboat::raft::LayerIdentity::family(
+                    voteboat::raft::ApplicationFamily::COUNTER,
+                ),
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
+                command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                 snapshot_bytes: 4096,
             },
         },
@@ -983,8 +998,8 @@ fn write_wire_nodes(nodes: &mut [WireNode], clock: Instant) {
     nodes[0]
         .propose(ClientRequest {
             group: group(),
-            operation: OperationId::new(88).unwrap(),
-            bytes: 9i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 88).unwrap(),
+            bytes: Counter::command(0, 9),
         })
         .unwrap();
     let mut completed = false;

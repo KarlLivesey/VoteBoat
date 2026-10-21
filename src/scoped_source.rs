@@ -482,24 +482,46 @@ where
         }
         Ok(())
     }
+    /// The highest enabled mode's schema.
+    fn mode_schema(&self) -> u64 {
+        if self.metadata_locator_adoption {
+            LOCATOR_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.metadata_adoption {
+            METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.parent_slots {
+            PARENT_SLOT_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.parent_limit != 0 {
+            PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.retained_grants {
+            RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else if self.bound_intents {
+            BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA
+        } else {
+            SCOPED_TRANSFER_SOURCE_SCHEMA
+        }
+    }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
-            application_schema: if self.metadata_locator_adoption {
-                LOCATOR_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.metadata_adoption {
-                METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.parent_slots {
-                PARENT_SLOT_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.parent_limit != 0 {
-                PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.retained_grants {
-                RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else if self.bound_intents {
-                BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA
-            } else {
-                SCOPED_TRANSFER_SOURCE_SCHEMA
-            },
+            application_schema: self.mode_schema(),
+            // Words: 0 = export image bound; 1 = parent adoption limit; 2 =
+            // modes (bit 0 bound intents, 1 retained grants, 2 parent slots,
+            // 3 metadata adoption, 4 metadata locator adoption). The schema
+            // names only the highest mode, so the word records them all.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::SCOPED_TRANSFER_SOURCE,
+                [
+                    self.export_bytes as u64,
+                    self.parent_limit as u64,
+                    u64::from(self.bound_intents)
+                        | u64::from(self.retained_grants) << 1
+                        | u64::from(self.parent_slots) << 2
+                        | u64::from(self.metadata_adoption) << 3
+                        | u64::from(self.metadata_locator_adoption) << 4,
+                    0,
+                ],
+            ),
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: (inner.command_bytes + if self.parent_limit == 0 { 20 } else { 22 })
                 .max(if self.metadata_adoption {
                     MAX_RETAINED_ADOPTION_BYTES.max(MAX_METADATA_ADOPTION_BYTES)
@@ -1023,8 +1045,21 @@ where
     fn validate_group(&self, g: GroupIdentity) -> Result<(), ApplicationError> {
         self.routed.validate_group(g)
     }
+    /// Routed lifetime tables until DR2/AD1 (audit S3, S7). An undeclared
+    /// inner application stays undeclared.
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.routed.retention(),
+        )
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
+    }
+    /// The scoped bootstrap applies only as its exact bytes (a raw Routed
+    /// bootstrap is refused) and initializes the Routed layer.
+    fn deployment_bound(&self) -> bool {
+        self.routed.deployment_bound()
     }
     fn applied_index(&self) -> u64 {
         self.routed.applied_index()
@@ -1146,7 +1181,7 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        self.readiness_requirements().application_schema
+        self.mode_schema()
     }
     fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         let inner = self.routed.checkpoint(max_bytes)?;

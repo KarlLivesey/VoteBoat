@@ -47,6 +47,7 @@ pub mod raft;
 pub mod reparent_commit;
 pub mod reparent_guard;
 pub mod reparenting;
+pub mod retention;
 pub mod routed;
 pub mod routing;
 pub mod runtime;

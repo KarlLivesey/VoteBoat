@@ -16,14 +16,16 @@
 use super::*;
 pub fn ordinary(parent: &mut fixture::FacadeNode) {
     let app = fixture::app_with_mappings((0..3).map(groups::mapping).collect());
-    let bytes = app.business(&1_i64.to_le_bytes()).unwrap();
+    let bytes = app
+        .business(&voteboat::application::Counter::command(0, 1_i64))
+        .unwrap();
     let pointer = bytes.as_ptr();
     let capacity = bytes.capacity();
     let clients = parent.local().clients.usage();
     let rejected = parent
         .propose(ClientRequest {
             group: groups::mapping(1).parent,
-            operation: OperationId::new(335_090).unwrap(),
+            operation: voteboat::application::Counter::operation(1, 9).unwrap(),
             bytes,
         })
         .unwrap_err();
@@ -32,7 +34,8 @@ pub fn ordinary(parent: &mut fixture::FacadeNode) {
     assert_eq!(rejected.request.bytes.capacity(), capacity);
     assert_eq!(
         rejected.request.bytes,
-        app.business(&1_i64.to_le_bytes()).unwrap()
+        app.business(&voteboat::application::Counter::command(0, 1_i64))
+            .unwrap()
     );
     assert_eq!(parent.local().clients.usage(), clients);
     let reads = parent.local().reads.usage();

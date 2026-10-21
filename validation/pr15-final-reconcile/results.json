@@ -1,0 +1,765 @@
+{
+  "status": "focused checks passed; full qualification pending",
+  "old_pr15_head": "79829e871b2c4131700f51a7c2df978db8fc7618",
+  "dependency": "219ad7bb8489c19012c8298d1021ddd959861782",
+  "dependency_qualified": false,
+  "source_inputs": {
+    "algorithm": "SHA256(sorted path + NUL + byte length + NUL + file bytes)",
+    "paths": 1549,
+    "sha256": "438a02a2f6bda3207282e3d0abf4d0c0dd9dc1b92d530d140fdee5ec3273b978",
+    "scope": "Cargo inputs, hook, src, tests, examples and matched workspace inputs; excludes documentation and reports"
+  },
+  "cases": [
+    {
+      "label": "default-app",
+      "exit": 0,
+      "passed": 33,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "application",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-learners",
+      "exit": 0,
+      "passed": 41,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "learners",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-rr7",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--lib",
+        "rr7_",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-claim-bound",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--lib",
+        "only_a_first_claim_carries_the_binding_and_it_must_fit_the_command_bound",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-ledger",
+      "exit": 0,
+      "passed": 16,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--lib",
+        "retention::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-runtime",
+      "exit": 0,
+      "passed": 58,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "runtime",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-node-retention",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "effect_owner",
+        "node_facade::retention::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-node-maintenance",
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "effect_owner",
+        "node_facade::automatic_maintenance::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-snapshot-routes",
+      "exit": 0,
+      "passed": 15,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "effect_owner",
+        "snapshot_routes::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-startup-probe",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "startup",
+        "storage_probe_commands_use_the_session_counter_protocol",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-startup-pressure",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "startup",
+        "backpressure::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-startup-partial",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "startup",
+        "restart_during_automatic_checkpoint_or_reclaim_recovers_the_same_state",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-counter-sessions",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "counter_service",
+        "sessions::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-counter-maintenance",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "counter_service",
+        "maintenance::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-counter-noquic",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "counter_service",
+        "unavailable_quic_selection_rejects_before_creating_a_store",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-transfer-boundary",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "transfer_service",
+        "listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-transfer-revocation",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "transfer_service",
+        "revocation::interrupted_split_resumes_under_replacement_administrator_tcp",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-portleases",
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "fixture_isolation",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-snapshot-worker",
+      "exit": 0,
+      "passed": 14,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "snapshot_worker",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-cluster",
+      "exit": 0,
+      "passed": 8,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--example",
+        "native_benchmark",
+        "offered::cluster::tests::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-held-maintenance",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--example",
+        "native_benchmark",
+        "automatic_maintenance_progresses_with_held_snapshot_recovery",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-aggregate",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "log_store",
+        "aggregate",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-u2",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "lifetime_apply_never_errs",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-core-aggregate",
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--lib",
+        "aggregate",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-leadership-profile",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "counter_service",
+        "maintenance_profile",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-maintenance-schema",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "counter_service",
+        "group_maintenance_schema_cannot_reinterpret_existing_counter_stores",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "default-leadership-wrapper",
+      "exit": 0,
+      "passed": 14,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "leadership_maintenance",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-app",
+      "exit": 0,
+      "passed": 33,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "application",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-learners",
+      "exit": 0,
+      "passed": 42,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "learners",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-rr7",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib",
+        "rr7_",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-claim-bound",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib",
+        "only_a_first_claim_carries_the_binding_and_it_must_fit_the_command_bound",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-runtime-charge",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "runtime",
+        "readiness_event_heap_is_counted",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-counter-sessions",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "counter_service",
+        "sessions::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-counter-maintenance",
+      "exit": 0,
+      "passed": 8,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "counter_service",
+        "maintenance::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-leadership-profile",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "counter_service",
+        "maintenance_profile",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-leadership-wrapper",
+      "exit": 0,
+      "passed": 14,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "leadership_maintenance",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-transfer-boundary",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "transfer_service",
+        "listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-transfer-original-failure",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "transfer_service",
+        "revocation::interrupted_split_resumes_under_replacement_administrator_tcp",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-cluster",
+      "exit": 0,
+      "passed": 8,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "offered::cluster::tests::",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-held-maintenance",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "automatic_maintenance_progresses_with_held_snapshot_recovery",
+        "--",
+        "--nocapture"
+      ]
+    },
+    {
+      "label": "all-wire",
+      "exit": 0,
+      "passed": 20,
+      "failed": 0,
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "wire",
+        "--",
+        "--nocapture"
+      ]
+    }
+  ],
+  "hook": {
+    "path": ".githooks/pre-push",
+    "sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92",
+    "exit": 0,
+    "diagnostics": 0,
+    "commands": [
+      "cargo +stable fmt --all -- --check",
+      "cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings",
+      "cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings",
+      "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings",
+      "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings",
+      "cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml -- --check",
+      "cargo +stable clippy --manifest-path benchmarks/matched/Cargo.toml --locked --offline --keep-going --all-targets -- -D warnings"
+    ],
+    "publication": "Actual git push runs the enabled same hook; its result/head are recorded in the durable PR comment and main artifact report."
+  }
+}

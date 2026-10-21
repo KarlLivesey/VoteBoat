@@ -276,8 +276,8 @@ impl Cluster {
         let ticket = self.nodes[0]
             .propose(ClientRequest {
                 group,
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .unwrap();
         let mut result = None;

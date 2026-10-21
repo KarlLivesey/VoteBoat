@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
-const ORIGINAL: &[&str] = &["group", "7", "3", "add", "42", "5"];
+const ORIGINAL: &[&str] = &["group", "7", "3", "add", "1", "1", "0", "5"];
 const TIMEOUT: &str =
     "UNKNOWN authentication deadline expired; retry the same operation ID and delta\n";
 const RECEIPT: &str = "OK outcome=Value(5) duplicate=true\n";
@@ -84,7 +84,7 @@ fn history(quic: bool) {
         groups::leader(&mut c, group, inc);
         assert!(invoke(
             &c,
-            &["group", group, inc, "add", "42", value],
+            &["group", group, inc, "add", "1", "1", "0", value],
             Duration::from_secs(10)
         )
         .contains(&format!("Value({value})")));
@@ -95,7 +95,7 @@ fn history(quic: bool) {
     values(&c, "5");
     assert!(invoke(
         &c,
-        &["group", "7", "3", "add", "24200", "2"],
+        &["group", "7", "3", "add", "1", "2", "0", "2"],
         Duration::from_secs(10)
     )
     .contains("Value(7)"));
@@ -109,14 +109,14 @@ fn history(quic: bool) {
     assert_eq!(invoke(&c, ORIGINAL, Duration::from_secs(15)), original);
     assert!(invoke(
         &c,
-        &["group", "7", "3", "add", "24200", "2"],
+        &["group", "7", "3", "add", "1", "2", "0", "2"],
         Duration::from_secs(10)
     )
     .contains("duplicate=true"));
     for (group, inc, value) in [("1", "1", "3"), ("8", "2", "9")] {
         assert!(invoke(
             &c,
-            &["group", group, inc, "add", "42", value],
+            &["group", group, inc, "add", "1", "1", "0", value],
             Duration::from_secs(10)
         )
         .contains("duplicate=true"));

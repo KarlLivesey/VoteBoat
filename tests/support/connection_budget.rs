@@ -325,8 +325,12 @@ fn local_configuration(group_id: u128, peer: u64, physical: u128) -> Event {
         record: *record,
         readiness: vec![],
         requirements: ReadinessRequirements {
-            application_schema: 1,
-            command_bytes: 8,
+            application_schema: Counter::new(100).unwrap().schema_version(),
+            identity: voteboat::raft::LayerIdentity::family(
+                voteboat::raft::ApplicationFamily::COUNTER,
+            ),
+            inner_profile: voteboat::raft::InnerProfile::LEAF,
+            command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
             snapshot_bytes: 4096,
         },
     }))

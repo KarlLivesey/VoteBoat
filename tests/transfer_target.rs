@@ -532,3 +532,67 @@ fn multi_source_import_requires_ordered_complete_coverage_and_refuses_id_collisi
         }
     }
 }
+
+#[test]
+fn target_configuration_is_compared_exactly_at_readiness() {
+    // Round 5: the target's own limits (import bytes, application checkpoint
+    // bytes) and the parent adoption limit change how it decides committed
+    // entries, so they are configuration words, compared exactly; a larger
+    // envelope no longer admits a replica configured differently.
+    let with_limits = |l: TargetLimits| {
+        TransferTarget::new(
+            group(21),
+            op(200),
+            source::intent(),
+            BucketCounter::new(range(0, 128), source::Policy, source::bucket_limits()).unwrap(),
+            source::Policy,
+            l,
+        )
+        .unwrap_or_else(|r| panic!("{:?}", r.0))
+    };
+    let base = fresh();
+    let declared = base.deployment_requirements().unwrap();
+    assert_eq!(
+        declared.identity.family,
+        voteboat::raft::ApplicationFamily::TRANSFER_TARGET
+    );
+    assert_eq!(base.validate_deployment_requirements(declared), Ok(()));
+    let others = [
+        with_limits(TargetLimits {
+            import_bytes: limits().import_bytes + 1,
+            ..limits()
+        }),
+        with_limits(TargetLimits {
+            application_checkpoint_bytes: limits().application_checkpoint_bytes + 1,
+            ..limits()
+        }),
+    ];
+    for other in &others {
+        let theirs = other.deployment_requirements().unwrap();
+        assert_eq!(theirs.application_schema, declared.application_schema);
+        assert_eq!(theirs.inner_profile, declared.inner_profile);
+        for (replica, leader) in [(&base, other), (other, &base)] {
+            let declared = leader.deployment_requirements().unwrap();
+            let widest = voteboat::raft::ReadinessRequirements {
+                command_bytes: declared.command_bytes + 1024,
+                snapshot_bytes: declared.snapshot_bytes + 1024,
+                ..declared
+            };
+            assert_eq!(
+                replica.validate_deployment_requirements(widest),
+                Err(ApplicationError::UnsupportedSchema)
+            );
+        }
+    }
+    let parent = |limit| {
+        fresh()
+            .with_parent_adoption(limit)
+            .unwrap_or_else(|e| panic!("{:?}", e.0))
+    };
+    let (one, two) = (parent(1), parent(2));
+    assert_eq!(one.schema_version(), two.schema_version());
+    assert_eq!(
+        one.validate_deployment_requirements(two.deployment_requirements().unwrap()),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+}

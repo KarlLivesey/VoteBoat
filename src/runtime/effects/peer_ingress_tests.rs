@@ -9,17 +9,17 @@ use crate::{
     quorum::*,
 };
 
-type Owner = EffectOwner<FairScheduler, DeadlineQueue, JitterEntropy>;
-fn node(id: u64) -> NodeId {
+pub(super) type Owner = EffectOwner<FairScheduler, DeadlineQueue, JitterEntropy>;
+pub(super) fn node(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
 }
-fn group(id: u128) -> GroupIdentity {
+pub(super) fn group(id: u128) -> GroupIdentity {
     GroupIdentity {
         id: GroupId::new(id).unwrap(),
         incarnation: GroupIncarnation::new(1).unwrap(),
     }
 }
-fn store(id: u128) -> StoreBinding {
+pub(super) fn store(id: u128) -> StoreBinding {
     StoreBinding {
         identity: StoreIdentity {
             id: StoreId::new(id).unwrap(),
@@ -29,40 +29,13 @@ fn store(id: u128) -> StoreBinding {
     }
 }
 fn owner() -> Owner {
-    let bootstrap = Bootstrap {
-        group: group(1),
-        configuration: ConfigurationId::new(1).unwrap(),
-        policy: Policy::new(
-            Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
-            Limits::default(),
-        )
-        .unwrap(),
-        voter_stores: (1..=3)
-            .map(|n| (node(n), store(u128::from(n)).identity))
-            .collect(),
-    };
+    owner_with(&[1])
+}
+/// One owner for node 1 of a three-voter group per listed group id, each
+/// recovered at term 1 with no entries.
+pub(super) fn owner_with(groups: &[u128]) -> Owner {
     let mut states = BTreeMap::new();
     let log = LogLimits::default();
-    apply_batch(&mut states, &[LogMutation::Create(bootstrap)], log).unwrap();
-    let revision = states[&group(1)].revision;
-    apply_batch(
-        &mut states,
-        &[LogMutation::Update(LogUpdate {
-            group: group(1),
-            expected_revision: revision,
-            hard_state: HardState {
-                term: 1,
-                voted_for: Some(node(1)),
-            },
-            commit_index: 0,
-            suffix: None,
-            snapshot: None,
-            snapshot_membership: None,
-        })],
-        log,
-    )
-    .unwrap();
-    let core = Raft::recover(node(1), store(1), states.remove(&group(1)).unwrap(), log).unwrap();
     let identity = RuntimeOwner {
         store: store(1),
         lane: ExecutionLaneId::new(1).unwrap(),
@@ -71,16 +44,51 @@ fn owner() -> Owner {
     let mut shard = Shard::new(
         identity,
         ShardLimits {
-            max_groups: 1,
+            max_groups: groups.len(),
             ..Default::default()
         },
-        FairScheduler::new(1).unwrap(),
+        FairScheduler::new(groups.len()).unwrap(),
     )
     .unwrap();
-    shard.register(core).unwrap();
+    for &g in groups {
+        let bootstrap = Bootstrap {
+            group: group(g),
+            configuration: ConfigurationId::new(1).unwrap(),
+            policy: Policy::new(
+                Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
+                Limits::default(),
+            )
+            .unwrap(),
+            voter_stores: (1..=3)
+                .map(|n| (node(n), store(u128::from(n)).identity))
+                .collect(),
+        };
+        apply_batch(&mut states, &[LogMutation::Create(bootstrap)], log).unwrap();
+        let revision = states[&group(g)].revision;
+        apply_batch(
+            &mut states,
+            &[LogMutation::Update(LogUpdate {
+                group: group(g),
+                expected_revision: revision,
+                hard_state: HardState {
+                    term: 1,
+                    voted_for: Some(node(1)),
+                },
+                commit_index: 0,
+                suffix: None,
+                snapshot: None,
+                snapshot_membership: None,
+            })],
+            log,
+        )
+        .unwrap();
+        let core =
+            Raft::recover(node(1), store(1), states.remove(&group(g)).unwrap(), log).unwrap();
+        shard.register(core).unwrap();
+    }
     let timed = TimedShard::new(
         shard,
-        DeadlineQueue::new(identity, 1).unwrap(),
+        DeadlineQueue::new(identity, groups.len()).unwrap(),
         JitterEntropy::new(1),
         TimerConfig::default(),
         MonoTime(0),
@@ -97,8 +105,12 @@ fn owner() -> Owner {
     .unwrap()
 }
 fn vote(from: u64, term: u64) -> Event {
+    vote_in(1, from, term)
+}
+/// A vote request from `from` at `term` for node 1 of group `g`.
+pub(super) fn vote_in(g: u128, from: u64, term: u64) -> Event {
     Event::Receive(Message {
-        group: group(1),
+        group: group(g),
         configuration: ConfigurationId::new(1).unwrap(),
         from: node(from),
         sender: store(u128::from(from)),

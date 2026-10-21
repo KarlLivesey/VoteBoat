@@ -89,16 +89,35 @@ impl<A: StateMachine + Clone> StateMachine for Maintenance<A> {
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.check_group(group)
     }
+    /// Lifetime leadership records until DR2 (audit S2). An undeclared
+    /// inner application stays undeclared.
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.inner.retention(),
+        )
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         let inner = self.inner.deployment_requirements()?;
         Some(ReadinessRequirements {
             application_schema: self.schema,
+            // Configuration word 0: the leadership record capacity, which
+            // decides whether a committed Begin is recorded. The profile format
+            // is in the schema.
+            identity: LayerIdentity::new(
+                ApplicationFamily::MAINTENANCE,
+                [self.capacity as u64, 0, 0, 0],
+            ),
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: inner.command_bytes.checked_add(9)?.max(113),
             snapshot_bytes: inner
                 .snapshot_bytes
                 .checked_add(codec::HEADER_BYTES)?
                 .checked_add(self.capacity.checked_mul(codec::RECORD_BYTES)?)?,
         })
+    }
+    fn deployment_bound(&self) -> bool {
+        self.inner.deployment_bound()
     }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()

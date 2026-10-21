@@ -19,8 +19,14 @@ fn history(quic: bool) {
     for node in 1..=3 {
         c.start(node, "create");
     }
-    assert!(authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("Value(5)"));
-    assert!(authenticated_write(&c, &["group", "8", "2", "add", "42", "8"]).contains("Value(8)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("Value(5)")
+    );
+    assert!(
+        authenticated_write(&c, &["group", "8", "2", "add", "1", "1", "0", "8"])
+            .contains("Value(8)")
+    );
     let source = groups::leader(&mut c, "7", "3");
     let target = source % 3 + 1;
     begin(&mut c, ("7", "3", "9"), OP, target);
@@ -53,9 +59,13 @@ fn history(quic: bool) {
     }
     status(&mut c, ("8", "2"), OP, "phase=Absent");
     assert!(
-        authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("duplicate=true")
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("duplicate=true")
     );
-    assert!(authenticated_write(&c, &["group", "7", "3", "add", "43", "1"]).contains("Value(6)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "2", "0", "1"])
+            .contains("Value(6)")
+    );
     assert_eq!(c.routed(&["group", "8", "2", "read"]), "OK value=8\n");
     let checkpoint = quic.then(|| checkpoint(&mut c));
     c.stop();
@@ -109,7 +119,13 @@ pub(super) fn verify_checkpoint(c: &Cluster, node: usize, through: u64) {
         SnapshotLimits::default(),
     )
     .unwrap();
-    let mut app = Maintenance::new(group, 2, 64, Counter::new(10000).unwrap()).unwrap();
+    let mut app = Maintenance::new(
+        group,
+        3,
+        64,
+        Counter::with_limits(voteboat::retention::SessionLimits::default()).unwrap(),
+    )
+    .unwrap();
     let (core, _) = recover_member_replica(
         NodeId::new(node as u64).unwrap(),
         group,

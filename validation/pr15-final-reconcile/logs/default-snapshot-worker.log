@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-9e098eb7)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.11s
+     Running tests/snapshot_worker.rs (target/debug/deps/snapshot_worker-f73eb13017f7fde2)
+
+running 14 tests
+test downstream_worker_selection_rejection_stale_envelope_and_failure ... ok
+test install_requires_reconciled_image_and_valid_application_before_acknowledgement ... ok
+test invalid_application_and_store_scope_never_submit_work ... ok
+test local_checkpoint_checks_context_boundary_and_exact_retention_completion ... ok
+test local_checkpoint_rejects_foreign_published_boundary_before_wal ... ok
+test native::a_failed_snapshot_request_reports_every_accepted_group_without_success ... ok
+test native::admission_rejects_wrong_scope_and_excess_capacity_without_progress ... ok
+test faults::checkpoint_retention_failure_fences_and_recovers_the_durable_anchor ... ok
+test native::asynchronous_pinned_load_supplies_exact_leader_snapshot_request ... ok
+test native::bulk_snapshot_loads_leave_control_capacity_for_installation ... ok
+test native::native_worker_uses_host_stores_and_retains_credits_until_terminal_poll ... ok
+
+thread 'voteboat-snapshot' (144189) panicked at tests/snapshot_worker.rs:1423:17:
+injected provider panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test faults::async_snapshot_short_write_sync_publication_pin_and_panic_fail_closed ... ok
+test native::real_files_install_through_effect_owner_snapshot_worker_and_wal_worker ... ok
+test native::local_checkpoint_receipt_loss_recovers_exact_wal_anchor_and_tail ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

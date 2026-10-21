@@ -23,9 +23,9 @@ pub fn requests(
     delta: i64,
     value: i64,
 ) {
-    let op = OperationId::new(operation).unwrap();
+    let op = voteboat::application::Counter::operation(1, operation as u64).unwrap();
     let bytes = fixture::app_with_mappings((0..3).map(groups::mapping).collect())
-        .business(&delta.to_le_bytes())
+        .business(&voteboat::application::Counter::command(0, delta))
         .unwrap();
     let first = write(peers, parent, target, op, &bytes, value, false);
     let retry = write(peers, parent, target, op, &bytes, value, true);

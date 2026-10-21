@@ -14,7 +14,13 @@
 // rights and limitations under the RPL.
 //! Explicit host-authorized learner enrollment through the public storage,
 //! core, application and snapshot contracts. No network bootstrap is inferred.
+#[path = "learners/bootstrap_bindings.rs"]
+mod bootstrap_bindings;
+#[path = "learners/readiness_plans.rs"]
+mod readiness_plans;
 mod support;
+#[path = "transfer_source/fixtures.rs"]
+mod transfer_fixtures;
 use support::*;
 use voteboat::{application::*, identity::*, log::*, membership::*, raft::*, snapshot::*};
 fn cid(n: u64) -> ConfigurationId {
@@ -86,8 +92,8 @@ fn command_message() -> Message {
                 index: 2,
                 term: 2,
                 payload: EntryPayload::Command {
-                    operation: OperationId::new(7).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec().into(),
+                    operation: Counter::operation(1, 7).unwrap(),
+                    bytes: Counter::command(0, 7).into(),
                 },
             }]
             .into(),
@@ -534,8 +540,10 @@ fn joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting
 
 fn readiness_requirements() -> ReadinessRequirements {
     ReadinessRequirements {
-        application_schema: 1,
-        command_bytes: 8,
+        application_schema: Counter::new(16).unwrap().schema_version(),
+        identity: voteboat::raft::LayerIdentity::family(voteboat::raft::ApplicationFamily::COUNTER),
+        inner_profile: voteboat::raft::InnerProfile::LEAF,
+        command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
         snapshot_bytes: 4096,
     }
 }
@@ -652,7 +660,7 @@ fn readiness_exchange_suspends_verification_rejects_stale_completion_and_denies_
             .step(Event::CheckLearnerReadiness {
                 learner: learner_peer(),
                 session: log.binding().session,
-                requirements,
+                requirements: Box::new(requirements),
             })
             .unwrap();
         let query = sent(&effects, 4);
@@ -732,7 +740,7 @@ fn readiness_storage_failure_fences_without_reply_and_recovery_discards_pending_
             .step(Event::CheckLearnerReadiness {
                 learner: learner_peer(),
                 session: log.binding().session,
-                requirements: readiness_requirements(),
+                requirements: Box::new(readiness_requirements()),
             })
             .unwrap(),
         4,
@@ -1110,7 +1118,7 @@ mod native_exchange {
                     .step(Event::CheckLearnerReadiness {
                         learner: learner_peer(),
                         session: self.log.binding().session,
-                        requirements,
+                        requirements: Box::new(requirements),
                     })
                     .unwrap(),
                 4,
@@ -1504,6 +1512,366 @@ fn readiness_rejects_changed_capabilities_provider_bindings_and_pending_writes()
         leader.storage_binding(),
     )
     .unwrap();
+}
+
+#[test]
+fn readiness_refuses_a_learner_whose_session_limits_differ() {
+    // The leader declares the envelope of a window-16 Counter. A learner built
+    // with window 32 fits that byte envelope, but it would decide the same
+    // committed entry differently, so its schema differs and readiness fails.
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, app, _leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    let mut other = Counter::new(32).unwrap();
+    other.apply_entries(learner.replay_committed()).unwrap();
+    assert!(other.readiness_requirements().snapshot_bytes <= request.requirements.snapshot_bytes);
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &other,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::Capability)
+    );
+    verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+}
+
+#[test]
+fn readiness_refuses_a_wrapped_learner_whose_inner_session_limits_differ() {
+    use voteboat::{maintenance::Maintenance, retention::SessionLimits};
+    // Leader and learner both run leadership maintenance (format 3, capacity
+    // 2) around a Counter; only the inner session count differs. The wrapper
+    // schema carries the inner identity, so readiness refuses the learner
+    // before it applies any command.
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, _, _leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let wrapped = |sessions| {
+        let limits = SessionLimits::new(sessions, 4, 4).unwrap();
+        let counter = Counter::with_limits(limits).unwrap();
+        let mut app = Maintenance::new(group(1), 3, 2, counter).unwrap();
+        app.apply_entries(learner.replay_committed()).unwrap();
+        app
+    };
+    let (small, large) = (wrapped(2), wrapped(3));
+    let declared = large.deployment_requirements().unwrap();
+    let requirements = ReadinessRequirements {
+        snapshot_bytes: 4096,
+        ..declared
+    };
+    assert!(small.deployment_requirements().unwrap().snapshot_bytes <= 4096);
+    let request = leader
+        .begin_learner_readiness(learner_peer(), log.binding().session, requirements)
+        .unwrap();
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &small,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::Capability)
+    );
+    verify_learner_readiness(
+        &learner,
+        &large,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+}
+
+/// Step `core` and complete any persistence it asks for; the other effects.
+fn step_persisted<S: LogStore>(core: &mut Raft, store: &mut S, event: Event) -> Vec<Effect> {
+    let mut out = Vec::new();
+    for effect in core.step(event).unwrap() {
+        match effect {
+            Effect::Persist(update) => out.extend(persist_effect(core, store, update).unwrap()),
+            other => out.push(other),
+        }
+    }
+    out
+}
+/// Commit one command at the next index on a `readiness_cluster` leader and
+/// learner by actual replication: voter 2 acknowledges every append it is
+/// sent and the learner's replies are delivered. Returns the index.
+fn commit_command<L: LogStore, M: LogStore>(
+    leader: &mut Raft,
+    leader_log: &mut M,
+    learner: &mut Raft,
+    log: &mut L,
+    operation: OperationId,
+    bytes: Vec<u8>,
+) -> u64 {
+    let index = leader.state().last_index() + 1;
+    let mut pending = step_persisted(leader, leader_log, Event::Propose { operation, bytes });
+    for _ in 0..16 {
+        if leader.state().commit_index >= index && learner.state().commit_index >= index {
+            assert_eq!(
+                learner.state().term_at(index),
+                leader.state().term_at(index)
+            );
+            return index;
+        }
+        let mut next = Vec::new();
+        for effect in std::mem::take(&mut pending) {
+            let Effect::Send(message) = effect else {
+                continue;
+            };
+            if message.to == node(2) {
+                if let Rpc::Append {
+                    previous_index,
+                    entries,
+                    ..
+                } = &message.rpc
+                {
+                    let ack = response(
+                        &message,
+                        2,
+                        Rpc::Appended {
+                            success: true,
+                            matching_index: previous_index + entries.len() as u64,
+                        },
+                    );
+                    next.extend(step_persisted(leader, leader_log, Event::Receive(ack)));
+                }
+            } else if message.to == node(4) {
+                for reply in step_persisted(learner, log, Event::Receive(message)) {
+                    if let Effect::Send(reply) = reply {
+                        if reply.to == node(1) {
+                            next.extend(step_persisted(leader, leader_log, Event::Receive(reply)));
+                        }
+                    }
+                }
+            }
+        }
+        if next.is_empty() {
+            next = step_persisted(leader, leader_log, Event::Heartbeat);
+        }
+        pending = next;
+    }
+    panic!("index {index} did not commit on the learner")
+}
+/// Real learner readiness for one declaration: a fresh leader/learner cluster,
+/// the learner's application (from `build`) caught up on the committed prefix,
+/// then the leader's request and the learner's `verify_learner_readiness`.
+fn learner_verdict<A: CheckpointStateMachine>(
+    declared: ReadinessRequirements,
+    build: impl Fn() -> A,
+) -> Result<LearnerReadinessReceipt, ReadinessError> {
+    learner_verdict_after(declared, build, Vec::new())
+}
+/// As [`learner_verdict`], with `bootstrap` (operations and their bytes)
+/// first committed from index 3 by actual replication and applied.
+fn learner_verdict_after<A: CheckpointStateMachine>(
+    declared: ReadinessRequirements,
+    build: impl Fn() -> A,
+    bootstrap: Vec<(OperationId, Vec<u8>)>,
+) -> Result<LearnerReadinessReceipt, ReadinessError> {
+    let mut log = HostLogStore::new(4);
+    let (mut leader, mut learner, _, mut leader_log) = readiness_cluster(&mut log);
+    for (n, (operation, bytes)) in bootstrap.into_iter().enumerate() {
+        let index = commit_command(
+            &mut leader,
+            &mut leader_log,
+            &mut learner,
+            &mut log,
+            operation,
+            bytes,
+        );
+        assert_eq!(index, 3 + n as u64);
+    }
+    let mut snapshots = snapshots();
+    let mut app = build();
+    app.apply_entries(learner.replay_committed()).unwrap();
+    let request = leader
+        .begin_learner_readiness(learner_peer(), log.binding().session, declared)
+        .unwrap();
+    verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+}
+/// Each application gets a receipt for its own declaration and is refused,
+/// with the typed readiness error, for the other's.
+fn assert_learners_refuse_each_other<A: CheckpointStateMachine, B: CheckpointStateMachine>(
+    a: impl Fn() -> A,
+    b: impl Fn() -> B,
+    widen: impl Fn(ReadinessRequirements) -> ReadinessRequirements,
+) {
+    let (da, db) = (
+        widen(a().deployment_requirements().unwrap()),
+        widen(b().deployment_requirements().unwrap()),
+    );
+    assert!(learner_verdict(da, &a).is_ok());
+    assert!(learner_verdict(db, &b).is_ok());
+    assert_eq!(learner_verdict(db, &a), Err(ReadinessError::Capability));
+    assert_eq!(learner_verdict(da, &b), Err(ReadinessError::Capability));
+}
+/// [`assert_learners_refuse_each_other`] for applications with a committed
+/// bootstrap binding (`boot_a`, `boot_b` give each one's bootstrap entries):
+/// each is refused for the other's declaration, refused for its own until its
+/// bootstrap has applied (`BootstrapPending`), and gets a receipt after.
+fn assert_bound_learners_refuse_each_other<A: CheckpointStateMachine, B: CheckpointStateMachine>(
+    a: impl Fn() -> A,
+    b: impl Fn() -> B,
+    widen: impl Fn(ReadinessRequirements) -> ReadinessRequirements,
+    boot_a: impl Fn(&A) -> Vec<(OperationId, Vec<u8>)>,
+    boot_b: impl Fn(&B) -> Vec<(OperationId, Vec<u8>)>,
+) {
+    let (da, db) = (
+        widen(a().deployment_requirements().unwrap()),
+        widen(b().deployment_requirements().unwrap()),
+    );
+    assert_eq!(
+        learner_verdict(da, &a),
+        Err(ReadinessError::BootstrapPending)
+    );
+    assert_eq!(
+        learner_verdict(db, &b),
+        Err(ReadinessError::BootstrapPending)
+    );
+    assert!(learner_verdict_after(da, &a, boot_a(&a())).is_ok());
+    assert!(learner_verdict_after(db, &b, boot_b(&b())).is_ok());
+    assert_eq!(learner_verdict(db, &a), Err(ReadinessError::Capability));
+    assert_eq!(learner_verdict(da, &b), Err(ReadinessError::Capability));
+}
+
+#[test]
+fn readiness_refuses_another_wrapper_family_with_the_same_schema_numbers() {
+    use transfer_fixtures::{nested_routed_in, source_in};
+    // Sol, round 4: TransferSource<BucketCounter> and
+    // Routed<Routed<BucketCounter>> have schema 1 over inner schemas [1, 1]
+    // and equal envelopes; both learners received receipts for the same
+    // request. The families now differ, so each learner is refused for the
+    // other's declaration, even with a common envelope.
+    let source = || source_in(group(1));
+    let nested = || nested_routed_in(group(1));
+    let (s, n) = (
+        source().deployment_requirements().unwrap(),
+        nested().deployment_requirements().unwrap(),
+    );
+    assert_eq!(s.application_schema, n.application_schema);
+    assert_eq!(s.inner_profile.schemas(), n.inner_profile.schemas());
+    assert_eq!(s.identity.family, ApplicationFamily::TRANSFER_SOURCE);
+    assert_eq!(n.identity.family, ApplicationFamily::ROUTED);
+    let common = |r: ReadinessRequirements| ReadinessRequirements {
+        command_bytes: s.command_bytes.max(n.command_bytes),
+        snapshot_bytes: s.snapshot_bytes.max(n.snapshot_bytes),
+        ..r
+    };
+    // DR1 round 7: each gets its receipt once its bootstrap entries applied
+    // (the nested inner Routed layer is bootstrapped by an outer data entry).
+    assert_bound_learners_refuse_each_other(
+        source,
+        nested,
+        common,
+        |s| {
+            vec![(
+                OperationId::new(991).unwrap(),
+                s.bootstrap_command(65536).unwrap(),
+            )]
+        },
+        |n| {
+            let inner = n.application().bootstrap_command(65536).unwrap();
+            let hint = voteboat::routing::RouteHint {
+                group: group(1),
+                ..transfer_fixtures::hint(1)
+            };
+            vec![
+                (
+                    OperationId::new(991).unwrap(),
+                    n.bootstrap_command(65536).unwrap(),
+                ),
+                (
+                    OperationId::new(992).unwrap(),
+                    voteboat::routed::encode_routed(hint, &[1], &inner, 65536).unwrap(),
+                ),
+            ]
+        },
+    );
+}
+
+#[test]
+fn readiness_refuses_a_learner_whose_wrapper_configuration_differs() {
+    use transfer_fixtures::{bucket_limits, grant_for, range, Policy};
+    use voteboat::{
+        bucket_counter::BucketCounter, maintenance::Maintenance, retention::SessionLimits,
+        routed::*,
+    };
+    // Sol and Opus, round 4: Maintenance capacity 2 and 4 around the same
+    // Counter accepted each other's declarations and the capacity-2 learner
+    // got a receipt (it then stopped with DedupCapacity at the third Begin).
+    // The capacity is now the layer's configuration, compared exactly, so the
+    // larger envelope no longer admits it.
+    let maintenance = |capacity| {
+        move || {
+            let counter = Counter::with_limits(SessionLimits::new(2, 4, 4).unwrap()).unwrap();
+            Maintenance::new(group(1), 3, capacity, counter).unwrap()
+        }
+    };
+    let envelope = |r: ReadinessRequirements| ReadinessRequirements {
+        snapshot_bytes: 4096,
+        ..r
+    };
+    assert_learners_refuse_each_other(maintenance(2), maintenance(4), envelope);
+    // Sol, round 4: RoutedLimits.operations 4 and 7 around identical inners
+    // accepted each other and diverged on the first bootstrap entry.
+    let routed = |operations| {
+        move || {
+            RoutedApplication::new(
+                group(1),
+                grant_for(group(1)),
+                BucketCounter::new(range(0, 256), Policy, bucket_limits()).unwrap(),
+                Policy,
+                RoutedLimits {
+                    operations,
+                    semantic_bytes: 8192,
+                    payload_bytes: 1024,
+                    inner_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+                },
+            )
+            .unwrap_or_else(|r| panic!("{:?}", r.error))
+        }
+    };
+    let widest = |r: ReadinessRequirements| ReadinessRequirements {
+        snapshot_bytes: r.snapshot_bytes + 1024,
+        command_bytes: r.command_bytes + 1024,
+        ..r
+    };
+    let boot = |r: &RoutedApplication<BucketCounter<Policy>, Policy>| {
+        vec![(
+            OperationId::new(991).unwrap(),
+            r.bootstrap_command(65536).unwrap(),
+        )]
+    };
+    assert_bound_learners_refuse_each_other(routed(4), routed(7), widest, boot, boot);
 }
 
 #[test]
@@ -2366,8 +2734,8 @@ fn advance_readiness_commit(
     } if entries.is_empty()));
     let effects = leader
         .step(Event::Propose {
-            operation: OperationId::new(99).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 99).unwrap(),
+            bytes: Counter::command(0, 7),
         })
         .unwrap();
     assert_eq!(
@@ -2495,4 +2863,95 @@ fn readiness_file_stores(
     )
     .unwrap();
     (log, snapshots, si)
+}
+
+/// DR1 round 6 (Sol, round 5): a captured readiness request's window owns a
+/// separately allocated copy of the request, so relay capture charges it.
+#[cfg(feature = "native")]
+mod relay_budget {
+    use super::*;
+    use std::mem::size_of;
+    use voteboat::{
+        native::{outbound::NativeOutbound, relay::*},
+        outbound::*,
+        runtime::*,
+    };
+    /// Whether a real leader's pending readiness request, taken from the
+    /// native queue, is captured under `metadata_bytes` (refused: too large).
+    fn captured(metadata_bytes: usize) -> bool {
+        let mut log = HostLogStore::new(4);
+        let (leader, _learner, _, _leader_log) = readiness_cluster(&mut log);
+        let store = leader.storage_binding();
+        let mut owner = queued_promotion_owner(leader);
+        owner
+            .admit(
+                group(1),
+                Event::CheckLearnerReadiness {
+                    learner: learner_peer(),
+                    session: log.binding().session,
+                    requirements: Box::new(readiness_requirements()),
+                },
+            )
+            .unwrap();
+        owner.advance(MonoTime(0), 1).unwrap();
+        let mut outbound = NativeOutbound::new(
+            OutboundBinding {
+                node: node(1),
+                store,
+                generation: OutboundGeneration::new(1).unwrap(),
+            },
+            OutboundLimits::default(),
+        )
+        .unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        let Effect::Send(message) = lease.effect else {
+            panic!("expected the readiness request")
+        };
+        assert!(matches!(message.rpc, Rpc::LearnerReadinessRequest(_)));
+        outbound.submit(vec![message]).unwrap();
+        owner.release_transferred_send(lease.ticket).unwrap();
+        assert!(owner.take_effect().unwrap().is_none());
+        let limits = RelayOutputLimits {
+            metadata_bytes,
+            ..RelayOutputLimits::default()
+        };
+        let accepted = match NativeRelayBatch::capture(&owner, &mut outbound, limits) {
+            Ok(Some(batch)) => {
+                let _ = batch.complete(&mut outbound, LocalSendResult::Cancelled);
+                true
+            }
+            Err(rejected) => {
+                assert_eq!(rejected.reason, RelayOutputError::TooLarge);
+                for batch in rejected.batches {
+                    outbound
+                        .complete(batch, LocalSendResult::Cancelled)
+                        .unwrap();
+                }
+                false
+            }
+            Ok(None) => panic!("missing original"),
+        };
+        accepted
+    }
+    #[test]
+    fn captured_readiness_metadata_covers_owned_request() {
+        let (mut refused, mut accepted) = (size_of::<NativeRelayBatch>(), 1 << 16);
+        assert!(!captured(refused));
+        assert!(captured(accepted));
+        while accepted - refused > 1 {
+            let mid = refused + (accepted - refused) / 2;
+            if captured(mid) {
+                accepted = mid;
+            } else {
+                refused = mid;
+            }
+        }
+        // The batch owner and the window's own copy of the request alone need
+        // this much; the scope and window fields come on top. Round 5 accepted
+        // 624 bytes against at least 848.
+        assert!(
+            accepted > size_of::<NativeRelayBatch>() + size_of::<LearnerReadinessRequest>(),
+            "least accepted {accepted}"
+        );
+    }
 }

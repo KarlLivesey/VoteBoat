@@ -252,7 +252,15 @@ impl Replay {
             Action::Campaign(id) => self.step_event(id, Event::Campaign),
             Action::TryWrite(id, operation, byte) => self.try_propose(id, operation, vec![byte]),
             Action::TryCounter(id, operation, delta) => {
-                self.try_propose(id, operation, delta.to_le_bytes().to_vec());
+                let counter_operation =
+                    voteboat::application::Counter::operation(1, operation as u64)
+                        .unwrap()
+                        .get();
+                self.try_propose(
+                    id,
+                    counter_operation,
+                    voteboat::application::Counter::command(0, delta),
+                );
             }
             Action::Isolate(id) => self.cluster.partition(&[id]),
             Action::Heal => self.cluster.heal(),

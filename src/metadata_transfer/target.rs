@@ -147,9 +147,26 @@ impl MetadataAuthorityTarget {
     pub fn imported_image(&self) -> Option<&MetadataImage> {
         self.imported.as_ref().map(|i| &i.image)
     }
+    /// Operation (id high, id low) and source configuration.
+    pub(super) fn plan_words(&self) -> [u64; 3] {
+        let operation = self.operation.get();
+        [
+            (operation >> 64) as u64,
+            operation as u64,
+            self.source_configuration.get(),
+        ]
+    }
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         ReadinessRequirements {
             application_schema: self.schema_version(),
+            // Words: the source's (export bound and initial directory).
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::METADATA_TARGET,
+                self.source.configuration_words(),
+            ),
+            // Plan: the transfer operation, which decides `Conflict` before
+            // any anchor check, and the source configuration.
+            inner_profile: crate::raft::InnerProfile::LEAF.planned(&self.plan_words()),
             command_bytes: 244
                 + MAX_METADATA_PLAN_BYTES
                 + self.source.export_bytes
@@ -382,8 +399,18 @@ impl StateMachine for MetadataAuthorityTarget {
             Err(ApplicationError::InvalidCommand)
         }
     }
+    /// Lifetime history until DH1 (audit S8).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())
+    }
+    /// The target bootstrap (its anchor over the source, plan and operation)
+    /// has applied: only its exact bytes stage it, and restore compares the
+    /// anchor.
+    fn deployment_bound(&self) -> bool {
+        self.staged.is_some()
     }
     fn applied_index(&self) -> u64 {
         self.applied
@@ -427,10 +454,10 @@ impl ProposalAdmission for MetadataAuthorityTarget {
     ) -> Result<usize, ApplicationError> {
         let mut next = self.clone();
         let mut count = 0;
+        // Computed once: the requirements value carries the whole identity.
+        let command_bytes = self.readiness_requirements().command_bytes;
         let mut admit = |op, bytes: &[u8]| -> Result<(), ApplicationError> {
-            if count >= MAX_DIRECTORY_PENDING
-                || bytes.len() > self.readiness_requirements().command_bytes
-            {
+            if count >= MAX_DIRECTORY_PENDING || bytes.len() > command_bytes {
                 return Err(ApplicationError::ReceiptBudget);
             }
             count += 1;

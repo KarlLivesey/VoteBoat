@@ -21,6 +21,7 @@ pub struct LogicalActivationControlProfile {
     mappings: Vec<LogicalStoreMapping>,
     limits: LogicalActivationLimits,
     inner_schema: u64,
+    application_schema: u64,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum LogicalActivationCommandClass {
@@ -39,6 +40,7 @@ where
             mappings: self.mappings.clone(),
             limits: self.limits,
             inner_schema: self.inner.schema_version(),
+            application_schema: self.schema,
         }
     }
 }
@@ -56,13 +58,34 @@ impl LogicalActivationControlProfile {
         self.inner_schema
     }
     pub fn application_schema(&self) -> u64 {
-        LOGICAL_ACTIVATION_SCHEMA
+        self.application_schema
     }
     pub fn response_schema(&self) -> u64 {
         LOGICAL_ACTIVATION_RESPONSE_SCHEMA
     }
     pub fn format_version(&self) -> u32 {
         2
+    }
+    /// Readiness plan words: the parent (3), the mapping count, each mapping's
+    /// voter, store (3) and child (3) (their parent is the parent, checked by
+    /// the activation constructor this profile comes from), the three limits
+    /// and the two schemas. At most 3 + 1 + 16 × 7 + 3 + 2 = 121 words.
+    pub(crate) fn plan_words(&self, out: &mut Vec<u64>) {
+        use crate::raft::DeploymentPlan;
+        out.extend(DeploymentPlan::group_words(self.parent));
+        out.push(self.mappings.len() as u64);
+        for m in &self.mappings {
+            out.push(m.voter.get());
+            out.extend(DeploymentPlan::store_words(m.store));
+            out.extend(DeploymentPlan::group_words(m.child));
+        }
+        out.extend([
+            self.limits.intents as u64,
+            self.limits.command_bytes as u64,
+            self.limits.checkpoint_bytes as u64,
+            self.inner_schema,
+            self.application_schema,
+        ]);
     }
     pub(crate) fn configuration_bytes(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
         let mut e = Encoder::new(max);

@@ -41,7 +41,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             return Err(ApplicationError::InvalidCommand);
         }
         self.control_profile = Some(profile);
-        self.configuration = self.configuration_bytes()?;
+        self.set_configuration()?;
         self.validate_read_envelopes()?;
         self.encode_state(self.limits.max_child_checkpoint_bytes)?;
         Ok(self)

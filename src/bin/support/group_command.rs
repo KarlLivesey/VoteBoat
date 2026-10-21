@@ -44,6 +44,7 @@ pub fn parse(input: &str) -> Result<Command<'_>, String> {
         "status"
             | "read"
             | "add"
+            | "register"
             | "checkpoint"
             | "configure"
             | "configuration-status"

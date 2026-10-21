@@ -67,7 +67,10 @@ fn limits() -> SnapshotLimits {
     SnapshotLimits {
         max_application_bytes: MAX_FAULT_BYTES,
         max_metadata_bytes: 4096,
-        max_chunk_bytes: 96,
+        // One chunk for a one-receipt Counter image (129 bytes: header 24,
+        // ledger header 44, session 28, receipt 33), two for the two-receipt
+        // replacement (162 bytes), as the histories expect.
+        max_chunk_bytes: 160,
     }
 }
 fn fresh() -> Counter {

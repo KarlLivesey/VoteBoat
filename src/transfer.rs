@@ -427,6 +427,9 @@ impl StateMachine for LifecycleDirectory {
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.0.validate_group(group)
     }
+    fn deployment_bound(&self) -> bool {
+        self.0.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.0.applied_index()
     }

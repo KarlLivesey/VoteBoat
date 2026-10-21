@@ -370,12 +370,17 @@ fn serve_cached_child(
     )
     .unwrap();
     assert_eq!(cached, route);
-    let bytes =
-        encode_routed(cached, &[10], &7i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap();
+    let bytes = encode_routed(
+        cached,
+        &[10],
+        &Counter::command(0, 7),
+        MAX_ROUTED_COMMAND_BYTES,
+    )
+    .unwrap();
     for duplicate in [false, true] {
         let (receipt, uncertain) =
-            propose_recovering_observed(children, clock, 20, 1, bytes.clone());
-        assert_eq!(receipt.operation, OperationId::new(1).unwrap());
+            propose_recovering_observed(children, clock, 20, counter_op(1), bytes.clone());
+        assert_eq!(receipt.operation, OperationId::new(counter_op(1)).unwrap());
         assert!(matches!(
             receipt.outcome,
             RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(7), duplicate: d, .. }) if d == duplicate || (!duplicate && uncertain && d)
@@ -456,8 +461,14 @@ fn recover_child(
             &mut children,
             clock,
             20,
-            1,
-            encode_routed(fresh, &[10], &7i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap()
+            counter_op(1),
+            encode_routed(
+                fresh,
+                &[10],
+                &Counter::command(0, 7),
+                MAX_ROUTED_COMMAND_BYTES
+            )
+            .unwrap()
         )
         .outcome,
         RoutedOutcome::Applied(CounterReceipt {
@@ -470,10 +481,16 @@ fn recover_child(
         &mut children,
         clock,
         20,
-        2,
-        encode_routed(fresh, &[10], &3i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap(),
+        counter_op(2),
+        encode_routed(
+            fresh,
+            &[10],
+            &Counter::command(0, 3),
+            MAX_ROUTED_COMMAND_BYTES,
+        )
+        .unwrap(),
     );
-    assert_eq!(receipt.operation, OperationId::new(2).unwrap());
+    assert_eq!(receipt.operation, OperationId::new(counter_op(2)).unwrap());
     assert!(matches!(receipt.outcome,
         RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(10), duplicate, .. })
             if !duplicate || uncertain

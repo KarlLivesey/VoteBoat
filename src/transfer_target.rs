@@ -814,9 +814,41 @@ where
             activated: self.activated.as_ref().map(|r| r.status),
         }
     }
+    /// Decision-affecting configuration, compared exactly at readiness. Words:
+    /// 0 = import bytes (high) and application checkpoint bytes (low); 1 =
+    /// partial delegation maximum (high) and export bytes (low), zero if not
+    /// selected; 2 = parent adoption limit (high) and modes (bit 0 metadata
+    /// adoption, 1 metadata locator adoption, 2 partial delegation). Every
+    /// value is bounded below 2^32 at construction. The operation, intent and
+    /// initial inner checkpoint are the group's deployment plan, bound by the
+    /// committed bootstrap entry.
+    fn layer_identity(&self) -> crate::raft::LayerIdentity {
+        use crate::raft::LayerIdentity;
+        let (maximum, export) = self
+            .partial
+            .as_ref()
+            .map_or((0, 0), |p| (p.maximum(), p.export_bytes()));
+        let modes = usize::from(self.metadata_adoption)
+            | usize::from(self.metadata_locator_adoption) << 1
+            | usize::from(self.partial.is_some()) << 2;
+        LayerIdentity::new(
+            crate::raft::ApplicationFamily::TRANSFER_TARGET,
+            [
+                LayerIdentity::pair(
+                    self.limits.import_bytes,
+                    self.limits.application_checkpoint_bytes,
+                ),
+                LayerIdentity::pair(maximum, export),
+                LayerIdentity::pair(self.parent_limit, modes),
+                0,
+            ],
+        )
+    }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: self.schema_version(),
+            identity: self.layer_identity(),
+            inner_profile: crate::raft::InnerProfile::of(&self.inner),
             command_bytes: self
                 .binding
                 .len()
@@ -1228,8 +1260,22 @@ where
         }
         self.inner.validate_group(group)
     }
+    /// Lifetime partial and adoption ledgers until AD1 (audit S7, T4). An undeclared
+    /// inner application stays undeclared.
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.inner.retention(),
+        )
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
+    }
+    /// The target binding (group, operation, intent, initial inner
+    /// checkpoint) has applied: only its exact bytes stage it, and restore
+    /// compares it.
+    fn deployment_bound(&self) -> bool {
+        self.staged.is_some() && self.inner.deployment_bound()
     }
     fn applied_index(&self) -> u64 {
         self.applied
@@ -1340,14 +1386,14 @@ where
         bytes: &[u8],
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError> {
-        if bytes.len() > self.readiness_requirements().command_bytes {
+        // Computed once: the requirements value carries the whole identity.
+        let command_bytes = self.readiness_requirements().command_bytes;
+        if bytes.len() > command_bytes {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut next = self.clone();
         for (position, (operation, bytes)) in pending.enumerate() {
-            if position >= crate::routed::MAX_ROUTED_PENDING
-                || bytes.len() > self.readiness_requirements().command_bytes
-            {
+            if position >= crate::routed::MAX_ROUTED_PENDING || bytes.len() > command_bytes {
                 return Err(ApplicationError::ReceiptBudget);
             }
             let index = next

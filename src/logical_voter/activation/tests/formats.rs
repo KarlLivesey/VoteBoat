@@ -15,7 +15,20 @@
 //! Format pins. The v1 files were written by the code at 30a1f6c5 with the same
 //! fixture (two intents, `Counter::new(16)`; populated = business `op(100)` at
 //! index 1 and a v1 `Begin` at index 2). Old bytes are refused typed, never
-//! reinterpreted; v2 bytes are pinned exactly.
+//! reinterpreted; v2 bytes are pinned exactly. DR1 regenerated `v2-empty.bin`,
+//! `v2-populated.bin` and `v2-profile.bin`: only the embedded inner Counter
+//! checkpoint (`VBCTR001` → `VBCTR002`) and the inner schema field (1 →
+//! `Counter::schema` of one session × 16 × one nonce, `0x0F00_0004`) changed;
+//! the wrapper layout is unchanged. DR1 round 2 regenerated them again: each
+//! retained Counter receipt now carries its acknowledgement (8 bytes), and the
+//! inner schema encodes the session limits. DR1 round 3 regenerated
+//! `v2-empty.bin`, `v2-populated.bin` and `v2-profile.bin` once more: the
+//! inner Counter checkpoint is `VBCTR003` (16 more ledger-header bytes for the
+//! closure record), the inner schema's format byte is 5, and the profile's
+//! application schema is `logical_activation_schema` of the inner schema.
+//! DR1 round 4 regenerated `v2-profile.bin` only: its application schema
+//! field (bytes 160..168) is now the layered `8 << 60 | inner`; the other
+//! three files are unchanged.
 use super::*;
 const OLD_SCHEMA: u64 = 0x5642_4143_5449_0001;
 const V1_EMPTY: &[u8] = include_bytes!("formats/v1-empty.bin");
@@ -28,8 +41,9 @@ const V2_BEGIN: &[u8] = include_bytes!("formats/v2-begin.bin");
 const V2_PROFILE: &[u8] = include_bytes!("formats/v2-profile.bin");
 fn populated() -> (LogicalActivationApplication<Counter>, Vec<u8>) {
     let mut a = app(2);
-    let business = a.business(&5i64.to_le_bytes()).unwrap();
-    a.apply_batch(&[entry(1, op(100), business)]).unwrap();
+    let business = a.business(&Counter::command(0, 5)).unwrap();
+    a.apply_batch(&[entry(1, business_op(1), business)])
+        .unwrap();
     let begin_bytes = a.begin(&intent(1)).unwrap();
     a.apply_batch(&[entry(2, ops(1).begin, begin_bytes.clone())])
         .unwrap();
@@ -53,13 +67,13 @@ fn v2_encodings_are_pinned_and_round_trip() {
     for (applied, bytes) in [(0, V2_EMPTY), (2, V2_POPULATED)] {
         let mut restored = app(2);
         restored
-            .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, applied, bytes)
+            .restore_checkpoint(app(2).schema_version(), applied, bytes)
             .unwrap();
         assert_eq!(restored.checkpoint(usize::MAX).unwrap(), bytes);
     }
     let mut restored = app(2);
     restored
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 2, V2_POPULATED)
+        .restore_checkpoint(app(2).schema_version(), 2, V2_POPULATED)
         .unwrap();
     assert_eq!(restored.active(), Some(ops(1).begin));
     assert_eq!(restored.inner.read_at(2, ()).unwrap(), 5);
@@ -69,12 +83,12 @@ fn v1_checkpoints_commands_and_profiles_are_refused_typed() {
     assert_eq!(&V1_EMPTY[..8], b"VBACTC01");
     assert_eq!(&V1_BEGIN[..8], b"VBACTA01");
     assert_eq!(&V1_PROFILE[..8], b"VBACTP01");
-    assert_ne!(LOGICAL_ACTIVATION_SCHEMA, OLD_SCHEMA);
+    assert_ne!(app(2).schema_version(), OLD_SCHEMA);
     let mut a = app(2);
     let before = a.checkpoint(usize::MAX).unwrap();
     for (applied, bytes) in [(0, V1_EMPTY), (2, V1_POPULATED)] {
         assert_eq!(
-            a.restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, applied, bytes),
+            a.restore_checkpoint(app(2).schema_version(), applied, bytes),
             Err(ApplicationError::InvalidCheckpoint)
         );
         assert_eq!(

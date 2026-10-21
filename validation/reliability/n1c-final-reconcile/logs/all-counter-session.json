@@ -1,0 +1,21 @@
+{
+  "name": "all-counter-session",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "-j",
+    "2",
+    "--all-features",
+    "--test",
+    "counter_service",
+    "sessions::",
+    "--",
+    "--test-threads=2"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+  "exit": 0,
+  "seconds": 8.395737648010254
+}

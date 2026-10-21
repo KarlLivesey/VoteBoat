@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --all-features --test transfer_service -- listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown quic_authenticated_operator_resumes_original_split_after_process_crash --test-threads=2 --nocapture

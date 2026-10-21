@@ -225,8 +225,8 @@ fn seed(path: &Path, local: u64, phase: u64, commit: u64, compact: bool) {
             index: 4,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(900).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, 10).unwrap(),
+                bytes: Counter::command(0, 7).into(),
             },
         });
     }
@@ -505,9 +505,8 @@ fn member_histories(protocol: NativePeerProtocol) {
                     group(),
                     OperationId::new(101).unwrap(),
                     ReadinessRequirements {
-                        application_schema: 1,
-                        command_bytes: 8,
                         snapshot_bytes: 4096,
+                        ..Counter::new(100).unwrap().readiness_requirements()
                     }
                 )
                 .unwrap(),
@@ -522,8 +521,8 @@ fn member_histories(protocol: NativePeerProtocol) {
                     index: 5,
                     term: 1,
                     payload: EntryPayload::Command {
-                        operation: OperationId::new(900).unwrap(),
-                        bytes: 7i64.to_le_bytes().to_vec().into(),
+                        operation: Counter::operation(1, 10).unwrap(),
+                        bytes: Counter::command(0, 7).into(),
                     },
                 }])
                 .unwrap();
@@ -572,8 +571,8 @@ fn enrollment_history(protocol: NativePeerProtocol) {
         index: 2,
         term: 1,
         payload: EntryPayload::Command {
-            operation: OperationId::new(900).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec().into(),
+            operation: Counter::operation(1, 10).unwrap(),
+            bytes: Counter::command(0, 7).into(),
         },
     });
     let mut source = Counter::new(100).unwrap();
@@ -586,12 +585,12 @@ fn enrollment_history(protocol: NativePeerProtocol) {
             )),
             index: 2,
             term: 1,
-            application_schema: 1,
+            application_schema: Counter::new(100).unwrap().schema_version(),
         },
         application: source.checkpoint(4096).unwrap(),
     };
     let mut bad = image.clone();
-    bad.metadata.application_schema = 2;
+    bad.metadata.application_schema = Counter::new(100).unwrap().schema_version() + 1;
     assert!(selected
         .enroll_snapshot(&bad, &mut Counter::new(100).unwrap())
         .is_err());
@@ -1170,7 +1169,7 @@ fn promoted_leader_loss_and_witness_outage(protocol: NativePeerProtocol, compact
             && (compacted_witness
                 || ns[0].local().applications[&group()].read_applied(acknowledged) == Ok(7))
     });
-    let final_index = outage_write(&mut older, &clock, 2, 902, 2, 9);
+    let final_index = outage_write(&mut older, &clock, 2, 12, 2, 9);
     outage_drive(&mut older, &clock, |ns| {
         ns[1..]
             .iter()
@@ -1346,8 +1345,8 @@ fn commit_admin_initial(nodes: &mut [Service], allowed: &NativeAdministrationPla
     let first = nodes[0]
         .propose(ClientRequest {
             group: group(),
-            operation: OperationId::new(899).unwrap(),
-            bytes: 1i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 9).unwrap(),
+            bytes: Counter::command(0, 1),
         })
         .unwrap();
     let mut first_index = None;
@@ -1737,8 +1736,8 @@ fn check_promoted_writes(
     let write = nodes[0]
         .propose(ClientRequest {
             group: group(),
-            operation: OperationId::new(900).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 10).unwrap(),
+            bytes: Counter::command(0, 7),
         })
         .unwrap();
     let mut applied = None;
@@ -1761,8 +1760,8 @@ fn check_promoted_writes(
         let retry = nodes[0]
             .propose(ClientRequest {
                 group: group(),
-                operation: OperationId::new(899).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, 9).unwrap(),
+                bytes: Counter::command(0, 1),
             })
             .unwrap();
         let mut completed = false;
@@ -2002,8 +2001,8 @@ fn repair_entries(
             index: history.len() as u64 + 1,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(901).unwrap(),
-                bytes: 11i64.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, 11).unwrap(),
+                bytes: Counter::command(0, 11).into(),
             },
         });
     }
@@ -2049,8 +2048,9 @@ fn seed_repair_nodes(
                     index,
                     term: 2,
                     payload: EntryPayload::Command {
-                        operation: OperationId::new(6000 + u128::from(index)).unwrap(),
-                        bytes: 99i64.to_le_bytes().to_vec().into(),
+                        operation: Counter::operation(1, (6000 + u128::from(index)) as u64)
+                            .unwrap(),
+                        bytes: Counter::command(0, 99).into(),
                     },
                 });
             }
@@ -2213,8 +2213,8 @@ fn commit_repaired_write(
                 candidate
                     .propose(ClientRequest {
                         group: group(),
-                        operation: OperationId::new(900).unwrap(),
-                        bytes: 7i64.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, 10).unwrap(),
+                        bytes: Counter::command(0, 7),
                     })
                     .unwrap_or_else(|r| panic!("{:?}", r.reason)),
             );
@@ -2279,7 +2279,7 @@ fn check_repaired_files(
         assert_eq!(app.read_applied(applied_index), Ok(expected_value));
         if divergent {
             assert!(!log.state(group()).unwrap().entries.iter().any(|entry|
-                matches!(&entry.payload, EntryPayload::Command { operation, .. } if operation.get() >= 6000)), "abandoned learner commands must not survive/apply");
+                matches!(&entry.payload, EntryPayload::Command { operation, .. } if operation.get() as u64 >= 6000)), "abandoned learner commands must not survive/apply");
         }
     }
 }
@@ -2441,8 +2441,8 @@ fn outage_write(
     let ticket = nodes[leader]
         .propose(ClientRequest {
             group: group(),
-            operation: OperationId::new(operation).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, operation as u64).unwrap(),
+            bytes: Counter::command(0, delta),
         })
         .unwrap();
     let mut index = None;
@@ -2620,8 +2620,8 @@ fn apply_witness_write(
                 nodes[1]
                     .propose(ClientRequest {
                         group: group(),
-                        operation: OperationId::new(900).unwrap(),
-                        bytes: 7i64.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, 10).unwrap(),
+                        bytes: Counter::command(0, 7),
                     })
                     .unwrap(),
             );
@@ -2694,7 +2694,7 @@ fn begin_witness_outage(
     outage_drive(&mut promoted, clock, |ns| {
         ns[0].local().owner.core(group()).unwrap().role() == Role::Leader
     });
-    let acknowledged = outage_write(&mut promoted, clock, 0, 900, 7, 7);
+    let acknowledged = outage_write(&mut promoted, clock, 0, 10, 7, 7);
     close(
         promoted.remove(0),
         MonoTime(clock.elapsed().as_millis() as u64),
@@ -2709,8 +2709,8 @@ fn begin_witness_outage(
     });
     let request = ClientRequest {
         group: group(),
-        operation: OperationId::new(901).unwrap(),
-        bytes: 100i64.to_le_bytes().to_vec(),
+        operation: Counter::operation(1, 11).unwrap(),
+        bytes: Counter::command(0, 100),
     };
     let allocation = request.bytes.as_ptr();
     let rejected = older[0].propose(request).unwrap_err();
@@ -2719,8 +2719,11 @@ fn begin_witness_outage(
         ClientError::Consensus(RaftError::NotLeader)
     );
     assert_eq!(rejected.request.group, group());
-    assert_eq!(rejected.request.operation, OperationId::new(901).unwrap());
-    assert_eq!(rejected.request.bytes, 100i64.to_le_bytes());
+    assert_eq!(
+        rejected.request.operation,
+        Counter::operation(1, 11).unwrap()
+    );
+    assert_eq!(rejected.request.bytes, Counter::command(0, 100));
     assert_eq!(rejected.request.bytes.as_ptr(), allocation);
     let baseline = older[0]
         .local()

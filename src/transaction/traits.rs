@@ -41,9 +41,46 @@ impl StateMachine for TransferApplication {
             Err(ApplicationError::InvalidCommand)
         }
     }
+    /// Lifetime transaction records until TX1 (audit S5).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
+        use crate::raft::DeploymentPlan;
+        // Plan: this group, which with the profile decides the role, then the
+        // profile's coordinator and two participants (3 words each); then a
+        // participant's opening image, per account in id order: id, opening
+        // (an initial input no committed entry binds). 1 + 12 + 2a words, so
+        // at most 89 accounts fit; a larger image overflows the profile and
+        // readiness refuses it rather than truncating.
+        let [first, second] = self.profile.participants();
+        let limit = crate::raft::MAX_DEPLOYMENT_PLAN_WORDS;
+        let mut plan = Vec::with_capacity((12 + 2 * self.accounts.len()).min(limit + 2));
+        for group in [self.group, self.profile.coordinator(), first, second] {
+            plan.extend(DeploymentPlan::group_words(group));
+        }
+        for (id, account) in &self.accounts {
+            // Past the bound the profile overflows whatever follows, so stop
+            // building (a refusal, never a truncated plan).
+            if plan.len() >= limit {
+                break;
+            }
+            plan.extend([id.get(), account.opening as u64]);
+        }
         Some(ReadinessRequirements {
             application_schema: TRANSFER_SCHEMA,
+            // Words: transaction and account capacities, each of which
+            // decides whether a committed command is recorded.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::TRANSFER_TRANSACTION,
+                [
+                    self.limits.transactions() as u64,
+                    self.limits.accounts() as u64,
+                    0,
+                    0,
+                ],
+            ),
+            inner_profile: crate::raft::InnerProfile::LEAF.planned(&plan),
             command_bytes: TRANSFER_COMMAND_BYTES,
             snapshot_bytes: codec::checkpoint_bound(self),
         })

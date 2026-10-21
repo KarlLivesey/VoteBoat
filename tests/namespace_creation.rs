@@ -151,9 +151,10 @@ fn target(p: &NamespacePlan) -> Target {
     )
     .unwrap_or_else(|_| panic!("target"))
 }
+/// A routed data write: sequence `op` of the inner counter's built-in session.
 fn data(op: u128, delta: i64) -> (OperationId, Vec<u8>) {
     (
-        OperationId::new(op).unwrap(),
+        Counter::operation(1, op as u64).unwrap(),
         encode_routed(
             RouteHint {
                 scheme: Policy.scheme(),
@@ -166,7 +167,7 @@ fn data(op: u128, delta: i64) -> (OperationId, Vec<u8>) {
                 generation: RouteGeneration::new(1).unwrap(),
             },
             &[4],
-            &delta.to_le_bytes(),
+            &Counter::command(0, delta),
             2000,
         )
         .unwrap(),
@@ -308,11 +309,11 @@ fn namespace_codecs_and_bindings_reject_wrong_modes_parents_and_ready_facts() {
 fn target_never_serves_before_exact_activation_and_preserves_retries_on_restore() {
     let (mut d, p) = reserve(16);
     let mut t = target(&p);
-    let (op, bytes) = data(10, 7);
+    let (op, bytes) = data(1, 7);
     assert!(t.validate_proposal(op, &bytes, std::iter::empty()).is_err());
     assert_eq!(t.read_at(0, query()).unwrap(), NamespaceRead::NotActive);
     assert_eq!(
-        commit(&mut t, 10, bytes.clone()).outcome,
+        commit(&mut t, op.get(), bytes.clone()).outcome,
         NamespaceOutcome::NotActive
     );
     let pubn = ready(&mut t);
@@ -346,7 +347,7 @@ fn target_never_serves_before_exact_activation_and_preserves_retries_on_restore(
         NamespaceOutcome::Activated
     );
     assert_eq!(
-        commit(&mut reopened, 10, bytes.clone()).outcome,
+        commit(&mut reopened, op.get(), bytes.clone()).outcome,
         NamespaceOutcome::Data(RoutedReceipt {
             index: 4,
             operation: op,
@@ -367,7 +368,7 @@ fn target_never_serves_before_exact_activation_and_preserves_retries_on_restore(
         recovered.read_at(index, query()).unwrap(),
         NamespaceRead::Data(RoutedRead::Served(7))
     );
-    let r = commit(&mut recovered, 10, bytes);
+    let r = commit(&mut recovered, op.get(), bytes);
     assert!(matches!(
         r.outcome,
         NamespaceOutcome::Data(RoutedReceipt {
@@ -383,7 +384,9 @@ fn target_never_serves_before_exact_activation_and_preserves_retries_on_restore(
         commit(&mut recovered, 4, activation).outcome,
         NamespaceOutcome::Activated
     );
-    let (id, b) = data(4, 9);
+    // The activation's raw ID reused for a data write conflicts.
+    let (_, b) = data(4, 9);
+    let id = OperationId::new(4).unwrap();
     assert!(recovered
         .validate_proposal(id, &b, std::iter::empty())
         .is_err());
@@ -538,8 +541,9 @@ fn reject_corrupt_activation(p: &NamespacePlan, index: u64, image: &[u8]) {
         .restore_checkpoint(1, index, &corrupt_activation)
         .is_err());
     let mut colliding_operation = image.to_vec();
+    // Collide with the data write's operation (`data(1, 7)`).
     colliding_operation[ready_offset + 17..ready_offset + 33]
-        .copy_from_slice(&10u128.to_le_bytes());
+        .copy_from_slice(&Counter::operation(1, 1).unwrap().get().to_le_bytes());
     assert!(target(p)
         .restore_checkpoint(1, index, &colliding_operation)
         .is_err());

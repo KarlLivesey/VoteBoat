@@ -86,7 +86,19 @@ fn data(c: &Cluster, operation: &str, delta: &str, value: &str, duplicate: bool)
         vec![("1", "1")]
     };
     for (group, incarnation) in groups {
-        let (text, retried) = write(c, &["group", group, incarnation, "add", operation, delta]);
+        let (text, retried) = write(
+            c,
+            &[
+                "group",
+                group,
+                incarnation,
+                "add",
+                "1",
+                operation,
+                "0",
+                delta,
+            ],
+        );
         assert!(text.contains(&format!("Value({value})")), "{text}");
         if duplicate || !retried {
             assert!(text.contains(&format!("duplicate={duplicate}")), "{text}");
@@ -187,7 +199,7 @@ fn startup_refusals(c: &mut Cluster) {
 }
 fn history(quic: bool, multi: bool, member: bool) {
     let mut c = setup(quic, multi, member);
-    data(&c, "501", "7", "7", false);
+    data(&c, "1", "7", "7", false);
     c.command_principal = Some(2);
     let denied = c.request(1, &["reload-peers", "1", "1", "2"]);
     assert_eq!(
@@ -207,8 +219,8 @@ fn history(quic: bool, multi: bool, member: bool) {
             .contains("queued=true"));
         wait(&c, id, "1", "recorded", 2);
     }
-    data(&c, "501", "7", "7", true);
-    data(&c, "502", "3", "10", false);
+    data(&c, "1", "7", "7", true);
+    data(&c, "2", "3", "10", false);
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     failures(&mut c);
     c.stop();
@@ -217,7 +229,7 @@ fn history(quic: bool, multi: bool, member: bool) {
         c.start(id, recovery(&c));
         wait(&c, id, "1", "recorded", 2);
     }
-    data(&c, "502", "3", "10", true);
+    data(&c, "2", "3", "10", true);
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();

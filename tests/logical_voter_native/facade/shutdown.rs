@@ -41,7 +41,7 @@ fn history(protocol: NativePeerProtocol) {
     .unwrap_or_else(|e| panic!("actual shutdown facade {:?}", e.reason));
     restart::elect(&mut bridge, &mut node, clock);
     assert_eq!(
-        restart::write(&mut bridge, &mut node, clock, 9001, 5).outcome,
+        restart::write(&mut bridge, &mut node, clock, 7, 5).outcome,
         CounterOutcome::Value(5)
     );
     let before = node

@@ -34,8 +34,8 @@ fn campaign(node: &mut NativeNode<Counter>, clock: Instant) {
 fn command(operation: u128, value: i64) -> ClientRequest {
     ClientRequest {
         group: group(),
-        operation: OperationId::new(operation).unwrap(),
-        bytes: value.to_le_bytes().to_vec(),
+        operation: Counter::operation(1, operation as u64).unwrap(),
+        bytes: Counter::command(0, value),
     }
 }
 fn collect(

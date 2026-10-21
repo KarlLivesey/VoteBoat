@@ -1,0 +1,29 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-776279aa01fe5e22)
+
+running 2 tests
+shared recovery fixture port namespace: /tmp/voteboat-test-ports
+maintenance recovery files: /tmp/voteboat-shared-repair-180098-TcpTls-1792540079012209490
+shared recovery fixture port namespace: /tmp/voteboat-test-ports
+maintenance recovery files: /tmp/voteboat-shared-repair-180098-Quic-1792540079011770434
+protocol=TcpTls phase=initial-write
+protocol=Quic phase=initial-write
+protocol=TcpTls phase=survivor-write
+protocol=TcpTls phase=automatic-checkpoint
+protocol=Quic phase=survivor-write
+protocol=Quic phase=automatic-checkpoint
+protocol=TcpTls phase=reopen
+protocol=TcpTls phase=arm-recovery
+recovery armed: accepted_requests=1 stale_snapshot_installs=0 foreground_campaign_pending=true
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+protocol=TcpTls groups=8 snapshot_installs=15 peak_recovery=1 reclaimed_bytes=17358 snapshot_send_refusals=0
+test shared::recovery::maintenance::tcp_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+protocol=Quic phase=reopen
+protocol=Quic phase=arm-recovery
+recovery armed: accepted_requests=1 stale_snapshot_installs=0 foreground_campaign_pending=true
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+protocol=Quic groups=8 snapshot_installs=9 peak_recovery=1 reclaimed_bytes=16042 snapshot_send_refusals=320
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 63 filtered out; finished in 17.02s
+

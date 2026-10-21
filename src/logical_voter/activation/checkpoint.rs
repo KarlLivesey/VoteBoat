@@ -134,7 +134,7 @@ where
     A::Receipt: ApplicationReceipt,
 {
     fn schema_version(&self) -> u64 {
-        LOGICAL_ACTIVATION_SCHEMA
+        self.schema
     }
     fn checkpoint(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
         self.checkpoint_bytes(max)
@@ -145,7 +145,7 @@ where
         applied: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != LOGICAL_ACTIVATION_SCHEMA {
+        if schema != self.schema_version() {
             return Err(ApplicationError::UnsupportedSchema);
         }
         let next = self.decode_checkpoint(applied, bytes).map_err(|e| {

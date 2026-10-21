@@ -15,7 +15,7 @@ use voteboat::{
 fn history(protocol: NativePeerProtocol) {
     let mut c = Cluster::new(protocol);
     c.campaign();
-    write(&mut c, 35251, 3);
+    write(&mut c, 51, 3);
     let before = c.boats[0]
         .local()
         .owner

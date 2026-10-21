@@ -92,6 +92,9 @@ pub struct NodeLimits {
     pub replica: ReplicaDriverLimits,
     pub peers: PeerDriverLimits,
     pub configuration: ConfigurationRequestLimits,
+    /// Automatic checkpoints and WAL reclaim by default; disabling them is a
+    /// named choice that leaves every group bounded by its store limits.
+    pub retention: RetentionMode,
 }
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NodePollBudget {
@@ -124,6 +127,7 @@ pub enum NodeError {
     Client(ClientError),
     Read(ReadInvocationError),
     Configuration(ConfigurationRequestError),
+    Maintenance(MaintenanceError),
 }
 pub struct NodeRejected<P> {
     pub reason: NodeError,
@@ -224,7 +228,16 @@ pub struct NetworkNode<
     failure: Option<NodeError>,
     configuration: ConfigurationRequests,
     maintenance: WalMaintenanceStatus,
+    // Whether the cores were last told the WAL is above high water.
+    core_pressure: bool,
+    // The data budget (`max_entries_per_group`) of the node's groups. They
+    // share one store, so one set of log limits.
+    entry_budget: usize,
+    // The store's control reserve: WAL room above the high-water mark only
+    // noop transitions may use (R4-1).
+    wal_noop_reserve: usize,
     checkpoints: CheckpointStatus,
+    retention: RetentionMode,
     drain: Option<drain::LocalDrain>,
     drain_history: Option<crate::drain::DrainRecord>,
 }
@@ -286,17 +299,19 @@ where
                 .transpose()?;
             let replica = ReplicaDriver::new(&parts.local.as_parts(), limits.replica, now)
                 .map_err(NodeError::Replica)?;
-            Ok((replica, budget, configuration))
+            let schedules = Self::default_schedules(&parts.local, limits.retention, now)?;
+            Ok((replica, budget, configuration, schedules))
         })();
-        let (replica, budget, configuration) = match checked {
-            Ok(driver) => driver,
-            Err(reason) => {
-                return Err(NodeRejected {
-                    reason,
-                    parts: Box::new(parts),
-                })
-            }
-        };
+        let (replica, budget, configuration, (checkpoints, maintenance, entry_budget)) =
+            match checked {
+                Ok(driver) => driver,
+                Err(reason) => {
+                    return Err(NodeRejected {
+                        reason,
+                        parts: Box::new(parts),
+                    })
+                }
+            };
         let mut peers = if let Some(network) = parts.peers.take() {
             match N::build(
                 network,
@@ -321,7 +336,8 @@ where
             parts.local.owner.install_connection_budget(budget);
             peers.as_mut().unwrap().install_admission_routes(routes);
         }
-        Ok(Self {
+        let wal_noop_reserve = Self::smallest_log_limits(&parts.local).control_reserve_bytes;
+        let mut node = Self {
             local: parts.local,
             replica,
             peers,
@@ -329,11 +345,89 @@ where
             now,
             failure: None,
             configuration,
-            maintenance: WalMaintenanceStatus::default(),
-            checkpoints: CheckpointStatus::default(),
+            maintenance,
+            core_pressure: false,
+            entry_budget,
+            wal_noop_reserve,
+            checkpoints,
+            retention: limits.retention,
             drain: None,
             drain_history: None,
+        };
+        // R4-1: the shard knows its WAL budget before any step, so a campaign
+        // requested before the first poll is already checked.
+        let usage = node.local.persistence.wal_usage();
+        node.publish_wal_budget(usage);
+        Ok(node)
+    }
+    /// I5 / R4-1: the shard checks every live staging against this budget.
+    fn publish_wal_budget(&mut self, usage: Option<crate::log::WalUsage>) {
+        let budget = usage.filter(|u| u.capacity > 0).map(|u| super::WalBudget {
+            limit: self.maintenance.high_water_bytes(u.capacity),
+            published: u.bytes,
+            reserve: self.wal_noop_reserve,
+        });
+        self.local.owner.set_wal_budget(budget);
+    }
+    /// Install the default maintenance a `Maintained` node runs from its first
+    /// poll. Every refusal here is a construction error, never a silent stop.
+    fn default_schedules(
+        local: &NodeLocalParts<S, T, E, A, W, O, H>,
+        retention: RetentionMode,
+        now: MonoTime,
+    ) -> Result<(CheckpointStatus, WalMaintenanceStatus, usize), NodeError> {
+        let mut checkpoints = CheckpointStatus::default();
+        let mut maintenance = WalMaintenanceStatus::default();
+        let limits = Self::smallest_log_limits(local);
+        // I5 / U5: whatever the retention mode, the WAL above the high-water
+        // mark must hold the largest batch, or a batch could wait for ever.
+        super::maintenance::check_wal_headroom(
+            local.persistence.wal_usage(),
+            maintenance.high_water_percent(),
+            limits.max_batch_bytes,
+            limits.control_reserve_bytes,
+        )?;
+        if retention == RetentionMode::LifetimeBounded {
+            return Ok((checkpoints, maintenance, limits.max_entries_per_group));
+        }
+        if !Self::checkpoints_supported(local) {
+            return Err(NodeError::Maintenance(
+                MaintenanceError::CheckpointsUnavailable,
+            ));
+        }
+        checkpoints.configure(
+            Some(CheckpointPolicy::for_limits(limits)),
+            now,
+            limits.max_entries_per_group,
+        )?;
+        if let Some(ceiling) = local.persistence.reclaim_limit() {
+            maintenance.configure(
+                Some(WalMaintenancePolicy::for_ceiling(ceiling)),
+                now,
+                Some(ceiling),
+            )?;
+        }
+        Ok((checkpoints, maintenance, limits.max_entries_per_group))
+    }
+    fn checkpoints_supported(local: &NodeLocalParts<S, T, E, A, W, O, H>) -> bool {
+        local.snapshots.as_ref().is_some_and(|snapshots| {
+            local.owner.groups().all(|group| {
+                snapshots
+                    .worker
+                    .checkpoint_bytes(group)
+                    .is_some_and(|n| n != 0)
+            })
         })
+    }
+    /// The tightest retained-entry budget among the groups (store defaults
+    /// when there are none yet).
+    fn smallest_log_limits(local: &NodeLocalParts<S, T, E, A, W, O, H>) -> crate::log::LogLimits {
+        local
+            .owner
+            .groups()
+            .filter_map(|group| local.owner.core(group).map(|core| core.log_limits()))
+            .min_by_key(|limits| limits.max_entries_per_group)
+            .unwrap_or_default()
     }
     fn validate_group_parts(
         parts: &NetworkNodeParts<S, T, E, A, W, O, H, N>,
@@ -504,11 +598,37 @@ where
         if self.state != NodeState::Running {
             return Err(NodeError::Closed);
         }
+        if policy.is_none() && self.retention == RetentionMode::Maintained {
+            return Err(NodeError::Maintenance(
+                MaintenanceError::DisableRequiresLifetimeBounded,
+            ));
+        }
+        if let Some(p) = policy {
+            let limits = Self::smallest_log_limits(&self.local);
+            super::maintenance::check_wal_headroom(
+                self.local.persistence.wal_usage(),
+                p.high_water_percent,
+                limits.max_batch_bytes,
+                limits.control_reserve_bytes,
+            )?;
+        }
         self.maintenance
             .configure(policy, self.now, self.local.persistence.reclaim_limit())
     }
     pub fn wal_maintenance(&self) -> &WalMaintenanceStatus {
         &self.maintenance
+    }
+    /// Protocol time of the latest poll (local monotonic clock).
+    pub fn poll_time(&self) -> MonoTime {
+        self.now
+    }
+    /// The retention mode chosen at construction.
+    pub fn retention(&self) -> RetentionMode {
+        self.retention
+    }
+    /// Latest physical WAL occupancy the persistence provider published.
+    pub fn wal_usage(&self) -> Option<crate::log::WalUsage> {
+        self.local.persistence.wal_usage()
     }
     /// Configure fair, bounded local checkpoints. This never bypasses the
     /// selected snapshot worker, application validation or durable log update.
@@ -518,6 +638,11 @@ where
     ) -> Result<(), NodeError> {
         if self.state != NodeState::Running {
             return Err(NodeError::Closed);
+        }
+        if policy.is_none() && self.retention == RetentionMode::Maintained {
+            return Err(NodeError::Maintenance(
+                MaintenanceError::DisableRequiresLifetimeBounded,
+            ));
         }
         if policy.is_some() {
             let snapshots = self
@@ -535,7 +660,8 @@ where
                 }
             }
         }
-        self.checkpoints.configure(policy, self.now)
+        let max_entries = Self::smallest_log_limits(&self.local).max_entries_per_group;
+        self.checkpoints.configure(policy, self.now, max_entries)
     }
     pub fn checkpoints(&self) -> &CheckpointStatus {
         &self.checkpoints
@@ -635,6 +761,43 @@ where
                 request,
             });
         };
+        // ST2b: the high-water state refuses a client before the request
+        // reaches any core or log. R6-3: admission reads the state the last
+        // poll computed (each poll folds in the WAL's published occupancy and
+        // the shard's refusals) instead of recomputing it per proposal. The
+        // byte bound itself is checked for every proposal at its step
+        // (`WalAccount::over`, the same typed `StoragePressure`), so one that
+        // arrives before the next poll notices the WAL thread's latest
+        // publication is refused there, never admitted past the mark.
+        if self.maintenance.high_water {
+            self.maintenance.refused_proposal();
+            return Err(ClientRejected {
+                reason: ClientError::StoragePressure,
+                request,
+            });
+        }
+        // ST2 round 3 (I2): the group's retained-entry budget gets the same
+        // typed, retryable refusal, with the same hysteresis, while
+        // checkpoints are on to bring it back down (an opt-out node refuses
+        // at the budget itself, also typed).
+        if let Some(core) = self
+            .local
+            .owner
+            .core(request.group)
+            .filter(|_| self.retention == RetentionMode::Maintained)
+        {
+            if self.maintenance.entry_high_water(
+                request.group,
+                core.state().entries.len(),
+                core.log_limits().max_entries_per_group,
+            ) {
+                self.maintenance.refused_entry_proposal();
+                return Err(ClientRejected {
+                    reason: ClientError::StoragePressure,
+                    request,
+                });
+            }
+        }
         self.local
             .clients
             .submit(&mut self.local.owner, app, request)
@@ -872,7 +1035,7 @@ where
                         store: source.source().store.identity,
                     },
                     session: source.source().store.session,
-                    requirements,
+                    requirements: Box::new(requirements),
                 },
             )
             .map_err(|r| NodeError::Owner(EffectOwnerError::Runtime(r.reason)))
@@ -1093,22 +1256,85 @@ where
         if let Err(reason) = &result {
             self.enter_recovery(reason.clone());
         }
-        if result.is_ok() && self.state == NodeState::Running {
-            self.checkpoints
-                .schedule(&mut self.local.owner, &self.local.applications, now);
-            if let Err(reason) = self.schedule_wal_maintenance(now) {
+        let usage = self.local.persistence.wal_usage();
+        let account = self.local.owner.wal_account();
+        self.maintenance
+            .note_budget_refusals(account.refused.saturating_add(account.declined));
+        self.maintenance.note_noop_refusals(account.noop_refused);
+        let high_water = self.maintenance.update_high_water(usage);
+        if usage.is_some_and(|u| u.parked > 0) {
+            self.maintenance.held_since.get_or_insert(now);
+        } else {
+            self.maintenance.held_since = None;
+        }
+        self.publish_wal_budget(usage);
+        // I2: groups leave the entry gate without waiting for a proposal.
+        if !self.maintenance.entry_high_water.is_empty() {
+            for group in self.maintenance.entry_high_water.clone() {
+                if let Some(core) = self.local.owner.core(group) {
+                    let (retained, max) = (
+                        core.state().entries.len(),
+                        core.log_limits().max_entries_per_group,
+                    );
+                    self.maintenance.entry_high_water(group, retained, max);
+                }
+            }
+        }
+        // Cores report the high-water state (`Raft::storage_pressure`). Their
+        // followers decide on the byte room the shard gives before every
+        // received message (R6-1), not on this latch. Set on every poll
+        // while it lasts (groups may be added), cleared once.
+        if high_water || self.core_pressure {
+            self.local.owner.set_storage_pressure(high_water);
+            self.core_pressure = high_water;
+        }
+        // A held batch only a rewrite can unpark must not stall a drain.
+        let held = usage.is_some_and(|u| u.parked > 0)
+            && matches!(self.state, NodeState::Quiescing | NodeState::Draining);
+        if result.is_ok() && (self.state == NodeState::Running || held) {
+            let pressure = high_water || super::maintenance::pressure(usage);
+            let entry_high = super::maintenance::percent_of(
+                self.entry_budget,
+                self.maintenance.high_water_percent(),
+            ) as u64;
+            self.checkpoints.schedule(
+                &mut self.local.owner,
+                &self.local.applications,
+                now,
+                pressure,
+                entry_high,
+            );
+            if let Err(reason) = self.schedule_wal_maintenance(now, usage, pressure) {
                 self.enter_recovery(reason.clone());
                 return Err(reason);
             }
         }
         result
     }
-    fn schedule_wal_maintenance(&mut self, now: MonoTime) -> Result<(), NodeError> {
-        let Some(policy) = self.maintenance.due(now) else {
+    fn schedule_wal_maintenance(
+        &mut self,
+        now: MonoTime,
+        usage: Option<crate::log::WalUsage>,
+        pressure: bool,
+    ) -> Result<(), NodeError> {
+        // The live estimate is O(groups); compute it only when a rewrite may
+        // be due (under pressure or at the interval deadline).
+        let live = if pressure || self.maintenance.interval_due(now) {
+            self.local
+                .owner
+                .groups()
+                .filter_map(|g| self.local.owner.core(g))
+                .fold(0usize, |sum, core| {
+                    sum.saturating_add(core.live_log_bytes())
+                })
+        } else {
+            0
+        };
+        let Some(policy) = self.maintenance.due(now, usage, live) else {
             return Ok(());
         };
         match self.reclaim(policy.max_bytes) {
-            Ok(ticket) => self.maintenance.submitted(ticket),
+            Ok(ticket) => self.maintenance.submitted(ticket, now),
             Err(NodeError::Replica(ReplicaError::Worker(error))) => {
                 self.maintenance.rejected(error.clone(), now);
                 if self.state == NodeState::RecoveryRequired {

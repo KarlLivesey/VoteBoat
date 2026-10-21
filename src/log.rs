@@ -264,6 +264,40 @@ pub struct LogUpdate {
     /// original bootstrap only, and cannot discard committed configuration work.
     pub snapshot_membership: Option<Box<crate::membership::Membership>>,
 }
+/// Upper bound of the WAL bytes one update adds beyond its entries: batch
+/// framing, the update header (group, revision, hard state, commit), a
+/// snapshot reference and the suffix header. ST2 round 3 (I5); checked against
+/// the native codec in its tests.
+pub const UPDATE_WAL_OVERHEAD: usize = 512;
+/// Upper bound of one entry's encoded fields besides its payload: index,
+/// term, payload tag, operation and length.
+pub const ENTRY_WAL_OVERHEAD: usize = 64;
+/// Upper bound of the WAL bytes one entry with `payload` bytes adds.
+pub fn entry_wal_bound(payload: usize) -> usize {
+    ENTRY_WAL_OVERHEAD.saturating_add(payload)
+}
+/// WAL bound of a leader's current-term noop transition (one update with one
+/// noop entry): what the shard's account must still hold under the
+/// high-water mark plus the control reserve before a core may campaign or
+/// place its noop (ST2 round 4, R4-1).
+pub const NOOP_WAL_BOUND: usize = UPDATE_WAL_OVERHEAD + ENTRY_WAL_OVERHEAD;
+impl LogUpdate {
+    /// Upper bound of this update's WAL encoding, for exact in-flight
+    /// accounting against the WAL high-water mark. Not durability evidence.
+    pub fn wal_bound(&self) -> usize {
+        let mut bytes = UPDATE_WAL_OVERHEAD.saturating_add(
+            self.snapshot_membership
+                .as_ref()
+                .map_or(0, |m| m.retained_bytes()),
+        );
+        if let Some(suffix) = &self.suffix {
+            for entry in &suffix.entries {
+                bytes = bytes.saturating_add(entry_wal_bound(entry.payload_bytes()));
+            }
+        }
+        bytes
+    }
+}
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LogMutation {
     Create(Bootstrap),
@@ -292,6 +326,32 @@ pub struct DurableLog {
 pub struct LogReclaimed {
     pub before_bytes: usize,
     pub after_bytes: usize,
+}
+
+/// Physical log occupancy against the bytes applications may use
+/// (`max_wal_bytes − control_reserve_bytes`). Scheduling input and operator
+/// diagnostics only: never durability evidence.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct WalUsage {
+    pub bytes: usize,
+    pub capacity: usize,
+    /// Owner-side cost of batches the WAL thread holds because their encoding
+    /// does not fit yet. They are written after the next successful rewrite;
+    /// nonzero means the node is in the WAL high-water state.
+    pub parked: usize,
+}
+
+/// A refusal from [`LogStore::append_batch_within_capacity`].
+#[derive(Debug)]
+pub enum AppendRefused {
+    /// The encoded batch does not fit the physical log's remaining capacity
+    /// for its class (data, or control within the reserve). Nothing was
+    /// written and no store state changed; the unchanged mutations are
+    /// returned so the caller can retry after a rewrite. Never a
+    /// `StorageError`, so it cannot fail a core.
+    Full(Vec<LogMutation>),
+    /// Any other refusal, exactly as `append_batch` reports it.
+    Failed(StorageError),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -323,10 +383,25 @@ impl Default for LogLimits {
     }
 }
 impl LogLimits {
+    /// Entries beyond `max_entries_per_group` that only a leader's own
+    /// current-term noop may occupy (ST2 round 3, I1): a leader elected over a
+    /// log at the data budget can always append the entry that lets it commit
+    /// the old-term suffix. 256 at the default budget.
+    pub fn leader_noop_reserve(self) -> usize {
+        (self.max_entries_per_group / 64).max(4)
+    }
+    /// Retained entries a group's log may hold: the data budget
+    /// `max_entries_per_group` (proposals, configuration entries and replicated
+    /// data are admitted only below it) plus [`Self::leader_noop_reserve`].
+    /// The store, recovery and decoding bound.
+    pub fn retained_entry_capacity(self) -> usize {
+        self.max_entries_per_group
+            .saturating_add(self.leader_noop_reserve())
+    }
     pub fn validate(self) -> Result<Self, StorageError> {
         if self.max_groups == 0
             || self.max_entries_per_group == 0
-            || self.max_entries_per_group > u32::MAX as usize
+            || self.retained_entry_capacity() > u32::MAX as usize
             || self.max_command_bytes == 0
             || self.max_snapshot_bytes == 0
             || self.max_snapshot_bytes > 256 * 1024 * 1024
@@ -381,9 +456,24 @@ pub trait LogStore {
     }
     fn append_batch(&mut self, mutations: Vec<LogMutation>)
         -> Result<Vec<LogTicket>, StorageError>;
+    /// `append_batch`, except that a batch refused only because the physical
+    /// log is full comes back unchanged as [`AppendRefused::Full`], with no
+    /// state changed. Stores without a bounded physical log never refuse for
+    /// capacity (the default delegates to `append_batch`).
+    fn append_batch_within_capacity(
+        &mut self,
+        mutations: Vec<LogMutation>,
+    ) -> Result<Vec<LogTicket>, AppendRefused> {
+        self.append_batch(mutations).map_err(AppendRefused::Failed)
+    }
     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError>;
     fn supports_reclaim(&self) -> bool {
         false
+    }
+    /// Current physical log occupancy when the store keeps a bounded physical
+    /// log that `reclaim` rewrites; None otherwise. Must be cheap.
+    fn physical_usage(&self) -> Option<WalUsage> {
+        None
     }
     /// Optional physical maintenance. Preserve every current durable group,
     /// including its snapshot reference and full surviving suffix. Logical
@@ -769,7 +859,7 @@ fn apply_suffix(
     }
     let start = usize::try_from(suffix.from - current.base_index() - 1)
         .map_err(|_| StorageError::Rejected("index overflow"))?;
-    if suffix.entries.len() > limits.max_entries_per_group.saturating_sub(start) {
+    if suffix.entries.len() > limits.retained_entry_capacity().saturating_sub(start) {
         return Err(StorageError::Rejected("group entry limit"));
     }
     validate_suffix_entries(

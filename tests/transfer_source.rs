@@ -19,6 +19,7 @@ use voteboat::{
 #[path = "transfer_source/fixtures.rs"]
 mod fixtures;
 use fixtures::*;
+use voteboat::raft::{ApplicationFamily, InnerLayer, LayerIdentity};
 
 #[test]
 fn same_batch_freeze_retains_exact_boundary_while_outer_prefix_advances() {
@@ -266,4 +267,135 @@ fn status_query_is_prefix_checked_and_charges_fixed_and_nested_capacity() {
     };
     assert_eq!(status.fence, s.fence().unwrap());
     assert_eq!(status.intent, intent());
+}
+
+#[test]
+fn readiness_declares_and_compares_the_whole_inner_stack() {
+    // The source's schema is a protocol constant, so the routed owner and its
+    // bucket counter below it are declared as the inner profile and compared
+    // layer for layer: a replica with any other stack is refused at readiness.
+    let s = fresh();
+    let declared = s.deployment_requirements().unwrap();
+    assert_eq!(declared.application_schema, TRANSFER_SOURCE_SCHEMA);
+    let routed = routed().deployment_requirements().unwrap();
+    assert_eq!(
+        declared.inner_profile.schemas(),
+        Some(vec![ROUTED_APPLICATION_SCHEMA, BUCKET_COUNTER_SCHEMA])
+    );
+    let layers = declared.inner_profile.layers().unwrap().to_vec();
+    assert_eq!(layers[0].identity.family, ApplicationFamily::ROUTED);
+    assert_eq!(layers[1].identity.family, ApplicationFamily::BUCKET_COUNTER);
+    assert_eq!(declared.identity.family, ApplicationFamily::TRANSFER_SOURCE);
+    assert_eq!(
+        declared.inner_profile,
+        voteboat::raft::InnerProfile::wrapping(routed)
+    );
+    assert_eq!(s.validate_deployment_requirements(declared), Ok(()));
+    let with_family = |layer: InnerLayer, family| InnerLayer {
+        identity: LayerIdentity {
+            family,
+            ..layer.identity
+        },
+        ..layer
+    };
+    for other in [
+        vec![],
+        vec![layers[0]],
+        vec![
+            InnerLayer {
+                schema: SCOPED_ROUTED_APPLICATION_SCHEMA,
+                ..layers[0]
+            },
+            layers[1],
+        ],
+        vec![layers[0], layers[1], InnerLayer::unregistered(1)],
+        // Same schemas, another family or configuration in one layer.
+        vec![
+            with_family(layers[0], ApplicationFamily::TRANSFER_SOURCE),
+            layers[1],
+        ],
+        vec![
+            layers[0],
+            with_family(layers[1], ApplicationFamily::UNREGISTERED),
+        ],
+        vec![
+            InnerLayer {
+                identity: LayerIdentity::new(ApplicationFamily::ROUTED, [0; 4]),
+                ..layers[0]
+            },
+            layers[1],
+        ],
+    ] {
+        assert_eq!(
+            s.validate_deployment_requirements(voteboat::raft::ReadinessRequirements {
+                inner_profile: voteboat::raft::InnerProfile::from_layers(&other).unwrap(),
+                ..declared
+            }),
+            Err(ApplicationError::UnsupportedSchema),
+            "{other:?}"
+        );
+    }
+    // The export bound is the source's own configuration.
+    let other =
+        TransferSource::new(fixtures::routed(), 65535).unwrap_or_else(|r| panic!("{:?}", r.0));
+    assert_eq!(
+        s.validate_deployment_requirements(other.deployment_requirements().unwrap()),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+}
+
+#[test]
+fn distinct_wrapper_families_are_refused_at_readiness() {
+    // Sol, round 4: TransferSource<BucketCounter> and
+    // Routed<Routed<BucketCounter>> both declared schema 1 over the profile
+    // [1, 1] with equal envelopes, accepted each other's declarations, and
+    // diverged on the source's bootstrap (Ok vs InvalidCommand). Every layer
+    // now carries its family, so the two complete identities differ.
+    let source = fresh();
+    let nested = nested_routed();
+    let (a, b) = (
+        source.deployment_requirements().unwrap(),
+        nested.deployment_requirements().unwrap(),
+    );
+    // The collision this round removes: same numbers everywhere.
+    assert_eq!(a.application_schema, b.application_schema);
+    assert_eq!(a.inner_profile.schemas(), b.inner_profile.schemas());
+    assert_eq!(a.inner_profile.schemas(), Some(vec![1, 1]));
+    assert_eq!(
+        (a.command_bytes, a.snapshot_bytes),
+        (b.command_bytes, b.snapshot_bytes)
+    );
+    assert_ne!(a, b);
+    assert_eq!(a.identity.family, ApplicationFamily::TRANSFER_SOURCE);
+    assert_eq!(b.identity.family, ApplicationFamily::ROUTED);
+    assert_eq!(source.validate_deployment_requirements(a), Ok(()));
+    assert_eq!(nested.validate_deployment_requirements(b), Ok(()));
+    assert_eq!(
+        source.validate_deployment_requirements(b),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(
+        nested.validate_deployment_requirements(a),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    // Both wrap the same fixture Routed owner, so the inner layers are equal
+    // (families included); the outer family alone tells them apart.
+    assert_eq!(a.inner_profile, b.inner_profile);
+    assert_eq!(
+        source.validate_deployment_requirements(voteboat::raft::ReadinessRequirements {
+            identity: b.identity,
+            ..a
+        }),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    // Had readiness been bypassed: the outcome Sol observed.
+    let bootstrap = source.bootstrap_command(100000).unwrap();
+    let (mut source, mut nested) = (source, nested);
+    assert!(source
+        .apply_batch(&[entry(1, 100, bootstrap.clone())])
+        .is_ok());
+    assert_eq!(
+        nested.apply_batch(&[entry(1, 100, bootstrap)]).err(),
+        Some(ApplicationError::InvalidCommand)
+    );
 }

@@ -46,6 +46,14 @@ where
         }
         self.inner.validate_group(group)
     }
+    /// Activation intents kept for life until AI3 (audit L2). An undeclared
+    /// inner application stays undeclared.
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.inner.retention(),
+        )
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         let inner = self.inner.deployment_requirements()?;
         if inner.application_schema != self.inner.schema_version()
@@ -58,10 +66,29 @@ where
             return None;
         }
         Some(crate::raft::ReadinessRequirements {
-            application_schema: LOGICAL_ACTIVATION_SCHEMA,
+            application_schema: self.schema,
+            // Configuration words: intent capacity, command decode bound and
+            // checkpoint bound; each decides committed entries or the
+            // checkpoint encoding.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::LOGICAL_ACTIVATION,
+                [
+                    self.limits.intents as u64,
+                    self.limits.command_bytes as u64,
+                    self.limits.checkpoint_bytes as u64,
+                    0,
+                ],
+            ),
+            // The parent and every store mapping decide whether a committed
+            // `Begin` is accepted (`check_intent`), and no committed entry
+            // binds them, so they are this layer's deployment plan.
+            inner_profile: crate::raft::InnerProfile::wrapping(inner).planned(&self.plan_words()),
             command_bytes: self.limits.command_bytes,
             snapshot_bytes: self.limits.checkpoint_bytes,
         })
+    }
+    fn deployment_bound(&self) -> bool {
+        self.inner.deployment_bound()
     }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
@@ -160,6 +187,20 @@ impl<A: ProposalAdmission + CheckpointStateMachine> LogicalActivationApplication
 where
     A::Receipt: ApplicationReceipt,
 {
+    /// Deployment plan words: the parent group (3 words), then each mapping
+    /// in the constructor's voter order: voter, store (3), child (3). Every
+    /// mapping's parent is the parent (constructor check). At most
+    /// 3 + 16 × 7 = 115 words.
+    fn plan_words(&self) -> Vec<u64> {
+        let mut words = Vec::with_capacity(3 + 7 * self.mappings.len());
+        words.extend(crate::raft::DeploymentPlan::group_words(self.parent));
+        for m in &self.mappings {
+            words.push(m.voter.get());
+            words.extend(crate::raft::DeploymentPlan::store_words(m.store));
+            words.extend(crate::raft::DeploymentPlan::group_words(m.child));
+        }
+        words
+    }
     pub(super) fn inner_entries(
         &self,
         entries: &[LogEntry],

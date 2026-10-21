@@ -69,7 +69,7 @@ fn retry(
 mod tests {
     use super::*;
     use std::cell::Cell;
-    const ORIGINAL: &[&str] = &["group", "7", "3", "add", "42", "5"];
+    const ORIGINAL: &[&str] = &["group", "7", "3", "add", "1", "1", "0", "5"];
     const RECEIPT: &str = "OK outcome=Value(5) duplicate=true\n";
 
     fn sequence(first: &str, error: &str) {

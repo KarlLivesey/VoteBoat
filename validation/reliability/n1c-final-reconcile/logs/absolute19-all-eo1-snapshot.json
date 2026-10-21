@@ -1,0 +1,21 @@
+{
+  "name": "absolute19-all-eo1-snapshot",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "-j",
+    "2",
+    "--all-features",
+    "--test",
+    "effect_owner",
+    "snapshot_routes::eo1_repro",
+    "--",
+    "--test-threads=2"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+  "exit": 0,
+  "seconds": 4.8171916007995605
+}

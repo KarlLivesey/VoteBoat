@@ -12,7 +12,7 @@ fn history(protocol: NativePeerProtocol) {
     );
     c.gates[1].writes.set(true);
     c.campaign();
-    write(&mut c, 36401, 3);
+    write(&mut c, 61, 3);
     c.until(|c| c.value(2) == 3);
     assert_eq!(
         c.value(1),
@@ -40,7 +40,7 @@ fn history(protocol: NativePeerProtocol) {
     c.until(|c| c.value(1) == 3);
     c.gates[3].reads.set(true);
     c.gates[3].writes.set(true);
-    write(&mut c, 36402, 4);
+    write(&mut c, 62, 4);
     assert_eq!(read(&mut c), 7);
     assert_eq!(c.value(2), 3);
     c.gates[3].reads.set(false);

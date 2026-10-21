@@ -200,6 +200,33 @@ impl<P: PartitionPolicy + Clone> BucketCounter<P> {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: BUCKET_COUNTER_SCHEMA,
+            // Words: operation and retained-byte limits, which decide
+            // committed commands.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::BUCKET_COUNTER,
+                [
+                    self.limits.operations as u64,
+                    self.limits.semantic_bytes as u64,
+                    0,
+                    0,
+                ],
+            ),
+            // Plan: the scope (start high, end low), which refuses keys
+            // outside it, and the partition scheme (id high, id low, version)
+            // its checkpoint names. The bucket function itself is the policy
+            // type's code.
+            inner_profile: crate::raft::InnerProfile::LEAF.planned(&{
+                let scheme = self.policy.scheme();
+                [
+                    crate::raft::LayerIdentity::pair(
+                        self.scope.start().into(),
+                        self.scope.end().into(),
+                    ),
+                    (scheme.id.get() >> 64) as u64,
+                    scheme.id.get() as u64,
+                    scheme.version.into(),
+                ]
+            }),
             command_bytes: MAX_BUCKET_COMMAND_BYTES,
             snapshot_bytes: self.limits.checkpoint_bound().expect("validated limits"),
         }
@@ -367,6 +394,10 @@ impl<P: PartitionPolicy + Clone> BucketCounter<P> {
 }
 impl<P: PartitionPolicy + Clone> StateMachine for BucketCounter<P> {
     type Receipt = BucketReceipt;
+    /// Lifetime operation table until DR2 (audit S3).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

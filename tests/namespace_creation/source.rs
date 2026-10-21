@@ -720,3 +720,75 @@ fn publish_created_targets(
         .unwrap()
         .unwrap()
 }
+
+#[test]
+fn namespace_and_transfer_source_families_are_refused_at_readiness() {
+    // Sol, round 4: CreatedNamespace and TransferSource<Routed<…>> around
+    // identical BucketCounters both declared schema 1 over the profile [1, 1]
+    // and accepted a common declaration; the namespace's initialization
+    // command then succeeded on one and failed on the other. Their outer
+    // families now differ, so each refuses the other at readiness.
+    let (_, p) = reserve_source();
+    let limits = RoutedLimits {
+        operations: 8,
+        semantic_bytes: 8192,
+        payload_bytes: 1024,
+        inner_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+    };
+    let app = || {
+        BucketCounter::new(p.manifest.input().scope, Policy, bucket_limits())
+            .unwrap_or_else(|_| panic!("bucket app"))
+    };
+    let namespace = CreatedNamespace::new(p.clone(), app(), Policy, limits)
+        .unwrap_or_else(|_| panic!("namespace"));
+    let routed = RoutedApplication::new(group(100), p.manifest.clone(), app(), Policy, limits)
+        .unwrap_or_else(|_| panic!("routed"));
+    let owner = Owner::new(routed, 65536).unwrap_or_else(|_| panic!("source"));
+    let (n, s) = (
+        namespace.deployment_requirements().unwrap(),
+        owner.deployment_requirements().unwrap(),
+    );
+    assert_eq!(n.application_schema, s.application_schema);
+    assert_eq!(n.inner_profile.schemas(), s.inner_profile.schemas());
+    assert_eq!(n.inner_profile.schemas(), Some(vec![1, 1]));
+    assert_eq!(
+        n.identity.family,
+        voteboat::raft::ApplicationFamily::CREATED_NAMESPACE
+    );
+    assert_eq!(
+        s.identity.family,
+        voteboat::raft::ApplicationFamily::TRANSFER_SOURCE
+    );
+    // A common declaration covering both envelopes: each accepts its own
+    // identity and refuses the other's.
+    let common = |r: voteboat::raft::ReadinessRequirements| voteboat::raft::ReadinessRequirements {
+        command_bytes: n.command_bytes.max(s.command_bytes),
+        snapshot_bytes: n.snapshot_bytes.max(s.snapshot_bytes),
+        ..r
+    };
+    assert_eq!(
+        namespace.validate_deployment_requirements(common(n)),
+        Ok(())
+    );
+    assert_eq!(owner.validate_deployment_requirements(common(s)), Ok(()));
+    assert_eq!(
+        namespace.validate_deployment_requirements(common(s)),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(
+        owner.validate_deployment_requirements(common(n)),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    // Had readiness been bypassed: the outcome Sol observed.
+    let init = namespace.initialization_command(100000).unwrap();
+    let (mut namespace, mut owner) = (namespace, owner);
+    let op = p.creation.operation.get();
+    assert_eq!(
+        commit(&mut namespace, op, init.clone()).outcome,
+        NamespaceOutcome::Ready
+    );
+    assert_eq!(
+        owner.apply_batch(&[entry(1, op, init)]).err(),
+        Some(ApplicationError::InvalidCommand)
+    );
+}

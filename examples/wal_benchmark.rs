@@ -217,8 +217,8 @@ fn measure_batches(
                         index,
                         term: 1,
                         payload: EntryPayload::Command {
-                            operation: OperationId::new(index as u128).unwrap(),
-                            bytes: 1i64.to_le_bytes().to_vec().into(),
+                            operation: Counter::operation(1, index).unwrap(),
+                            bytes: Counter::command(0, 1).into(),
                         },
                     })
                     .collect(),
@@ -273,8 +273,8 @@ fn verify_recovery(root: &Path, expected: GroupLog, count: usize) -> Result<(), 
             index: app.applied_index() + 1,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(index as u128).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, index as u64).unwrap(),
+                bytes: Counter::command(0, 1).into(),
             },
         };
         let r = checked(app.apply_batch(&[duplicate]))?.remove(0);

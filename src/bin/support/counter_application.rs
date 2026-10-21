@@ -13,6 +13,12 @@ pub enum Application {
     Counter(Counter),
     Maintenance(Maintenance<Counter>),
 }
+/// Format of the leadership-maintenance profile. Its application schema is
+/// `maintenance_schema(3, Counter::schema(limits))`: the top four bits are the
+/// format and the rest is the inner Counter's schema, so it differs from the
+/// pre-DR1 profile (2) and every plain Counter schema, and a peer whose inner
+/// session limits differ refuses this profile's readiness declaration.
+pub const MAINTENANCE_FORMAT: u64 = 3;
 macro_rules! delegate {
     ($self:expr, $app:ident => $expression:expr) => {
         match $self {
@@ -31,7 +37,12 @@ impl Application {
         enabled: bool,
     ) -> Result<Self, Failure> {
         Ok(if enabled {
-            Self::Maintenance(checked(Maintenance::new(group, 2, 64, counter))?)
+            Self::Maintenance(checked(Maintenance::new(
+                group,
+                MAINTENANCE_FORMAT,
+                64,
+                counter,
+            ))?)
         } else {
             Self::Counter(counter)
         })
@@ -42,13 +53,13 @@ impl Application {
             _ => Err("leadership maintenance profile disabled".into()),
         }
     }
-    pub fn data(&self, delta: i64) -> Result<Vec<u8>, String> {
-        let bytes = delta.to_le_bytes();
+    /// Frame counter command bytes (a registration's empty bytes or
+    /// `Counter::command`) for the selected profile.
+    pub fn data(&self, bytes: &[u8]) -> Result<Vec<u8>, String> {
         match self {
             Self::Counter(_) => Ok(bytes.to_vec()),
-            Self::Maintenance(_) => {
-                Maintenance::<Counter>::data(&bytes, 17).map_err(|e| format!("{e:?}"))
-            }
+            Self::Maintenance(_) => Maintenance::<Counter>::data(bytes, 9 + COUNTER_COMMAND_BYTES)
+                .map_err(|e| format!("{e:?}")),
         }
     }
 }
@@ -59,6 +70,12 @@ impl StateMachine for Application {
     }
     fn deployment_requirements(&self) -> Option<voteboat::raft::ReadinessRequirements> {
         delegate!(self, app => app.deployment_requirements())
+    }
+    fn retention(&self) -> Retention {
+        delegate!(self, app => app.retention())
+    }
+    fn deployment_bound(&self) -> bool {
+        delegate!(self, app => app.deployment_bound())
     }
     fn applied_index(&self) -> u64 {
         delegate!(self, app => app.applied_index())

@@ -32,6 +32,11 @@ fn group(id: u128) -> GroupIdentity {
 fn op(id: u128) -> OperationId {
     OperationId::new(id).unwrap()
 }
+/// A business (inner Counter) operation: `sequence` of the counter's built-in
+/// session.
+fn business_op(sequence: u64) -> OperationId {
+    Counter::operation(1, sequence).unwrap()
+}
 fn config(nodes: [u64; 3], id: u64) -> Configuration {
     let voters = nodes.map(|n| NodeId::new(n).unwrap());
     Configuration::new(

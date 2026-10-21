@@ -116,6 +116,8 @@ impl LogicalResponseCodec for App {
             CounterOutcome::Value(v) => (1, v),
             CounterOutcome::Overflow => (2, 0),
             CounterOutcome::OperationConflict => (3, 0),
+            CounterOutcome::Registered(session) => (4, session as i64),
+            CounterOutcome::Refused(refusal) => (5, refusal as i64),
         };
         out[24] = tag;
         out[25..33].copy_from_slice(&value.to_le_bytes());

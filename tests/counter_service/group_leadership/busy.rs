@@ -26,8 +26,14 @@ fn history(quic: bool) {
     for node in 1..=3 {
         c.start(node, "create");
     }
-    assert!(authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("Value(5)"));
-    assert!(authenticated_write(&c, &["group", "8", "2", "add", "42", "8"]).contains("Value(8)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("Value(5)")
+    );
+    assert!(
+        authenticated_write(&c, &["group", "8", "2", "add", "1", "1", "0", "8"])
+            .contains("Value(8)")
+    );
     let source = groups::leader(&mut c, "7", "3");
     let target = source % 3 + 1;
     drain::kill(&mut c, target);
@@ -84,7 +90,10 @@ fn history(quic: bool) {
     status(&mut c, ("8", "2"), OP, "phase=Absent");
     for (group, incarnation, value) in [("7", "3", "5"), ("8", "2", "8")] {
         assert_eq!(
-            authenticated_write(&c, &["group", group, incarnation, "add", "42", value]),
+            authenticated_write(
+                &c,
+                &["group", group, incarnation, "add", "1", "1", "0", value]
+            ),
             format!("OK outcome=Value({value}) duplicate=true\n")
         );
         assert_eq!(

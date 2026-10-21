@@ -274,6 +274,13 @@ where
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
             application_schema: TRANSFER_SOURCE_SCHEMA,
+            // Configuration word 0: the export image bound, which decides
+            // whether a committed freeze can export the scope.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::TRANSFER_SOURCE,
+                [self.export_bytes as u64, 0, 0, 0],
+            ),
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: (inner.command_bytes + 20).max(8 + MAX_TRANSFER_INTENT_BYTES),
             snapshot_bytes: inner.snapshot_bytes + 40 + MAX_TRANSFER_INTENT_BYTES,
         }
@@ -289,8 +296,21 @@ where
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.routed.validate_group(group)
     }
+    /// Wraps lifetime-bounded routed owners until DR2 (audit S3). An undeclared
+    /// inner application stays undeclared.
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.routed.retention(),
+        )
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
+    }
+    /// The source bootstrap applies only as its exact bytes and initializes
+    /// the Routed layer with the embedded binding.
+    fn deployment_bound(&self) -> bool {
+        self.routed.deployment_bound()
     }
     fn applied_index(&self) -> u64 {
         self.applied

@@ -50,8 +50,8 @@ fn command(log: &mut impl LogStore, operation: u128, delta: i64) {
                     index,
                     term: 1,
                     payload: EntryPayload::Command {
-                        operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec().into(),
+                        operation: Counter::operation(1, operation as u64).unwrap(),
+                        bytes: Counter::command(0, delta).into(),
                     },
                 }]
                 .into(),
@@ -68,7 +68,7 @@ fn old_checkpoint(log: &mut impl LogStore, snapshots: &mut impl SnapshotRetentio
         ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
         1,
     );
-    command(log, 900, 7);
+    command(log, 9, 7);
     let mut core = recover(log);
     assert!(!core.local_voter());
     let mut app = Counter::new(16).unwrap();
@@ -76,7 +76,7 @@ fn old_checkpoint(log: &mut impl LogStore, snapshots: &mut impl SnapshotRetentio
         .unwrap();
     let receipt = checkpoint_application(&core, &app, snapshots).unwrap();
     compact_replica(&mut core, log, snapshots, &app, receipt.reference()).unwrap();
-    command(log, 901, 3);
+    command(log, 10, 3);
     receipt.reference()
 }
 
@@ -165,7 +165,7 @@ fn publish_uninstalled(log: &impl LogStore, snapshots: &mut impl SnapshotRetenti
     let state = log.state(group(1)).unwrap();
     let mut app = Counter::new(16).unwrap();
     let old = snapshots.load_pinned(state.snapshot.unwrap()).unwrap();
-    app.restore_checkpoint(1, old.metadata.index, &old.application)
+    app.restore_checkpoint(app.schema_version(), old.metadata.index, &old.application)
         .unwrap();
     app.apply_batch(&state.entries.to_vec()[..(state.commit_index - state.base_index()) as usize])
         .unwrap();
@@ -177,7 +177,7 @@ fn publish_uninstalled(log: &impl LogStore, snapshots: &mut impl SnapshotRetenti
                 membership: state.checkpoint_membership(state.commit_index).unwrap(),
                 index: state.commit_index,
                 term: state.term_at(state.commit_index).unwrap(),
-                application_schema: 1,
+                application_schema: Counter::new(16).unwrap().schema_version(),
             },
             bytes.len(),
         )
@@ -309,14 +309,14 @@ fn check_predicate(core: &Raft, stage: Stage) {
 }
 
 fn retry(app: &mut Counter) {
-    for (operation, delta, value) in [(900, 7i64, 7), (901, 3, 10)] {
+    for (operation, delta, value) in [(9, 7i64, 7), (10, 3, 10)] {
         let receipts = app
             .apply_batch(&[LogEntry {
                 index: app.applied_index() + 1,
                 term: 3,
                 payload: EntryPayload::Command {
-                    operation: OperationId::new(operation).unwrap(),
-                    bytes: delta.to_le_bytes().to_vec().into(),
+                    operation: Counter::operation(1, operation as u64).unwrap(),
+                    bytes: Counter::command(0, delta).into(),
                 },
             }])
             .unwrap();

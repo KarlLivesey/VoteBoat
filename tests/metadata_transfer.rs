@@ -563,3 +563,97 @@ fn metadata_wrappers_retain_receipts_within_declared_capacity() {
     let repeat = MetadataPublishingSource::new(repeat).unwrap();
     check(repeat.clone(), 7, repeat.bootstrap_command(100000).unwrap());
 }
+
+#[test]
+fn readiness_compares_the_initial_directory_limits_and_the_target_operation() {
+    // DR1 round 6 audit: the source's initial directory decides its rejection
+    // capacity and its history, and a target's operation decides `Conflict`
+    // before any anchor check; neither was in the readiness identity.
+    // One export bound for both: the larger directory's image.
+    let export = directory(17)
+        .directory()
+        .readiness_requirements()
+        .snapshot_bytes;
+    let source = |operations| {
+        MetadataAuthoritySource::new(directory(operations), export)
+            .unwrap_or_else(|_| panic!("source"))
+    };
+    let (small, large) = (source(16), source(17));
+    let (ds, dl) = (
+        small.deployment_requirements().unwrap(),
+        large.deployment_requirements().unwrap(),
+    );
+    assert_eq!(ds.identity.configuration[..2], [export as u64, 16]);
+    assert_eq!(dl.identity.configuration[..2], [export as u64, 17]);
+    use voteboat::raft::ReadinessRequirements;
+    let covering = |r: ReadinessRequirements| ReadinessRequirements {
+        command_bytes: ds.command_bytes.max(dl.command_bytes),
+        snapshot_bytes: ds.snapshot_bytes.max(dl.snapshot_bytes),
+        ..r
+    };
+    for (app, other) in [(&small, dl), (&large, ds)] {
+        assert_eq!(
+            app.validate_deployment_requirements(covering(other)),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+    }
+
+    let plan = MetadataMovePlan::new(group(1), group(9), vec![grant()]).unwrap();
+    let target = |operation| {
+        MetadataAuthorityTarget::new(
+            source(16),
+            plan.clone(),
+            op(operation),
+            ConfigurationId::new(1).unwrap(),
+        )
+        .unwrap()
+    };
+    let (seven, eight) = (target(7), target(8));
+    // The divergence: the same committed bootstrap entry of operation 7.
+    let boot = entry(1, 7, seven.bootstrap_command(100_000).unwrap());
+    let outcome = |mut t: MetadataAuthorityTarget| {
+        t.apply_batch(std::slice::from_ref(&boot))
+            .map(|r| r.first().map(|r| r.outcome))
+    };
+    assert_ne!(outcome(seven.clone()), outcome(eight.clone()));
+    assert_eq!(
+        outcome(eight.clone()),
+        Ok(Some(MetadataTargetOutcome::Conflict))
+    );
+    let (d7, d8) = (
+        seven.deployment_requirements().unwrap(),
+        eight.deployment_requirements().unwrap(),
+    );
+    assert_eq!(
+        (d7.identity, d7.command_bytes),
+        (d8.identity, d8.command_bytes)
+    );
+    assert_eq!(
+        seven.validate_deployment_requirements(d8),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(
+        eight.validate_deployment_requirements(d7),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(seven.validate_deployment_requirements(d7), Ok(()));
+
+    // Serving targets that differ only in the target configuration.
+    let serving = |configuration| {
+        MetadataServingTarget::new(
+            MetadataPublishingSource::new(source(16)).unwrap(),
+            plan.clone(),
+            op(7),
+            ConfigurationId::new(1).unwrap(),
+            ConfigurationId::new(configuration).unwrap(),
+        )
+        .unwrap()
+    };
+    let (two, three) = (serving(2), serving(3));
+    let d3 = three.deployment_requirements().unwrap();
+    assert_eq!(
+        two.validate_deployment_requirements(d3),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(three.validate_deployment_requirements(d3), Ok(()));
+}

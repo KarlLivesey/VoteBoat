@@ -90,7 +90,9 @@ fn accepted_begin_rollback_replays_only_the_surviving_exact_binding() {
 #[test]
 fn pending_and_applied_bindings_refuse_changed_identity_before_admission() {
     let mut a = app(2);
-    let i = intent(10, 2);
+    // An ID that is also a valid counter operation, so the same ID can frame
+    // both an administrative and a data command.
+    let i = intent(Counter::operation(1, 1).unwrap().get(), 2);
     let begin = LeadershipCommand::Begin(i).encode().unwrap();
     let mut changed = i;
     changed.source = PeerIdentity {
@@ -118,7 +120,7 @@ fn pending_and_applied_bindings_refuse_changed_identity_before_admission() {
     assert!(a
         .validate_proposal(
             i.request.operation,
-            &Maintenance::<Counter>::data(&7i64.to_le_bytes(), 100).unwrap(),
+            &Maintenance::<Counter>::data(&Counter::command(0, 7), 100).unwrap(),
             [(i.request.operation, begin.as_slice())].into_iter()
         )
         .is_ok());
@@ -154,7 +156,7 @@ fn same_term_completion_recovers_and_older_completion_cannot_escape() {
     assert_eq!(done.phase, LeadershipPhase::Completed { index: 2, term: 2 });
     let bytes = a.checkpoint(10000).unwrap();
     let mut restored = app(2);
-    restored.restore_checkpoint(8001, 2, &bytes).unwrap();
+    restored.restore_checkpoint(schema(), 2, &bytes).unwrap();
     assert_eq!(restored.record(i.request.operation), Some(done));
     assert_eq!(
         recorded(&mut restored, command(3, 3, LeadershipCommand::Begin(i))),

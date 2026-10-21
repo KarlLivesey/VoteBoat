@@ -183,8 +183,8 @@ fn write_wave(
         let ticket = nodes[n]
             .propose(ClientRequest {
                 group: group_id(g),
-                operation: OperationId::new((first + g - 1) as u128).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, (first + g - 1) as u64).unwrap(),
+                bytes: Counter::command(0, 1),
             })
             .unwrap();
         pending.insert((n, ticket.sequence), ticket);

@@ -159,8 +159,8 @@ fn facade_proposals<F: voteboat::transport::PeerTransportFactory<Session>>(
         nodes[0]
             .propose(ClientRequest {
                 group: group(g),
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .unwrap();
     }
@@ -343,7 +343,7 @@ fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
 fn facade_scheduled_reclaim(nodes: &mut [Facade]) {
     for n in nodes.iter_mut() {
         n.configure_wal_maintenance(Some(WalMaintenancePolicy {
-            interval_ms: 1, retry_ms: 1, max_bytes: LogLimits::default().max_wal_bytes,
+            interval_ms: 1, retry_ms: 1, max_bytes: LogLimits::default().max_wal_bytes, min_reclaim_bytes: 0, high_water_percent: 75, low_water_percent: 50,
         })).unwrap();
     }
     facade_drive_at(nodes, MonoTime(1), |nodes| nodes.iter().all(|n| n.wal_maintenance().last_completion.is_some()));

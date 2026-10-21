@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-84037e790a73cc22)
+
+running 1 test
+
+thread 'snapshot_routes::eo1_repro::leader_append_snapshot_retry_keeps_its_send_ahead_of_the_commit_persist' (115498) panicked at tests/snapshot_routes/eo1_repro.rs:65:41:
+called `Result::unwrap()` on an `Err` value: InvalidCommand
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test snapshot_routes::eo1_repro::leader_append_snapshot_retry_keeps_its_send_ahead_of_the_commit_persist ... FAILED
+
+failures:
+
+failures:
+    snapshot_routes::eo1_repro::leader_append_snapshot_retry_keeps_its_send_ahead_of_the_commit_persist
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`

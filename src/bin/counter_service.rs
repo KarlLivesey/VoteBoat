@@ -96,15 +96,14 @@ use std::{
     time::{Duration, Instant},
 };
 use voteboat::observability::*;
-use voteboat::worker::PersistenceWorker;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N] [--gather-us US] [--host-wait-ms MS]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--wal-reclaim-min-bytes N] [--checkpoint-entries N] [--no-maintenance I-accept-a-bounded-log] [--gather-us US] [--host-wait-ms MS]\n\
 voteboat-counter placement-plan INPUT learner OPERATION | replace RETIRING LEARNER_OPERATION VOTER_OPERATION retire|retain | voters OPERATION retire|retain POLICY\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE] [--leadership-maintenance enabled]\n\
-voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
-voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
+voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|register NONCE|add SESSION SEQUENCE ACK DELTA|checkpoint|quit\n\
+voteboat-counter client BASE_PORT auto read|register NONCE|add SESSION SEQUENCE ACK DELTA\n\
 voteboat-counter client BASE_PORT NODE events SESSION AFTER LIMIT\n\
 voteboat-counter client BASE_PORT NODE explain-quorum NODES_CSV_OR_DASH OFFSET COUNT\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
@@ -120,10 +119,10 @@ Optional authenticated commands: serve --service-access FILE; client ... --servi
 Endpoint discovery: client ... --discover-via NODE --command-peers FILE --service-tls TLS_DIRECTORY --principal ID. Raft peer discovery: serve ... --peer-discovery FILE; see docs/COUNTER_SERVICE.md.\n\
 Versioned discovery source: discovery-status; discovery-update EXPECTED NEXT NODE SOCKET_ADDRESS. Updates are local volatile hints; persist the v2 startup file separately.\n\
 Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
---wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
+Checkpoints (every 8192 applied entries) and WAL reclaim (every 1000 ms and at half WAL occupancy) are on by default; --checkpoint-entries, --wal-reclaim-ms and --wal-reclaim-min-bytes (bytes that must be reclaimable for a scheduled rewrite; 0 rewrites at every interval) change them; --no-maintenance I-accept-a-bounded-log disables both and every group then stops accepting writes at its store limits. Startup prints the selection; the maintenance command reports it.\n\
 --gather-us (default 200, at most 10000) is the host loop's gather window before a round with queued work: longer windows mean fewer, fuller rounds (less CPU per write, more latency); --host-wait-ms (default 10) caps how long the host waits with nothing announced.\n\
-Use the same operation ID and delta when retrying an unknown write.\n\
-Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use schema2/wire8.\n\
+Writes: register NONCE allocates a session (OK outcome=Registered(SESSION)); use a fresh random nonzero NONCE per registration, adopt the first reply and ignore later ones. Session 1 is built in for exactly one writer per group; every other writer registers. add SESSION SEQUENCE ACK DELTA numbers writes 1, 2, ... per session; ACK is the highest sequence whose outcome you have consumed (all lower included) and SEQUENCE - ACK is at most 32. Keep SESSION, next SEQUENCE and ACK across restarts or register again; never reuse a SESSION SEQUENCE for another write. Retry an uncertain write with the same SESSION SEQUENCE DELTA. Refused(Expired) means the outcome is no longer retained: never resend the delta under a new sequence or session; read instead, and register again if the session was evicted. Refused(Window) closes the session: that write never executed. See docs/COUNTER_SERVICE.md, client rules.\n\
+Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use maintenance profile format 3 (schema maintenance_schema(3, Counter::schema(limits))), wire format 8 and 64 leadership records.\n\
 Commands: move-leader OP CONFIG SOURCE SOURCE_STORE SOURCE_INC TARGET TARGET_STORE TARGET_INC; leadership-status OP; resume-leadership OP; cancel-leadership OP.\n\
 Retained-replica drain: --node-drain enabled requires the maintenance profile.\n\
 Commands: drain-node SEQUENCE OP CONFIG TARGET STORE INC; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP.\n\
@@ -131,7 +130,7 @@ Membership drain: source uses --membership-drain FILE and all peers use --remote
 voteboat-counter drain-run BASE SOURCE SEQUENCE OP --service-tls TLS_DIRECTORY --principal ADMIN [--command-peers FILE]\n\
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST. Peer rotation: --peer-credentials FILE enables reload-peers REQUEST EXPECTED NEXT and peer-credential-status REQUEST.\n\
 Multi-group data service: --groups FILE requires --service-access; see docs/MULTI_GROUP_STARTUP.md.\n\
-Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.\n\
+Commands: group ID INC status|read|register NONCE|add SESSION SEQUENCE ACK DELTA|checkpoint; auto routing supports group reads, registrations and adds.\n\
 Local inventory: list-assigned-groups CURSOR LIMIT (start with -; limit 1..8); requires Inspect on every local group.\n\
 Multi-group membership: --group-admin-plans FILE selects per-group trusted plans; requires --groups and --service-access.\n\
 Commands: group ID INC configure OP|configuration-status OP; address the selected group's leader for configure.\n\
@@ -199,17 +198,6 @@ fn ports(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     }
     Ok((base, id))
 }
-fn maintenance_status(service: &Service) -> String {
-    let status = service.wal_maintenance();
-    let event = status.last_completion.as_ref();
-    let reclaimed = event.and_then(|e| e.result.as_ref().ok());
-    format!("OK enabled={} pending={} next_ms={:?} last_sequence={} before_bytes={} after_bytes={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_pending={} checkpoint_base={}",
-        status.policy.is_some(), status.pending.is_some(), status.next_deadline.map(|d| d.0),
-        event.map_or(0, |e| e.request.sequence), reclaimed.map_or(0, |r| r.before_bytes),
-        reclaimed.map_or(0, |r| r.after_bytes), status.last_admission_error,
-        event.and_then(|e| e.result.as_ref().err()), service.checkpoints().policy.is_some(),
-        service.checkpoints().pending.len(), service.local().owner.core(group()).map_or(0, |c| c.state().base_index()))
-}
 fn discovery_command(
     source: &Option<command_discovery::Source>,
     words: &[&str],
@@ -255,7 +243,7 @@ fn command(
     }
     let reply = match words.as_slice() {
         ["credential-status" | "reload-access", ..] => credentials.command(&words)?,
-        ["maintenance"] => maintenance_status(service),
+        ["maintenance"] => service_setup::maintenance_status(service, group),
         ["list-assigned-groups", cursor, limit] => assignment_listing::list(service, cursor, limit)?,
         ["events", session, after, count] => observer.events(session, after, count)?,
         ["metrics"] => {
@@ -289,18 +277,13 @@ fn command(
                 core.state().commit_index
             )
         }
-        ["add", operation, delta] => {
-            let operation = operation
-                .parse::<u128>()
-                .ok()
-                .and_then(OperationId::new)
-                .ok_or("invalid operation ID")?;
-            let delta = delta.parse::<i64>().map_err(|_| "invalid delta")?;
+        ["register" | "add", ..] => {
+            let (operation, bytes) = counter_request(&words)?;
             let ticket = service
                 .propose(ClientRequest {
                     group,
                     operation,
-                    bytes: service.local().applications.get(&group).ok_or("missing group")?.data(delta)?,
+                    bytes: service.local().applications.get(&group).ok_or("missing group")?.data(&bytes)?,
                 })
                 .map_err(|r| match r.reason {
                     ClientError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
@@ -326,13 +309,44 @@ fn command(
             "OK shutting_down".into()
         }
         _ => {
-            return Err("expected status, metrics, timings, explain-quorum NODES OFFSET COUNT, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
+            return Err("expected status, metrics, timings, explain-quorum NODES OFFSET COUNT, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, register NONCE, add SESSION SEQUENCE ACK DELTA, checkpoint or quit".into())
         }
     };
     Ok(Phase::Output {
         bytes: format!("{reply}\n").into_bytes(),
         sent: 0,
     })
+}
+/// `register NONCE` or `add SESSION SEQUENCE ACK DELTA` as a counter
+/// operation ID and command bytes. `ACK` is the highest sequence whose outcome
+/// the client has consumed (all lower ones included) and is below `SEQUENCE`.
+fn counter_request(words: &[&str]) -> Result<(OperationId, Vec<u8>), String> {
+    let number =
+        |word: &str, what: &str| word.parse::<u64>().map_err(|_| format!("invalid {what}"));
+    match words {
+        ["register", nonce] => {
+            let nonce = number(nonce, "registration nonce")?;
+            let operation = voteboat::retention::SessionOperation::Register { nonce }
+                .operation()
+                .ok_or("invalid registration nonce")?;
+            Ok((operation, Vec::new()))
+        }
+        ["add", session, sequence, ack, delta] => {
+            let (session, sequence) = (number(session, "session")?, number(sequence, "sequence")?);
+            let ack = number(ack, "acknowledgement")?;
+            let delta = delta.parse::<i64>().map_err(|_| "invalid delta")?;
+            let operation = voteboat::application::Counter::operation(session, sequence)
+                .ok_or("invalid session or sequence")?;
+            if ack >= sequence {
+                return Err("acknowledgement must be below the sequence".into());
+            }
+            Ok((
+                operation,
+                voteboat::application::Counter::command(ack, delta),
+            ))
+        }
+        _ => Err("expected register NONCE or add SESSION SEQUENCE ACK DELTA".into()),
+    }
 }
 fn outputs(
     service: &mut Service,
@@ -355,6 +369,10 @@ fn outputs(
             c.reply(match result {
                 ClientOutcome::Applied { receipt, .. } => leadership_commands::receipt(&receipt),
                 ClientOutcome::NotProposed(RaftError::NotLeader) => "ERR NOT_LEADER".into(),
+                // Retryable backpressure, nothing proposed (ST2 round 3).
+                ClientOutcome::NotProposed(RaftError::StoragePressure) => {
+                    "ERR StoragePressure".into()
+                }
                 ClientOutcome::NotProposed(e) => format!("ERR not_proposed={e:?}"),
                 ClientOutcome::Unknown(e) => {
                     format!("UNKNOWN {e:?}; retry the same operation ID and delta")
@@ -426,7 +444,9 @@ fn prepare_service(
         .transpose()?;
     let create = options.checked_mode(mode, &input)?;
     options.validate_profiles(root)?;
+    options.maintenance.validate()?;
     let mut config = setup::configuration(root, id, base, tls, create, input)?;
+    options.maintenance.select(&mut config.startup.limits);
     let peers = options.prepare_peer_credentials(&mut config, mode)?;
     let credentials = credential_reload::Credentials::load(
         root,
@@ -481,7 +501,8 @@ fn prepare_service(
         rotation,
         source,
     )?;
-    options.configure_maintenance(&mut service)?;
+    options.maintenance.apply(&mut service)?;
+    println!("{}", service_setup::maintenance_startup(&service));
     let drain = options
         .node_drain
         .then(|| {
@@ -973,8 +994,7 @@ struct StartupOptions {
     discovery_peers: Option<std::path::PathBuf>,
     peer_discovery: Option<std::path::PathBuf>,
     remote_admin: administration::Mode,
-    wal_reclaim_ms: Option<u64>,
-    checkpoint_entries: Option<u64>,
+    maintenance: service_setup::MaintenanceOptions,
     /// Host-loop gather window and wait cap; see `service_setup::HostWait`.
     gather_us: Option<u64>,
     host_wait_ms: Option<u64>,
@@ -997,8 +1017,7 @@ impl StartupOptions {
             discovery_peers: None,
             peer_discovery: None,
             remote_admin: administration::Mode::Automatic,
-            wal_reclaim_ms: None,
-            checkpoint_entries: None,
+            maintenance: Default::default(),
             gather_us: None,
             host_wait_ms: None,
             membership_drain: None,
@@ -1130,31 +1149,6 @@ impl StartupOptions {
         }
         Ok(())
     }
-
-    fn configure_maintenance(&self, service: &mut Service) -> Result<(), Failure> {
-        if let Some(interval_ms) = self.wal_reclaim_ms {
-            checked(
-                service.configure_wal_maintenance(Some(WalMaintenancePolicy {
-                    interval_ms,
-                    retry_ms: interval_ms,
-                    max_bytes: service
-                        .local()
-                        .persistence
-                        .reclaim_limit()
-                        .ok_or("reclamation unavailable")?,
-                })),
-            )?;
-        }
-        if let Some(min_entries) = self.checkpoint_entries {
-            checked(service.configure_checkpoints(Some(CheckpointPolicy {
-                min_entries,
-                interval_ms: 100,
-                scan_groups: 64,
-                max_in_flight: 4,
-            })))?;
-        }
-        Ok(())
-    }
 }
 fn positive_option(value: &str, name: &str) -> Result<u64, Failure> {
     let n = value.parse::<u64>()?;
@@ -1184,6 +1178,8 @@ fn is_startup_option(flag: &str) -> bool {
             | "--discovery-peers"
             | "--peer-discovery"
             | "--wal-reclaim-ms"
+            | "--wal-reclaim-min-bytes"
+            | "--no-maintenance"
             | "--gather-us"
             | "--host-wait-ms"
             | "--checkpoint-entries"
@@ -1260,8 +1256,8 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--command-listen" if options.command_listen.is_none() && args[0] == "serve" => {
                 options.command_listen = Some(value.parse()?);
             }
-            "--wal-reclaim-ms" if options.wal_reclaim_ms.is_none() && args[0] == "serve" => {
-                options.wal_reclaim_ms = Some(positive_option(&value, "WAL reclaim interval")?);
+            flag if service_setup::MaintenanceOptions::is_flag(flag) && args[0] == "serve" => {
+                options.maintenance.parse(flag, &value)?;
             }
             "--gather-us" if options.gather_us.is_none() && args[0] == "serve" => {
                 let gather = value.parse::<u64>()?;
@@ -1285,12 +1281,6 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             }
             "--membership-drain" if options.membership_drain.is_none() && args[0] == "serve" => {
                 options.membership_drain = Some(std::path::PathBuf::from(value));
-            }
-            "--checkpoint-entries"
-                if options.checkpoint_entries.is_none() && args[0] == "serve" =>
-            {
-                options.checkpoint_entries =
-                    Some(positive_option(&value, "checkpoint entry threshold")?);
             }
             _ => return Err("duplicate or unsupported startup option".into()),
         }

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "taskset",
+    "-c",
+    "0-3",
+    "nice",
+    "-n",
+    "19",
+    "sh",
+    ".githooks/pre-push"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-9e098eb7",
+  "env": {
+    "CARGO_BUILD_JOBS": "4",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_TARGET_DIR": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-9e098eb7/target"
+  }
+}

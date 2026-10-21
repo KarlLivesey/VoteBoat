@@ -31,7 +31,13 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             }
             CommandBody::Claim { expected_epoch } => {
                 e.u8(0)?;
-                e.u64(expected_epoch.map_or(0, RepresentativeEpoch::get))
+                e.u64(expected_epoch.map_or(0, RepresentativeEpoch::get))?;
+                // A claim that can create the parent image binds it: the
+                // exact parent bootstrap of the encoding replica.
+                if expected_epoch.is_none() {
+                    e.blob(self.parent_binding())?;
+                }
+                Ok(())
             }
             CommandBody::Mutate {
                 expected_generation,
@@ -89,12 +95,20 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         rep: RepresentativeBinding,
     ) -> Result<CommandBody, ApplicationError> {
         Ok(match d.u8()? {
-            0 => CommandBody::Claim {
-                expected_epoch: match d.u64()? {
+            0 => {
+                let expected_epoch = match d.u64()? {
                     0 => None,
                     n => RepresentativeEpoch::new(n),
-                },
-            },
+                };
+                // Another parent bootstrap is a deployment fault of this
+                // replica: refused at admission, `Err` at apply.
+                if expected_epoch.is_none()
+                    && d.blob(self.parent_binding().len())? != self.parent_binding()
+                {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                CommandBody::Claim { expected_epoch }
+            }
             1 => {
                 let expected_generation = d.id(LogGeneration::new)?;
                 let origin = d.persist()?;
@@ -145,7 +159,16 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                 origin: d.capsule_origin()?,
                 body: self.decode_capsule(d, rep)?,
             }),
-            5 if self.candidate() => CommandBody::EnrollmentClaim(Box::new(self.decode_import(d)?)),
+            5 if self.candidate() => {
+                let import = self.decode_import(d)?;
+                // The import's snapshot carries the source's parent
+                // bootstrap; another one is a deployment fault of this
+                // candidate, as for a first claim.
+                if import.snapshot.metadata.bootstrap != self.parent_bootstrap {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                CommandBody::EnrollmentClaim(Box::new(import))
+            }
             _ => return Err(ApplicationError::InvalidCommand),
         })
     }

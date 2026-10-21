@@ -149,10 +149,11 @@ impl Demo {
 fn main() -> Result<(), Failure> {
     let args: Vec<_> = std::env::args().collect();
     if args.len() != 4 {
-        return Err("usage: replicated_counter DIRECTORY OPERATION_ID DELTA".into());
+        return Err("usage: replicated_counter DIRECTORY SEQUENCE DELTA".into());
     }
     let root = PathBuf::from(&args[1]);
-    let operation = OperationId::new(args[2].parse()?).ok_or("operation must be nonzero")?;
+    // A write is numbered by its sequence in the counter's built-in session.
+    let operation = Counter::operation(1, args[2].parse()?).ok_or("sequence must be nonzero")?;
     let delta: i64 = args[3].parse()?;
     match std::fs::create_dir(&root) {
         Ok(()) => (),
@@ -168,7 +169,7 @@ fn main() -> Result<(), Failure> {
             leader,
             Event::Propose {
                 operation,
-                bytes: delta.to_le_bytes().to_vec(),
+                bytes: Counter::command(0, delta),
             },
         )?;
         demo.pump()?;

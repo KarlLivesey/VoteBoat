@@ -30,6 +30,11 @@ fn selected() -> LogLimits {
     LogLimits {
         max_command_bytes: COMMAND_BYTES,
         max_batch_bytes: 33_587_200,
+        // ST2 round 3 (I5): the WAL above the 75% high-water mark must hold
+        // the largest batch plus the control reserve, or a batch could wait
+        // for ever for room; with the default 64 MiB WAL these limits are
+        // refused at construction (`WalHeadroomTooSmall`).
+        max_wal_bytes: 160 * 1024 * 1024,
         ..Default::default()
     }
 }
@@ -121,11 +126,11 @@ fn write(node: &mut Boat, clock: Instant, command_bytes: usize) -> ClientOutcome
             && n.local().applications[&group()].applied_index() > 0
     });
     let mut bytes = vec![0; command_bytes];
-    bytes[..8].copy_from_slice(&7i64.to_le_bytes());
+    bytes[..COUNTER_COMMAND_BYTES].copy_from_slice(&Counter::command(0, 7));
     let ticket = node
         .propose(ClientRequest {
             group: group(),
-            operation: OperationId::new(1).unwrap(),
+            operation: Counter::operation(1, 1).unwrap(),
             bytes,
         })
         .unwrap_or_else(|e| {

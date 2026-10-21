@@ -66,8 +66,8 @@ fn wrapped(capacity: usize, maintenance: bool) -> WrappedSetup {
 fn wrapped_request(app: &Application, id: u128, delta: i64) -> ClientRequest {
     ClientRequest {
         group: group(1),
-        operation: OperationId::new(id).unwrap(),
-        bytes: app.data(delta).unwrap(),
+        operation: Counter::operation(1, id as u64).unwrap(),
+        bytes: app.data(&Counter::command(0, delta)).unwrap(),
     }
 }
 fn applied(
@@ -96,38 +96,9 @@ fn applied(
     assert_eq!(receipt.duplicate, duplicate);
 }
 
-#[test]
-fn plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds() {
-    let (mut owner, mut worker, mut clients, mut results, mut apps) = wrapped(2, false);
-    assert!(apps[&group(1)].supports_ready_batch());
-    assert!(apps[&group(1)].maintenance().is_err());
-    let tickets: Vec<_> = [(1, 7), (2, 2), (1, 9), (1, 7)]
-        .into_iter()
-        .map(|(id, delta)| {
-            clients
-                .submit(
-                    &mut owner,
-                    &apps[&group(1)],
-                    wrapped_request(&apps[&group(1)], id, delta),
-                )
-                .unwrap()
-        })
-        .collect();
-    let refused = clients
-        .submit(
-            &mut owner,
-            &apps[&group(1)],
-            wrapped_request(&apps[&group(1)], 3, 1),
-        )
-        .unwrap_err();
-    assert_eq!(
-        refused.reason,
-        ClientError::Application(ApplicationError::DedupCapacity)
-    );
-    let steps = clients
-        .advance(&mut owner, MonoTime(400), 8, |g| apps.get(&g))
-        .unwrap();
-    assert_eq!(steps.len(), 4);
+/// Every ticket was admitted separately and proposed in order in one visit.
+fn batched_in_one_visit(steps: &[OwnerStep], tickets: &[ClientTicket]) {
+    assert_eq!(steps.len(), tickets.len());
     for (offset, step) in steps.iter().enumerate() {
         assert!(step.admission.is_some());
         assert!(steps[..offset]
@@ -138,6 +109,45 @@ fn plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds() {
         assert_eq!(step.proposed.unwrap().index, offset as u64 + 2);
         assert!(step.error.is_none());
     }
+}
+
+#[test]
+fn plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds() {
+    // The executable's wrapper under a pending-aware host layer with two
+    // reservation slots and a window of 4, so a refusal can come only from
+    // the queued commands the router passes to admission.
+    let (mut owner, mut worker, mut clients, mut results, apps) = wrapped(4, false);
+    let mut apps: BTreeMap<_, _> = apps
+        .into_iter()
+        .map(|(g, inner)| (g, Reserving { inner, slots: 2 }))
+        .collect();
+    assert!(apps[&group(1)].supports_ready_batch());
+    assert!(apps[&group(1)].inner.maintenance().is_err());
+    let tickets: Vec<_> = [(1, 7), (2, 2), (1, 9), (1, 7)]
+        .into_iter()
+        .map(|(id, delta)| {
+            clients
+                .submit(
+                    &mut owner,
+                    &apps[&group(1)],
+                    wrapped_request(&apps[&group(1)].inner, id, delta),
+                )
+                .unwrap()
+        })
+        .collect();
+    let third = wrapped_request(&apps[&group(1)].inner, 3, 1);
+    let (third_operation, third_bytes) = (third.operation, third.bytes.clone());
+    let refused = clients
+        .submit(&mut owner, &apps[&group(1)], third)
+        .unwrap_err();
+    assert_eq!(
+        refused.reason,
+        ClientError::Application(ApplicationError::DedupCapacity)
+    );
+    let steps = clients
+        .advance(&mut owner, MonoTime(400), 8, |g| apps.get(&g))
+        .unwrap();
+    batched_in_one_visit(&steps, &tickets);
     let lease = owner.take_effect().unwrap().unwrap();
     let Effect::Persist(update) = &lease.effect else {
         panic!()
@@ -189,4 +199,9 @@ fn plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds() {
         apps[&group(1)].read_at(5, application::Query::Data(())),
         Ok(application::ReadResult::Data(9))
     );
+    // With the queue drained the same command is admitted: the refusal
+    // depended on the queued commands.
+    assert!(apps[&group(1)]
+        .validate_proposal(third_operation, &third_bytes, std::iter::empty())
+        .is_ok());
 }

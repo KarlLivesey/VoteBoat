@@ -151,6 +151,7 @@ impl MetadataPublishingSource {
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         let mut r = self.inner.readiness_requirements();
         r.application_schema = self.schema_version();
+        r.identity.family = crate::raft::ApplicationFamily::METADATA_PUBLISHING;
         r.command_bytes = r.command_bytes.max(PUBLICATION_BYTES);
         r.snapshot_bytes += 56 + PUBLICATION_BYTES;
         r
@@ -218,8 +219,17 @@ impl StateMachine for MetadataPublishingSource {
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.inner.validate_group(group)
     }
+    /// Its exact bootstrap is forwarded as the source's (a raw source
+    /// bootstrap is refused), which records it.
+    fn deployment_bound(&self) -> bool {
+        self.inner.deployment_bound()
+    }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
+    }
+    /// Lifetime history until DH1 (audit S8).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
     }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())

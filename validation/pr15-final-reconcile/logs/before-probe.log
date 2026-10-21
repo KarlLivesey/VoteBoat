@@ -1,0 +1,47 @@
+   Compiling libc v0.2.190
+   Compiling cfg-if v1.0.5
+   Compiling bytes v1.12.1
+   Compiling zeroize v1.9.1
+   Compiling untrusted v0.9.0
+   Compiling rustls-pki-types v1.15.1
+   Compiling subtle v2.6.1
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-9e098eb7)
+   Compiling protobuf v2.28.0
+   Compiling once_cell v1.21.4
+   Compiling zerocopy v0.8.62
+   Compiling getrandom v0.2.17
+   Compiling ring v0.17.14
+   Compiling protobuf-codegen v2.28.0
+   Compiling rustls-webpki v0.103.15
+   Compiling rustls v0.23.45
+   Compiling protobuf-build v0.14.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling raft-proto v0.7.0
+   Compiling rand_core v0.6.4
+   Compiling rand_chacha v0.3.1
+   Compiling byteorder v1.5.0
+   Compiling fxhash v0.2.1
+   Compiling thiserror v1.0.69
+   Compiling rand v0.8.8
+   Compiling slog v2.7.0
+   Compiling raft v0.7.0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.47s
+     Running tests/startup.rs (target/debug/deps/startup-b02a36d975d641a0)
+
+running 1 test
+
+thread 'retention::storage_probe_commands_use_the_session_counter_protocol' (114886) panicked at tests/startup/retention.rs:464:5:
+assertion `left == right` failed
+  left: [1, 0, 0, 0, 0, 0, 0, 0]
+ right: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test retention::storage_probe_commands_use_the_session_counter_protocol ... FAILED
+
+failures:
+
+failures:
+    retention::storage_probe_commands_use_the_session_counter_protocol
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 55 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test startup`

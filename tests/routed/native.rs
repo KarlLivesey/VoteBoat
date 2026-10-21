@@ -293,6 +293,10 @@ where
     // the observed ready leader, whose authority is still checked by the core.
     nodes.swap(0, leader.unwrap());
 }
+/// Raw operation ID of `sequence` in a Counter child's built-in session.
+pub(super) fn counter_op(sequence: u64) -> u128 {
+    Counter::operation(1, sequence).unwrap().get()
+}
 fn propose<A>(
     nodes: &mut [Node<A>],
     clock: &Instant,

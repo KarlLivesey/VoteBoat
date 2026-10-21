@@ -28,6 +28,9 @@ fn enable(nodes: &mut [Replica<SharedLog>]) {
             interval_ms: 1,
             retry_ms: 1,
             max_bytes: LogLimits::default().max_wal_bytes,
+            min_reclaim_bytes: 0,
+            high_water_percent: 75,
+            low_water_percent: 50,
         }))
         .unwrap();
     }
@@ -120,7 +123,10 @@ fn arm_recovery(
     totals: &mut PollTotals,
     observations: &mut Observations,
 ) {
-    for g in 1..=GROUPS {
+    // Establish snapshot recovery before campaigning the foreground group.
+    // Waiting for both in one predicate can consume earlier groups' receipts
+    // while the foreground election is still in flight.
+    for g in 1..GROUPS {
         nodes[0]
             .control(group_id(g), NodeControl::Campaign)
             .unwrap();
@@ -135,13 +141,28 @@ fn arm_recovery(
             .router
             .recovery_usage()
             .requests
-            == 1
-            && leader(ns, group_id(GROUPS)).is_ok_and(|n| n < 2))
+            == 1)
     })
     .unwrap_or_else(|error| {
         diagnose(nodes);
         panic!("arming recovery failed: {error}");
     });
+    assert_eq!(
+        totals.snapshot_installs[2], 0,
+        "arming must stop at the first accepted request, before consuming any recovery receipt"
+    );
+    eprintln!("recovery armed: accepted_requests=1 stale_snapshot_installs=0 foreground_campaign_pending=true");
+    // The accepted request is now owned by the stale router. Do not poll that
+    // replica again until maintenance_while_held finishes, even if its native
+    // snapshot worker has already completed the I/O.
+    nodes[0]
+        .control(group_id(GROUPS), NodeControl::Campaign)
+        .unwrap();
+    drive(&mut nodes[..2], &h.clock, totals, |ns| {
+        observations.record(ns);
+        Ok(leader(ns, group_id(GROUPS)).is_ok())
+    })
+    .unwrap();
 }
 
 fn foreground(
@@ -157,8 +178,8 @@ fn foreground(
         let ticket = nodes[n]
             .propose(ClientRequest {
                 group: group_id(GROUPS),
-                operation: OperationId::new(900_001).unwrap(),
-                bytes: 0i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, FOREGROUND).unwrap(),
+                bytes: Counter::command(0, 0),
             })
             .map_err(|e| format!("foreground refused: {:?}", e.reason))?;
         *pending = Some((n, ticket));
@@ -293,8 +314,8 @@ fn retry_foreground(h: &Harness, nodes: &mut [Replica<SharedLog>]) {
     let ticket = nodes[n]
         .propose(ClientRequest {
             group: group_id(GROUPS),
-            operation: OperationId::new(900_001).unwrap(),
-            bytes: 0i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, FOREGROUND).unwrap(),
+            bytes: Counter::command(0, 0),
         })
         .unwrap();
     until(nodes, &h.clock, |ns| {

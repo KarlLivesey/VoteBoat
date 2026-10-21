@@ -69,9 +69,13 @@ On a new three-node cluster, append these options to **every** serve command:
 --service-access ACCESS_FILE --leadership-maintenance enabled
 ```
 
-Use the same options on recovery. This explicitly selects counter application
-schema2, wire8 and 64 permanent maintenance records. The existing plain counter
-profile stays schema1. Do not enable the new profile on existing plain data or
+Use the same options on recovery. This explicitly selects maintenance profile
+format 3, whose application schema is `maintenance_schema(3,
+Counter::schema(limits))` (format 3 in the top four bits above the counter's
+own schema, which has format 5 in its low byte and the session limits above
+it), wire format 8 and 64 permanent maintenance records. Readiness compares the
+record capacity exactly, so every replica must use the same 64.
+The existing plain counter profile keeps its own schema. Do not enable the new profile on existing plain data or
 mix the profiles between replicas. Membership administration uses explicitly
 requested `--remote-admin-plan` operations and the wrapper's actual readiness
 requirements. Automatic administration is refused with this profile. There is

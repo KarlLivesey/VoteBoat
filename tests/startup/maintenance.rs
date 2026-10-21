@@ -34,9 +34,15 @@ impl History {
         std::fs::create_dir(&directory).unwrap();
         let sockets = (0..3)
             .map(|_| {
-                let tcp = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = std::net::UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
+                // The UDP port can be held by another process; retry as the
+                // other startup fixtures do.
+                (0..32)
+                    .find_map(|_| {
+                        let tcp = std::net::TcpListener::bind("127.0.0.1:0").ok()?;
+                        let udp = std::net::UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
+                        Some((tcp, udp))
+                    })
+                    .expect("available TCP/UDP endpoint")
             })
             .collect::<Vec<_>>();
         let addresses = sockets
@@ -75,7 +81,7 @@ impl History {
                     mode,
                     version,
                 );
-                let app = Maintenance::new(group(), 9001, 4, app()).unwrap();
+                let app = Maintenance::new(group(), 1, 4, app()).unwrap();
                 let wake = Arc::new(ThreadWake::current());
                 if self.member && mode != NativeOpenMode::Create {
                     NativeMemberStartup {
@@ -402,8 +408,8 @@ fn handoff(protocol: NativePeerProtocol, checkpoint: bool) {
     assert!(matches!(
         h.submit(
             1,
-            OperationId::new(20).unwrap(),
-            Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap()
+            Counter::operation(1, 20).unwrap(),
+            Maintenance::<HostApplication>::data(&Counter::command(0, 7), 100).unwrap()
         ),
         ClientOutcome::Applied { .. }
     ));
