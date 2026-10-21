@@ -43,7 +43,32 @@ reviews and final matrix. Save compact committed report and raw exact evidence,
 push nonforce same PR15, update current body and one durable report, immediately
 sweep own checkout/target and audit process/scratch/disk cleanup.
 
-**Status:** source reconciliation in progress; fresh focused validation pending.
+**Implemented source preparation (21 October 2026; full qualification pending).**
+The real original-DR1 + main merge is `46664109`; parent docs-only main `7dbd932d`
+is merged via `12a3bf5e`. The independently committed desired tree was audited
+before `b6d9f911` retained published b0ff ancestry with an explicit history-only
+merge. That merge changed no tree bytes; all eight DR1 review rounds and all
+published history survive without adopting the ST2 source tree.
+
+Default focused checks: **223/0 in 18 nonempty commands**; all features:
+**179/0 in 15 nonempty commands**. Both offered-mode executions also complete
+100 Applied writes, recovery/retry verification and worker joins with truthful
+16-byte metadata. Readiness/EntryBatch, EO1 and N0 adapters reuse the prior
+reviewed integration repairs; core ledger/Counter/readiness/first-claim invariant
+sources remain identical to original `79829e87`. The investigated anchor fixture
+and combined-manifest optimization were ST2-only and are excluded. No capacity,
+window, index, charge or continuation assertion is removed by these adapters.
+
+The lower NT1 mini table retains the parent's corrected independent DR1 row and
+NT2 deferral. Existing DR2/TX1 items are explicitly deferred outside wind-down.
+The LB macro is reviewed and remains incomplete; no replacement maintenance or
+new feature is required for this bounded DR1 candidate. Fresh source reviews
+and the exclusive whole final-head gate remain parent-owned.
+The enabled qualification hook passes **7/7 checks with zero diagnostics**:
+root fmt, four strict all-target Clippy configurations, matched fmt and strict
+Clippy with its own lock, offline/locked where applicable. The nonforce push
+runs the enabled hook again. Exact checked source, ancestry, source-preservation,
+commands and publication limits: `validation/pr15-final-without-st2/REPORT.md`.
 ST2 is rejected/parked, PR14 is closed without merging, and its source is absent from this candidate tree. Automatic end-to-end
 checkpoint/WAL maintenance remains deferred: DR1 bounds application receipt
 retention only and does not make every storage/runtime lifetime bound disappear.
@@ -751,8 +776,8 @@ design pack is unchanged; its amendments are recorded below.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`, in review; see DR1 implemented) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | Qualified main 7dbd932d (production bd714771); independently reviewed DR1 79829e87; no ST2 dependency | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
-| Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe. Also owns application deployment-recovery admission (recorded in DR1 round 5): static bootstrap exchanges no application requirements, and a voter reopening a WAL with no checkpoint replays under its current configuration. AI3 owns activation's counterpart. (The leaf configurations deferred in round 5, including activation mappings, the logical voter's limits and the transaction applications', are compared since DR1 round 6; readiness before a bootstrap entry commits, recorded here in round 6, moved into DR1 round 7, which also carries participant opening images. The logical voter's parent bootstrap, open after round 7, is bound since round 8 by the first claim or the enrollment.) | DR1 (ledger, `Retention`, probe harness, readiness identity) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites; a static bootstrap with two voters of different application configuration, and a checkpoint-less restart under changed limits (Sol's 7-vs-10 probe), each refused with a typed error before any entry applies | LB |
-| Then TX1: transaction participants and coordinators | Audit S5, S6: transaction services run indefinitely; a coordinator incarnation is a session at each participant | DR1 (ledger, `Expired` vocabulary) | Fail@main at 4,097 transactions (program: 257); 200,000-transaction soak with coordinator restarts and lost decision receipts | LB |
+| Deferred DR2 (existing next application item; outside wind-down): Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe. Also owns application deployment-recovery admission (recorded in DR1 round 5): static bootstrap exchanges no application requirements, and a voter reopening a WAL with no checkpoint replays under its current configuration. AI3 owns activation's counterpart. (The leaf configurations deferred in round 5, including activation mappings, the logical voter's limits and the transaction applications', are compared since DR1 round 6; readiness before a bootstrap entry commits, recorded here in round 6, moved into DR1 round 7, which also carries participant opening images. The logical voter's parent bootstrap, open after round 7, is bound since round 8 by the first claim or the enrollment.) | DR1 (ledger, `Retention`, probe harness, readiness identity) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites; a static bootstrap with two voters of different application configuration, and a checkpoint-less restart under changed limits (Sol's 7-vs-10 probe), each refused with a typed error before any entry applies | LB |
+| Deferred TX1 (existing following application item; outside wind-down): transaction participants and coordinators | Audit S5, S6: transaction services run indefinitely; a coordinator incarnation is a session at each participant | DR1 (ledger, `Expired` vocabulary) | Fail@main at 4,097 transactions (program: 257); 200,000-transaction soak with coordinator restarts and lost decision receipts | LB |
 
 ### DR1 schema plan (19 October 2026, before editing)
 
