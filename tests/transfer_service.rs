@@ -31,6 +31,8 @@ mod retirement;
 mod retirement_retry;
 #[path = "transfer_service/revocation.rs"]
 mod revocation;
+#[path = "transfer_service/root.rs"]
+mod root;
 #[path = "transfer_service/startup_data.rs"]
 mod startup_data;
 #[path = "transfer_service/startup_discovery.rs"]
@@ -57,7 +59,7 @@ fn run(command: &mut Command) -> Output {
 }
 const GROUPS: [u128; 4] = [1, 20, 21, 22];
 struct Cluster {
-    root: PathBuf,
+    root: root::Directory,
     base: u16,
     quic: bool,
     admin: u64,
@@ -96,11 +98,7 @@ impl Cluster {
     fn with_options(quic: bool, retirement: bool, merge: bool, peer_credentials: bool) -> Self {
         let reservation = fixture_gate();
         let (base, mut ports) = ports::PortLease::acquire_offsets(&listener_offsets());
-        let root = std::env::temp_dir().join(format!(
-            "voteboat-transfer-service-{}-{base}",
-            std::process::id()
-        ));
-        fs::create_dir_all(&root).unwrap();
+        let root = root::Directory::new();
         for group in GROUPS {
             fs::create_dir_all(root.join(group.to_string())).unwrap();
         }

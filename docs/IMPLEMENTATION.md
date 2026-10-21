@@ -1,5 +1,37 @@
 # Implementation record
 
+## PR15 root identity review repair (21 October 2026)
+
+Before-edit schema/API/identity/lifecycle/partial-construction/unwind/cleanup and
+acceptance plan: `validation/pr15-root-identity-review/PLAN.md`. Both exact-dec5
+source reviews request changes (B corrected its initial approval). The bounded
+P2 fixture identity and comment-only P3 repair is current; parent fresh reviews
+and whole final-head qualification remain pending. The plan links current PR15,
+next PR23 and then PR22 to the unchanged incomplete LB/network macro. No new
+roadmap or rejected ST2 production is introduced.
+
+| Mini item | Purpose | Dependencies | Completion checks | Macro advanced |
+| --- | --- | --- | --- | --- |
+| Current PR15 | Repair review P2 directory ownership and P3 comment, then judge independent DR1 | Exact dec5; no rejected ST2 production | Deterministic controls and focused default/all suites; strict7/enabled nonforce hook; parent fresh reviews and whole final-head five-config gate | Incomplete LB: bounded application sessions |
+| Next PR23 N1c | Judge existing source without rejected ST2 | Independently qualified DR1/main | Parent fresh reviews/full suites/existing fair performance gate | Existing network milestone |
+| Then PR22 N1b | Finish existing candidate | Reconciled final main after PR23 | Existing documentation caveats, reviews and validation gates | Existing network milestone |
+
+Implemented bounded review repair: exclusive fresh root identity, stale-name
+skipping and owner-only unwind cleanup; existing normal removal assertions and
+child/lease ordering remain. P3 is comment-only. Final-source focused checks:
+**87 positive passes /0 unexpected failures /0 ignored**, plus the single
+expected old-identity negative-control failure at the fresh-root assertion;
+transfer default28/all36, isolation9 each. **Strict7/7, zero diagnostics**.
+Exact scope proof: 1,849/1,850 prior protected inputs byte-identical; the sole
+exception is the src/raft.rs comment. Ten original DR1 invariant files remain
+identical. Actual enabled nonforce hook/publication receipts and subsequent
+cleanup are external: `validation/pr15-root-identity-review/REPORT.md` and raw
+main `target/claude/research-lv/pr15-root-identity-review/`. Old full-gate failures
+remain failed history; fresh source reviews and whole final-head gate pending.
+
+Macro reviewed: no milestone completes and no new prerequisite is introduced.
+The earlier transfer-repair mini table below records the prior dec5 deliverable.
+
 ## PR15 known transfer gate repair (21 October 2026)
 
 The before-edit schema/ownership/failure/acceptance and current/next-two plan is
@@ -9,8 +41,8 @@ remain pinned. Fresh reviews and the whole final-head gate remain parent-owned.
 The LB/network macro scope and rejected ST2 disposition are unchanged.
 
 **Implemented bounded repair; full qualification remains pending.** Only the
-approved three-file fixture diff from 3fa6435b was extracted. Protected src/
-examples/Cargo/locks/hooks/matched inputs are exactly 558643b3 (1,850 files);
+approved three-file fixture diff from 3fa6435b was extracted. At dec5, protected
+src/examples/Cargo/locks/hooks/matched inputs were exactly 558643b3 (1,850 files);
 the prior 2,611-file input audit changes only the three authorized test files.
 The known 65200+487 overflow is rejected by checked layout arithmetic; finite
 shared leases hold all 24 listeners through cluster lifetime and child joins.
@@ -130,7 +162,7 @@ work needed to decide PR19.
 | --- | --- | --- |
 | PR24 V3f | Kept and merged | Merge `1e56e9f5`; recorded final-main head `bd714771`; default 2603, all-features 2915, no-default 1346, native-only 1924 and matched 75 passed, zero failures; both reviews, strict checks and enabled hook passed |
 | PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
-| PR15 DR1 | Current: qualify the independent ledger candidate without ST2 | Reconciled558 preserves original798, main, all eight rounds/published history and 16-byte metadata. The bounded known transfer-fixture repair passes targeted80/0 and strict7; fresh source reviews and the whole final-head gate remain required |
+| PR15 DR1 | Current: qualify the independent ledger candidate without ST2 | Reconciled558 preserves original798, main, all eight rounds/published history and 16-byte metadata. The known transfer-fixture repair passed80/0; both dec5 source reviews then requested root identity/P3 changes. Current bounded review repair passes87 positive checks plus its expected negative control and strict7; fresh source reviews and the whole final-head gate remain required |
 | PR23 N1c | Next: judge on the qualified dependency tree | Exclude rejected ST2 through the replacement DR1 reconciliation; fresh reviews, full final-head suites and the established fair performance gate remain required |
 | PR22 N1b | Then: resolve after PR23 | Reconcile the final main, fold the superseded-N1c and entryless-frame documentation caveats, and complete the established review and validation gates |
 | PR19 N1 | Pending bounded keep/reject decision after PR23 | Only the previously authorized N1d work, two existing review P2 fixes and the recorded performance gate are permitted; park/close if that gate still fails |

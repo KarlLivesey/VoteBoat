@@ -431,7 +431,7 @@ pub struct Raft {
     authority_request: Option<authority::PendingAuthority>,
     replication_permit: Option<authority::ReplicationPermit>,
     // Boxed: readiness requirements carry the full application identity
-    // (about 400 bytes), which the per-write core state need not hold inline.
+    // which the per-write core state need not hold inline.
     learner_readiness: Option<Box<LearnerReadinessRequest>>,
     ready_learner: Option<Box<ReadyLearner>>,
     readiness_check: Option<Message>,
