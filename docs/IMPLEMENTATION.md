@@ -8,6 +8,62 @@ equal cores on the networked native path. Design: the R4 research plan
 §3.1 harness, §3.2 cells, §3.3 attribution, §3.4 noise, §4 candidates). The
 design pack is unchanged.
 
+### Wind-down disposition (21 October 2026)
+
+The active scope is to keep or reject existing PRs 14, 15, 19, 22, 23 and 24.
+The lifetime-bounds macro goal below remains incomplete; new roadmap slices and
+research are paused. N1d is permitted only as the already-authorized bounded
+work needed to decide PR19.
+
+| Candidate | Disposition | Evidence or remaining gate |
+| --- | --- | --- |
+| PR24 V3f | Kept and merged | Merge `1e56e9f5`; recorded final-main head `bd714771`; default 2603, all-features 2915, no-default 1346, native-only 1924 and matched 75 passed, zero failures; both reviews, strict checks and enabled hook passed |
+| PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
+| PR15 DR1 | Current: reconcile the independent ledger candidate without ST2 | Original reviewed `79829e87` did not depend on ST2. Remove the rejected cumulative ST2 tree, preserve all eight review rounds and published history, correct the 16-byte benchmark metadata, then obtain fresh source reviews and the full final-head gate |
+| PR23 N1c | Next: judge on the qualified dependency tree | Exclude rejected ST2 through the replacement DR1 reconciliation; fresh reviews, full final-head suites and the established fair performance gate remain required |
+| PR22 N1b | Then: resolve after PR23 | Reconcile the final main, fold the superseded-N1c and entryless-frame documentation caveats, and complete the established review and validation gates |
+| PR19 N1 | Pending bounded keep/reject decision after PR23 | Only the previously authorized N1d work, two existing review P2 fixes and the recorded performance gate are permitted; park/close if that gate still fails |
+
+The current DR1 item advances LB by retaining bounded application-session state;
+its dependency is qualified main, not automatic maintenance from rejected ST2.
+N1c and N1b advance the existing network milestone through the gates above. No
+unfinished lifetime or network roadmap item is made a prerequisite for this
+wind-down.
+
+#### PR14 rejection record
+
+[PR14 was closed as parked](https://github.com/KarlLivesey/VoteBoat/pull/14#issuecomment-6307127725)
+without merging ST2. The user's accepted CPU cost and independent Sol source
+approvals [A](https://github.com/KarlLivesey/VoteBoat/pull/14#pullrequestreview-5593950615)
+and [B](https://github.com/KarlLivesey/VoteBoat/pull/14#pullrequestreview-5593951317)
+remain valid history, but do not replace the failed final-head acceptance gate.
+
+On exact checked `3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7`, all 129
+all-target executables were audited exactly once; aggregate rc1, 2667 passed,
+one failed and one ignored, with no abort. Eligible doctests passed. The normal
+debug exhaustive relay completed 9/9 and routed completed 110/110. The sole
+failure was `backpressure::absent_follower_does_not_stop_the_leader_checkpointing`:
+the existing 600-second guard reported `hang at 8576 ms`, without failure-phase,
+write-progress, node or worker state. Cause remains unproven; this run did not
+report `LeadershipChanged`. Later configurations were held.
+
+Two bounded diagnostics preserved the original outcomes, assertions and bounds.
+The isolated 49,152-write case passed in 290.07 seconds; the instrumented startup
+binary passed all 56 cases in 484.24 seconds on the recorded original command
+and affinity. Both are inconclusive for the original failure. The historical
+literal `RUST_TEST_THREADS` value was not snapshotted, so identical historical
+concurrency is not claimed. Neither diagnostic identified a cause-specific
+repair or cleared the full gate. No unchanged retry series or new research is
+authorized. Checked source, diagnostic patch, valid and invalid controls and
+failure audits are retained with the parked branch; its owner must sweep its
+checkout, target and processes after the durable disposition record.
+
+The parked documentation P3 also remains recorded: when WAL and retained-entry
+limits are both exhausted, the WAL high-water gate returns first, so one
+submission need not increment both cause counters. This is not a shipped ST2
+behavior claim. PR15 and PR23 must exclude the rejected ST2 tree before final
+qualification; DR1 does not imply automatic-maintenance or complete LB coverage.
+
 ### Macro plan (this track)
 
 | Milestone | User-visible outcome | Acceptance |
@@ -644,8 +700,8 @@ maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-life
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done NT1: connection generations and listener (merged 19 October 2026 in PR 13) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
-| Current NT2: roster, budget and cache reclaim | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors; also the NT1 leftover: a test for the completion-branch `generations_exhausted` flag at `runtime/peers.rs` (reviewer P3 on PR 13) | NT1 (same files) | U6 probe as fail@main; churn soak; completion-branch flag test | LB |
-| Then DR1: Counter session ledger | Audit S1, RT2 for Counter through the generic `SessionLedger` | ST2 merged | 200,000-write soak fails on the base; restart and exactly-once tests | LB |
+| Deferred NT2: roster, budget and cache reclaim (outside wind-down) | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors; also the NT1 leftover: a test for the completion-branch `generations_exhausted` flag at `runtime/peers.rs` (reviewer P3 on PR 13) | NT1 (same files) | U6 probe as fail@main; churn soak; completion-branch flag test | LB |
+| Current DR1: Counter session ledger (existing PR15) | Audit S1, RT2 for Counter through the generic `SessionLedger`; retain the independently reviewed application contract without rejected ST2 | Qualified main; reconcile original DR1 and preserve its review fixes, without the cumulative ST2 tree | Existing ledger soak, restart and exactly-once checks; fresh independent source approvals, strict root/matched checks and full final-head default/all/no-default/native/matched suites before merge | LB |
 
 ### Inventory (rows owned by NT1, and the leftovers it hands on)
 
