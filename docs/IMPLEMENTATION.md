@@ -42676,3 +42676,23 @@ Remaining after round 2:
   `DialWork` with the same wrapper.
 - Single-cluster waits while other clusters are borrowed by the lower host
   still leave those clusters unpolled for their duration (unchanged).
+
+### PR23 independent-main reconciliation: pre-edit schema plan (21 October)
+
+The current deliverable is existing N1c only: real-merge reviewed original
+`44b95083` with qualified `b77fd087`, excluding rejected ST2 and DR1 production.
+Commit and audit that desired tree before joining published `b95943a3` ancestry
+without changing it. The schema, ownership, partial-progress/conflict and
+acceptance plan is [recorded before edits](../validation/reliability/n1c-independent-main/PLAN.md).
+The only necessary exception is the already-reviewed checked transfer-port
+layout and independent fixture-directory ownership fixes, extracted as test-only
+hunks. Preserve main's actual 8-byte Counter protocol, V3e/V3f and EO1.
+Existing macro milestone: usable networked service/Rust embedding with qualified
+network CPU changes. Current mini deliverable: source reconciliation, dependent
+on qualified main and original N1c, completed by focused checks/strict checks/
+enabled nonforce publication. Next: parent's fresh pinned source reviews and
+full final-head five-configuration gate, dependent on this source, completed
+only by actual full audited results. Next after that: parent's fair exact-head
+performance keep/reject decision, dependent on a stable qualified candidate and
+baseline, completed by the established gate and durable disposition. No new
+roadmap slices or indispensable rejected dependencies are assumed.
