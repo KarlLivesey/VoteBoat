@@ -15,6 +15,7 @@
 //! NT1: connect generations are scoped to the store session and full-width.
 //! Each process used to own `session * 10000 ..= +9999`; one peer down at the
 //! 10 s retry cap exhausted that in ~27.8 h and sent the node to recovery.
+use super::test_ports as ports;
 use super::*;
 use voteboat::{
     native::{
@@ -409,10 +410,6 @@ fn connect_generations_are_unique_across_store_session_restarts() {
     }
     std::fs::remove_dir_all(directory).unwrap();
 }
-
-#[path = "../support/ports.rs"]
-#[allow(dead_code)]
-mod ports;
 
 /// Two TR1b leases; both probes are released before a node binds, and the
 /// locks stay held until the lease is dropped.

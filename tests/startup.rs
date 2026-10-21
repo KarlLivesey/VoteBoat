@@ -47,6 +47,9 @@ mod ready_items;
 mod retention;
 #[path = "startup/shutdown_clock.rs"]
 mod shutdown_clock;
+#[path = "support/ports.rs"]
+#[allow(dead_code)]
+mod test_ports;
 #[path = "startup/timing_profile.rs"]
 mod timing_profile;
 #[derive(Clone)]

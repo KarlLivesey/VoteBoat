@@ -13,9 +13,12 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! ST2 on the native store, opened through `NativeStartup` like the three
-//! service binaries, with protocol time simulated: one millisecond per poll.
+//! service binaries, with protocol time simulated from native-I/O-idle rounds.
 use super::*;
-use voteboat::{native::connect::NativeServiceConnector, raft::Role};
+use voteboat::{
+    native::connect::NativeServiceConnector, raft::Role, snapshot_worker::SnapshotWorker,
+    worker::PersistenceWorker,
+};
 
 /// A canonical zero-padded Counter command: each write puts 4 KiB in the WAL,
 /// so 64 MiB passes in about 16,000 writes. Capacity probe only.
@@ -134,8 +137,9 @@ fn open(directory: &std::path::Path, mode: NativeOpenMode) -> Boat {
         )
         .unwrap_or_else(|e| panic!("{:?}", e.reason))
 }
-/// Simulated protocol time, one millisecond per `polls_per_ms` polls; the
-/// wall clock only bounds a hang.
+/// One millisecond per `polls_per_ms` native-I/O-idle polls. Physical worker
+/// and dial waits cannot spend the protocol interval used by the occupancy
+/// assertion; the wall clock only bounds a hang.
 struct Clock {
     now: u64,
     polls: u64,
@@ -155,9 +159,18 @@ impl Clock {
         }
     }
     fn poll(&mut self, n: &mut Boat) {
-        self.polls += 1;
-        if self.polls.is_multiple_of(self.polls_per_ms) {
-            self.now += 1;
+        let local = n.local();
+        let native_pending = local.persistence.usage().requests != 0
+            || local
+                .snapshots
+                .as_ref()
+                .is_some_and(|s| s.worker.usage().requests != 0)
+            || n.peers().is_some_and(|p| p.connector_usage().dialing != 0);
+        if !native_pending {
+            self.polls += 1;
+            if self.polls.is_multiple_of(self.polls_per_ms) {
+                self.now += 1;
+            }
         }
         let progress = n
             .poll(MonoTime(self.now), NodePollBudget::default())
@@ -283,6 +296,8 @@ fn default_native_node_keeps_accepting_past_the_wal_and_entry_limits() {
     let capacity = n.wal_usage().unwrap().capacity;
     let (mut max_wal, mut max_retained) = (0, 0);
     let (mut rewrites, mut last_rewrite) = (0u64, None);
+    let mut first_occupancy = None;
+    let (mut quiescent_waits, mut quiescent_ms) = (0u64, 0u64);
     let mut bases = vec![core(&n).state().base_index()];
     let mut written = 0;
     while written < total {
@@ -295,9 +310,38 @@ fn default_native_node_keeps_accepting_past_the_wal_and_entry_limits() {
             if at != last_rewrite {
                 rewrites += 1;
                 last_rewrite = at;
+                if first_occupancy.is_none() && rewrites > at.unwrap().0 / 1000 {
+                    first_occupancy = Some((rewrites, at.unwrap()));
+                }
             }
         });
         written += total / 4;
+        // Every offered write has completed at this boundary. Once actual
+        // pre-interval reclaim proves occupancy, retain continuous write pressure.
+        // Otherwise give the unchanged interval path a quiescent opportunity
+        // before offering the next quarter. The strict final rewrite/time
+        // premise still rejects an interval-only implementation after ALL writes.
+        let quiescent_at = clock.now;
+        if first_occupancy.is_none() && n.wal_usage().unwrap().bytes >= capacity / 2 {
+            quiescent_waits += 1;
+        }
+        while first_occupancy.is_none() && n.wal_usage().unwrap().bytes >= capacity / 2 {
+            clock.poll(&mut n);
+            max_wal = max_wal.max(n.wal_usage().unwrap().bytes);
+            let at = n.wal_maintenance().last_reclaimed.map(|(t, _)| t);
+            if at != last_rewrite {
+                rewrites += 1;
+                last_rewrite = at;
+                if first_occupancy.is_none() && rewrites > at.unwrap().0 / 1000 {
+                    first_occupancy = Some((rewrites, at.unwrap()));
+                }
+            }
+            assert!(
+                clock.now < quiescent_at + 5_000,
+                "quiescent maintenance stalled"
+            );
+        }
+        quiescent_ms += clock.now - quiescent_at;
         let base = core(&n).state().base_index();
         assert!(
             base > *bases.last().unwrap(),
@@ -312,7 +356,7 @@ fn default_native_node_keeps_accepting_past_the_wal_and_entry_limits() {
     assert!(max_wal <= capacity * 3 / 4, "{max_wal} of {capacity}");
     assert!(max_retained < ENTRY_LIMIT, "{max_retained}");
     eprintln!(
-        "ST2 native soak: writes={total} appended_bytes={} last_index={} max_wal={max_wal} capacity={capacity} max_retained={max_retained} bases={bases:?} rewrites={rewrites} last_reclaim={reclaimed:?} simulated_ms={}",
+        "ST2 native soak: writes={total} appended_bytes={} last_index={} max_wal={max_wal} capacity={capacity} max_retained={max_retained} bases={bases:?} rewrites={rewrites} last_reclaim={reclaimed:?} first_occupancy={first_occupancy:?} quiescent_waits={quiescent_waits} quiescent_ms={quiescent_ms} simulated_ms={}",
         total * PADDED as u64,
         core(&n).state().last_index(),
         clock.now
@@ -322,6 +366,11 @@ fn default_native_node_keeps_accepting_past_the_wal_and_entry_limits() {
         rewrites > clock.now / 1000 + 1,
         "{rewrites} in {} ms",
         clock.now
+    );
+    assert_eq!(
+        (quiescent_waits, quiescent_ms),
+        (0, 0),
+        "normal early reclaim must not add quarter-boundary periodic pauses"
     );
     stop(n, &mut clock);
     std::fs::remove_dir_all(directory).unwrap();

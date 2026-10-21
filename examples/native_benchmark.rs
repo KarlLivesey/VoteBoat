@@ -905,8 +905,12 @@ fn run_selected(
         let _ = RETENTION.set(RetentionMode::LifetimeBounded);
     }
     if config.shared {
-        run(config, clock, |mode| {
-            shared::open_partition(
+        let endpoints = std::cell::RefCell::new(None::<shared::Endpoints>);
+        let result = run(config, clock, |mode| {
+            if let Some(mut previous) = endpoints.borrow_mut().take() {
+                previous.reclaim()?;
+            }
+            let (replicas, traces, owner) = shared::open_partition(
                 root,
                 mode,
                 protocol,
@@ -920,8 +924,15 @@ fn run_selected(
                     capacity_profile,
                     publication,
                 },
-            )
-        })
+            )?;
+            *endpoints.borrow_mut() = Some(owner);
+            Ok((replicas, traces))
+        });
+        // The run has closed/dropped every connector before its endpoint owner.
+        if let Some(mut owner) = endpoints.into_inner() {
+            owner.reclaim()?;
+        }
+        result
     } else {
         run(config, clock, |mode| {
             open_recorded(

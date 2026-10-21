@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
-type Replicas = Vec<Replica<shared::SharedLog>>;
 
 pub(super) fn run(
     root: PathBuf,
@@ -12,7 +11,8 @@ pub(super) fn run(
 ) -> Result<Report, Failure> {
     std::fs::create_dir(&root)?;
     let clock = Instant::now();
-    let (mut replicas, traces) = open(&root, plan, protocol, &clock, NativeOpenMode::Create)?;
+    let (mut replicas, traces, mut endpoints) =
+        open(&root, plan, protocol, &clock, NativeOpenMode::Create)?;
     let mut storage = Vec::new();
     let result = (|| {
         campaign_partition(&mut replicas, &clock, plan)?;
@@ -51,22 +51,29 @@ pub(super) fn run(
     let (warmup, measured) = match result {
         Ok(result) => {
             close(replicas, &clock)?;
+            endpoints.reclaim()?;
             result
         }
         Err(error) => {
-            return failure::cleanup(replicas, &clock, &root, error);
+            let result = failure::cleanup(replicas, &clock, &root, error);
+            endpoints.reclaim()?;
+            return result;
         }
     };
     observe::capture(&mut storage, "after_create_join", &traces);
-    let (mut replicas, traces) = open(&root, plan, protocol, &clock, NativeOpenMode::Recover)?;
+    let (mut replicas, traces, mut endpoints) =
+        open(&root, plan, protocol, &clock, NativeOpenMode::Recover)?;
     let recovery = recover(&mut replicas, &clock, plan, &warmup, &measured);
     let retries = match recovery {
         Ok(retries) => {
             close(replicas, &clock)?;
+            endpoints.reclaim()?;
             retries
         }
         Err(error) => {
-            return failure::cleanup(replicas, &clock, &root, error).and_then(|()| unreachable!());
+            let result = failure::cleanup(replicas, &clock, &root, error);
+            endpoints.reclaim()?;
+            return result;
         }
     };
     observe::capture(&mut storage, "after_recover_join", &traces);
@@ -93,7 +100,7 @@ fn open(
     protocol: NativePeerProtocol,
     clock: &Instant,
     mode: NativeOpenMode,
-) -> Result<(Replicas, Vec<observe::Trace>), Failure> {
+) -> Result<shared::OpenedPartition, Failure> {
     shared::open_partition(
         root,
         mode,

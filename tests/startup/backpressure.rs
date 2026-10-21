@@ -31,6 +31,7 @@ use voteboat::{
         wire::NativeWireCodec,
     },
     raft::{Raft, RaftError, Role},
+    snapshot_worker::SnapshotWorker,
     worker::*,
 };
 
@@ -41,6 +42,7 @@ use voteboat::{
 struct SlowRewrite {
     inner: NativeLogWorker<NativeLogStore<FileLogIo>>,
     hold: Arc<AtomicBool>,
+    hold_completion: AtomicBool,
 }
 impl PersistenceWorker for SlowRewrite {
     fn binding(&self) -> WorkerBinding {
@@ -56,7 +58,11 @@ impl PersistenceWorker for SlowRewrite {
         self.inner.submit(units)
     }
     fn poll(&mut self, limit: usize) -> Vec<WorkerEvent> {
-        self.inner.poll(limit)
+        if self.hold_completion.load(Ordering::Relaxed) {
+            Vec::new()
+        } else {
+            self.inner.poll(limit)
+        }
     }
     fn reclaim_limit(&self) -> Option<usize> {
         self.inner.reclaim_limit()
@@ -144,6 +150,7 @@ fn wrap(
                 persistence: SlowRewrite {
                     inner: persistence,
                     hold,
+                    hold_completion: AtomicBool::new(false),
                 },
                 applications,
                 results,
@@ -192,7 +199,9 @@ fn dump(nodes: &[Held]) -> String {
         })
         .collect()
 }
-/// Simulated protocol time: one millisecond per `POLLS_PER_MS` rounds.
+/// One millisecond per `POLLS_PER_MS` native-I/O-idle rounds. Worker and
+/// dial latency adds polls, not protocol time. Refused rewrite admission and
+/// absent peers are protocol work, so they do not hold this clock.
 const POLLS_PER_MS: u64 = 10;
 struct Clock {
     now: u64,
@@ -213,9 +222,20 @@ impl Clock {
     /// One round over every node. Any node error (the node-fatal WAL refusal
     /// on the base) fails the test with the node's own error.
     fn poll(&mut self, nodes: &mut [Held]) {
-        self.rounds += 1;
-        if self.rounds.is_multiple_of(POLLS_PER_MS) {
-            self.now += 1;
+        let native_pending = nodes.iter().any(|n| {
+            let local = n.local();
+            local.persistence.usage().requests != 0
+                || local
+                    .snapshots
+                    .as_ref()
+                    .is_some_and(|s| s.worker.usage().requests != 0)
+                || n.peers().is_some_and(|p| p.connector_usage().dialing != 0)
+        });
+        if !native_pending {
+            self.rounds += 1;
+            if self.rounds.is_multiple_of(POLLS_PER_MS) {
+                self.now += 1;
+            }
         }
         let mut progress = false;
         for (i, n) in nodes.iter_mut().enumerate() {
@@ -441,6 +461,111 @@ fn cluster_bootstrap() -> Bootstrap {
         .unwrap(),
         voter_stores: stores,
     }
+}
+
+/// A real accepted write waits for its native completion, not an election.
+/// The hold has a finite host-poll lifetime independent of protocol time.
+#[test]
+fn accepted_native_write_completion_does_not_spend_an_election_timeout() {
+    let directory = root();
+    std::fs::create_dir(&directory).unwrap();
+    let mut ports = crate::test_ports::PortLease::acquire(3);
+    let addresses = ports.address_list();
+    for slot in 0..3 {
+        drop(ports.adopt_tcp(slot));
+    }
+    let bootstrap = cluster_bootstrap();
+    let mut nodes = (1..=3)
+        .map(|n| {
+            open(
+                selected_wire_config(
+                    &directory,
+                    &addresses,
+                    &bootstrap,
+                    n,
+                    NativeOpenMode::Create,
+                    8,
+                ),
+                Arc::new(AtomicBool::new(false)),
+            )
+        })
+        .collect::<Vec<_>>();
+    let mut clock = Clock::new();
+    nodes[0].control(group(), NodeControl::Campaign).unwrap();
+    while !(core(&nodes[0]).role() == Role::Leader
+        && core(&nodes[0]).state().last_term() == core(&nodes[0]).state().hard_state.term
+        && nodes[0].local().applications[&group()].applied_index()
+            == core(&nodes[0]).state().last_index()
+        && nodes[0].local().persistence.usage().requests == 0
+        && nodes
+            .iter()
+            .all(|n| core(n).state().commit_index == core(&nodes[0]).state().last_index()))
+    {
+        clock.poll(&mut nodes);
+    }
+    let term = core(&nodes[0]).state().hard_state.term;
+    let baseline = core(&nodes[0]).state().last_index();
+    assert!(baseline > 0, "initial election noop not applied");
+    nodes[0]
+        .local()
+        .persistence
+        .hold_completion
+        .store(true, Ordering::Relaxed);
+    nodes[0].propose(write(0)).unwrap();
+    while nodes[0].local().persistence.usage().requests == 0 {
+        clock.poll(&mut nodes);
+    }
+    let held_at = clock.now;
+    let timers = TimerConfig::default();
+    // More than two maximum election timeouts on the historical poll clock.
+    // The native job remains accepted throughout; no client result controls it.
+    for _ in 0..2 * (timers.election_min_ms + timers.election_spread_ms) * POLLS_PER_MS {
+        clock.poll(&mut nodes);
+    }
+    let released_at = clock.now;
+    nodes[0]
+        .local()
+        .persistence
+        .hold_completion
+        .store(false, Ordering::Relaxed);
+    let outcome = loop {
+        clock.poll(&mut nodes);
+        if let Some(output) = nodes[0].poll_client() {
+            break nodes[0].complete_client(output).unwrap();
+        }
+        assert!(
+            clock.now < released_at + 5_000,
+            "write stalled:{}",
+            dump(&nodes)
+        );
+    };
+    // Check the accepted-write contract before the clock assertion: a blind
+    // clock must expose the actual leadership/outcome loss, not just elapsed time.
+    assert!(
+        matches!(outcome, ClientOutcome::Applied { .. }),
+        "accepted held write: {outcome:?};{}",
+        dump(&nodes)
+    );
+    if let ClientOutcome::Applied { position, .. } = outcome {
+        assert_eq!(position.index, baseline + 1);
+    }
+    assert_eq!(core(&nodes[0]).state().hard_state.term, term);
+    assert_eq!(released_at, held_at);
+    // Terminal collection releases the physical credit; no stale hold survives.
+    for _ in 0..1_000 {
+        clock.poll(&mut nodes);
+        if clock.now > released_at {
+            break;
+        }
+    }
+    assert!(
+        clock.now > released_at,
+        "clock stayed held after terminal completion"
+    );
+    eprintln!("native completion hold: baseline={baseline} applied={} term={term} held_ms={} resumed_ms={}", baseline + 1, released_at - held_at, clock.now - released_at);
+    stop(nodes, &mut clock);
+    ports.reclaim();
+    std::fs::remove_dir_all(directory).unwrap();
 }
 
 /// A follower whose rewrite is held fills its WAL with replicated data. With

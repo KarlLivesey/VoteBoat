@@ -1989,6 +1989,152 @@ owns final pinned-object source confirmation. Root main remains parent-owned;
 this dependency release does not authorize main integration. The LB macro and
 next two mini-plan deliverables are unchanged; this work only completes ST2.
 
+##### PR14 cumulative default result and focused repair plan (21 October 2026)
+
+The complete audited default run on `219ad7bb` is **FAILED**: 2,662 passed,
+4 failed, 1 ignored; all 129 `--all-targets` executables matched the built
+inventory and every exit/result was checked. Startup: 52/3, exit 101;
+native benchmark: 56/1, exit 101; controller exit 1. Routed passed 110/0;
+the complete debug relay passed 9/0 (3,308.56 s), including its exhaustive
+case; default doctests passed with zero cases. Nothing was aborted. Later
+feature configurations were held. The initial inherited-nice correction is
+retained in the validation record; this is no compliant green gate.
+
+The observed failures are two accepted-write `Unknown(LeadershipChanged)`
+outcomes in startup backpressure (writes 9,996 and 12,976), the native retention
+soak's occupancy-versus-periodic assertion (all 32,768 writes completed,
+4 real rewrites, but incidental poll counting advanced 15,445 protocol ms),
+and uneven benchmark lanes failing at startup with `AddrInUse`. These are
+actual failures; none is cleared by isolated reruns or labelled harmless.
+
+**Schema/transition plan before edits.** Keep the existing startup clocks'
+10/100-poll scenario rates, but count a tick only when native log/reclaim and
+snapshot request accounts and connector dial-worker jobs are quiescent.
+Queued/ready native completions must be ingested before advancing their
+protocol time. Do not freeze on client work, peer acknowledgements, an absent
+node or a refused maintenance submission: the deliberately held rewrite has
+no admitted native request, so its 1,000 ms release condition must still run.
+These are the existing idle-aware fixture's finite-worker/dial observations,
+without a blanket freeze on all protocol work or continuous applied progress.
+No timer setting, assertion, write count or production consensus/storage rule
+changes. Add a finite external native-completion hold control that preserves
+an accepted write's exact Applied outcome and term; restoring the old clock
+must fail its causal regression.
+
+For benchmark lane endpoints, reuse the checked shared lease in tests and
+transfer already-bound selected TCP/UDP sockets directly into the existing
+native connector adoption APIs. Retain the lease and unused halves in an explicit private endpoint owner
+through each cluster lifetime; transfer only the selected half. Reclaim after
+close/join, including partial-construction cleanup, before releasing locks. Each reopen already selects a new endpoint set; it does
+not depend on reclaiming the previous address. The connector then owns its
+socket through existing close/join. A small private assembly parameter/helper
+is needed to carry that socket through setup; no public seam or new feature.
+The non-test benchmark's existing reservations can use the same direct
+adoption path, closing its identical drop/rebind window. Preserve the prior
+fork/WAL exclusion, reader joins, per-lane counts and recovery checks.
+
+**Ownership/failure/restart.** Clocks own only volatile counters; providers
+retain their existing request ownership. The control's hold is released by
+an explicit finite host step, never by a clock it freezes. Reclaim admission
+refusal remains protocol-timed. Leases own registry locks and untransferred
+probes; successful connectors own transferred sockets. Partial construction
+keeps untransferred reservations through existing replica cleanup and final
+reclaim; shutdown
+joins owners before recovery. No durable format/generation or restart rule
+changes. Never reset the shared port namespace.
+
+**Acceptance checks (planned, not results).** Retain all original assertions
+in the three startup histories and uneven lanes. Use a real native-WAL
+accepted-write completion hold plus old-clock mutation; keep the full native
+soak and its strict `rewrites > protocol_ms / 1000 + 1` assertion. A temporary
+early-reclaim-only mutation, with interval scheduling intact, must fail that
+occupancy premise. TCP/QUIC socket-clone witnesses reproduce the old rebind
+`AddrInUse`, require direct adoption success, and prove final owner release
+with the existing lease. Revert all mutations before final checks. Then root
+fmt, four strict Clippy configurations, matched fmt/Clippy, enabled non-force
+push, fresh parent-owned source confirmation and a reset complete exclusive
+matrix on the repaired published head. Absolute kernel nice 19, cores 12–15,
+max four Cargo jobs, one own target and unchanged guards throughout. ST2
+remains in review; the LB macro and next two mini-plan items stay active and
+unchanged. No main-writer lease is granted by this plan.
+
+**Causal-control refinement before editing.** The first interval-only mutation
+preserved the interval branch but reached `NotProposed(StoragePressure)` at
+write 11,200; it is a failed control, not occupancy proof. At each existing
+8,192-write quarter boundary every accepted write has completed. If WAL
+occupancy is still at least half, let that quiescent scenario poll the existing
+maintenance timer until it reclaims below half, at the unchanged 100-poll clock
+rate and existing 5,000 ms progress bound. Native accepted work still holds
+time; no client outcome is retried or weakened. This lets interval-only
+maintenance finish all four quarters, while the unchanged final strict
+occupancy-versus-interval assertion must reject it. The normal early path
+should reclaim before the boundary and need no interval wait. This is only a
+fixture causal control; total writes, window, caps and production scheduling
+stay unchanged.
+
+**Normal-pressure refinement before editing.** The unconditional half-WAL
+boundary condition completed all 32,768 writes and passed the original strict
+occupancy premise (3 rewrites in 375 ms), but the added zero-pause check failed:
+3 boundary waits advanced 50 ms. Retain that failed fixture attempt. Latch
+actual occupancy evidence when the observed rewrite count exceeds the number
+of interval deadlines elapsed at that reclaim receipt. Once latched, skip
+all boundary waits, preserving continuous normal write pressure. An
+interval-only implementation cannot obtain that witness, so only it retains
+the quiescent fallback opportunity before the unchanged final assertion.
+The exact Applied outcomes, 64-write window, all writes/bytes and original
+strict occupancy premise remain mandatory; normal boundary waits/ms must be
+zero. Tighten the finite completion-hold control's setup to require the
+initial election noop durably applied and no accepted native request before
+proposing its real write; recheck both the pass and old-clock failure.
+
+**Strict-check cleanup before editing.** The first seven-check audit correctly
+failed despite the shell helper's final exit0: default/all Clippy reported a
+duplicate startup port-module load and excessive complexity in the private
+opened-partition tuple. Keep that failed audit. Load the existing port fixture
+once at startup root and make the existing connection-generation fixture use
+that module, preserving the same helper/lease contract and its existing
+annotation. Name the private opened-partition result shape with a type alias;
+no runtime or public API change. Recheck the shared-fixture callers and both
+benchmark feature modes, then rerun all seven strict checks without changing
+lint levels or thresholds. This cleanup only completes the current ST2 gate.
+
+##### Focused cumulative repair evidence (21 October 2026; full matrix pending)
+
+The repair changes test clocks and private benchmark assembly only; `src/`,
+public APIs, durable formats and production protocol/storage logic are unchanged.
+The clocks read provider-owned accepted request/job credits, including terminal
+error/fence/cancel cleanup. There is no client/ACK/missing-node/refused-rewrite
+gate or separate bookkeeping that could strand a hold. Existing native worker
+and connector contracts retain credits until actual terminal worker receipts.
+One one-slot lease per benchmark replica lets partial startup reclaim only
+selected halves without relaxing the shared fixture's strict reclaim contract;
+unopened leases retain both probes until cleanup.
+
+| Focused check/control | Actual result |
+| --- | --- |
+| Backpressure histories | 5/5: follower20,480 writes/term1/no leader refusals; singleton24,576 writes/96MiB; both refused rewrite holds exactly1,000ms; absent follower49,152 writes/refused0/retained10300<16384; reserve/noop/larger-WAL recovery passed |
+| Accepted native write hold, tightened setup | Durable/applied noop baseline1 and zero native requests before proposal; Applied index2/term1 after finite6,000 host polls; held protocol0ms; clock resumed+1ms after terminal completion. Rechecked after shared-module cleanup |
+| Historical-clock-only mutation | Expected rc101 at exact `Unknown(LeadershipChanged)` accepted-write assertion, with baseline commit/applied1 and another leader in term2; mutation reverted |
+| Native soak, normal latch | All32,768 Applied writes/128MiB; first occupancy witness rewrite1@75ms; 3 rewrites/327ms; quarter waits0/added_ms0; maxWAL44,070,808<75%, retained7582<16384; original strict assertion and zero-wait assertion passed |
+| Early-reclaim-only mutation, interval branch unchanged | All32,768 Applied writes/128MiB completed; rc101 at SAME original strict assertion: 3 observed rewrite receipts/4000ms, last3000ms, witnessNone. Four quiescent waits/3676ms; all preceding caps/base/state checks passed; zero-wait assertion not reached. Reverted |
+| Benchmark endpoint ownership and actual histories | After structural cleanup, default58/58 and all68/68, including TCP/QUIC lanes, exact uneven counts, fork/WAL exclusion, reader joins, partial startup cleanup, selected/unused halves, adoption rejection and final reclaim |
+| Historical selected-socket rebind mutation | TCP and QUIC both fail required adoption success with kernel `AddrInUse`/98 while clone witness owns socket. No original competing PID identified; no host-noise attribution. Reverted |
+| Terminal physical credit cleanup | Persistence9/9, snapshots14/14, native dial cancellation1/1, shared lease9/9; existing native reconnect1/1 after common-module cleanup |
+
+Initial invalid controls and the normal3-wait/50ms attempt remain failures,
+with logs/patches retained. The first strict attempt also remains FAILED:
+default/all Clippy identified only duplicate module loading and private tuple
+complexity; the audited runner returned1 despite the helper's final shell0.
+The single common fixture import and private type alias address those causes
+without lint suppression. See [the durable focused record](../validation/st2-final-gate/CUMULATIVE-REPAIR.md).
+
+Seven strict checks will run on the clean source commit carrying this record,
+then the same head through the enabled pre-push hook. Exact-head command/resource
+results are recorded in the PR and main safe-report directory. A fresh independent
+Sol source confirmation and the complete final published-head matrix remain
+required. ST2 stays in review; macro/next-two items stay unchanged; no main-writer
+lease is implied. The original full `219ad7bb` default remains FAILED.
+
 #### Design-pack amendment realised by ST2 (pack preserved)
 
 | Pack text | Amendment |

@@ -39,6 +39,11 @@ use voteboat::{
     worker::*,
 };
 
+#[path = "shared_endpoints.rs"]
+mod endpoints;
+pub(super) use endpoints::Endpoints;
+pub(super) type OpenedPartition = (Vec<Replica<SharedLog>>, Vec<Trace>, Endpoints);
+
 #[derive(Clone, Copy)]
 pub(super) struct Partition {
     pub offset: usize,
@@ -56,7 +61,7 @@ pub(super) fn open_partition(
     capacity: usize,
     clock: &Instant,
     partition: Partition,
-) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+) -> Result<OpenedPartition, Failure> {
     if partition.groups == 0
         || !(1..=1024).contains(&partition.ready_visit_items)
         || partition.groups > 32
@@ -69,21 +74,8 @@ pub(super) fn open_partition(
     {
         return Err("invalid lane partition".into());
     }
-    // Hold every endpoint reservation until all addresses have been selected.
-    let reservations = (0..3)
-        .map(|_| {
-            (0..32)
-                .find_map(|_| {
-                    let tcp = TcpListener::bind("127.0.0.1:0").ok()?;
-                    let udp = UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
-                    Some((tcp, udp))
-                })
-                .ok_or("no local TCP/UDP endpoint")
-        })
-        .collect::<Result<Vec<_>, _>>()?;
-    let addresses = (1..=3)
-        .zip(reservations.iter().map(|(t, _)| t.local_addr().unwrap()))
-        .collect::<BTreeMap<_, _>>();
+    let mut endpoints = Endpoints::acquire()?;
+    let addresses = endpoints.addresses().clone();
     let policy = checked(Policy::new(
         Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
         Limits::default(),
@@ -98,7 +90,6 @@ pub(super) fn open_partition(
                 .collect(),
         })
         .collect::<Vec<_>>();
-    drop(reservations);
     let mut replicas = Vec::new();
     let mut traces = Vec::new();
     for n in 1..=3 {
@@ -115,14 +106,24 @@ pub(super) fn open_partition(
             capacity_profile: partition.capacity_profile,
             publication: partition.publication,
         };
-        let (replica, trace) = match setup.open_replica(n) {
+        let (replica, trace) = match setup.open_profile_with_endpoint(
+            n,
+            None,
+            false,
+            IngressLimits::default(),
+            Some(endpoints.take(n, protocol)),
+        ) {
             Ok(opened) => opened,
-            Err(error) => return failure::cleanup(replicas, clock, root, error),
+            Err(error) => {
+                let result = failure::cleanup(replicas, clock, root, error);
+                endpoints.reclaim()?;
+                return result;
+            }
         };
         replicas.push(replica);
         traces.push(trace);
     }
-    Ok((replicas, traces))
+    Ok((replicas, traces, endpoints))
 }
 
 fn open_log(
@@ -344,7 +345,11 @@ fn connector(
     local: LocalIdentity,
     remote: &BTreeMap<NodeId, StoreIdentity>,
     addresses: &BTreeMap<u64, std::net::SocketAddr>,
-    profile: (NativePeerProtocol, NativeTlsConfig),
+    profile: (
+        NativePeerProtocol,
+        NativeTlsConfig,
+        Option<endpoints::Endpoint>,
+    ),
     wake: Arc<dyn WorkerWake>,
     now: MonoTime,
 ) -> Result<NativeServiceConnector, Failure> {
@@ -369,9 +374,10 @@ fn connector(
         limits: ConnectLimits::default(),
         session: SessionLimits::default(),
     };
-    let (protocol, tls) = profile;
+    let (protocol, tls, endpoint) = profile;
     let connector = match protocol {
         NativePeerProtocol::TcpTls => {
+            let listener = endpoints::tcp(endpoint, addresses[&n])?;
             let dialer = checked(NativeTcpDialer::spawn(
                 local,
                 remote.clone(),
@@ -383,7 +389,7 @@ fn connector(
                 tls,
                 pins,
                 dialer,
-                Some(TcpListener::bind(addresses[&n])?),
+                Some(listener),
                 now,
             ))?))
         }
@@ -395,7 +401,7 @@ fn connector(
                 pins.into_iter()
                     .map(|(p, pin)| (p, (addresses[&p.get()], pin)))
                     .collect(),
-                UdpSocket::bind(addresses[&n])?,
+                endpoints::quic(endpoint, addresses[&n])?,
                 now,
             ),
         )?)),
@@ -437,16 +443,7 @@ impl ClusterSetup<'_> {
         }
         Ok(())
     }
-    fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
-        self.open_replica_with_recovery(n, None)
-    }
-    fn open_replica_with_recovery(
-        &self,
-        n: u64,
-        recovery: Option<SnapshotRecoveryLimits>,
-    ) -> Result<(Replica<SharedLog>, Trace), Failure> {
-        self.open_profile(n, recovery, false)
-    }
+    #[cfg(test)]
     fn open_profile(
         &self,
         n: u64,
@@ -455,12 +452,23 @@ impl ClusterSetup<'_> {
     ) -> Result<(Replica<SharedLog>, Trace), Failure> {
         self.open_profile_with_ingress(n, recovery, member, IngressLimits::default())
     }
+    #[cfg(test)]
     fn open_profile_with_ingress(
         &self,
         n: u64,
         recovery: Option<SnapshotRecoveryLimits>,
         member: bool,
         ingress_limits: IngressLimits,
+    ) -> Result<(Replica<SharedLog>, Trace), Failure> {
+        self.open_profile_with_endpoint(n, recovery, member, ingress_limits, None)
+    }
+    fn open_profile_with_endpoint(
+        &self,
+        n: u64,
+        recovery: Option<SnapshotRecoveryLimits>,
+        member: bool,
+        ingress_limits: IngressLimits,
+        endpoint: Option<endpoints::Endpoint>,
     ) -> Result<(Replica<SharedLog>, Trace), Failure> {
         let Self {
             root,
@@ -522,6 +530,12 @@ impl ClusterSetup<'_> {
         let ingress = checked(IngressRouter::new(ingress.binding(), ingress_limits))?;
         let factory = checked(NativeTransportFactory::new(codec, Default::default()))?;
         let wake: Arc<dyn WorkerWake> = host_wake();
+        let profile = (
+            protocol,
+            checked(tls(n).with_wire_version(version))?,
+            endpoint,
+        );
+        let connector = connector(n, local, &remote, addresses, profile, wake.clone(), now)?;
         let mut workers = spawn_workers(log, timed, snapshots, owner_id, wake.clone())?;
         workers.limit_recovery(recovery)?;
         let Workers {
@@ -529,8 +543,6 @@ impl ClusterSetup<'_> {
             persistence,
             snapshots: snapshot_workers,
         } = workers;
-        let profile = (protocol, checked(tls(n).with_wire_version(version))?);
-        let connector = connector(n, local, &remote, addresses, profile, wake, now)?;
         let parts = NodeParts {
             local: NodeLocalParts {
                 owner,
