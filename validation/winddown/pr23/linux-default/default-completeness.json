@@ -1,0 +1,169 @@
+{
+  "head": "1c2595364cbe405922695ce9c8728316ecf05741",
+  "config": "default",
+  "overall_rc": 1,
+  "errors": [
+    "test-default-061-routed"
+  ],
+  "build_rc": 0,
+  "build_finished": [
+    true
+  ],
+  "inventory": 129,
+  "executed": 129,
+  "inventory_exactly_once": true,
+  "totals": {
+    "passed": 2639,
+    "failed": 1,
+    "ignored": 1
+  },
+  "zero_test_harnesses": [
+    "test-default-021-replicated_counter",
+    "test-default-023-quic",
+    "test-default-028-embedded_counter",
+    "test-default-067-quic_connect",
+    "test-default-093-wal_benchmark",
+    "test-default-123-durable_vote"
+  ],
+  "doctests": {
+    "label": "doc-default",
+    "kind": "doctests",
+    "argv": [
+      "/usr/bin/cargo",
+      "+stable",
+      "test",
+      "--doc",
+      "--locked",
+      "--offline"
+    ],
+    "cores": [
+      10,
+      11
+    ],
+    "rc": 0,
+    "elapsed": 1.229717493057251,
+    "results": [
+      {
+        "status": "ok",
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "line": "ok"
+      }
+    ],
+    "named_counts": {
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "named_outcomes": [],
+    "resource_violations": [],
+    "observed_tasks": 6,
+    "own_target_bytes": 1379401728,
+    "preexec_nice": 19,
+    "preexec_cores": [
+      10,
+      11
+    ],
+    "head": "1c2595364cbe405922695ce9c8728316ecf05741",
+    "config": "default",
+    "controller_pid": 762392,
+    "controller_nice": 19,
+    "controller_thread_nice": 19,
+    "controller_cores": [
+      10,
+      11
+    ]
+  },
+  "eligible_libraries": [
+    {
+      "package": "voteboat",
+      "target": "voteboat"
+    }
+  ],
+  "relay": {
+    "label": "test-default-relay",
+    "kind": "harness",
+    "argv": [
+      "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/representative_relay_model-aaf695fc0fc3d871"
+    ],
+    "cores": [
+      10
+    ],
+    "rc": 0,
+    "elapsed": 3241.539154291153,
+    "results": [
+      {
+        "status": "ok",
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "line": "ok"
+      }
+    ],
+    "named_counts": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "named_outcomes": [
+      [
+        "tests::nonce_projection_keeps_original_counters_and_owned_packet_values",
+        "ok"
+      ],
+      [
+        "tests::nonce_projection_preserves_a_foreign_actual_credit_mismatch",
+        "ok"
+      ],
+      [
+        "tests::original_append_ack_before_sync_cannot_release_matching_prefix",
+        "ok"
+      ],
+      [
+        "tests::request_fanout_restarts_from_the_original_retained_parent_request",
+        "ok"
+      ],
+      [
+        "tests::restart_does_not_erase_original_transmitted_wire_replay",
+        "ok"
+      ],
+      [
+        "tests::retired_store_original_replay_fails_before_publication",
+        "ok"
+      ],
+      [
+        "tests::stale_original_context_and_store_outputs_cannot_certify_new_scope",
+        "ok"
+      ],
+      [
+        "tests::strict_physical_voter_relay_graphs_exhaust_without_unsafe_release",
+        "ok"
+      ],
+      [
+        "tests::weakened_relay_and_durability_rules_replay_original_counterexamples",
+        "ok"
+      ]
+    ],
+    "resource_violations": [],
+    "observed_tasks": 5,
+    "own_target_bytes": 1374474240,
+    "preexec_nice": 19,
+    "preexec_cores": [
+      10
+    ],
+    "head": "1c2595364cbe405922695ce9c8728316ecf05741",
+    "config": "default",
+    "controller_pid": 762392,
+    "controller_nice": 19,
+    "controller_thread_nice": 19,
+    "controller_cores": [
+      10,
+      11
+    ]
+  },
+  "resource_violations": 0,
+  "observed_task_records": 38659,
+  "source_unchanged": true,
+  "max_guarded_target_bytes": 1379401728,
+  "configurations_later_held": true
+}

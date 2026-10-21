@@ -1,0 +1,18 @@
+{
+  "ownedProductBuildTestOrDeletedCwdProcesses": [],
+  "currentAuditAndAncestorsExcluded": [
+    {
+      "pid": 897853,
+      "ppid": 3483976,
+      "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat",
+      "exe": "/usr/bin/python3.14",
+      "command": "python3"
+    }
+  ],
+  "worktrees": "worktree /home/karllivesey/Documents/ChatGPT/VoteBoat\nHEAD 576c7cfb25820d7d3e34b218b66016bd4ac5159b\nbranch refs/heads/main\n\nworktree /home/karllivesey/.codex/worktrees/application-conformance/VoteBoat\nHEAD d6adc44d79e3bf22910532dc4f1c6cebfdc9c0cd\nbranch refs/heads/codex/application-conformance\n\n",
+  "remainingForeignCheckout": "application-conformance unchanged d6adc44d; not owned or swept",
+  "taskStatusAudit": "36/36 completed; no pending child runs",
+  "candidateStates": "PR24 merged; PR14/15/19/22/23 closed unmerged; no open PRs",
+  "rootHookBuildCache": "inherited cache reused only for enabled pushes; remove build artifacts after final push, retain main target/claude tools and raw evidence",
+  "sharedTestPortNamespace": "untouched"
+}

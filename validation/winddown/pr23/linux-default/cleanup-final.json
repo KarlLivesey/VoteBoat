@@ -1,0 +1,34 @@
+{
+  "time": 1792569093.1137655,
+  "head": "1c2595364cbe405922695ce9c8728316ecf05741",
+  "worktree_exists": false,
+  "target_exists": false,
+  "worktree_registered": false,
+  "own_seed_branch_removed": true,
+  "closed_owned_helpers": [
+    {
+      "pid": 753275,
+      "starttime": "20313943",
+      "signal": "TERM if live"
+    },
+    {
+      "pid": 753109,
+      "starttime": "20313940",
+      "signal": "TERM if live"
+    },
+    {
+      "pid": 753147,
+      "starttime": "20313941",
+      "signal": "TERM if live"
+    }
+  ],
+  "owned_jobs_or_deleted_cwd": [],
+  "known_product_jobs": [],
+  "stock_sweep_rc": 0,
+  "stock_final_guard_rc": 0,
+  "shared_ports": "untouched",
+  "foreign_worktrees_and_processes": "untouched",
+  "main_tracked_source_docs_memory": "unwritten by this runner",
+  "later_configs": "never launched",
+  "linux_performance": "not run"
+}

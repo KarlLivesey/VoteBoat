@@ -1,0 +1,56 @@
+[
+  {
+    "closed_at": "2026-10-21T03:15:08Z",
+    "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+    "html_url": "https://github.com/KarlLivesey/VoteBoat/pull/14",
+    "merge_commit_sha": "df65a448368ec28c7c1e7e4ebde89ed527f2c9e3",
+    "merged": false,
+    "number": 14,
+    "state": "closed"
+  },
+  {
+    "closed_at": "2026-10-21T05:16:38Z",
+    "head": "66fcf3e000441c7fae0bb1fed231bdc28e146c9f",
+    "html_url": "https://github.com/KarlLivesey/VoteBoat/pull/15",
+    "merge_commit_sha": "dd5cc79f4bd2be654059bceda56bd0eff1dbb819",
+    "merged": false,
+    "number": 15,
+    "state": "closed"
+  },
+  {
+    "closed_at": "2026-10-21T06:20:54Z",
+    "head": "ff9faec8f01710d4e12c2fffb6ccc5f32c879fb8",
+    "html_url": "https://github.com/KarlLivesey/VoteBoat/pull/19",
+    "merge_commit_sha": null,
+    "merged": false,
+    "number": 19,
+    "state": "closed"
+  },
+  {
+    "closed_at": "2026-10-21T06:28:21Z",
+    "head": "463c50d4ec06b5e87d435c41427ccb63c60a9dfd",
+    "html_url": "https://github.com/KarlLivesey/VoteBoat/pull/22",
+    "merge_commit_sha": null,
+    "merged": false,
+    "number": 22,
+    "state": "closed"
+  },
+  {
+    "closed_at": "2026-10-21T06:20:52Z",
+    "head": "1c2595364cbe405922695ce9c8728316ecf05741",
+    "html_url": "https://github.com/KarlLivesey/VoteBoat/pull/23",
+    "merge_commit_sha": "497cfa3a1186c82eb9f5229fad3b5f4df1c5503c",
+    "merged": false,
+    "number": 23,
+    "state": "closed"
+  },
+  {
+    "closed_at": "2026-10-20T23:26:31Z",
+    "head": "deaf8121e700bc1c2f6f86440d2699c560da7114",
+    "html_url": "https://github.com/KarlLivesey/VoteBoat/pull/24",
+    "merge_commit_sha": "1e56e9f5ebb552cf711d859b5f2b0a7ebf3d66c7",
+    "merged": true,
+    "number": 24,
+    "state": "closed"
+  }
+]

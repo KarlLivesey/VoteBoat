@@ -1,0 +1,2066 @@
+[
+  {
+    "label": "test-default-relay",
+    "target": "representative_relay_model",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/representative_relay_model-aaf695fc0fc3d871",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 3241.539154291153,
+    "executable_sha256": "8fa9aafc9da7e48de72cf38232cfd0a7c08ccefc6764211ff9d8b225c38282d2",
+    "log_sha256": "acbe63b1eb5942b371e84d24c238df54e81afae58370f1aaad273439eb4be0d6"
+  },
+  {
+    "label": "test-default-000-transfer_target",
+    "target": "transfer_target",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_target-11c34d3b687976fa",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.4580087661743164,
+    "executable_sha256": "d552b3410f6036822a8398586775b2e084b08cdd7e8e57d6d1c699f0e3db7568",
+    "log_sha256": "1ea9b04dbc6094f952fc172c54f61fb45a3761e16dd0258e44f77482a1885f52"
+  },
+  {
+    "label": "test-default-001-logical_activation_application",
+    "target": "logical_activation_application",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_activation_application-8ad8cefd1ed1d38b",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 0.22446870803833008,
+    "executable_sha256": "15276832456680b513a2263d88c7df5146b841b0fa724ff758b2094b367d97a5",
+    "log_sha256": "749b41cff0cf7e41a128169fea770a7c24dcebcfe838207d9e4464c2245bb20f"
+  },
+  {
+    "label": "test-default-002-shared_barrier",
+    "target": "shared_barrier",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/shared_barrier-c6ae0fb69cc07899",
+    "rc": 0,
+    "results": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 8,
+    "elapsed": 0.6263010501861572,
+    "executable_sha256": "9b1fafc9e59066357e75b213e498f4624d7c222634a4755fbbeebea1b87aa9bb",
+    "log_sha256": "f7cd40ce26d8f11cb4d6945e87be219c7075dbc1628d5f4c7cbc488f5ec091ba"
+  },
+  {
+    "label": "test-default-003-effect_owner",
+    "target": "effect_owner",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/effect_owner-1a56b3e77d840106",
+    "rc": 0,
+    "results": {
+      "passed": 211,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 211,
+    "elapsed": 83.53952145576477,
+    "executable_sha256": "03be1fc89f5e63b5c9771268d432568cb1d979dfd8019b8ab1862c4e72cbccf5",
+    "log_sha256": "4bdeae5ebfe376af3d462c459f64ec6148918250eb857a6e2009b18164d4b7fa"
+  },
+  {
+    "label": "test-default-004-retained_insertion",
+    "target": "retained_insertion",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/retained_insertion-6d784a79f0796dae",
+    "rc": 0,
+    "results": {
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 39,
+    "elapsed": 9.662721872329712,
+    "executable_sha256": "2e6c387e2803f3f93ff8e9f0c0e49209f1b71984fa772ad8effecc44aeb2e030",
+    "log_sha256": "f428b08b8ec2a5a24a9435ee1ca89193b2806bdc63000a50507f8ec2a27e6afc"
+  },
+  {
+    "label": "test-default-005-logical_voter_application",
+    "target": "logical_voter_application",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_voter_application-8a016db474424e20",
+    "rc": 0,
+    "results": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 8,
+    "elapsed": 0.2306814193725586,
+    "executable_sha256": "46ce4b65dc4b0f9ae5c1d6f0750c1e81537a911cd5cdc6a85e2a18a8d2905ff8",
+    "log_sha256": "de86887bc2cf8f7ed0010eac38d980c70f2a9909a40b98f35efa356be643be8e"
+  },
+  {
+    "label": "test-default-006-voteboat",
+    "target": "voteboat",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/voteboat-4c5dca527dec7d39",
+    "rc": 0,
+    "results": {
+      "passed": 582,
+      "failed": 0,
+      "ignored": 1
+    },
+    "result_count": 1,
+    "named_outcomes": 583,
+    "elapsed": 29.986329793930054,
+    "executable_sha256": "388f7d7989fa8c6e10a447b4af0260151cbcb7c8627dcc6518dd4f552c96efeb",
+    "log_sha256": "b5b2908f49abd510eb2f268fdabf71f2c96a51f944facbab3ea6817ca521ed7a"
+  },
+  {
+    "label": "test-default-007-transfer_source",
+    "target": "transfer_source",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_source-495a1b251d7f311f",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 0.6292836666107178,
+    "executable_sha256": "482f70a3b1949727163cba51c1cd2093fd341451e43505c0be85312195fd8af4",
+    "log_sha256": "77b266cee10a4dd6f8186bb63a64baa366d52af8fea1e5957bacde75294c5129"
+  },
+  {
+    "label": "test-default-008-ballot_model",
+    "target": "ballot_model",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/ballot_model-9b34bfc23e37b9c2",
+    "rc": 0,
+    "results": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 2,
+    "elapsed": 0.8275434970855713,
+    "executable_sha256": "2b5a434259077399b174b585a8b5ecc46ae9d75fa70768023f728cf7c4f3e5e1",
+    "log_sha256": "7870330ffa7d836eb20be2b90c4d5d15492c1e32a82203eb85cb79497cc6d824"
+  },
+  {
+    "label": "test-default-009-deletion",
+    "target": "deletion",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/deletion-ad3d6ec2cb1be693",
+    "rc": 0,
+    "results": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 12,
+    "elapsed": 0.23335623741149902,
+    "executable_sha256": "1fa45949c1e19dabcf90dd918daf995940a8377033551d458bf3d0325a94c524",
+    "log_sha256": "99c61ce2b59381039679ac12fb781eea36b622e318cbf8d26e8f1e26cc71b3e7"
+  },
+  {
+    "label": "test-default-010-outbound",
+    "target": "outbound",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/outbound-6339158f1e6c5e9f",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 0.23017406463623047,
+    "executable_sha256": "c904a82eeaab72ccac46d4f3145ea050491b0737b813dafe6822bff65cdbb357",
+    "log_sha256": "188865be971445b559f8886c12fa11f723920bf84e51c7cb9a364d195fa93dbd"
+  },
+  {
+    "label": "test-default-011-imported_parent",
+    "target": "imported_parent",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/imported_parent-d4efcc18ce9145ca",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 1.2318615913391113,
+    "executable_sha256": "99b5a3c745e9a994e3b3e1d39a97a73f12a260aabd1e515b3aa6947c05ab6736",
+    "log_sha256": "dbf553a97641619396b2f8694a9d9bcf6528a670a4891db95f98243535d09d7e"
+  },
+  {
+    "label": "test-default-012-logical_network",
+    "target": "logical_network",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_network-d070567573fc12ac",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 1.6477844715118408,
+    "executable_sha256": "e3c168cb34ed749377f64704a3a9ccaa6c7d719f5bf602969e59dd5ac8335070",
+    "log_sha256": "45a93826ed4f4a43817a2a7044f9eed165e381bb9e49927410cbd45b55dc4a50"
+  },
+  {
+    "label": "test-default-013-wire",
+    "target": "wire",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/wire-c878f3ae1f3a0adc",
+    "rc": 0,
+    "results": {
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 20,
+    "elapsed": 0.2288057804107666,
+    "executable_sha256": "d3de9fe44b098231c82c534a20785757b5ac1790b84f73b33d40e4c17beac4dd",
+    "log_sha256": "42cca3fab628abad9ade980f4bddb7efaa2024bdc063b77908cbbb7bdfa7d468"
+  },
+  {
+    "label": "test-default-014-native_vote_store",
+    "target": "native_vote_store",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/native_vote_store-c5b6b5d7f6f61ac2",
+    "rc": 0,
+    "results": {
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 13,
+    "elapsed": 0.2361147403717041,
+    "executable_sha256": "347f057c73aeb27d8598978421f5f998011d428380bd3b26f76aab5c0b1e9826",
+    "log_sha256": "60929072cfa3430426b81e87111a7adaea6dda794106312ac2427d7657b887a8"
+  },
+  {
+    "label": "test-default-015-buffer",
+    "target": "buffer",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/buffer-2953b3ea75ecf181",
+    "rc": 0,
+    "results": {
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 13,
+    "elapsed": 0.2247776985168457,
+    "executable_sha256": "4f61d9eb627214fa396eca3845ca0727865d1464c4350c605a6cda4af51db764",
+    "log_sha256": "fffbfb7482616acf8bb149fe212707790543af2f377c675fbf4bc5c530fd5dba"
+  },
+  {
+    "label": "test-default-016-fixture_isolation",
+    "target": "fixture_isolation",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/fixture_isolation-d3fde1a88cc889ca",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.2321169376373291,
+    "executable_sha256": "4eda212145484375e6d8f3417ca400a49c3b0421cf800b866af929473635afa9",
+    "log_sha256": "3ad511c9b011c751be0604e205a722ebe027816fe11fe61cd231a270dd511c02"
+  },
+  {
+    "label": "test-default-017-drain_journal",
+    "target": "drain_journal",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/drain_journal-c78d9f3c01a57b11",
+    "rc": 0,
+    "results": {
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 11,
+    "elapsed": 0.2210557460784912,
+    "executable_sha256": "4e163db2cb927b3b67a99c23feb0c771ab8e0f07a7a588e65307fc545cb3b2ce",
+    "log_sha256": "7df157a775a28fd6c8d1e5e496110144510397985271caff3bbdafbea7104d0a"
+  },
+  {
+    "label": "test-default-018-logical_voter_payload",
+    "target": "logical_voter_payload",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_voter_payload-4d0d499b03462bb5",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 37.90334463119507,
+    "executable_sha256": "246b9b41b7e9f870056c84ba91d6249b360e2c34a5cbda91e78436b8c817b46c",
+    "log_sha256": "5a79731d840916939a323a837b4526b66034daa2930b10c5199b3daffd43e556"
+  },
+  {
+    "label": "test-default-019-voteboat-directory",
+    "target": "voteboat-directory",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/voteboat_directory-e3d556a4a2f3a17d",
+    "rc": 0,
+    "results": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 12,
+    "elapsed": 3.4421801567077637,
+    "executable_sha256": "4a786a7e8fc284d4c1551e7d32ded562e1b03640ff5e97ad4d1520551e4a6d45",
+    "log_sha256": "c75d2590865ac6b46de2caf4068f7c06def3e6dde2f4a204fc6d10c8d1466b06"
+  },
+  {
+    "label": "test-default-020-volatile",
+    "target": "volatile",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/volatile-66682859d6ec85ca",
+    "rc": 0,
+    "results": {
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 11,
+    "elapsed": 0.2298283576965332,
+    "executable_sha256": "aba707163f11b1de9bb2126dce64f24068533be26c980784ada529089dba432b",
+    "log_sha256": "e2a228b7bb666557c31ea047ebf49525e1050c96ee47c8c0daf96169501e4b66"
+  },
+  {
+    "label": "test-default-021-replicated_counter",
+    "target": "replicated_counter",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/replicated_counter-4e07f43f7529fcb0",
+    "rc": 0,
+    "results": {
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 0,
+    "elapsed": 0.2299480438232422,
+    "executable_sha256": "e453afd262f457da0a2a19bcc338bf8bd6dc104cc0b3249c6bcebb7263e67efe",
+    "log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+  },
+  {
+    "label": "test-default-022-leadership_maintenance",
+    "target": "leadership_maintenance",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/leadership_maintenance-c1b59485b08434f3",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.22605109214782715,
+    "executable_sha256": "a54414e515b37056f98f0bc8d564c2ff5b6f3996ed19ee9d70ec5ab0d2727953",
+    "log_sha256": "a6fec4851606b91bc89481532a4b4db3f0357d5f28fd549b467e953f994b593d"
+  },
+  {
+    "label": "test-default-023-quic",
+    "target": "quic",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/quic-6534ba07f831b1ef",
+    "rc": 0,
+    "results": {
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 0,
+    "elapsed": 0.22927570343017578,
+    "executable_sha256": "d5416ba86f05b27b1240054500abb7295a97b26c66f01b674cd9648cb1479f35",
+    "log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+  },
+  {
+    "label": "test-default-024-startup",
+    "target": "startup",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/startup-d667aaa7d934dd31",
+    "rc": 0,
+    "results": {
+      "passed": 48,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 48,
+    "elapsed": 16.71768617630005,
+    "executable_sha256": "574260b55856cfa882ae1b2845f4b45c052993c0eae1f42338f48d9047622ba6",
+    "log_sha256": "653020c53604ae6033e1d008fa1f384e3fb1ba17fc78c33b6b755b731763cb0b"
+  },
+  {
+    "label": "test-default-025-transfer_preview_cli",
+    "target": "transfer_preview_cli",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_preview_cli-4d8b041df9140d9c",
+    "rc": 0,
+    "results": {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 3,
+    "elapsed": 0.22387480735778809,
+    "executable_sha256": "dcad749da2cfeb5c9b0e36932ad8f8850e41d114454606c7166096187e897b85",
+    "log_sha256": "722057eaac1ec0debd99fb8367aeafb759e2e560e3cea7ddb1ca9ebeb5ca0f99"
+  },
+  {
+    "label": "test-default-026-voteboat-transfer",
+    "target": "voteboat-transfer",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/voteboat_transfer-d5e0e7e3ed59ecd6",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 0.22530221939086914,
+    "executable_sha256": "ae322b266388e03980d120fa9afd116f33a7864f79b524b25b76dddeeba0efd8",
+    "log_sha256": "6e8cbf5b271ca7f29dbb1ad923bec129e5d20aae5a767a16b16bd6d199afe57f"
+  },
+  {
+    "label": "test-default-027-program_transaction_application",
+    "target": "program_transaction_application",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/program_transaction_application-6b29b604464025cb",
+    "rc": 0,
+    "results": {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 3,
+    "elapsed": 0.22727394104003906,
+    "executable_sha256": "1607c4e3f0c60ce1a1c6ef00faf99871d500dc8ec7945dffcf6de6848cd30910",
+    "log_sha256": "b923c1849072cfb9b826f0af49dbf6377fe6d332d10f107118a993968d6effa9"
+  },
+  {
+    "label": "test-default-028-embedded_counter",
+    "target": "embedded_counter",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/embedded_counter-e61abf58856c017d",
+    "rc": 0,
+    "results": {
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 0,
+    "elapsed": 0.22197818756103516,
+    "executable_sha256": "23caf21dcdaf59511a6fb6b8a8e030ebfda57ed6c3679526b45b36603c1f3499",
+    "log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+  },
+  {
+    "label": "test-default-029-snapshot",
+    "target": "snapshot",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/snapshot-a19c1c73a60ef4bb",
+    "rc": 0,
+    "results": {
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 27,
+    "elapsed": 0.829613208770752,
+    "executable_sha256": "8a457c68c3b1f8cb8ac5d1afc42e85c7342a60c7988fcdaee390d457bdbab9f5",
+    "log_sha256": "3c9c1d561651fe628091b37394419e4f25e415fa35278d7d6a1b8f7afdcfd19d"
+  },
+  {
+    "label": "test-default-030-application",
+    "target": "application",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/application-5f7374c0b9183989",
+    "rc": 0,
+    "results": {
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 23,
+    "elapsed": 0.6319060325622559,
+    "executable_sha256": "3d2cf3c04821db0154de7e4e2c4db0ea3306fa92f2298da805e918da66d34c3d",
+    "log_sha256": "4266b1f234c0b88563eca6809f90844505d1fc68665fd7f99775cccc3a17c337"
+  },
+  {
+    "label": "test-default-031-observability",
+    "target": "observability",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/observability-11091d2d2822cf08",
+    "rc": 0,
+    "results": {
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 11,
+    "elapsed": 0.23606538772583008,
+    "executable_sha256": "7892cff5935f775a5fa491512e35464246e9bbf3828471b9774472a66623ca32",
+    "log_sha256": "7f486b729b3a6f650cb86fb95e3e36c1b15dd9f3371713dc69ea80ac48f89f7e"
+  },
+  {
+    "label": "test-default-032-directory",
+    "target": "directory",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/directory-58e50ecda80e07e6",
+    "rc": 0,
+    "results": {
+      "passed": 31,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 31,
+    "elapsed": 2.043221950531006,
+    "executable_sha256": "9e911713b700efab6817d5c1b53dd0f49a475e74000a61d73b41f19a760b388b",
+    "log_sha256": "79d7fdd65e7b2cf51f5801653026c4a90e3092c4f4ce5b84ffd9a82cb6ad3049"
+  },
+  {
+    "label": "test-default-033-manifest_mapping",
+    "target": "manifest_mapping",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/manifest_mapping-8005885eb355749d",
+    "rc": 0,
+    "results": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 2,
+    "elapsed": 0.2294776439666748,
+    "executable_sha256": "f1d6e6e7aefaaeeadc22a88913026f28ec3bf3a67a6a2491f39ab94baecd8c7f",
+    "log_sha256": "be6ef420aecdbb0d6d6e04448c4246134feacc70edac251d9a5f56cc4047b713"
+  },
+  {
+    "label": "test-default-034-child_slots",
+    "target": "child_slots",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/child_slots-a5baf3e7fa033bb8",
+    "rc": 0,
+    "results": {
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 10,
+    "elapsed": 0.22734928131103516,
+    "executable_sha256": "d6df2c267c19a67109b8d4368daa9a0b5bc80267d41c5a90dead383d2dbd796d",
+    "log_sha256": "b2b2bbc88b62dc32eb6bfd99162fd82680247d8e848150b76a3e69af9563078a"
+  },
+  {
+    "label": "test-default-035-log_store",
+    "target": "log_store",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/log_store-38d89b3c1da01ac8",
+    "rc": 0,
+    "results": {
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 19,
+    "elapsed": 0.42760252952575684,
+    "executable_sha256": "b1821bfafb640948799e9f30513a02b8665e33f29afc0f64b4d2024a10a138a4",
+    "log_sha256": "2bfdba6fc8a7d687874d5ec3c62f750ec76084b27b4022427860579d6524cf24"
+  },
+  {
+    "label": "test-default-036-quorum",
+    "target": "quorum",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/quorum-48c1d038f29940f9",
+    "rc": 0,
+    "results": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 6,
+    "elapsed": 0.22800397872924805,
+    "executable_sha256": "8ec95c3da2c3311ec2b96e922c814359949da1b771b70e17e6dcfdbc15cb5af6",
+    "log_sha256": "b4b73fb0d8797b8e11cd209ef745bca0d3275488f23cd2a316f0fb6af84ee7d8"
+  },
+  {
+    "label": "test-default-037-metadata_transfer",
+    "target": "metadata_transfer",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/metadata_transfer-f9cfa5bf4a2357ee",
+    "rc": 0,
+    "results": {
+      "passed": 42,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 42,
+    "elapsed": 5.243287563323975,
+    "executable_sha256": "ff1635112a744ee0805a8ce0ef25058d527c4a4dc1eea87c87458e00fcedb072",
+    "log_sha256": "aba39364bbb469a9322d279687bce6f3adb30444b3e1e133abf39ca32e4b475d"
+  },
+  {
+    "label": "test-default-038-logical_nested_native",
+    "target": "logical_nested_native",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_nested_native-89016bc823b2f4c0",
+    "rc": 0,
+    "results": {
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 13,
+    "elapsed": 45.58685326576233,
+    "executable_sha256": "c788ebd2de1d8be273b7277e605a6f64c91a53c67e0baef718d54dd4c3c2b299",
+    "log_sha256": "c09b7983fe1b99abdd56be5f7c7617d03814c3e509a68029c35bbfe43221d52c"
+  },
+  {
+    "label": "test-default-039-retirement",
+    "target": "retirement",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/retirement-233d8cda158c387d",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 0.6267397403717041,
+    "executable_sha256": "3d49a1653ab4b8a5b78133f3a43e139318b79d5eb13821b650aebb440b6c9184",
+    "log_sha256": "cdf3b0ce104850fc8eed9d5526f1fd0cb24a0d0d24d8d68e85be83950e1984ea"
+  },
+  {
+    "label": "test-default-040-scopes",
+    "target": "scopes",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/scopes-3e29b0b4c6359893",
+    "rc": 0,
+    "results": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 12,
+    "elapsed": 0.22971630096435547,
+    "executable_sha256": "5309affb2f79851da5decb3a459f10b229b5de70858c71bdd08dd3681f02b329",
+    "log_sha256": "551c180bb018d9b33a5b462b26ce72e1827dbbff4714695419b32a64558200cb"
+  },
+  {
+    "label": "test-default-041-insertion",
+    "target": "insertion",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/insertion-78cb49cbc3f47c14",
+    "rc": 0,
+    "results": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 12,
+    "elapsed": 2.6349806785583496,
+    "executable_sha256": "29b0513f2544694d5fd9375a356c6becc1d7049f3abfa98bd0d1ff0d0984a2b8",
+    "log_sha256": "2e177f5b3293b80dc049566e21e442b2e32c5262025999676095f926eb280534"
+  },
+  {
+    "label": "test-default-042-transaction_application",
+    "target": "transaction_application",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transaction_application-a191c83556b37729",
+    "rc": 0,
+    "results": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 6,
+    "elapsed": 0.22444415092468262,
+    "executable_sha256": "a1618482b2526b3acd7b4aec1b3c16412a9c70f08eaefa6bd6026015c7f11fae",
+    "log_sha256": "9f54e939a3478d7d9a3b23e6997365e211cb9088225de7327cb6946acfac2b0b"
+  },
+  {
+    "label": "test-default-043-learners",
+    "target": "learners",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/learners-1a54c75b28ec28c1",
+    "rc": 0,
+    "results": {
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 23,
+    "elapsed": 0.6354215145111084,
+    "executable_sha256": "a1538c686f5d2eb8f2b0fde25410efeb4aefd25846329f367dd86aa1e8728c46",
+    "log_sha256": "b6ca1aaf6a6faac3d87a4d9305577cd8fcb10087ca4051a4d7ed06443fbb58a7"
+  },
+  {
+    "label": "test-default-044-transfer_repeat",
+    "target": "transfer_repeat",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_repeat-0de2972c8f902547",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.4303882122039795,
+    "executable_sha256": "614c93b7fe37c0eb72437bf3633523fb12f1b5092e1bc6c2de815f16ccaa06df",
+    "log_sha256": "da6a4dd1d8dbf1630a4b45d11e650985917304d0189b6a27ca502afa44f6804d"
+  },
+  {
+    "label": "test-default-045-drain_membership",
+    "target": "drain_membership",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/drain_membership-518804366b9eb667",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.22269582748413086,
+    "executable_sha256": "9afc33a7eccc4733e0afe0fb053bfe57a4f7065257ba4b8d188e478c58aaaf29",
+    "log_sha256": "da7a31b55b7ab014887801e3403a2af9f82f9460d5aeaa76345cc476fbe0214b"
+  },
+  {
+    "label": "test-default-046-embedded_transfer",
+    "target": "embedded_transfer",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/embedded_transfer-f055741c8abe69c8",
+    "rc": 0,
+    "results": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 1,
+    "elapsed": 0.44089484214782715,
+    "executable_sha256": "b617c3f8524d7f5ce0f60efac7c3915c06433242758dab2693ed77b5d4277d39",
+    "log_sha256": "34410d67a556be432403c3b01f9db7cc1c3d2254dad2f3ad6310925737940a85"
+  },
+  {
+    "label": "test-default-047-history",
+    "target": "history",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/history-05e0ed35099d5e36",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.2274646759033203,
+    "executable_sha256": "bdfeb7e2b4489f82c3e23daf49b99e0ffa960921bda040a711793fbc627852ac",
+    "log_sha256": "6c493e753851fab947edc0843e8c381a44e0478d401e4073b7bfa53493f4e7b5"
+  },
+  {
+    "label": "test-default-048-learner_enrollment",
+    "target": "learner_enrollment",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/learner_enrollment-a1ec1ce34755d954",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.22491049766540527,
+    "executable_sha256": "5f08fd02b5dedc65408b63ea38116bbe7e99e91310c960c86b9ce49d113485c5",
+    "log_sha256": "2a1314c7d19be7d981b6946e1d6b5552b09b7d871a9443e9b350f778924d995d"
+  },
+  {
+    "label": "test-default-049-parser_campaign",
+    "target": "parser_campaign",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/parser_campaign-c892a823b6f11777",
+    "rc": 0,
+    "results": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 8,
+    "elapsed": 0.23032498359680176,
+    "executable_sha256": "942189f4e282b20a16736a8166b888ffc70095c9937d32783c019b2b59125de4",
+    "log_sha256": "b036e589224daf99e937807f79fa0465528375b37ad0f2ca87cecfe23a226dc8"
+  },
+  {
+    "label": "test-default-050-raft",
+    "target": "raft",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/raft-56dd50927f4890a8",
+    "rc": 0,
+    "results": {
+      "passed": 81,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 81,
+    "elapsed": 3.4492154121398926,
+    "executable_sha256": "feffb1100a8f5e97bb68d0655b778458a7e8270a13d4433aa479523d6fdc9345",
+    "log_sha256": "422f72d12bc5ed422927b95c1065dce95e984c90aa26f3612d10a9b3b91d450f"
+  },
+  {
+    "label": "test-default-051-configuration_capacity",
+    "target": "configuration_capacity",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/configuration_capacity-5142bbe36a919f5c",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.23519682884216309,
+    "executable_sha256": "0427946149c6ae75eccb667aebf14c375d1b1b2ebd89dabac9ef47e448aa6b85",
+    "log_sha256": "064a58dc8d0bef5334674f57a25ba4ff522df13e868319ab8053faa1bf4774af"
+  },
+  {
+    "label": "test-default-052-dial",
+    "target": "dial",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/dial-a0cb124f2c884390",
+    "rc": 0,
+    "results": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 6,
+    "elapsed": 0.22486639022827148,
+    "executable_sha256": "9388460f786f4ff4dad971a60c5460ddb396185aa9df9aebae91621be2e5b33f",
+    "log_sha256": "9d71e74d9530f3cc6300e9e15993d8229c444b4e9055fc36a5aef758a7cabef4"
+  },
+  {
+    "label": "test-default-053-authorization",
+    "target": "authorization",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/authorization-8b2e721e12553f0d",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 0.22518587112426758,
+    "executable_sha256": "e0b029c74059f5ea61aed3cda5c095d3db7882a797c5dcf3764f2850f5cf0aad",
+    "log_sha256": "5729eaaca10464d0455fca71ce95b8b80e4d1742cf57a1043f58c43eeca8cc77"
+  },
+  {
+    "label": "test-default-054-worker",
+    "target": "worker",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/worker-f48d736a258ba7dd",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 1.4408230781555176,
+    "executable_sha256": "2360034e0fd25c4688a1dff5a5bcbddcd5a1d51aecad8810aed0abb3d0bdc5ca",
+    "log_sha256": "98be3ab5e782c58c064a5c6b5f5c1873a851753c3e6fa1d58c55d9edb1650ec4"
+  },
+  {
+    "label": "test-default-055-remote_manifest",
+    "target": "remote_manifest",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/remote_manifest-96a9df6c65057eeb",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 0.22120022773742676,
+    "executable_sha256": "66512059823031b5f57be1d25533fb958362da6b7e1acce132011a050edd5a82",
+    "log_sha256": "12f58d46fbc6dae3322e764dcbf3e4e05c222f4e61f91364e70180ba399ff403"
+  },
+  {
+    "label": "test-default-056-logical_activation_driver",
+    "target": "logical_activation_driver",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_activation_driver-787874e99de18441",
+    "rc": 0,
+    "results": {
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 23,
+    "elapsed": 18.74347472190857,
+    "executable_sha256": "4a508ca1979beb591abb849fbc9234d56a6bb0c8ca4b5f2d5e655dc6db337755",
+    "log_sha256": "6e2b740e7e227ab8e099be7fc2d8b4a6e4da40f50cdb1e0e0f5eebceec03fc60"
+  },
+  {
+    "label": "test-default-057-directory_service",
+    "target": "directory_service",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/directory_service-9309fa4461c85a75",
+    "rc": 0,
+    "results": {
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 18,
+    "elapsed": 64.23388171195984,
+    "executable_sha256": "634a93438ccb2487f6185916f4a91f9ff62cabec81f7b86bd46ba252a14db396",
+    "log_sha256": "8a954a137f9edf6e0076a5b3d381831abbc46e17e3db3d496b0ca1982e395301"
+  },
+  {
+    "label": "test-default-058-provider_conformance",
+    "target": "provider_conformance",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/provider_conformance-331765eecc8d86d3",
+    "rc": 0,
+    "results": {
+      "passed": 42,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 42,
+    "elapsed": 0.43027186393737793,
+    "executable_sha256": "eeb2951975b242c442b4213b2b08dafa805e2977671f0527f5a0afbccdbeb7fe",
+    "log_sha256": "26e5a236ef2bffa1ebe0235682f98c6a233b1b1a6c03c68a44e32add99998c33"
+  },
+  {
+    "label": "test-default-059-member_recovery",
+    "target": "member_recovery",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/member_recovery-bb1bbca89ef59c6c",
+    "rc": 0,
+    "results": {
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 43,
+    "elapsed": 1.838585376739502,
+    "executable_sha256": "033c074e5e862c97c394d52ed1600dedfeed2ca788157b677c896718458ed154",
+    "log_sha256": "0dbca9f373f1df0241dd01e67363e79d657a37d2ecacb8c9cc238a26b2ab4df0"
+  },
+  {
+    "label": "test-default-060-routing",
+    "target": "routing",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/routing-955df0e040ddc1c9",
+    "rc": 0,
+    "results": {
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 13,
+    "elapsed": 0.22476816177368164,
+    "executable_sha256": "e5274ffdb3396c76b69f7bbd14535d82f234610fdbaeabbe6184e1e9bd185f25",
+    "log_sha256": "d8a0879f02e1a08eed432ba837937b39c872f5df5ed967774a0bb9fd8457297a"
+  },
+  {
+    "label": "test-default-061-routed",
+    "target": "routed",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/routed-ee18a611f2cb5bd0",
+    "rc": 101,
+    "results": {
+      "passed": 109,
+      "failed": 1,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 110,
+    "elapsed": 1803.8396172523499,
+    "executable_sha256": "7e36ffe0d5de73711bcbb46c6360afdbf0efc82fcf04c0b15a598ff9607fac2e",
+    "log_sha256": "4cd27df60833cc63a93278b4c8af599f992d4d06f0cb90329c7c8a79ce821017"
+  },
+  {
+    "label": "test-default-062-transfer_service",
+    "target": "transfer_service",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_service-f7b7b6618fe11802",
+    "rc": 0,
+    "results": {
+      "passed": 28,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 28,
+    "elapsed": 89.41041278839111,
+    "executable_sha256": "53a729f7a7e279def9d84d072075033eb00b39672a0fc4f981f2c34b157cebf2",
+    "log_sha256": "959b72df7daf341735c166a6385dca32a3f6622a0c792965a0b47fb002c00876"
+  },
+  {
+    "label": "test-default-063-admission",
+    "target": "admission",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/admission-230f1420e1a29a52",
+    "rc": 0,
+    "results": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 8,
+    "elapsed": 0.22423911094665527,
+    "executable_sha256": "e90076ff332188244de9b87418bf85da8583fc7a81f4a6dc500e7f9914f22c2c",
+    "log_sha256": "496ace32348f9aca265ebd2bf45fb511b39e966b4be867192b6679ec8b7e6801"
+  },
+  {
+    "label": "test-default-064-activation_model",
+    "target": "activation_model",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/activation_model-e93704cf79835a04",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 0.22448086738586426,
+    "executable_sha256": "ca1368957acda27e17187d983005a0a09b780d63ecd4175069c96223139d80e1",
+    "log_sha256": "e760f693074048ad185f7aefdca27f2b09e1e3e1bad99ea440f03eaf95708224"
+  },
+  {
+    "label": "test-default-065-transport",
+    "target": "transport",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transport-84ab2dfe88e3dc1a",
+    "rc": 0,
+    "results": {
+      "passed": 37,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 37,
+    "elapsed": 0.23200011253356934,
+    "executable_sha256": "8d7ffee0be2796dd75d9a243302a9babe4b7f4eb97ed8b1f12d75eb87f5fe0d5",
+    "log_sha256": "39e23560e51afc54562a8e82be1d08aa7398827da8b55a432b7199d3b1f57758"
+  },
+  {
+    "label": "test-default-066-transfer_publication",
+    "target": "transfer_publication",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_publication-7708fbf3ac180276",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 0.22529315948486328,
+    "executable_sha256": "ae7fd8ad5381ebcfa3b51b413ca383b74f39ac752cf1629ab52ed27542408592",
+    "log_sha256": "1fe2f84b9f3b3cafd943d6e17887117f9351812d7217834514a0ed0dda4e7ebb"
+  },
+  {
+    "label": "test-default-067-quic_connect",
+    "target": "quic_connect",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/quic_connect-6b7070a98e66aeed",
+    "rc": 0,
+    "results": {
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 0,
+    "elapsed": 0.22780990600585938,
+    "executable_sha256": "5b126858c3fa87ae8987a7d2570c2b0408f73038ba444dec9ca7fd21243db58d",
+    "log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+  },
+  {
+    "label": "test-default-068-program_transaction_model",
+    "target": "program_transaction_model",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/program_transaction_model-4ae2c6be5b90155e",
+    "rc": 0,
+    "results": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 2,
+    "elapsed": 0.22314167022705078,
+    "executable_sha256": "1c0c775a740f68fd90651adc43ad4ac99f2b52061c35af72e03a1d3e3875a0b7",
+    "log_sha256": "fb31ed101059e66f6deda1ecba4da5c5219a10ac71ac429f6d018254114d8096"
+  },
+  {
+    "label": "test-default-069-scoped_source",
+    "target": "scoped_source",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/scoped_source-4ad130bb1a811779",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.43091726303100586,
+    "executable_sha256": "88acb79a90868b59cc773f27164ec420031e8806182e3cfd92460aeaa20c09e3",
+    "log_sha256": "e3182a96b4ac92825652b0d28707518ba45222cd67d6599f7c2a1e2d08480bcd"
+  },
+  {
+    "label": "test-default-070-voteboat-counter",
+    "target": "voteboat-counter",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/voteboat_counter-f06d2e34902c1478",
+    "rc": 0,
+    "results": {
+      "passed": 52,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 52,
+    "elapsed": 17.891923427581787,
+    "executable_sha256": "b53d0d905c51387e7a9c228042a9472c06ea87c6fcf71d468852cd1706bac635",
+    "log_sha256": "de1b882622b350dd3b75077154a6d8a69306e051110c90b44e963b48761d60b0"
+  },
+  {
+    "label": "test-default-071-logical_voter_native",
+    "target": "logical_voter_native",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_voter_native-b7af557afb4f191f",
+    "rc": 0,
+    "results": {
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 25,
+    "elapsed": 7.692246198654175,
+    "executable_sha256": "52fd635303b463d8c0a03fb0f4d32be191b602a4613a69ca130cd629f1ecf926",
+    "log_sha256": "78ec4417b0ae8245757545ccac18ebfd44eeec53abd6c68b11b01d4e7b4de29a"
+  },
+  {
+    "label": "test-default-072-logical_voter_network",
+    "target": "logical_voter_network",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_voter_network-a84849edbc1955e5",
+    "rc": 0,
+    "results": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 2,
+    "elapsed": 3.0573959350585938,
+    "executable_sha256": "b536dd25bfd33dd43d19008081a3c0a97e3148e960245f3197ee3f833df6213e",
+    "log_sha256": "b114510d8d9d7ab02147e64527faff157c480fb8f9f0e9df5ecc5f31719d5ae0"
+  },
+  {
+    "label": "test-default-073-lookup_discovery",
+    "target": "lookup_discovery",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/lookup_discovery-99ee967c0981753d",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.22510838508605957,
+    "executable_sha256": "609a9d47dbd411af16c398ed20175ef920395e66b99268e18eaec30bfec049b3",
+    "log_sha256": "405ea1a73374ded437050b213d53459966ce73e83011fe3f8ff81fc16f0b9f58"
+  },
+  {
+    "label": "test-default-074-logical_relay_native",
+    "target": "logical_relay_native",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_relay_native-c1736a1db873ba63",
+    "rc": 0,
+    "results": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 1,
+    "elapsed": 1.4418282508850098,
+    "executable_sha256": "91057b5a229eed98bc589d7e1f794f1e328e9ca991090c84561f816ffa53971c",
+    "log_sha256": "0eaab741cc306e1792777c59eb66a9e1b2ec859fb2f9bad97da54016c968a710"
+  },
+  {
+    "label": "test-default-075-snapshot_worker",
+    "target": "snapshot_worker",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/snapshot_worker-8ed0ee43776163b2",
+    "rc": 0,
+    "results": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 14,
+    "elapsed": 0.4373970031738281,
+    "executable_sha256": "d74c0abc526c326ec855e36b7f33b493ed10f6d55c0d4f9227b3fa0904684f47",
+    "log_sha256": "62c9f24376aff0d1536ee7464fa8d89e1b041545db47a10d2e5e239aa0ad841f"
+  },
+  {
+    "label": "test-default-076-witness_log_store",
+    "target": "witness_log_store",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/witness_log_store-051f5f982f407b3d",
+    "rc": 0,
+    "results": {
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 15,
+    "elapsed": 0.23737835884094238,
+    "executable_sha256": "a3300cb4dd18a65bfec81b88fa6b3ec909f9a20a6782f7497887c5278b0b84ac",
+    "log_sha256": "2e91a6cc6697a631e79990d41b9db94d8b7aadd0f1b7e16fde1300ad79f09e77"
+  },
+  {
+    "label": "test-default-077-log_staging_benchmark",
+    "target": "log_staging_benchmark",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/log_staging_benchmark-4de22333ee8edd16",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.23057270050048828,
+    "executable_sha256": "16725256c20816de48a6ede06fd1c42c9515ce20fc3d5b4945585e243a98250a",
+    "log_sha256": "7db9d03cedede512e0e1a076f5b16ecaab8d6cab127c59397c0c283bd18d9578"
+  },
+  {
+    "label": "test-default-078-credential_journal",
+    "target": "credential_journal",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/credential_journal-5e7fd5bf80eda01c",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 0.22359323501586914,
+    "executable_sha256": "ff64cbdad6e2b44c7d2e308a43a05ef12edb25d869c37bd6b6884721993850e1",
+    "log_sha256": "290429be2cbf020b2e67d582d845f6418642d96679f50599d46c58d210cd121d"
+  },
+  {
+    "label": "test-default-079-logical_activation_nested",
+    "target": "logical_activation_nested",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_activation_nested-8c9663ab71e9a499",
+    "rc": 0,
+    "results": {
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 11,
+    "elapsed": 46.59977316856384,
+    "executable_sha256": "b9ce1e61a37577fec2d6ea7e0efb0332a79879f677019ea717388351b4a4f46f",
+    "log_sha256": "1f5da0747995684714eaf0c01e7a23188de8c5ae55cb42f30441c6655fc03624"
+  },
+  {
+    "label": "test-default-080-journal_attribution",
+    "target": "journal_attribution",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/journal_attribution-5e628ba01d930766",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.4306962490081787,
+    "executable_sha256": "5c505aaa8f1c71c3cc3a73a4e7876cae78a373ce0409f4deca1ffdd72219f1ec",
+    "log_sha256": "ee79ca80d9dfe0f6cef944f8598bd0869c348383bb4b796aa6db1b7e642d9c2e"
+  },
+  {
+    "label": "test-default-081-native_benchmark",
+    "target": "native_benchmark",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/native_benchmark-e480d7f4eb11c147",
+    "rc": 0,
+    "results": {
+      "passed": 56,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 56,
+    "elapsed": 38.23972463607788,
+    "executable_sha256": "b777c1c98c53e2695b632ff67d426c265d96dcdbd129b033b06b7399e38a9d38",
+    "log_sha256": "0de684b30089079a21eb38b6eda2a8ab4ece49c507e180ce9551b5d0e33290dd"
+  },
+  {
+    "label": "test-default-082-group_creation",
+    "target": "group_creation",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/group_creation-c374515f1d4c64cd",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 0.23355960845947266,
+    "executable_sha256": "86409036832e4aa73a4e6db7241723b2d7087241845f146bd0ed68cad0da769b",
+    "log_sha256": "118e986c042c8c7e4f8aebe8eada9114467c7f728953a10cc4ea8e2d39f52343"
+  },
+  {
+    "label": "test-default-083-native_relay",
+    "target": "native_relay",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/native_relay-6be3a9cd6122d7e3",
+    "rc": 0,
+    "results": {
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 13,
+    "elapsed": 1.8510851860046387,
+    "executable_sha256": "6085ef5735d4a28ee7719194275626788c8311da9fa3fe872c083d8d21213b70",
+    "log_sha256": "6f52d7bf78f58efac9a739fd4f69694f1900677eae8cac09a216dc6eade3f8ad"
+  },
+  {
+    "label": "test-default-084-placement",
+    "target": "placement",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/placement-956eda0c6fb81ef4",
+    "rc": 0,
+    "results": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 8,
+    "elapsed": 0.2247791290283203,
+    "executable_sha256": "6d00877a4e9213b54b5bbfbe683823ec8f8f21090dbf4b94c1f9cc7f19173ba2",
+    "log_sha256": "1e49885a059aa9cd39d464609ad74721ad973c4c86b1e827b8bc80276550dba3"
+  },
+  {
+    "label": "test-default-085-striped_wal_model",
+    "target": "striped_wal_model",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/striped_wal_model-03b92930d8b7126d",
+    "rc": 0,
+    "results": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 2,
+    "elapsed": 0.2245640754699707,
+    "executable_sha256": "4628f5586c0fb0c2cd7d7e3db27b000bafa54e3ae1a0adeb65fca9e6e1e0d8ea",
+    "log_sha256": "ed2a0339a51adcc3b90e1122c02f895928c72b97823e0729c2ca417bfe7be46e"
+  },
+  {
+    "label": "test-default-086-namespace_creation",
+    "target": "namespace_creation",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/namespace_creation-d6ccbacd2c21c333",
+    "rc": 0,
+    "results": {
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 18,
+    "elapsed": 0.6481921672821045,
+    "executable_sha256": "8e0530edfa56d1c94ea60f6f24b32861ff6389a063bfd0e1e08aa6ebd82c8edd",
+    "log_sha256": "9371235c939242e339a0dff332c008c021feb9e0e1a4d14aade25b199b509c4e"
+  },
+  {
+    "label": "test-default-087-transfer_activation",
+    "target": "transfer_activation",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_activation-d26ef7b2f7671a10",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.2343463897705078,
+    "executable_sha256": "6678632339370e39507720b6706c13a22d2d7868f1a7c782279f6f10b813c8fd",
+    "log_sha256": "91cef542db72d0b9631d9af463cde72cc8a95c7bf6e3cac7d3fe685259f4c01b"
+  },
+  {
+    "label": "test-default-088-logical_configuration_history",
+    "target": "logical_configuration_history",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_configuration_history-00f916a59a34fcd3",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 0.23500490188598633,
+    "executable_sha256": "2f3c964ae6efcd404e6ea6f4c5a4281a85d2fe905bdb5ce1c581178b808f69d4",
+    "log_sha256": "e65e70460823721b4d9cccc65e79223b7e7861671fd264611cd5604d96c38013"
+  },
+  {
+    "label": "test-default-089-connect",
+    "target": "connect",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/connect-3069dae895288140",
+    "rc": 0,
+    "results": {
+      "passed": 21,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 21,
+    "elapsed": 0.24919962882995605,
+    "executable_sha256": "c0f7d7e4cf20db6b502847eee34bd3c9b4f07f3e8cfa2544b731cf107e276074",
+    "log_sha256": "552660f07883b1d98abf922feac082379cbfa77fd7da50819932be2d8626025d"
+  },
+  {
+    "label": "test-default-090-logical_voter_activation",
+    "target": "logical_voter_activation",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_voter_activation-6cdbf6b5d60b8107",
+    "rc": 0,
+    "results": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 6,
+    "elapsed": 12.87561297416687,
+    "executable_sha256": "c6b9522d1480c289c7411ad1760407b92dc3e64693dd8093d0b4130ca2b4538c",
+    "log_sha256": "61eeb62b4df83f4bfc86d06813490ffcac8cb3cd23b54ff59ad5667c8d903cad"
+  },
+  {
+    "label": "test-default-091-vote",
+    "target": "vote",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/vote-87fa2cadce4c2578",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 0.23198437690734863,
+    "executable_sha256": "c44de3f76aca501c389c37e670897ea2f8671f1af18945df647586acd59127a8",
+    "log_sha256": "2ed5c39abbf0554c3fe3bc71f3b2d81dea4b90afd15c563e8ebbe0a2d5e46eb1"
+  },
+  {
+    "label": "test-default-092-transfer_operation",
+    "target": "transfer_operation",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_operation-fbd1681a90223af6",
+    "rc": 0,
+    "results": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 12,
+    "elapsed": 0.25417184829711914,
+    "executable_sha256": "daa4369e4372045a345ef6d7ec55c8dff183c30aab08e9b6ce9e1ca4471ab21c",
+    "log_sha256": "725fa3dfae5d3a1a8cd71d7ffba59c88f03caf207766d822e941b678ee522e8c"
+  },
+  {
+    "label": "test-default-093-wal_benchmark",
+    "target": "wal_benchmark",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/wal_benchmark-26efcf5b8d8e141b",
+    "rc": 0,
+    "results": {
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 0,
+    "elapsed": 0.23654556274414062,
+    "executable_sha256": "6c768445b5335359da229b686246b86218a61be41ca4f8b198ed21eac18d2b9b",
+    "log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+  },
+  {
+    "label": "test-default-094-framework_benchmark",
+    "target": "framework_benchmark",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/framework_benchmark-88681b2c5413104b",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.24036622047424316,
+    "executable_sha256": "0116c82370c2ea58b910119c799ee66a326d10b360cb0c4a851d20dcd0ee314b",
+    "log_sha256": "79fc58f84a3d330c317bcd89062f5b808d1c592a1dfbb1811c160078fbbc1408"
+  },
+  {
+    "label": "test-default-095-logical_formats",
+    "target": "logical_formats",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_formats-538b2ee1b69c89dc",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.23088908195495605,
+    "executable_sha256": "f05c916ceb8e4c1cec35c7cba5103ee64e0c9b45a94b4faaeea89d48dd42685c",
+    "log_sha256": "44c6c92347f807ed7d57aef753e193813a2a1d8214fe815c356e892339901085"
+  },
+  {
+    "label": "test-default-096-peer_rotation",
+    "target": "peer_rotation",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/peer_rotation-9b57d85ab039c6de",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.2258765697479248,
+    "executable_sha256": "9f1b70a0b1a6245738d46fd171b1ad3dd870d04daf96681d807f40dac7c8a58e",
+    "log_sha256": "b9cf91e4ff57a50ac212fc9a28bf4b74fd0032490e17379759545e1a564e5010"
+  },
+  {
+    "label": "test-default-097-secure",
+    "target": "secure",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/secure-55b7de54ba58990a",
+    "rc": 0,
+    "results": {
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 16,
+    "elapsed": 0.2615084648132324,
+    "executable_sha256": "e7f6e4e890d69a2ec48b5959b0e2e5036e898f8e02cd3533a8327f6fc9e01f97",
+    "log_sha256": "171d1fcb4f8b52c508530e05d4b179b288ff294d2d599db83733e0251f52e179"
+  },
+  {
+    "label": "test-default-098-log_staging",
+    "target": "log_staging",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/log_staging-824c9eed9d53a916",
+    "rc": 0,
+    "results": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 2,
+    "elapsed": 0.22332978248596191,
+    "executable_sha256": "f1da8fccef70c8b999665585cc1913205fbb1014df99dfe181671d1b9fb0dda1",
+    "log_sha256": "68523bbfe7fd8543ef842f132c936483b44059f4a26381d27c1f83e0b3b43283"
+  },
+  {
+    "label": "test-default-099-log_owned",
+    "target": "log_owned",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/log_owned-5d0d1d5403cf072e",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.2264080047607422,
+    "executable_sha256": "240af0cff64c31e3e2fc8b46fb14ffb27b7cde537025d082b0d82efa85d1b584",
+    "log_sha256": "6c012ed8aa7ec61ace1019afbba120874415f1ef80e0807746fa73a7a5dd7422"
+  },
+  {
+    "label": "test-default-100-journal_timings",
+    "target": "journal_timings",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/journal_timings-162570f629391248",
+    "rc": 0,
+    "results": {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 3,
+    "elapsed": 0.22571468353271484,
+    "executable_sha256": "16957c65ab08c099111f6db72f54689102b04af75fb6139d8ed23aa93ed8cf30",
+    "log_sha256": "537018677f588b93998155899ff244b0ece9b3f1226eba40182849a492ecac00"
+  },
+  {
+    "label": "test-default-101-membership",
+    "target": "membership",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/membership-fb08f628a539b80f",
+    "rc": 0,
+    "results": {
+      "passed": 32,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 32,
+    "elapsed": 0.23795700073242188,
+    "executable_sha256": "8efbf1dd5c333fea262e1ae2073c2850a8558dfbcbfafa7f18d4866a70d1f7f2",
+    "log_sha256": "6eca3d602120fb51ad4b951ddf02986564afbcbb7e1711d62a0aba4a8419ab3d"
+  },
+  {
+    "label": "test-default-102-peers",
+    "target": "peers",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/peers-7c5951b37ec70713",
+    "rc": 0,
+    "results": {
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 22,
+    "elapsed": 0.8279314041137695,
+    "executable_sha256": "5275ba666c46c2894f1b1e1eb676115e3a1239d54e4db8cb94ff1569ebc89a34",
+    "log_sha256": "4786ccd3086b09262730fd3cb5ed2f2738a008269380118d644659cb80ab0fc0"
+  },
+  {
+    "label": "test-default-103-remote_discovery",
+    "target": "remote_discovery",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/remote_discovery-787805962022549c",
+    "rc": 0,
+    "results": {
+      "passed": 29,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 29,
+    "elapsed": 0.24899053573608398,
+    "executable_sha256": "e0beca8958f4e94d5d138836898afa0740a71450e74f4744fc6e4459d43d0e72",
+    "log_sha256": "54c2215a0426dc68517c63c90be69c61fd40100341f2fc18d8a93d9dfde70150"
+  },
+  {
+    "label": "test-default-104-striped_node",
+    "target": "striped_node",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/striped_node-ecfff52001e780a2",
+    "rc": 0,
+    "results": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 1,
+    "elapsed": 0.6403546333312988,
+    "executable_sha256": "ac35698f6921fc9a4c4e59c1a8bca6450a9a29b60ac3faa3b8897dcfd0948e02",
+    "log_sha256": "dd93829306134b829d94d4bc6ebee2a1b4870650e9e006f697fa896e810c78a5"
+  },
+  {
+    "label": "test-default-105-transaction_model",
+    "target": "transaction_model",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transaction_model-8bcb1bd61375c071",
+    "rc": 0,
+    "results": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 8,
+    "elapsed": 3.2540438175201416,
+    "executable_sha256": "e9c1c52cfc8f2e9f7eb05be3f7fa04472b059c593df7123c41589403816db5b4",
+    "log_sha256": "cd3195b8a657dab0a02bb59bf2fcdd1abe92e04a824d2bcbc6ebbff09be124a8"
+  },
+  {
+    "label": "test-default-106-reparent_guards",
+    "target": "reparent_guards",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/reparent_guards-45d0dd6faed6c4b7",
+    "rc": 0,
+    "results": {
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 18,
+    "elapsed": 1.4485435485839844,
+    "executable_sha256": "6ac2911a93f0e9d66da2eaa4acce5c5c801a492e574681f5aa16a674cdb6dd06",
+    "log_sha256": "c741faf3b832da0e75a119078d29df5cb4ca3a75f434abf50b8ee33af74e2fad"
+  },
+  {
+    "label": "test-default-107-ballots",
+    "target": "ballots",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/ballots-d9e48a652ec8ee94",
+    "rc": 0,
+    "results": {
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 10,
+    "elapsed": 0.23529887199401855,
+    "executable_sha256": "bb255f9155b1efdca00f736606e226e8c3bcd6bdde854690f8740909e6eb79f7",
+    "log_sha256": "6e946920f52eb911499ea638fdbb1ddc32b78912c2fbdf88519dd2bef1231bc9"
+  },
+  {
+    "label": "test-default-108-program_transaction_driver",
+    "target": "program_transaction_driver",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/program_transaction_driver-1e280eb5ae0e1d78",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 9.873586654663086,
+    "executable_sha256": "41250d8c8c14f1296ea21784128719705f98462fd4be4daeb5734c5510b8645a",
+    "log_sha256": "7d1a0787aa2ea4e479db0792800ebcabc754350c637eb6a81775f115abebe1ac"
+  },
+  {
+    "label": "test-default-109-native_member_startup",
+    "target": "native_member_startup",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/native_member_startup-bf381637f339b60c",
+    "rc": 0,
+    "results": {
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 27,
+    "elapsed": 11.07414197921753,
+    "executable_sha256": "d13c1c3e14faae50b7284773b92d6f43ef049e551bef61133009c981ec5f98f1",
+    "log_sha256": "cf9dfa830c22cdcf0548a0234ef12338685794359c318bb903a4c496d95fc1fa"
+  },
+  {
+    "label": "test-default-110-discovery",
+    "target": "discovery",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/discovery-c7aca7221eb3d2ad",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.22745609283447266,
+    "executable_sha256": "f4995df0430dbcabeaa2f711bbf68d6425c89f0b893779f0478cdf942367f5d2",
+    "log_sha256": "ccdc0a467cb9e5a7c5507dad70cd352094a05b6c8644b9a6bdc1f964a8a6f840"
+  },
+  {
+    "label": "test-default-111-delegation",
+    "target": "delegation",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/delegation-ac1b8b3e571ff02d",
+    "rc": 0,
+    "results": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 14,
+    "elapsed": 0.2283797264099121,
+    "executable_sha256": "e1a87031c63f93eef97d27b9c27e9d9b26f5dda9c9ef9fbff0b974ea2a7ec906",
+    "log_sha256": "03aa5530381e27ed14f19195b44a1897ef54acc2d6f5fc1b80dfab1c031c879c"
+  },
+  {
+    "label": "test-default-112-logical_voter_promises",
+    "target": "logical_voter_promises",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/logical_voter_promises-37b4be47786fb53d",
+    "rc": 0,
+    "results": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 6,
+    "elapsed": 61.388307332992554,
+    "executable_sha256": "2acec95d0b13f2d52cf6dd5ea2229d2ae4c5dee80e0eb39ce604bf38e39767ec",
+    "log_sha256": "ba8637b998b5f2892cb9747b410a9aa39fd26f8648374e77b84a6d74bca55b21"
+  },
+  {
+    "label": "test-default-113-transaction_driver",
+    "target": "transaction_driver",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transaction_driver-aedbb25877267c78",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 7.874711513519287,
+    "executable_sha256": "0f95ac67ca7145d5257833239d9184bed84042e30cb7e5fbb25c69a8a2c4cb3a",
+    "log_sha256": "bd4e21b47c420e7b6d8fd056ebc4673083706f0ed6690db8b01f7e185678b6c2"
+  },
+  {
+    "label": "test-default-114-reparenting",
+    "target": "reparenting",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/reparenting-7df3ba229701e5df",
+    "rc": 0,
+    "results": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 14,
+    "elapsed": 0.4345974922180176,
+    "executable_sha256": "b02792945a0010904e80cfdc8ac0c09b392d30aab68f8fdab04f2ee3b16313ed",
+    "log_sha256": "61b4421102568b2128070df44fda98e2eec3e58274c6243deef79fb76c74be25"
+  },
+  {
+    "label": "test-default-115-transfer_merge",
+    "target": "transfer_merge",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/transfer_merge-3064fcd833b7276d",
+    "rc": 0,
+    "results": {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 3,
+    "elapsed": 0.23284602165222168,
+    "executable_sha256": "45685080de89940068a1a0ff4afc8d0eb4a5a3cca740a61d021e0599ce95ae89",
+    "log_sha256": "c4674133113976c8cf5d47dfe46071fa61cf1dcb87c80c05d48c1a746ceb9f74"
+  },
+  {
+    "label": "test-default-116-credential_refresh",
+    "target": "credential_refresh",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/credential_refresh-3443097157c52ae9",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.23097753524780273,
+    "executable_sha256": "9ac6cb2215438339c881add0f1c41c7248241d4430c5f54a162eb181a5ea5f0b",
+    "log_sha256": "e850725dfcf34d5b5ba0b81cbdb17180655b20e6cac0e0c2d38da9f1146770b8"
+  },
+  {
+    "label": "test-default-117-runtime",
+    "target": "runtime",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/runtime-cedaff21a1e2ea2c",
+    "rc": 0,
+    "results": {
+      "passed": 64,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 64,
+    "elapsed": 1.4526619911193848,
+    "executable_sha256": "8d9f3e99010fc7e38c1199fd43e64ff97cd899aae8a73ac371474f40a529c8f3",
+    "log_sha256": "5439191d20d30d070bc5712494a94806c857746a38a119b4a780dd9aafc8e0e7"
+  },
+  {
+    "label": "test-default-118-journal_barrier",
+    "target": "journal_barrier",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/journal_barrier-cf834bc4c7360493",
+    "rc": 0,
+    "results": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 4,
+    "elapsed": 0.22656798362731934,
+    "executable_sha256": "309e800802ddb30cd49fc18e69e96645f47dbe624b9ffe6f57ea943fc88831ea",
+    "log_sha256": "8ef3cb2195d0c61c6ebaa5361178c5a0b03fdf6540d97694c08e4f81588e0ec3"
+  },
+  {
+    "label": "test-default-119-placement_planning",
+    "target": "placement_planning",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/placement_planning-eef734937d3e25a2",
+    "rc": 0,
+    "results": {
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 13,
+    "elapsed": 0.2251904010772705,
+    "executable_sha256": "9da7ecf108964e74dc0db29b02362008b248f4c86096eebe3ac0a639b3a630cc",
+    "log_sha256": "0156487ab967ab23adf7cf6cfac72f04d947dd706be8449fe6718d2d45c4e51b"
+  },
+  {
+    "label": "test-default-120-replication_scope",
+    "target": "replication_scope",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/replication_scope-fe4e039b84788380",
+    "rc": 0,
+    "results": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 7,
+    "elapsed": 0.22460222244262695,
+    "executable_sha256": "4e5a9261feeb1c3ccc670c84f0e3c5691d881a7ecbc6b2e56e54d2550be17a69",
+    "log_sha256": "82373476469058ca609a84b3dca8d591e8426a0cef31a27728674b923efee2b9"
+  },
+  {
+    "label": "test-default-121-service_profiles",
+    "target": "service_profiles",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/service_profiles-7761b52a3a128ab8",
+    "rc": 0,
+    "results": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 1,
+    "elapsed": 0.22600674629211426,
+    "executable_sha256": "7f4cbf72b8cd7362423c35de26ab6f59cd254edbc06398ed308ec3349e494049",
+    "log_sha256": "e013a3706772571b92f5b8e7b712b0eed2e729b469458d26b7bfcec496ca289e"
+  },
+  {
+    "label": "test-default-122-counter_service",
+    "target": "counter_service",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/counter_service-fee6a661a41aa2d4",
+    "rc": 0,
+    "results": {
+      "passed": 144,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 144,
+    "elapsed": 313.83520126342773,
+    "executable_sha256": "a1be4661cacbc7fae2898e546d7bcab2bceaa95fd2ed751982528f95fd783bc6",
+    "log_sha256": "65d1a25d7bf98d7e7a8e5685a3f011a44866f0920072f14f3f4f09cdfb73680a"
+  },
+  {
+    "label": "test-default-123-durable_vote",
+    "target": "durable_vote",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/examples/durable_vote-ec68f073c6c48e7f",
+    "rc": 0,
+    "results": {
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 0,
+    "elapsed": 0.2210538387298584,
+    "executable_sha256": "fe497cf5ab0025cc4d6cd599901a3052e09d156fc80b1d8ddb989986db953f59",
+    "log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd"
+  },
+  {
+    "label": "test-default-124-striped_log_store",
+    "target": "striped_log_store",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/striped_log_store-6101ee15ed022a6f",
+    "rc": 0,
+    "results": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 9,
+    "elapsed": 0.43453335762023926,
+    "executable_sha256": "21db2450ab624cff4b784ee48438bcce1aee21c763e9e255ce8ba4ab64a6cc3e",
+    "log_sha256": "ded043370eea2711df53eba407de33d6dfd71dfbf55d153e1172c843c24200b3"
+  },
+  {
+    "label": "test-default-125-maintenance",
+    "target": "maintenance",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/maintenance-4dfbadd665ff09c9",
+    "rc": 0,
+    "results": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 5,
+    "elapsed": 0.23815059661865234,
+    "executable_sha256": "df3ea72dda75470a52647d014cb81835243f6b3805a08d74ba5e35e2f3ff790c",
+    "log_sha256": "09a36f1f1e9278ed4f08d04490651c85a8aaa373ff85371d2bda2500aef8497e"
+  },
+  {
+    "label": "test-default-126-snapshot_exports",
+    "target": "snapshot_exports",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/snapshot_exports-82781d9afcd7681d",
+    "rc": 0,
+    "results": {
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 15,
+    "elapsed": 0.25827717781066895,
+    "executable_sha256": "f9619452a2562dd4c9616f8cdf27ad4c02b44aadbc522623c05eaa35fdf06f5e",
+    "log_sha256": "e11ac449fe069943b1efb62890a3101e961590e58278f9e94f656a21f5032136"
+  },
+  {
+    "label": "test-default-127-log_reclaim",
+    "target": "log_reclaim",
+    "path": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255/target/debug/deps/log_reclaim-df84d6b4ad9b244c",
+    "rc": 0,
+    "results": {
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "result_count": 1,
+    "named_outcomes": 11,
+    "elapsed": 0.8599092960357666,
+    "executable_sha256": "6625aa9bfd2bc790610f6380012d7c00491e41c07fd0a9459841d061fdec1074",
+    "log_sha256": "10629da5a529ce945f61583f9b06d13a239b573d1f44d7a7b947471005e23b89"
+  }
+]

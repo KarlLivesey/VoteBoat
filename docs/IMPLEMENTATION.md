@@ -20,18 +20,22 @@ work needed to decide PR19.
 | PR24 V3f | Kept and merged | Merge `1e56e9f5`; recorded final-main head `bd714771`; default 2603, all-features 2915, no-default 1346, native-only 1924 and matched 75 passed, zero failures; both reviews, strict checks and enabled hook passed |
 | PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
 | PR15 DR1 | Rejected for this wind-down; closed as parked, not merged | Independent source `66fcf3e0` has both fresh source approvals and strict checks, but its complete final default failed: 2686 passed / 2 failed / 1 ignored |
-| PR23 N1c | Rejected for this wind-down; closed as parked, not merged | Independent source `1c259536` has both source approvals and strict checks, but fair performance qualification is incomplete: 0/70 measurements launched because the quiet-host prerequisite never held. Current Linux default is being completed and audited before cleanup |
+| PR23 N1c | Rejected for this wind-down; closed as parked, not merged | Independent source `1c259536` has both source approvals and strict checks, but fair performance qualification is incomplete: 0/70 measurements launched because the quiet-host prerequisite never held. Complete final default failed: 2639 passed / 1 failed / 1 ignored; 129/129 harnesses audited and owned checkout/processes swept |
 | PR22 N1b | Rejected for this wind-down; closed as parked, not merged | Dirty reconciled input passed Python 15 and default example 56, but all-feature example failed 63 passed / 1 failed. No source publication, fresh review or full qualification followed |
 | PR19 N1 | Rejected for this wind-down; closed as parked, not merged | Unchanged `ff9faec8` retains its failed durable-save CPU gate and unresolved source-review P2 obligations. N1d was not built |
 
 All six candidates now have explicit decisions: keep PR24; reject and close
-PR14, PR15, PR19, PR22 and PR23 as parked. No candidate remains open. The current
-mini plan is to preserve the PR22 patch and failure evidence, complete PR23’s
-already-running default audit, then verify ownership/process/build cleanup.
-Their dependency is the existing evidence, and completion requires durable
-records, joined jobs and removed owned build checkouts. They close the existing
-network wind-down without adding roadmap scope; the macro release and lifetime
-goals remain incomplete.
+PR14, PR15, PR19, PR22 and PR23 as parked. No candidate remains open. PR22’s
+reconstructable patch/failure evidence and PR23’s complete default audit are
+retained below; all delegated build checkouts and jobs are swept. The final
+parent ownership audit found all 36 recorded tasks terminal, no pending child
+runs, no owned build/test/deleted-cwd processes and no owned extra worktrees.
+The foreign application-conformance checkout is preserved. This record is
+published through the enabled checks; inherited main build artifacts are
+removed afterward while safe tools/reports remain. No next implementation
+deliverable is authorized. This closes the
+existing network wind-down without adding roadmap scope; the macro release
+and lifetime goals remain incomplete.
 
 #### PR23 rejection record
 
@@ -55,11 +59,31 @@ comparisons cannot qualify this head. The owned Mac roots, targets, WAL and
 jobs were removed and the stock guard passed; early helper/resource limitations
 remain disclosed. [Compact retained evidence](../validation/winddown/pr23/REPORT.md).
 
-The Linux owner must complete and audit its current default configuration,
-including every original executable, exhaustive normal-debug relay and eligible
-docs, then stop all later configurations and sweep its checkout/build/processes.
-That audit is pending at this record and cannot replace the missing performance
-gate. No further measurement, repair or unchanged retry is authorized.
+The exact-head Linux default also failed: **2639 passed / 1 failed / 1 ignored**,
+actual outer rc1. Build rc0/build-finished true; all 129 Cargo-discovered harnesses
+ran exactly once, with raw named results, exits and executable hashes audited.
+The exhaustive normal-debug relay passed 9/9 in 3241.54 seconds, alone and fully
+joined before ordinary tests. Eligible library doctests completed rc0 with zero
+cases. All-features, no-default, native-only and matched were held and never
+launched. This complete failure cannot clear the missing fair performance gate.
+
+The sole failed harness, routed, reported 109 passed / 1 failed and rc101 after
+1803.61 seconds. `native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules`
+timed out at `tests/routed/namespace_race.rs:108:9`. The last printed schedule
+was Publish/committed/checkpoint. Emitted nodes were leader/follower in term2,
+commit/last/applied5, no pending dependency; owner drained but peers not drained,
+with one retained client request on node1. These are observations, not proof
+of a causal phase or a product defect. No backtrace or node3 local dump was
+emitted. No diagnosis, repair, isolated rerun or Linux performance test followed.
+[Complete audit and original failure](../validation/winddown/pr23/linux-default/REPORT.md).
+
+The owner removed its target, checkout, registration, scratch, seed branch and
+three positively identified helpers; no owned/deleted-cwd jobs remained and
+the final stock guard passed. Native test receipts sampled 38,659 task records
+with zero observed priority/affinity violations. All-task resource compliance
+is not a pass: three idle app tool hosts were discovered outside that envelope
+and corrected only for cleanup. That limitation remains disclosed. No further
+measurement, repair or unchanged retry is authorized.
 
 The source-audit P3 is folded here: the 2,621-path union names original44,
 mainb77, fixture66fc and the desired tree, rather than every historical tree.

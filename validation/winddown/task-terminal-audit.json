@@ -1,0 +1,254 @@
+[
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Ahandoff-pr15-validation-sol-r1-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Ahandoff-pr24-integration-sol-r1-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-cumulative-reconcile-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-cumulative-review-a-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-cumulative-review-b-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-independent-exclusive-gate-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-independent-final-source-a-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-independent-final-source-b-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-known-transfer-overflow-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-root-fixed-source-a-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-root-fixed-source-b-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-root-identity-review-fix-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-dr1-without-st2-reconcile-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1b-final-main-reconcile-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-cumulative-reconcile-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-cumulative-review-a-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-cumulative-review-b-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-fair-qualified-n0-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-final-n0-sol-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-independent-exclusive-gate-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-independent-main-reconcile-sol-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-independent-source-a-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-independent-source-b-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-r3-sol-review-a-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-n1c-r3-sol-review-b-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-st2-cumulative-sol-confirm-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-st2-exclusive-final-gate-sol-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-st2-final-fixtures-sol-confirm-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-st2-rebase-sol-confirm-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-st2-repair-sol-source-a-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-st2-repair-sol-source-b-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Adelegate-task%3Awinddown-st2-three-gate-failures-sol-20261020",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Athread-send%3Ast2-3aed-full-matrix-release-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Athread-send%3Ast2-3aed-single-diagnostic-release-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Athread-send%3Ast2-3aed-startup-context-diagnostic-once-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  },
+  {
+    "taskId": "node:delegated-task:command%3Amcp%3A949e93bd-7d0b-478d-b727-5f1bd57eb166%3Athread-send%3Ast2-reject-park-record-and-sweep-20261021",
+    "status": "completed",
+    "hasPendingChildRuns": false,
+    "workState": "result_available",
+    "latestTerminalStatus": "completed"
+  }
+]
