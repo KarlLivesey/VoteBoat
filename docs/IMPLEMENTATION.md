@@ -20,14 +20,69 @@ work needed to decide PR19.
 | PR24 V3f | Kept and merged | Merge `1e56e9f5`; recorded final-main head `bd714771`; default 2603, all-features 2915, no-default 1346, native-only 1924 and matched 75 passed, zero failures; both reviews, strict checks and enabled hook passed |
 | PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
 | PR15 DR1 | Rejected for this wind-down; closed as parked, not merged | Independent source `66fcf3e0` has both fresh source approvals and strict checks, but its complete final default failed: 2686 passed / 2 failed / 1 ignored |
-| PR23 N1c | Current: reconcile the original network candidate onto qualified main | Exclude both rejected ST2 and DR1 production trees while preserving published history; fresh reviews, full final-head suites and the established fair performance gate remain required |
-| PR22 N1b | Next: resolve after PR23 | Reconcile the final main, make the N1c disposition and entryless-frame documentation accurate, and complete the established review and validation gates |
-| PR19 N1 | Pending bounded keep/reject decision after PR23 | Only the previously authorized N1d work, two existing review P2 fixes and the recorded performance gate are permitted; park/close if that gate still fails |
+| PR23 N1c | Rejected for this wind-down; closed as parked, not merged | Independent source `1c259536` has both source approvals and strict checks, but fair performance qualification is incomplete: 0/70 measurements launched because the quiet-host prerequisite never held. Current Linux default is being completed and audited before cleanup |
+| PR22 N1b | Current: finish the existing diagnostic-counter candidate | Reconcile qualified main; record N1c and N1 as parked, document counter limits, then obtain fresh reviews and the full final-head validation gate |
+| PR19 N1 | Rejected for this wind-down; closed as parked, not merged | Unchanged `ff9faec8` retains its failed durable-save CPU gate and unresolved source-review P2 obligations. N1d was not built |
 
-N1c and N1b advance the existing network milestone through the gates above.
-PR19 is the following bounded decision item. Their dependency is qualified main,
-not either parked lifetime-bounds candidate. No unfinished lifetime or network
-roadmap item is made a prerequisite for this wind-down.
+PR22 is the only remaining open candidate. Its purpose is to retain useful
+benchmark diagnostics if the established gates pass; its dependency is qualified
+main, not a parked candidate. Next comes recording its keep/reject decision,
+then the final ownership/process/build cleanup audit. These steps advance the
+existing network milestone and close the wind-down; they add no roadmap scope.
+
+#### PR23 rejection record
+
+[PR23 was closed as parked](https://github.com/KarlLivesey/VoteBoat/pull/23#issuecomment-6309504497)
+without merging N1c. Independent source `1c2595364cbe405922695ce9c8728316ecf05741`
+retains the original candidate and qualified main while excluding rejected ST2
+and DR1 production. Fresh Sol source approvals
+[A](https://github.com/KarlLivesey/VoteBoat/pull/23#pullrequestreview-5595438315)
+and [B](https://github.com/KarlLivesey/VoteBoat/pull/23#pullrequestreview-5595449962),
+strict checks and the enabled push hook passed. The required fair performance
+gate remains incomplete, so these do not authorize a merge.
+
+The fair Mac comparison pinned qualified main `b77fd087` against this exact head
+with matching 8-byte command composition. Both release builds and source/binary
+audits passed. During the bounded quiet wait, load1 never met the required `<1`
+condition: 91 samples, minimum 1.305176; the nominal 900-second wait lasted 907
+seconds because of polling. No measurement launched: 0/70 attempted, completed,
+valid or invalid; all metrics are unavailable. This is neither a measured CPU
+regression nor a production-defect finding. Historical unequal-composition
+comparisons cannot qualify this head. The owned Mac roots, targets, WAL and
+jobs were removed and the stock guard passed; early helper/resource limitations
+remain disclosed. [Compact retained evidence](../validation/winddown/pr23/REPORT.md).
+
+The Linux owner must complete and audit its current default configuration,
+including every original executable, exhaustive normal-debug relay and eligible
+docs, then stop all later configurations and sweep its checkout/build/processes.
+That audit is pending at this record and cannot replace the missing performance
+gate. No further measurement, repair or unchanged retry is authorized.
+
+The source-audit P3 is folded here: the 2,621-path union names original44,
+mainb77, fixture66fc and the desired tree, rather than every historical tree.
+Adding history-only b959 gives 2,628 paths: 2,607 present and 21 absent, with all
+seven additional ST2-only paths absent. Two-voter commit notices can be held;
+a byte-limit split can re-hold a spare. Historical TCP4k p99 notes remain
+historical evidence, not clearance of the final candidate.
+
+#### PR19 rejection record
+
+[PR19 was closed as parked](https://github.com/KarlLivesey/VoteBoat/pull/19#issuecomment-6309505093)
+without merging N1. The unchanged candidate
+`ff9faec8f01710d4e12c2fffb6ccc5f32c879fb8` retains the
+[Sol request-changes review](https://github.com/KarlLivesey/VoteBoat/pull/19#pullrequestreview-5582976295).
+Its recorded durable-save comparison regressed from 9.74 to 10.72 microseconds
+per write; all five paired CPU measurements worsened, and the recomputed median
+paired marginal CPU ratio was about 1.115. Latency gains do not clear that gate.
+
+Two review P2 obligations also remain unresolved on this candidate: complete
+the peers actually visited by the flush pass, and certify same-peer/class FIFO
+under a sends=1 refusal (observed order 1,3,2). The latter was pre-existing and
+is not attributed to N1. These are retained branch findings, not a fresh
+diagnosis of current main. The planned qualified-N1c dependency did not land.
+The authorized N1d contract amendment remains recorded, but N1d was not built;
+no new prerequisite or investigation is started to rescue PR19. EO1 already
+landed separately. [Retained review and decision](../validation/winddown/pr19/REPORT.md).
 
 #### PR14 rejection record
 

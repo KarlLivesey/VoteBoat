@@ -1,0 +1,26 @@
+{
+  "host": "Mac.localdomain",
+  "source": {
+    "b77fd087b06c5ae76a5a1a25f2cfe3ed6891c339": {
+      "root": "/tmp/voteboat-claude-loop/winddown-n1c-qualified/main-b77fd087",
+      "checked": 1866,
+      "mismatches": []
+    },
+    "1c2595364cbe405922695ce9c8728316ecf05741": {
+      "root": "/tmp/voteboat-claude-loop/winddown-n1c-qualified/candidate-1c259536",
+      "checked": 1868,
+      "mismatches": []
+    }
+  },
+  "binaries": {
+    "main-b77fd087": "d461c0233f2c10fbf0d76c45f290ad0972e1ea8f80afe480cc2acbd71107eb67",
+    "candidate-1c259536": "18d94b03292b2ae00436547cf37d3b5a20492b4885221ddd440e388d971f52ac"
+  },
+  "env": {
+    "CARGO_TARGET_DIR": null,
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "CARGO_BUILD_TARGET": null
+  },
+  "owned_processes": []
+}

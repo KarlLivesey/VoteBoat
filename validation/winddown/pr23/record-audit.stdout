@@ -1,0 +1,135 @@
+{
+  "status": "INCOMPLETE_BLOCKED_QUIET_HOST",
+  "A": "b77fd087b06c5ae76a5a1a25f2cfe3ed6891c339",
+  "B": "1c2595364cbe405922695ce9c8728316ecf05741",
+  "planned_runs": 70,
+  "attempted_runs": 0,
+  "completed_runs": 0,
+  "valid_runs": 0,
+  "invalid_runs": 0,
+  "unattempted_runs": 70,
+  "cells": {
+    "tcp1k": {
+      "planned_runs": 10,
+      "attempted_runs": 0,
+      "completed_runs": 0,
+      "valid_runs": 0,
+      "invalid_runs": 0,
+      "planned_rounds": 5,
+      "attempted_measurement_rounds": 0,
+      "valid_rounds": [],
+      "invalid_rounds": {},
+      "unattempted_rounds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "metrics": null,
+      "reason": "quiet-host timeout before tcp1k round0; no further cells launched"
+    },
+    "tcp4k": {
+      "planned_runs": 10,
+      "attempted_runs": 0,
+      "completed_runs": 0,
+      "valid_runs": 0,
+      "invalid_runs": 0,
+      "planned_rounds": 5,
+      "attempted_measurement_rounds": 0,
+      "valid_rounds": [],
+      "invalid_rounds": {},
+      "unattempted_rounds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "metrics": null,
+      "reason": "quiet-host timeout before tcp1k round0; no further cells launched"
+    },
+    "tcp15k": {
+      "planned_runs": 20,
+      "attempted_runs": 0,
+      "completed_runs": 0,
+      "valid_runs": 0,
+      "invalid_runs": 0,
+      "planned_rounds": 5,
+      "attempted_measurement_rounds": 0,
+      "valid_rounds": [],
+      "invalid_rounds": {},
+      "unattempted_rounds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "metrics": null,
+      "reason": "quiet-host timeout before tcp1k round0; no further cells launched"
+    },
+    "quic15k": {
+      "planned_runs": 20,
+      "attempted_runs": 0,
+      "completed_runs": 0,
+      "valid_runs": 0,
+      "invalid_runs": 0,
+      "planned_rounds": 5,
+      "attempted_measurement_rounds": 0,
+      "valid_rounds": [],
+      "invalid_rounds": {},
+      "unattempted_rounds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "metrics": null,
+      "reason": "quiet-host timeout before tcp1k round0; no further cells launched"
+    },
+    "idle20": {
+      "planned_runs": 10,
+      "attempted_runs": 0,
+      "completed_runs": 0,
+      "valid_runs": 0,
+      "invalid_runs": 0,
+      "planned_rounds": 5,
+      "attempted_measurement_rounds": 0,
+      "valid_rounds": [],
+      "invalid_rounds": {},
+      "unattempted_rounds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "metrics": null,
+      "reason": "quiet-host timeout before tcp1k round0; no further cells launched"
+    }
+  },
+  "quiet": {
+    "entries": 91,
+    "round_entries": 1,
+    "passed": 0,
+    "first_utc": "2026-10-21T05:59:20Z",
+    "last_utc": "2026-10-21T06:14:27Z",
+    "observed_elapsed_s": 907.0,
+    "deadline_s": 900,
+    "sampling_interval_s": 10,
+    "load1_min": 1.30517578125,
+    "load1_max": 3.64794921875,
+    "load1_last": 1.681640625,
+    "competing_process_observations": 0
+  },
+  "performance_clearance": false,
+  "winning_regimes": null,
+  "losing_regimes": null,
+  "append_counters": "UNAVAILABLE",
+  "data_vs_commit_persist": "UNAVAILABLE",
+  "all_attempts_linux_resource_compliance": false,
+  "resource_note": "early read/preflight helpers did not establish absolute19; initial controller assertion failed before archive/build; corrected launch enforces19/4-7"
+}
+Independent zero-attempt artifact audit PASS: no scheduled run directories, command/result/node records; all quiet observations fail required load1<1; no measurement statistics computed.

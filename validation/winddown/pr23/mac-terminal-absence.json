@@ -1,0 +1,9 @@
+{
+  "owned_parent_exists": false,
+  "owned_root_exists": {
+    "/tmp/voteboat-claude-loop/winddown-n1c-qualified/main-b77fd087": false,
+    "/tmp/voteboat-claude-loop/winddown-n1c-qualified/candidate-1c259536": false
+  },
+  "wal_exists": false,
+  "owned_processes": []
+}

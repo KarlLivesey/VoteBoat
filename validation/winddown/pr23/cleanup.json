@@ -1,0 +1,13 @@
+{
+  "utc": "2026-10-21T06:15:34Z",
+  "owned_processes_before": [],
+  "owned_processes_after": [],
+  "roots_exist_after": {
+    "/tmp/voteboat-claude-loop/winddown-n1c-qualified/main-b77fd087": false,
+    "/tmp/voteboat-claude-loop/winddown-n1c-qualified/candidate-1c259536": false
+  },
+  "wal_exists_after": false,
+  "shared_test_ports_untouched": true,
+  "reference_tools_untouched": true,
+  "linux_worktrees_targets_untouched": true
+}
