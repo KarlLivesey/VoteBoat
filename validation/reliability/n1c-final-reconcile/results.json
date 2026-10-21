@@ -1,0 +1,781 @@
+[
+  {
+    "name": "absolute19-all-core-boundaries",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--lib",
+      "--",
+      "append_hold",
+      "peer_slots_tests",
+      "install_in_place_tests",
+      "progress_broadcast",
+      "continuation_tests",
+      "wal_admission",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 5.020719051361084,
+    "summaries": [
+      "ok. 41 passed; 0 failed; 0 ignored; 0 measured; 595 filtered out; finished in 0.33s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-all-counter-session",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "counter_service",
+      "sessions::",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 6.5150346755981445,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 206 filtered out; finished in 1.70s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-all-eo1-snapshot",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "effect_owner",
+      "snapshot_routes::eo1_repro",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 4.8171916007995605,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-all-hold-runtime",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "runtime",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 4.8514885902404785,
+    "summaries": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.03s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-all-logical-voter",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "logical_voter_network",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 40.27191519737244,
+    "summaries": [
+      "ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 34.74s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-all-original-owner",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "effect_owner",
+      "--",
+      "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+      "native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport",
+      "native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport",
+      "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+      "native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups",
+      "persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable",
+      "persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 30.90864610671997,
+    "summaries": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 210 filtered out; finished in 26.19s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-all-terminal",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--bin",
+      "voteboat-counter",
+      "terminal",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 6.505855083465576,
+    "summaries": [
+      "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 53 filtered out; finished in 1.65s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-default-core-boundaries",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "--",
+      "append_hold",
+      "peer_slots_tests",
+      "install_in_place_tests",
+      "progress_broadcast",
+      "continuation_tests",
+      "wal_admission",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 5.380313158035278,
+    "summaries": [
+      "ok. 41 passed; 0 failed; 0 ignored; 0 measured; 593 filtered out; finished in 0.29s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-default-counter-session",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "counter_service",
+      "sessions::",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 6.418376445770264,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 147 filtered out; finished in 1.71s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-default-eo1-snapshot",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "effect_owner",
+      "snapshot_routes::eo1_repro",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 4.680351495742798,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-default-hold-runtime",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "runtime",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 4.722997188568115,
+    "summaries": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.01s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-default-logical-voter",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "logical_voter_network",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 6.679019451141357,
+    "summaries": [
+      "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.95s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-default-original-owner",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "effect_owner",
+      "--",
+      "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+      "native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport",
+      "native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport",
+      "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+      "native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups",
+      "persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable",
+      "persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 30.802098751068115,
+    "summaries": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 210 filtered out; finished in 25.94s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "absolute19-default-terminal",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--bin",
+      "voteboat-counter",
+      "terminal",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 6.203256845474243,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 51 filtered out; finished in 1.44s"
+    ],
+    "resource_verified": true
+  },
+  {
+    "name": "all-core-boundaries",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--lib",
+      "--",
+      "append_hold",
+      "peer_slots_tests",
+      "install_in_place_tests",
+      "progress_broadcast",
+      "continuation_tests",
+      "wal_admission",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 33.254246950149536,
+    "summaries": [
+      "ok. 41 passed; 0 failed; 0 ignored; 0 measured; 595 filtered out; finished in 0.26s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "all-counter-session",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "counter_service",
+      "sessions::",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 8.395737648010254,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 206 filtered out; finished in 1.67s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "all-eo1-snapshot",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "effect_owner",
+      "snapshot_routes::eo1_repro",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 5.164879560470581,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.00s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "all-hold-runtime",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "runtime",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 31.11855459213257,
+    "summaries": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.01s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "all-logical-voter",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "logical_voter_network",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 36.594560384750366,
+    "summaries": [
+      "ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 28.66s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "all-original-owner",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--test",
+      "effect_owner",
+      "--",
+      "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+      "native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport",
+      "native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport",
+      "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+      "native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups",
+      "persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable",
+      "persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 37.45965266227722,
+    "summaries": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 210 filtered out; finished in 25.03s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "all-terminal",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--all-features",
+      "--bin",
+      "voteboat-counter",
+      "terminal",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 10.193379640579224,
+    "summaries": [
+      "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 53 filtered out; finished in 1.61s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "default-core-boundaries",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "--",
+      "append_hold",
+      "peer_slots_tests",
+      "install_in_place_tests",
+      "progress_broadcast",
+      "continuation_tests",
+      "wal_admission",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 24.671603441238403,
+    "summaries": [
+      "ok. 41 passed; 0 failed; 0 ignored; 0 measured; 593 filtered out; finished in 0.25s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "default-counter-session",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "counter_service",
+      "sessions::",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 9.004057168960571,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 147 filtered out; finished in 1.95s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "default-eo1-snapshot",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "effect_owner",
+      "snapshot_routes::eo1_repro",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 6.459574222564697,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 216 filtered out; finished in 0.11s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "default-eo1-snapshot",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "snapshot_routes",
+      "eo1_repro",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 101,
+    "seconds": 4.834674596786499,
+    "summaries": [],
+    "resource_verified": false
+  },
+  {
+    "name": "default-hold-core",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 36.146360635757446,
+    "summaries": [
+      "ok. 18 passed; 0 failed; 0 ignored; 0 measured; 616 filtered out; finished in 0.00s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "default-hold-runtime",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "runtime",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 28.78719997406006,
+    "summaries": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.02s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "default-logical-voter",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "logical_voter_network",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 14.44789981842041,
+    "summaries": [
+      "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.02s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "default-original-owner",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "effect_owner",
+      "--",
+      "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+      "native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport",
+      "native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport",
+      "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+      "native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups",
+      "persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable",
+      "persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 38.423243045806885,
+    "summaries": [
+      "ok. 7 passed; 0 failed; 0 ignored; 0 measured; 210 filtered out; finished in 26.03s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "default-terminal",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--bin",
+      "voteboat-counter",
+      "terminal",
+      "--",
+      "--test-threads=2"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 9.956260442733765,
+    "summaries": [
+      "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 51 filtered out; finished in 1.43s"
+    ],
+    "resource_verified": false
+  },
+  {
+    "name": "hook-precommit",
+    "command": [
+      "sh",
+      ".githooks/pre-push"
+    ],
+    "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+    "exit": 0,
+    "seconds": 102.4363739490509,
+    "summaries": [],
+    "resource_verified": true
+  }
+]

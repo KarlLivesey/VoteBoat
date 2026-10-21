@@ -84,7 +84,9 @@ impl Raft {
         if self.append_hold != AppendHold::Off {
             return self.broadcast_held_peers_into(out);
         }
-        for peer in self.peers() {
+        self.refresh_peer_order();
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             // Snapshot requests retain their existing fallback. An ordinary
             // request owns its exact range until ACK or explicit invalidation.
             if self

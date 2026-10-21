@@ -1,0 +1,21 @@
+{
+  "name": "all-terminal",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "-j",
+    "2",
+    "--all-features",
+    "--bin",
+    "voteboat-counter",
+    "terminal",
+    "--",
+    "--test-threads=2"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+  "exit": 0,
+  "seconds": 10.193379640579224
+}

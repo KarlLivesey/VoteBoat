@@ -41,17 +41,80 @@ pub struct PortLease {
 
 impl PortLease {
     pub fn acquire(count: usize) -> Self {
+        Self::with_directory(|directory| Self::acquire_in(count, directory))
+    }
+
+    /// Reserve a service's fixed listener layout with the same locks and safe
+    /// pool as individual ports. Every addition is checked before any bind.
+    pub fn acquire_offsets(offsets: &[u16]) -> (u16, Self) {
+        assert!(!offsets.is_empty());
+        assert_eq!(offsets.iter().collect::<BTreeSet<_>>().len(), offsets.len());
+        let lease = Self::with_directory(|directory| Self::acquire_offsets_in(offsets, directory));
+        let base = lease.held[0].address.port() - offsets[0];
+        (base, lease)
+    }
+
+    fn with_directory(acquire: impl Fn(&Path) -> io::Result<Self>) -> Self {
         let directory = shared_directory();
-        let result =
-            prepare_directory(&directory).and_then(|()| Self::acquire_in(count, &directory));
+        let result = prepare_directory(&directory).and_then(|()| acquire(&directory));
         match result {
             Ok(lease) => lease,
+            Err(error) if error.kind() == io::ErrorKind::AddrNotAvailable => panic!("{error}"),
             Err(error) => {
                 let fallback = fallback_directory(&directory, &error);
                 prepare_directory(&fallback).unwrap();
-                Self::acquire_in(count, &fallback).unwrap()
+                acquire(&fallback).unwrap()
             }
         }
+    }
+
+    fn acquire_offsets_in(offsets: &[u16], directory: &Path) -> io::Result<Self> {
+        let ephemeral = ephemeral_range();
+        let permitted = candidates(&ephemeral).collect::<BTreeSet<_>>();
+        let mut namespace_error = None;
+        let mut namespace_usable = false;
+        for base in candidates(&ephemeral).filter_map(|port| port.checked_sub(offsets[0])) {
+            let Some(ports) = offset_ports(base, offsets) else {
+                continue;
+            };
+            if !ports.iter().all(|port| permitted.contains(port)) {
+                continue;
+            }
+            let mut held = Vec::new();
+            for port in ports {
+                match reserve(port, directory) {
+                    Ok(Some(reservation)) => {
+                        namespace_usable = true;
+                        held.push(reservation);
+                    }
+                    Ok(None) => {
+                        namespace_usable = true;
+                        break;
+                    }
+                    Err(error) if error.kind() == io::ErrorKind::ReadOnlyFilesystem => {
+                        return Err(error)
+                    }
+                    Err(error) => {
+                        namespace_error = namespace_error.or(Some(error));
+                        break;
+                    }
+                }
+            }
+            if held.len() == offsets.len() {
+                return Ok(Self {
+                    held,
+                    directory: directory.to_owned(),
+                });
+            }
+            // A collision releases this partial layout before the next base.
+        }
+        if let (false, Some(error)) = (namespace_usable, namespace_error) {
+            return Err(error);
+        }
+        Err(io::Error::new(
+            io::ErrorKind::AddrNotAvailable,
+            "no available TCP/UDP service port layout",
+        ))
     }
 
     fn acquire_in(count: usize, directory: &Path) -> io::Result<Self> {
@@ -61,15 +124,12 @@ impl PortLease {
         let mut namespace_error = None;
         let mut namespace_usable = false;
         for port in candidates(&ephemeral) {
-            let mut local = PORTS.lock().unwrap_or_else(PoisonError::into_inner);
-            if local.contains(&port) {
-                continue;
-            }
-            // Never unlink lock files: every process must lock the same inode.
-            let lock = match open_lock(&directory.join(format!("{port}.lock"))) {
-                Ok(lock) => {
+            match reserve(port, directory) {
+                Ok(reservation) => {
                     namespace_usable = true;
-                    lock
+                    if let Some(reservation) = reservation {
+                        held.push(reservation);
+                    }
                 }
                 Err(error) if error.kind() == io::ErrorKind::ReadOnlyFilesystem => {
                     return Err(error)
@@ -78,32 +138,7 @@ impl PortLease {
                     namespace_error = namespace_error.or(Some(error));
                     continue;
                 }
-            };
-            match lock.try_lock() {
-                Ok(()) => (),
-                Err(std::fs::TryLockError::WouldBlock) => continue,
-                Err(error) => panic!("port lease {port}: {error}"),
             }
-            let (tcp, udp) = match bind_pair(port) {
-                Ok(sockets) => sockets,
-                Err(error)
-                    if matches!(
-                        error.kind(),
-                        io::ErrorKind::AddrInUse | io::ErrorKind::PermissionDenied
-                    ) =>
-                {
-                    continue
-                }
-                Err(error) => panic!("port reservation {port}: {error}"),
-            };
-            let address = tcp.local_addr().unwrap();
-            local.insert(port);
-            held.push(Reservation {
-                address,
-                tcp: Some(tcp),
-                udp: Some(udp),
-                _lock: lock,
-            });
             if held.len() == count {
                 return Ok(Self {
                     held,
@@ -187,6 +222,47 @@ impl PortLease {
             }
         }
     }
+}
+
+pub fn offset_ports(base: u16, offsets: &[u16]) -> Option<Vec<u16>> {
+    offsets
+        .iter()
+        .map(|offset| base.checked_add(*offset))
+        .collect()
+}
+
+fn reserve(port: u16, directory: &Path) -> io::Result<Option<Reservation>> {
+    let mut local = PORTS.lock().unwrap_or_else(PoisonError::into_inner);
+    if local.contains(&port) {
+        return Ok(None);
+    }
+    // Never unlink lock files: every process must lock the same inode.
+    let lock = open_lock(&directory.join(format!("{port}.lock")))?;
+    match lock.try_lock() {
+        Ok(()) => (),
+        Err(std::fs::TryLockError::WouldBlock) => return Ok(None),
+        Err(error) => panic!("port lease {port}: {error}"),
+    }
+    let (tcp, udp) = match bind_pair(port) {
+        Ok(sockets) => sockets,
+        Err(error)
+            if matches!(
+                error.kind(),
+                io::ErrorKind::AddrInUse | io::ErrorKind::PermissionDenied
+            ) =>
+        {
+            return Ok(None)
+        }
+        Err(error) => panic!("port reservation {port}: {error}"),
+    };
+    let address = tcp.local_addr().unwrap();
+    local.insert(port);
+    Ok(Some(Reservation {
+        address,
+        tcp: Some(tcp),
+        udp: Some(udp),
+        _lock: lock,
+    }))
 }
 
 fn released<T>(address: SocketAddr, bound: io::Result<T>) -> T {

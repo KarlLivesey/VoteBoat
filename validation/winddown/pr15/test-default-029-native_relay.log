@@ -1,0 +1,30 @@
+
+running 13 tests
+test envelopes::declared_deep_controls_and_codec_envelopes_refuse_whole_ready_sessions_and_parts ... ok
+test clean_close::changed_actual_tls_binding_refuses_and_returns_the_original_owned_frame ... ok
+test clean_close::actual_tls_buffered_original_survives_clean_close_without_new_admission ... ok
+test helper_restart::tcp_actual_helper_restart_replays_same_original_and_refuses_foreign_channel_whole ... ok
+test late_reply::tcp_retired_actual_source_read_ack_cannot_satisfy_next_read ... ok
+test history::actual_tcp_relay_keeps_three_native_voters_and_progresses_without_third ... ok
+test late_reply::tcp_two_helper_tree_retired_leaf_ack_cannot_satisfy_next_parent_read ... ok
+test provider_refusal::actual_tcp_decoder_violation_returns_original_authenticated_frame_and_messages ... FAILED
+test minority::tcp_live_helper_never_replaces_the_physical_voter_majority ... ok
+test tree_plan::checked_tree_rejects_cycles_disconnection_unprovisioned_leaves_and_excess_depth ... ok
+test tree_restart::tcp_two_helper_tree_restart_reconsumes_original_and_old_close_preserves_fresh_path ... ok
+test tree_history::tcp_two_helper_tree_keeps_original_physical_votes_and_surviving_branch_majority ... ok
+test recovery::tcp_relay_native_checkpoint_and_wal_reopen_preserve_dedup_and_incarnations ... ok
+
+failures:
+
+---- provider_refusal::actual_tcp_decoder_violation_returns_original_authenticated_frame_and_messages stdout ----
+
+thread 'provider_refusal::actual_tcp_decoder_violation_returns_original_authenticated_frame_and_messages' (599147) panicked at tests/native_relay/cluster.rs:130:13:
+helper failure Session(Io(BrokenPipe)), nodes [Draining, Draining]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    provider_refusal::actual_tcp_decoder_violation_returns_original_authenticated_frame_and_messages
+
+test result: FAILED. 12 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.27s
+

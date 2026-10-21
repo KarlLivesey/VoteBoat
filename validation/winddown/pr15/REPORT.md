@@ -1,0 +1,15 @@
+Closing PR15 as parked/rejected for the authorized wind-down; DR1 is not merged.
+
+Exact source `66fcf3e000441c7fae0bb1fed231bdc28e146c9f` has both fresh Sol SOURCE APPROVE reviews [5594849864](https://github.com/KarlLivesey/VoteBoat/pull/15#pullrequestreview-5594849864) and [5594850693](https://github.com/KarlLivesey/VoteBoat/pull/15#pullrequestreview-5594850693), seven strict checks and the enabled push hook passing. The independent DR1/main reconciliation, prior review fixes and valid fixture controls remain preserved. These do not replace the required full acceptance gate.
+
+The exact-head complete default gate FAILED: **2686 passed / 2 failed / 1 ignored**, actual outer rc1. Build rc0/build-finished=true; all 130 Cargo all-target test executables ran exactly once, every raw named outcome/result/exit was independently audited, with no omissions, duplicates or abort. Explicit eligible doctests passed (0/0). The exhaustive unskipped normal-debug relay completed 9/9 in 3303.94s, and routed completed 112/112 in 2077.28s.
+
+The two actual failures are preserved without speculative attribution:
+- `provider_refusal::actual_tcp_decoder_violation_returns_original_authenticated_frame_and_messages`: native_relay 12/1, `Session(Io(BrokenPipe)), nodes [Draining, Draining]` at tests/native_relay/cluster.rs:130. The matching historical observation does not prove this run's cause.
+- `lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts`: native_benchmark 55/1; the unwrap of `execute(&root, config, NativePeerProtocol::TcpTls)` at examples/benchmark/lanes/tests.rs:167 receives `lock acquisition failed because the operation would block`. The originating open/recovery phase and competing owner were not emitted or established. This is not the earlier ST2 AddrInUse failure, and no WAL/fork cause is inferred.
+
+All 2615 inputs stayed unchanged. There were 133 resource audits / 39116 sampled pid-tid observations with zero violations. All-feature/no-default/native/matched configurations were held and not launched. No source edits, rebuilds, isolated reruns or diagnostics followed the failures. The owner is finalizing the durable run record and mandatory checkout/build/process cleanup.
+
+The full merge gate has not passed. Under the wind-down scope, this candidate is rejected for merge; no broad reliability investigation or unchanged retry series is started. This is a qualification decision, not a claim of an identified DR1 production defect. Source history, review responses, valid/invalid earlier evidence and the failed original run remain preserved. Main receives the disposition/evidence record only. PR23 will be reconciled directly onto qualified main, excluding both parked PR14 and PR15 production trees.
+
+The adjacent audit retains all 130 executable result/exit and raw-log hashes; large transient PID start-time inventories are omitted. Source head and counts are pinned in the machine-readable completeness record. Raw original reports remain in the main safe report directory until archival.

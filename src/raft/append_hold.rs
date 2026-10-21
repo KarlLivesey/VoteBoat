@@ -16,10 +16,11 @@
 //! voter's next Append is created now or at its release; the Append itself
 //! always comes from `append_for`, so its content, request bookkeeping, acks and
 //! the commit rule are unchanged. A held voter's commit-only notice waits too:
-//! its next data Append or the heartbeat carries the commit.
+//! its next data Append or the heartbeat carries the commit, including in a
+//! two-voter group. Data holds separately require quorum coverage without it.
 use super::*;
 
-/// Whether the leader may hold a ready follower's next data Append.
+/// Whether the leader may hold a ready follower's data Append or commit notice.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum AppendHold {
     /// Every ready follower gets its next Append at once (the core default).
@@ -31,7 +32,8 @@ pub enum AppendHold {
     /// cursor (a new leader's probe) is never held. The host must deliver
     /// [`Event::ReleaseHeldAppends`] within its own bound; `TimedShard` does so
     /// after `TimerConfig::append_hold_ms`. Heartbeats and a voter's rejection
-    /// also release holds.
+    /// also release holds. Commit-only notices to acknowledged voters can be
+    /// held in any group size, including two voters.
     QuorumFirst,
 }
 
@@ -123,8 +125,9 @@ impl Raft {
         self.held.insert(peer, self.durable.last_index());
     }
     /// A held peer that owes entries up to its mark is released by any later
-    /// durable leader batch, so a held Append carries at most two batches. A
-    /// held commit notice (the peer had every entry) is decided afresh.
+    /// durable leader batch. A byte-limited Append can split that release and
+    /// the spare can be held again mid-batch. A held commit notice (the peer
+    /// had every entry) is decided afresh, including in a two-voter group.
     fn hold_due(&self, peer: NodeId, last: u64) -> bool {
         self.held.get(&peer).is_some_and(|mark| {
             *mark < last && self.next_index.get(&peer).is_some_and(|next| next <= mark)

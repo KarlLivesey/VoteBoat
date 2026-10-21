@@ -1,0 +1,118 @@
+{
+  "pins": {
+    "n1c": "44b95083e96f7b09ab4e900ed4e1c25042896c2a",
+    "dr1": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+    "st2": "219ad7bb8489c19012c8298d1021ddd959861782",
+    "main": "bd714771e181d59c2cfaece3fc93dc411ce41ddb"
+  },
+  "checks": [
+    {
+      "path": "src/raft/append_hold/tests.rs",
+      "reference": "44b95083e96f7b09ab4e900ed4e1c25042896c2a",
+      "identical": true,
+      "sha256": "008434c48a02b81d8f501d7f061ac55c048a552efc2c226e055d930838eaf63d"
+    },
+    {
+      "path": "tests/runtime/append_hold.rs",
+      "reference": "44b95083e96f7b09ab4e900ed4e1c25042896c2a",
+      "identical": true,
+      "sha256": "d7b3387e48e6f3dae06a96f2250c10ed30be87212f25652d31d9ed47ad92803d"
+    },
+    {
+      "path": "tests/logical_voter_network/parent.rs",
+      "reference": "44b95083e96f7b09ab4e900ed4e1c25042896c2a",
+      "identical": true,
+      "sha256": "f9f9ee3670d4d8af2c5f1171be3ef7e3a2098b2a650210fc3dd959620d3ad1ee"
+    },
+    {
+      "path": "src/application/counter.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "bbdb7cb296a9b9e64ca5a97a73b0831e7c8fca06cb331eae7c96d47dcd65ef49"
+    },
+    {
+      "path": "src/retention.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "4e932400b891aba0c4052a5a4f2ac349534a92a87745f1da1b32cf222bed22a5"
+    },
+    {
+      "path": "src/raft/readiness.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "13adf74a3a92c0f832056ed11dde99633b9192bc14913b4392e635ba34a5ac9c"
+    },
+    {
+      "path": "src/raft/peer_slots.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "2f09e4a85708be30be74ba26ec4bede5ff7e949a2a50dcb76f492f72f1a7da45"
+    },
+    {
+      "path": "src/log/transition/summarized.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "6bd151712ebfde679588ebeb92fd82162fdbd75db02fd318121fe7f0c15d017e"
+    },
+    {
+      "path": "src/log/transition/incoming.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "c90c4499ad8f8d8c35f58c60a8ddf3139d24ddc3fc20ac5245db9334b9763aad"
+    },
+    {
+      "path": "src/runtime/effects.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "725f3db13e4491606fc0f331eeb168e34b0606bc6af80861346964a5db5b4687"
+    },
+    {
+      "path": "src/runtime/wal_account.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "50170cfb00c4c966faaba92dfb631c60e1ad5eaaba69af482b37dce02a460378"
+    },
+    {
+      "path": "src/native/worker.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "f7a95dd74421068de7a923ecb9ab4b50d70592c4b7343b1beb0b14df82e6c7b0"
+    },
+    {
+      "path": "src/raft/proposals.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "5ea0156132232a1d2775e3f5016187ba29c8df7242b65ea8cb4a7d94825e31e9"
+    },
+    {
+      "path": "src/raft/request_window/replication.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "5dcc852a271656d29847732038ec4e428975cd896eee38e8e5166022ccabf864"
+    },
+    {
+      "path": "src/quorum.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "e306f0b4731c3cbfcc638a57ae0f439ea6f52e9ff38c3ce266e605692988f962"
+    },
+    {
+      "path": "examples/benchmark/cluster.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "4c8e48b45d8bca4a62a37ffe9f4b75f1ce48d91baa99f03ccb6b5fd7432e8d46"
+    },
+    {
+      "path": "examples/benchmark/offered.rs",
+      "reference": "b0ff8c0fa9b2f777363352ebc38ae4f477030431",
+      "identical": true,
+      "sha256": "43ec03873d2adc95734cfbf958dd5424ee8b44bff29f15d682840e3887b91722"
+    },
+    {
+      "path": "src/raft/append_hold.rs",
+      "reference": "44b95083e96f7b09ab4e900ed4e1c25042896c2a",
+      "identical_excluding_comments": true
+    }
+  ],
+  "timer_delta": "Compared with old N1c, src/runtime/timed.rs only gains the ten lines of ST2 storage-pressure/WAL-budget/account forwarding; N1c hold/deadline logic unchanged."
+}

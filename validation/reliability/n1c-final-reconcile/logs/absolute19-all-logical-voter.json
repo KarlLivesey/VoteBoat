@@ -1,0 +1,20 @@
+{
+  "name": "absolute19-all-logical-voter",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "-j",
+    "2",
+    "--all-features",
+    "--test",
+    "logical_voter_network",
+    "--",
+    "--test-threads=2"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+  "exit": 0,
+  "seconds": 40.27191519737244
+}

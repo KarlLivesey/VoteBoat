@@ -1,0 +1,10 @@
+{
+  "name": "hook-precommit",
+  "command": [
+    "sh",
+    ".githooks/pre-push"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+  "exit": 0,
+  "seconds": 102.4363739490509
+}

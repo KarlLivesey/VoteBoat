@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 #![cfg(feature = "tls")]
+#[path = "support/ports.rs"]
+#[allow(dead_code)] // This service uses the shared fixture's offset layout.
+mod ports;
 #[path = "transfer_source/fixtures.rs"]
 mod source_fixture;
 use std::{
     fs,
-    net::{TcpListener, UdpSocket},
     path::PathBuf,
     process::{Child, Command, Output, Stdio},
-    sync::{
-        atomic::{AtomicU16, Ordering},
-        Mutex, MutexGuard,
-    },
+    sync::{Mutex, MutexGuard},
     time::{Duration, Instant},
 };
 #[path = "transfer_service/cuts.rs"]
@@ -32,6 +31,8 @@ mod retirement;
 mod retirement_retry;
 #[path = "transfer_service/revocation.rs"]
 mod revocation;
+#[path = "transfer_service/root.rs"]
+mod root;
 #[path = "transfer_service/startup_data.rs"]
 mod startup_data;
 #[path = "transfer_service/startup_discovery.rs"]
@@ -40,7 +41,6 @@ mod startup_discovery;
 #[path = "transfer_service/startup_recovery.rs"]
 mod startup_recovery;
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-transfer");
-static NEXT: AtomicU16 = AtomicU16::new(14000);
 // A concurrent fork can briefly inherit another fixture's reserved listeners.
 // Coordinate reservations and process creation, never child execution/waiting.
 static RESERVATION_SPAWN: Mutex<()> = Mutex::new(());
@@ -59,13 +59,31 @@ fn run(command: &mut Command) -> Output {
 }
 const GROUPS: [u128; 4] = [1, 20, 21, 22];
 struct Cluster {
-    root: PathBuf,
+    root: root::Directory,
     base: u16,
     quic: bool,
     admin: u64,
     peer_credentials: bool,
     retirement: bool,
     children: Vec<(u128, u16, Child)>,
+    _ports: ports::PortLease,
+}
+fn listener_offsets() -> Vec<u16> {
+    (0..4)
+        .flat_map(|slot| (1..=3).flat_map(move |node| [slot * 128 + node, slot * 128 + 100 + node]))
+        .collect()
+}
+
+#[test]
+fn listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping() {
+    let offsets = listener_offsets();
+    assert_eq!(offsets.len(), 24);
+    let max_base = u16::MAX - offsets.iter().max().unwrap();
+    let last = ports::offset_ports(max_base, &offsets).unwrap();
+    assert_eq!(last.iter().max(), Some(&u16::MAX));
+    assert!(ports::offset_ports(max_base + 1, &offsets).is_none());
+    // The old NEXT ladder reaches this base after fifty 1024-port advances.
+    assert!(ports::offset_ports(65200, &offsets).is_none());
 }
 impl Cluster {
     fn new(quic: bool) -> Self {
@@ -79,36 +97,8 @@ impl Cluster {
     }
     fn with_options(quic: bool, retirement: bool, merge: bool, peer_credentials: bool) -> Self {
         let reservation = fixture_gate();
-        let (base, held, udp) = loop {
-            let base = NEXT.fetch_add(1024, Ordering::Relaxed);
-            let mut held = Vec::new();
-            let mut udp = Vec::new();
-            let mut valid = true;
-            for slot in 0..4 {
-                for node in 1..=3 {
-                    for port in [base + slot * 128 + node, base + slot * 128 + 100 + node] {
-                        match (
-                            TcpListener::bind(("127.0.0.1", port)),
-                            UdpSocket::bind(("127.0.0.1", port)),
-                        ) {
-                            (Ok(t), Ok(u)) => {
-                                held.push(t);
-                                udp.push(u);
-                            }
-                            _ => valid = false,
-                        }
-                    }
-                }
-            }
-            if valid {
-                break (base, held, udp);
-            }
-        };
-        let root = std::env::temp_dir().join(format!(
-            "voteboat-transfer-service-{}-{base}",
-            std::process::id()
-        ));
-        fs::create_dir_all(&root).unwrap();
+        let (base, mut ports) = ports::PortLease::acquire_offsets(&listener_offsets());
+        let root = root::Directory::new();
         for group in GROUPS {
             fs::create_dir_all(root.join(group.to_string())).unwrap();
         }
@@ -156,8 +146,7 @@ impl Cluster {
             }
             fs::write(root.join(format!("endpoints{select}")), endpoints).unwrap();
         }
-        drop(held);
-        drop(udp);
+        ports.handoff();
         drop(reservation);
         let mut rig = Self {
             root,
@@ -167,6 +156,7 @@ impl Cluster {
             peer_credentials,
             retirement,
             children: Vec::new(),
+            _ports: ports,
         };
         if peer_credentials {
             peer_credentials::select(&rig, 1, &rig.tls());

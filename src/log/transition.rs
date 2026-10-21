@@ -175,7 +175,13 @@ impl NextLog {
         current: &GroupLog,
         update: &LogUpdate,
     ) -> Result<PreparedLog, StorageError> {
-        match &self {
+        self.check_install(current, update)?;
+        Ok(PreparedLog(self))
+    }
+    /// Refuse this plan unless `current` is its exact predecessor and
+    /// `update` its exact original.
+    fn check_install(&self, current: &GroupLog, update: &LogUpdate) -> Result<(), StorageError> {
+        match self {
             Self::Full {
                 predecessor,
                 update: original,
@@ -194,7 +200,28 @@ impl NextLog {
                 delta.check_install(LogMetadata::from_log(current), update)?;
             }
         }
-        Ok(PreparedLog(self))
+        Ok(())
+    }
+    /// [`Self::prepare_install`] then [`PreparedLog::install`], where the
+    /// plan lies. On error neither `current` nor the plan changes; on success
+    /// the plan is spent (a full plan holds the replaced log).
+    pub(crate) fn install_in_place(
+        &mut self,
+        current: &mut GroupLog,
+        update: &LogUpdate,
+    ) -> Result<LogSummary, StorageError> {
+        self.check_install(current, update)?;
+        Ok(match self {
+            Self::Full { next, .. } => swap_full(current, next),
+            Self::Delta(delta) => {
+                if let Some(suffix) = delta.append.take() {
+                    current.entries.append(suffix.entries);
+                }
+                delta.metadata().install_header(current);
+                delta.summary
+            }
+            Self::Compact(delta) => delta.install_ref(current),
+        })
     }
 }
 impl PreparedLog {
@@ -222,6 +249,13 @@ impl PreparedLog {
 #[inline(never)]
 fn install_full(current: &mut GroupLog, next: Box<GroupLog>) -> LogSummary {
     *current = *next;
+    LogSummary::from_validated(current)
+}
+/// [`install_full`] through `&mut`: the replaced log moves into the plan.
+#[cold]
+#[inline(never)]
+fn swap_full(current: &mut GroupLog, next: &mut GroupLog) -> LogSummary {
+    std::mem::swap(current, next);
     LogSummary::from_validated(current)
 }
 impl PlainDelta {

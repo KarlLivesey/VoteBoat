@@ -1,0 +1,270 @@
+{
+  "time": 1792541035.399227,
+  "ownership": "exact own-checkout cwd only",
+  "processes": [
+    {
+      "pid": 236814,
+      "cmd": "/usr/lib/chatgpt/resources/cua_node/bin/node /usr/lib/chatgpt/resources/cua_node/lib/node_modules/@oai/cua-repl/bin/cua-repl.mjs ",
+      "threads": [
+        {
+          "tid": 236814,
+          "before": 16,
+          "after": 19
+        },
+        {
+          "tid": 236863,
+          "before": 16,
+          "after": 19
+        },
+        {
+          "tid": 236864,
+          "before": 16,
+          "after": 19
+        },
+        {
+          "tid": 236865,
+          "before": 16,
+          "after": 19
+        },
+        {
+          "tid": 236866,
+          "before": 16,
+          "after": 19
+        },
+        {
+          "tid": 236867,
+          "before": 16,
+          "after": 19
+        },
+        {
+          "tid": 236889,
+          "before": 16,
+          "after": 19
+        }
+      ]
+    },
+    {
+      "pid": 236850,
+      "cmd": "/usr/lib/chatgpt/resources/cua_node/bin/node_repl ",
+      "threads": [
+        {
+          "tid": 236850,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236873,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236874,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236875,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236876,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236877,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236878,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236879,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236880,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236881,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236882,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236883,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236884,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236885,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236886,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236887,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236888,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236890,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 237034,
+          "before": -4,
+          "after": 19
+        }
+      ]
+    },
+    {
+      "pid": 236897,
+      "cmd": "/usr/lib/chatgpt/resources/cua_node/bin/node_repl ",
+      "threads": [
+        {
+          "tid": 236897,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236898,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236899,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236900,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236901,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236902,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236903,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236904,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236905,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236906,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236907,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236908,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236909,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236910,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236911,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236912,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236913,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 236931,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 237035,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 237037,
+          "before": -4,
+          "after": 19
+        },
+        {
+          "tid": 237055,
+          "before": -4,
+          "after": 19
+        }
+      ]
+    },
+    {
+      "pid": 251598,
+      "cmd": "python3 - ",
+      "threads": [
+        {
+          "tid": 251598,
+          "before": -4,
+          "after": 19
+        }
+      ]
+    }
+  ]
+}

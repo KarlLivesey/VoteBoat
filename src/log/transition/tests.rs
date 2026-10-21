@@ -21,6 +21,7 @@ mod configured;
 mod incoming;
 mod oracle;
 mod overlay;
+mod refused_installs;
 
 fn node(id: u64) -> NodeId {
     NodeId::new(id).unwrap()

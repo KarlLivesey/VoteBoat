@@ -8,6 +8,101 @@ equal cores on the networked native path. Design: the R4 research plan
 §3.1 harness, §3.2 cells, §3.3 attribution, §3.4 noise, §4 candidates). The
 design pack is unchanged.
 
+### Wind-down disposition (21 October 2026)
+
+The active scope is to keep or reject existing PRs 14, 15, 19, 22, 23 and 24.
+The lifetime-bounds macro goal below remains incomplete; new roadmap slices and
+research are paused. N1d is permitted only as the already-authorized bounded
+work needed to decide PR19.
+
+| Candidate | Disposition | Evidence or remaining gate |
+| --- | --- | --- |
+| PR24 V3f | Kept and merged | Merge `1e56e9f5`; recorded final-main head `bd714771`; default 2603, all-features 2915, no-default 1346, native-only 1924 and matched 75 passed, zero failures; both reviews, strict checks and enabled hook passed |
+| PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
+| PR15 DR1 | Rejected for this wind-down; closed as parked, not merged | Independent source `66fcf3e0` has both fresh source approvals and strict checks, but its complete final default failed: 2686 passed / 2 failed / 1 ignored |
+| PR23 N1c | Current: reconcile the original network candidate onto qualified main | Exclude both rejected ST2 and DR1 production trees while preserving published history; fresh reviews, full final-head suites and the established fair performance gate remain required |
+| PR22 N1b | Next: resolve after PR23 | Reconcile the final main, make the N1c disposition and entryless-frame documentation accurate, and complete the established review and validation gates |
+| PR19 N1 | Pending bounded keep/reject decision after PR23 | Only the previously authorized N1d work, two existing review P2 fixes and the recorded performance gate are permitted; park/close if that gate still fails |
+
+N1c and N1b advance the existing network milestone through the gates above.
+PR19 is the following bounded decision item. Their dependency is qualified main,
+not either parked lifetime-bounds candidate. No unfinished lifetime or network
+roadmap item is made a prerequisite for this wind-down.
+
+#### PR14 rejection record
+
+[PR14 was closed as parked](https://github.com/KarlLivesey/VoteBoat/pull/14#issuecomment-6307127725)
+without merging ST2. The user's accepted CPU cost and independent Sol source
+approvals [A](https://github.com/KarlLivesey/VoteBoat/pull/14#pullrequestreview-5593950615)
+and [B](https://github.com/KarlLivesey/VoteBoat/pull/14#pullrequestreview-5593951317)
+remain valid history, but do not replace the failed final-head acceptance gate.
+
+On exact checked `3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7`, all 129
+all-target executables were audited exactly once; aggregate rc1, 2667 passed,
+one failed and one ignored, with no abort. Eligible doctests passed. The normal
+debug exhaustive relay completed 9/9 and routed completed 110/110. The sole
+failure was `backpressure::absent_follower_does_not_stop_the_leader_checkpointing`:
+the existing 600-second guard reported `hang at 8576 ms`, without failure-phase,
+write-progress, node or worker state. Cause remains unproven; this run did not
+report `LeadershipChanged`. Later configurations were held.
+
+Two bounded diagnostics preserved the original outcomes, assertions and bounds.
+The isolated 49,152-write case passed in 290.07 seconds; the instrumented startup
+binary passed all 56 cases in 484.24 seconds on the recorded original command
+and affinity. Both are inconclusive for the original failure. The historical
+literal `RUST_TEST_THREADS` value was not snapshotted, so identical historical
+concurrency is not claimed. Neither diagnostic identified a cause-specific
+repair or cleared the full gate. No unchanged retry series or new research is
+authorized. Checked source, diagnostic patch, valid and invalid controls and
+failure audits are retained with the parked branch; its owner must sweep its
+checkout, target and processes after the durable disposition record.
+
+The parked documentation P3 also remains recorded: when WAL and retained-entry
+limits are both exhausted, the WAL high-water gate returns first, so one
+submission need not increment both cause counters. This is not a shipped ST2
+behavior claim. PR15 and PR23 must exclude the rejected ST2 tree before final
+qualification; DR1 does not imply automatic-maintenance or complete LB coverage.
+
+#### PR15 rejection record
+
+[PR15 was closed as parked](https://github.com/KarlLivesey/VoteBoat/pull/15#issuecomment-6308647961)
+without merging DR1. Exact source `66fcf3e000441c7fae0bb1fed231bdc28e146c9f`
+preserves the independently reviewed DR1/main tree, excludes ST2 production,
+retains published history and resolves the port-layout, directory-ownership and
+comment findings. Fresh Sol source approvals
+[A](https://github.com/KarlLivesey/VoteBoat/pull/15#pullrequestreview-5594849864)
+and [B](https://github.com/KarlLivesey/VoteBoat/pull/15#pullrequestreview-5594850693),
+seven strict checks and the enabled push hook passed. These do not clear its
+failed full acceptance gate.
+
+The complete final default failed: 2686 passed / 2 failed / 1 ignored, actual
+outer rc1. Build rc0/build-finished true; all 130 Cargo all-target test
+executables ran exactly once, with raw named outcomes, result totals and exits
+independently audited and no omission, duplicate or abort. Eligible doctests
+passed (0/0); the exhaustive normal-debug relay completed 9/9 in 3303.94 seconds
+and routed completed 112/112 in 2077.28 seconds.
+
+The actual failures remain unclassified. Native relay (12/1) reported
+`Session(Io(BrokenPipe)), nodes [Draining, Draining]` at
+`tests/native_relay/cluster.rs:130`. Native benchmark (55/1) received
+`lock acquisition failed because the operation would block` from the unwrap of
+`execute(&root, config, NativePeerProtocol::TcpTls)` at
+`examples/benchmark/lanes/tests.rs:167`. The originating open/recovery phase
+and competing owner were not emitted or established; no WAL/fork cause is
+inferred. This is distinct from the earlier ST2 `AddrInUse` failure. Matching
+historical text does not establish either current cause or host noise.
+
+All 2615 inputs stayed unchanged; 133 resource audits / 39,116 sampled task
+records reported zero violations. Later configurations were held and not
+launched. There were no source edits, rebuilds, diagnostics or isolated reruns
+after these failures. The outcome is rejection for merge under the agreed full
+gate, not a claim of an identified DR1 production defect. No unchanged retry
+series or broader reliability investigation is started. Compact original
+failure logs, all executable result/exit hashes and the completeness record are
+preserved in [the disposition evidence](../validation/winddown/pr15/REPORT.md).
+The owner must complete its mandatory checkout/build/process cleanup. PR23
+must exclude both parked production trees before final qualification.
+
 ### Macro plan (this track)
 
 | Milestone | User-visible outcome | Acceptance |
@@ -19,8 +114,143 @@ design pack is unchanged.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
-| Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
-| Current N1c: held follower Appends (quorum-first; PR 23 against main, merging alone; round 3 fixes the fresh-group boundary and frozen-clock fixtures; integration suites pending) | Restore follower Append size under N1 without commit latency: each new leader batch goes at once only to the followers a quorum needs; a ready, caught-up follower the quorum does not need is held until the next leader batch is durable (bounded by `TimerConfig::append_hold_ms`, default 1 ms, and the heartbeat) | N1 (PR 19) and the N1b step-0 counters (PR 22, measurement only); main `12fb21de` | Done: schema plan and evidence below; deterministic core and simulated-time runtime tests (a)–(f) with two mutations; N1c alone and N1c + N1 against main on the five N0 cells (5 ABBA rounds) and `nat.sh` (5 pairs); full hold measured. Round 2: holds need acknowledged prefix evidence (Sol's test and a runtime regression); a rejection releases held followers; the TCP 15k p99 explained (regime mix, plus a ~5% leader-side hold cost); N0 cells and `nat.sh` re-run. Round 3: nine original failures pass, core/runtime regressions and seven negative mutations pass; strict checks and focused all-feature results below. Full exclusive suites are assigned to the sole integration owner by the later handoff. Open: full-suite qualification, final-head N0 remeasurement, and the bound/leader commit-persist trade | NW1 |
+| Done EO1: effect-owner continuations keep the released effect's position (split from PR 19; merged 20 October 2026 in PR 20, head 364b45f9) | Remove a pre-existing availability loss: a loaded snapshot's Send queued behind a same-step Persist fenced the owner during snapshot catch-up under write load | — (on main) | Owner unit tests below fail on main and pass with the rule; mutation reverts fail both; witness test ×10 all-features; fmt, four strict Clippy builds, matched fmt/Clippy; effect_owner, runtime, native_member_startup, snapshot, snapshot_worker, counter_service in default and all-features | NW1 (unblocks N1) |
+| Current PR23: independent N1c source | Preserve approved held Appends on qualified main without rejected ST2/DR1 production | Original44 + mainb77; reviewed test-only fixture exceptions | Focused default/all checks, strict7, enabled nonforce publication; source audit below | NW1 |
+| Next: PR23 final source/full-suite gate (parent) | Qualify the exact composition | This checked source | Two fresh pinned Sol source approvals; complete audited five-configuration gate | NW1 |
+| Following: PR23 fair performance/keep decision (parent) | Decide existing candidate against the same stable baseline | Qualified source and mainb77, actual8B protocol | Established exact-head performance gate and durable keep/reject | NW1 |
+
+### EO1 merge record (20 October 2026, PR 20 → main)
+
+Reviews: GPT-6.1-Sol approve round 1; Claude Opus 5.5 approve round 1 with a
+P2 asking for a real-core regression, folded in round 2 (orchestrator) as
+`tests/snapshot_routes/eo1_repro.rs`: on main it fails with `ProviderContract`
+at the commit Persist, with the rule it passes. Exclusive suites on head
+`364b45f9` (`target/claude/research-r4/pr20-suites/`): checks 7/7 clean;
+default 2,597 / 0; no-default 1,331 / 0 plus `representative_relay_model`
+9 / 0 alone; all-features 2,900 / 0 plus the relay model 9 / 0 alone;
+native-only 1,918 / 0; matched 75 / 0.
+
+### EO1 schema plan (before editing, 20 October 2026)
+
+- **Bug (on main).** A leader step can emit `[SnapshotRequired, Persist]`
+  when the leader alone forms a quorum and a non-voting replica needs the
+  image (for example a compacted single-voter group growing by a learner);
+  with a three-voter majority the same shape needs N1's earlier sends, because
+  follower acknowledgements are only processed after the leader's own
+  durability (`After::LeaderAppend`: `broadcast_append_progress_into` re-emits
+  `SnapshotRequired` for a follower in snapshot catch-up, then
+  `maybe_commit_into` pushes `Persist(commit)` last). The owner leases the
+  front effect; when the image loads, `complete_effect_inner` appended the
+  continuation (one `Send` from the pure `snapshot_send`/`repair_snapshot_send`),
+  giving `[Persist, Send]`. `submit_persists` refuses a Persist with a queued
+  tail (`ProviderContract`), the replica fences the owner and recovers.
+  Fail-closed: the Send was never emitted and the Persist never submitted, so
+  no false reply and no corrupt state; an availability loss that repeats on the
+  next leader while the follower still needs the image. Found by N1 (PR 19,
+  `5986c826`), reproduced on main by the PR 19 review with an owner fixture.
+- **Invariant.** A continuation (the effects a completion callback returns for a
+  released lease, an in-place expansion of that effect) takes the released
+  effect's position in its visit's queue, in its own order. Because a visit
+  holds at most one lease (`Active::leased: Option`) and `take_owned_effect`
+  always pops the front, that position is the queue front: the continuation is
+  prepended, never appended. This is the order a synchronous completion would
+  have produced, and it is the order the core's own list contract (a Persist is
+  last) is written against.
+- **Mechanism.** One code path in `complete_effect_inner`: push the
+  continuation to the front in reverse, so it keeps its own order ahead of the
+  remaining effects. No kind is special-cased. Byte accounting is unchanged
+  (the same retained total is checked before the move). The Persist-tail rule
+  in `submit_persists` is unchanged and still the fail-closed backstop.
+  Not changed: `install_continuation` (worker Written/Durable continuations of
+  an already-submitted Persist). That is not a lease expansion: the Persist
+  left the queue at submission, and only early Sends emitted after it can be
+  queued, so FIFO after them is correct.
+- **Audit (every `Effect` kind: producer shape, continuation, effect of the
+  rule).** The rule only differs from appending when the continuation is
+  non-empty and effects are queued behind the released one.
+  - `Send`, `ReadReady`: continuation is empty (`release`,
+    `release_owned_send`, read capture, `cancel_read`). No change.
+  - `Committed`: inserted at index 0 with following effects behind it
+    (`CompletionEffects::into_owned`, `completion.rs:50`), but every production
+    continuation is empty (`release`, `complete_applied_capture`). No change.
+  - `Persist`: never completed through a callback (`PersistenceEffect`); its
+    continuation arrives through `deliver_worker` (see above). No change.
+  - `PersistVolatile`: only from `Raft::recover_volatile` cores, which the owner
+    does not run; completed through `persist_volatile`, outside the owner.
+  - `VerifyLearnerReadiness` (`readiness.rs:215`), `CheckpointRequired`
+    (`raft.rs:1082`), `StageSnapshot` (`receive.rs:538`): each returned as its
+    step's only effect, so nothing is queued behind them. No change.
+  - `SnapshotInstalled`, `CheckpointCompacted`: pushed last by `after_durable`
+    (`raft.rs:1425`, `raft.rs:1432`); nothing is queued behind them. No change.
+  - `SnapshotRequired`: the only kind emitted inside a multi-effect step
+    (`progress_broadcast.rs:15`, `raft.rs:1745`, `snapshot_repair.rs:123`), with
+    other Sends, other `SnapshotRequired`s and a final Persist behind it. Its
+    continuation is exactly one Send (pure `&self` expansion). This is the fix.
+  - Public `complete_effect`/`complete_effect_with` (physical embedding API)
+    with an arbitrary callback: the rule applies uniformly. A continuation that
+    itself holds a Persist with a non-empty tail now fails closed at
+    `submit_persists` (as appending already did whenever a Persist was queued
+    behind); no internal producer makes that shape. Sends ahead of a queued
+    Persist are the core's normal step shape: the core emits a durability-
+    dependent reply only from `after_durable`.
+  - Conclusion: the general rule is not unsafe for any kind; no special case.
+- **Tests (owner unit tests in `src/runtime/effects/continuation_tests.rs`,
+  deterministic, no I/O, white-box queue construction on the existing fixture,
+  generalised to N groups).** (1) `[SnapshotRequired, Persist]`, complete the
+  lease with one Send: the next leases are Send then Persist, and
+  `submit_persists` accepts the Persist. Under the `extend` mutation it fails at
+  the queue assertion before `submit_persists` runs; the real-core regression
+  `snapshot_routes::eo1_repro` (reviewer-supplied) fails on main with
+  `ProviderContract`.
+  (2) Two visits each `[SnapshotRequired, …, Persist]`, both leased, the later
+  lease completes first (with a two-Send continuation): each queue keeps the
+  continuation in the released effect's place and order, and both Persists
+  are accepted in one batch. Mutation: restoring `extend` fails both.
+- **Measurement.** None: only snapshot-continuation releases change order;
+  per-write releases (`Send`, `Committed`) have empty continuations, so the
+  per-write path runs the same operations.
+
+### EO1 implemented (evidence, 20 October 2026, Linux cores 10–15, nice 19, `-j 4`)
+
+- **Change.** `complete_effect_inner` prepends the continuation in its own
+  order (one path, no kind special case); the rule is stated on
+  `EffectOwner`'s documentation. The in-crate owner fixture
+  (`effects/peer_ingress_tests.rs`) now builds one owner over N groups; its two
+  existing tests are unchanged.
+- **Tests.** `continuation_tests::loaded_snapshot_send_takes_its_place_ahead_of_the_steps_persist`
+  and `continuation_tests::continuations_released_out_of_lease_order_keep_their_positions`
+  pass. Each Persist is leased last and `submit_persists` accepts it (one
+  batch of two in the second test); the owner is not failed.
+- **Mutation.** Restoring main's `a.effects.extend(effects)` fails both: queue
+  `[Persist, Send(11)]` against `[Send(11), Persist]`, and
+  `[Persist, Send(21), Send(22)]` against `[Send(21), Send(22), Persist]`.
+  Restored afterwards.
+- **Checks.** `cargo +stable fmt --all -- --check` clean; strict Clippy
+  (`--locked --offline --keep-going --all-targets -D warnings`) clean in
+  default, `--all-features`, `--no-default-features` and
+  `--no-default-features --features native`; matched fmt and strict Clippy
+  clean.
+- **Suites, default features:** lib 551 (1 ignored), counter_service 144,
+  effect_owner 210, native_member_startup 27, runtime 57, snapshot 27,
+  snapshot_worker 14: all passed. **All features:** lib 553 (1 ignored),
+  counter_service 203, effect_owner 210, native_member_startup 50, runtime 57,
+  snapshot 27, snapshot_worker 14: all passed.
+- **Witness.** `quic_promoted_leader_witness_installs_compacted_final_snapshot`
+  (all features) passed 10/10. It does not reproduce the bug on main (that
+  needs N1's early sends); this shows no regression.
+- **Not measured.** No CPU measurement: per-write releases (`Send`,
+  `Committed`) have empty continuations, so the per-write path is unchanged.
+
+### Historical original N1c record through 44b95083
+
+The following original plans, checks and measurements retain their original
+source and 8-byte campaign context. They do not qualify this reconciled head.
+Current wind-down dispositions and pending gates above take precedence.
+
+| Historical deliverable | Purpose | Dependencies then | Checks then | Advances |
+| --- | --- | --- | --- | --- |
+| Historical N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
+| Historical N1c: held follower Appends (quorum-first; PR 23 against main, merging alone; round 3 fixes the fresh-group boundary and frozen-clock fixtures; integration suites pending) | Restore follower Append size under N1 without commit latency: each new leader batch goes at once only to the followers a quorum needs; a ready, caught-up follower the quorum does not need is held until the next leader batch is durable (bounded by `TimerConfig::append_hold_ms`, default 1 ms, and the heartbeat) | N1 (PR 19) and the N1b step-0 counters (PR 22, measurement only); main `12fb21de` | Done: schema plan and evidence below; deterministic core and simulated-time runtime tests (a)–(f) with two mutations; N1c alone and N1c + N1 against main on the five N0 cells (5 ABBA rounds) and `nat.sh` (5 pairs); full hold measured. Round 2: holds need acknowledged prefix evidence (Sol's test and a runtime regression); a rejection releases held followers; the TCP 15k p99 explained (regime mix, plus a ~5% leader-side hold cost); N0 cells and `nat.sh` re-run. Round 3: nine original failures pass, core/runtime regressions and seven negative mutations pass; strict checks and focused all-feature results below. Full exclusive suites are assigned to the sole integration owner by the later handoff. Open: full-suite qualification, final-head N0 remeasurement, and the bound/leader commit-persist trade | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
 ### N1c schema plan (before editing, 20 October 2026)
@@ -1120,8 +1350,8 @@ maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-life
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done NT1: connection generations and listener (merged 19 October 2026 in PR 13) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
-| Current NT2: roster, budget and cache reclaim | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors; also the NT1 leftover: a test for the completion-branch `generations_exhausted` flag at `runtime/peers.rs` (reviewer P3 on PR 13) | NT1 (same files) | U6 probe as fail@main; churn soak; completion-branch flag test | LB |
-| Then DR1: Counter session ledger | Audit S1, RT2 for Counter through the generic `SessionLedger` | ST2 merged | 200,000-write soak fails on the base; restart and exactly-once tests | LB |
+| Deferred NT2: roster, budget and cache reclaim (outside wind-down) | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors; also the NT1 leftover: a test for the completion-branch `generations_exhausted` flag at `runtime/peers.rs` (reviewer P3 on PR 13) | NT1 (same files) | U6 probe as fail@main; churn soak; completion-branch flag test | LB |
+| Parked DR1: Counter session ledger (PR15 closed without merge) | Audit S1, RT2 for Counter through the generic `SessionLedger`; independently reviewed source retained, not shipped | The qualified main does not include this candidate or ST2 | Final exact `66fcf3e0` default failed 2686/2/1 despite fresh source approvals and strict checks; see rejection record above. Remaining feature configurations were not launched | LB remains incomplete |
 
 ### Inventory (rows owned by NT1, and the leftovers it hands on)
 
@@ -2313,7 +2543,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | T0 Recovery always works | A crash at any point never prevents restart and never loses acknowledged state | Exhaustive damaged-tail recovery for native log and vote stores; acknowledged-prefix damage still detected |
 | T2 Cheaper durable barrier | Fewer physical syncs per group commit on CoW and non-CoW volumes | Only with a complete recovery/damage proof and no relaxation of acknowledged state; Btrfs, ext4/XFS, APFS |
 | T3 Wider group commit | Barrier cost amortized over everything queued | Native loaded writes/s and p99 improve with lower CPU/original; unchanged durability contract |
-| T4 Per-original CPU | Framework CPU/original materially below the H2 main baseline; reference values are re-measured on main after each merge (post-V3 merge of 19 October 2026: to be re-baselined; the accepted singleton trade is recorded in the PR 10 row) | Profile-selected removals of per-original allocation/handoff with no semantic change |
+| T4 Per-original CPU | Framework CPU/original materially below the H2 main baseline; reference values are re-measured on main after each merge (post-V3 merge of 19 October 2026: to be re-baselined; the accepted singleton trade is recorded in the PR 10 row) | Profile-selected removals of per-original allocation/handoff with no semantic change; V3f is done in PR 24 ([merge record](#v3f-merge-record-pr-24)); T4 remains open |
 | Q1 Reliable suites on any host (user, 18 October 2026) | Every suite passes on any hardware, from a Raspberry Pi to large servers and GitHub's 3–4 core runners | No outcome depends on wall-clock speed, core count, disk latency or scheduling; no assertion weakened, no test ignored or retried, no library capacity changed; Platform feedback green |
 
 ### Mini plan
@@ -2340,8 +2570,8 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done V3c profile: whole-cost profile of the merged V2+V3 tree (`target/claude/research-r4/v3c-profile.md`) | Choose the next whole cost class from a fresh profile instead of adding helpers | V3 merged (`d379783d`) | Re-baseline recorded below; ranked slices with arithmetic | T4 |
 | Done V3c: host-owned effect sink and `ProposalBatch::push` fix (merged 20 October 2026 in PR 16, head 36de6dd0; code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace. Review round 2 (tests and docs only): granted-vote sentinel and election-reset comparison, each proved by mutating the two queue reads; wrapped-queue late exhaustion; durable, transfer, stale-append, learner-configuration and retirement-reply sink oracles | T4 |
 | Done V3d: per-step recomputation (merged 20 October 2026 in PR 18, head 1fb878da; code head 08ebc5c3, round 2 code head 0ea00498, round 3 code 4ba17fbf; quiet Mac vs `bc8fafb6`, 3 × 5 pairs: single-16 −3.0%, single-1 −1.8 to −3.5%, bulk-16 and bulk-1 flat; driver width 1 −13.0%, instructions −14.4%) | `effect_reservation` rebuilt and compared `LogMetadata` twice per harness step, and every plan and install rebuilt or compared it again (profile slice 2). The core's log changes only at install, so its summary is now kept valid there by type (`SummarizedLog`), plans from its own view skip the comparison, and an install version token skips the predecessor check while nothing changed; a plain log's replica count no longer walks the membership | V3c (same `raft.rs` chain) | Implemented evidence in the V3d sections below: summary/version tracking tests over every mutating path (fail without the bump or refresh), reservation test, unchanged transition/twin/snapshot/truncation/facts/golden tests, fixed-schedule counts and reservation checksums identical, per-site samply attribution, three gate runs, attribution controls, fmt + four strict Clippy builds + matched workspace. Review round 2 (Opus P3s): the install skip is bound to the stamp (log identity and version) of the view the plan came from, so a plan moved to another core is refused in debug and release; moved-version checked install tested; the skip still taken on ordinary appends and commit rounds (test counter); mutation edits recorded exactly; width-1 driver within noise (3 pairs: +0.2% ns, +0.17% instructions). Review round 3 (Sol): 16 B stamps (u64 identity issued once, u64 version, ≈ 584 years each at 10^9/s) that never repeat and fail closed to checked installs, with `observability::unidentified_logs()`; allocator- and version-bound tests in debug and release; nine named mutations; `Pending` 1,088 → 1,104 B; width-1 driver −0.2% ns, +0.25% instructions; single-1 vs `bc8fafb6` still −1.8% (5 pairs) | T4 |
-| Current V3e: peer slots | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; stack-bounded `peers()` and quorum frontier (profile slice 3: single-1 −2.3 to −3.1%) | V3d (same `raft.rs` chain) | Replication/frontier oracles; quiet-Mac pairs against the V3d merge | T4 |
-| Next V3f: in-place install | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,088 B), `OwnedNextLog` and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece) | V3e | A failed install keeps the pending transition intact and fences as today; twin and completion oracles; quiet-Mac pairs | T4 |
+| Done V3e: per-peer replication slots (merged 20 October 2026 in PR 21, head 5a316689; code head 713ead7c; quiet Mac vs `e7520ce1`, 3 × 5 pairs: single-16 −0.5 to −1.9%, bulk-16 and bulk-1 flat, single-1 +1.5 to +2.1% from a park threshold in the one-worker harness (control below); driver width 1 −12.5%, instructions −8.9%) | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; a cached peer order and stack-buffered quorum frontier instead of per-broadcast `Vec`s (profile slice 3: single-1 −2.3 to −3.1%, single-16 −1.3 to −1.8%, bulk ~0) | V3d (same `raft.rs` chain) | Slot and frontier oracles against the map form over membership-change, retirement, lagging and truncation histories; no slot for a departed peer; same-id replacement; named mutations; driver 1/231/515 with per-site attribution; quiet-Mac gate against `e7520ce1`; spin control for single-1; fmt, strict Clippy, suites ("V3e implemented" below) | T4 |
+| Done V3f: in-place install (merged 21 October 2026 in PR 24, final head deaf8121, code head e3471f31; [merge record](#v3f-merge-record-pr-24); quiet Mac vs `379668af`: driver width 1 −3.2% ns and −5.1% instructions, width 231 −1.2%; four cells flat within noise over 3 × 5 pairs, single-1 guard not adverse; install-side memmove 179 → 19 ns per write at width 1) | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,104 B), `OwnedNextLog` (672 B) and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece). Base width-1 driver profile on `379668af`: library memmove 266.6 ns per write at the install and staging sites | V3d (merged); V3e peer slots merged on main; combined source checked below | A failed install (predecessor mismatch, foreign stamp, cold-plan refusal) leaves `Pending` intact at the failure and the core fences as today, in debug and `--release`; success clears the slot (debug assertion, mutation proof); twin, completion, volatile/durable and V3d stamp tests unchanged; size bounds unchanged; per-site memmove before/after; driver 1/231/515; four-cell gate against `379668af`; attribution controls; fmt, strict Clippy, suites ("V3f schema plan" below) | T4 |
 | Following H-a: harness reply index | Bulk cells: the matched harness's `PendingReplies` (SipHash `HashMap<u128,_>`) remove + insert is about 23 ns of 214 per write, harness not library work (profile H-a: bulk −7 to −10%) | Separate harness PR on main with an H2-style fairness review, main re-baselined after; independent of V3e/V3f | Reply-order and fairness tests; OpenRaft engine untouched; quiet-Mac pairs with attribution parity | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
@@ -4311,6 +4541,688 @@ raft --test snapshot --test log_owned --test worker --test runtime` (548 lib,
 1 ignored, + 11/81/27/5/9/57) and all features (550 lib, 1 ignored, + the
 same), one configuration at a time; `--release --lib summarized` 11/11 in
 default and all features; matched tests 75/75 in default and all features.
+
+#### V3e merge record and the single-1 judging rule (20 October 2026, PR 21 → main `3b00d02c`)
+
+Reviews: GPT-6.1-Sol approve; Claude Opus 5.5 approve (joint → final and
+same-id truncation adversarial tests; the election reset proven necessary by
+mutation in debug and release). Exclusive suites on head `5a316689`
+(`target/claude/research-r4/pr21-suites/`): checks 7/7 clean; default
+2,601 / 0; no-default 1,337 / 0 plus `representative_relay_model` 9 / 0 alone;
+all-features 2,904 / 0 plus the relay model 9 / 0 alone; native-only
+1,922 / 0; matched 75 / 0.
+
+The single-1 cell measured +1.5 to +2.1% while the driver measured −12.5% and
+instructions fell. Both reviewers judged the control build (head plus a busy
+loop adding back the removed time, which ran single-1 faster than both head and
+base) valid evidence that this cell is sensitive to the one-worker co-location
+wake/park pattern (system CPU +8%, context switches +7–10%, user time −2%),
+not to library CPU. The user accepted the result on 20 October 2026 and the
+rule adopted from here on for singleton slices is: judge by the fixed-schedule
+driver, single-16 and both bulk cells; single-1 remains a guard where a
+regression counts only when no such control explains it. The instrument fix
+(client on its own thread, or server-only CPU) is a separate harness item.
+Folded at merge from the reviews: a debug assertion that only a leader
+refreshes the cached peer order, and the `peer_slots` module doc on same-id
+truncation.
+
+#### V3e schema plan: per-peer replication slots (20 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §§3–5 (slice 3). Branch
+`cpu/peer-slots` from main `12fb21de` (V3d merged at `e7520ce1`; the docs
+commit on top changes no code). Gate base: `e7520ce1`.
+
+Profile cost (`d379783d`, driver width 1 and single-1 running view): the
+leader's outstanding-request map empties and refills every round.
+`retire_replication` → `BTreeMap::remove` 137–152 ns (the last remove frees
+the root node, 75), `append_for` / `receive_appended` insert and get about
+55–60, the per-broadcast `peers()` `Vec` 87–100 (collect 88, drop 11) and
+`quorum::frontier`'s `Vec` collect, sort and free 74–137: about 421 ns per
+single-1 write, 70–95% recoverable.
+
+Mutation sites, read in `12fb21de`:
+
+| Structure | Writers | Readers |
+| --- | --- | --- |
+| `requests: BTreeMap<NodeId, Replication>` | insert: `append_for` (two arms), `replicate_admitted`; remove: `retire_replication` (`receive_appended`, `receive_snapshot_ack`, `receive_compacted`); clear: `clear_replication_requests` (term changes in `receive*`, `campaign`, `configuration_changed`, `become_leader`, step-down after retirement, `After::Compact`, `After::CheckpointCompact`, batched repair promotion, storage failure) | `append_for`, `receive_appended`, `receive_snapshot_ack`, `receive_compacted`, `early_peer`, `original_replication`, `is_empty_alias`, `broadcast_after_admission_into`, `broadcast_ready_peers_into`, `snapshot_send`, `RequestWindow::current_replication` |
+| `admitted_ranges`, `empty_append_aliases` (same keys, native early path) | insert: `replicate_admitted`; remove: `retire_replication`, `consume_empty_alias`, `receive_compacted`; clear: `clear_replication_requests` | `early_peer`, `admitted_entry`, `original_replication`, `is_empty_alias`, `broadcast_after_admission_into` |
+| `peers()` (fresh `Vec` per call) | — | hot: `broadcast_into`, `broadcast_ready_peers_into`, `broadcast_after_admission_into`; cold: `voting_peers`, `initialize_replication`, `retirement_announcements` |
+| `quorum::frontier` (recursive `Vec` per branch) | — | `maybe_commit_into` via `Membership::frontier`; public `Policy::frontier` / `JointPolicy::frontier` |
+
+Every configuration change runs `configuration_changed`, which clears all
+three request maps; so does every leadership change. A membership change
+therefore never carries an outstanding replication across: there is nothing
+to remap, and the slot table is rebuilt from empty, exactly like the maps.
+
+- **Data shape.** `src/raft/peer_slots.rs`: `PeerSlots<T: Copy>` with
+  `slots: Vec<(NodeId, Option<T>)>` sorted by `NodeId` and an `occupied`
+  count. Map-shaped API so every caller and test keeps its form: `get`,
+  `insert`, `remove`, `clear`, `contains_key`, `len`, `is_empty`, `iter`
+  (occupied slots in `NodeId` order, the `BTreeMap` order) and `Index`.
+  `requests`, `admitted_ranges` and `empty_append_aliases` become
+  `PeerSlots<_>`; `repair_requests` (candidate only, cold) stays a map.
+- **Slot invariant.** Keys are unique and sorted; `occupied` equals the
+  number of `Some` values; a key exists only for a peer inserted since the
+  last `clear`. `get`/`len`/`iter` see exactly the `Some` entries, so every
+  read returns what the map returned.
+- **Transitions.** `insert`: binary search; a found slot is overwritten in
+  place, a new key is inserted at its sorted position (no allocation once
+  the capacity has been reached). `remove`: the value is taken and the key
+  kept (a tombstone), so the next round's `insert` for that peer is an
+  in-place write: this is the per-round path, with no allocation or free.
+  `clear`: truncates every key (keeping the capacity).
+- **Lifetime bound.** Production inserts are only for peers of the
+  configuration that `initialize_replication` set up (`append_for` indexes
+  `next_index[&peer]`, `replicate_admitted` requires `early_peer`), and every
+  configuration or leadership change clears. So the key count is at most the
+  current membership's replica count, and no slot survives a departed peer;
+  the capacity is at most the largest replica set since the core started,
+  which `Configuration::new` bounds (`max_voters` plus learners). No
+  counter or lifetime budget.
+- **Peer order.** `peer_order: Vec<NodeId>` with `peer_order_for:
+  Option<ConfigurationId>`: `refresh_peer_order` rebuilds it in place
+  (same `replicas()` order, self excluded) when `membership().id()` differs,
+  and `configuration_changed` and `become_leader` reset it. The three hot
+  broadcasts iterate it by index (they do not change membership). A leader's
+  accepted membership changes only through its own strictly increasing
+  configuration ids, so the id identifies the replica set; debug builds
+  `debug_assert_eq!` the cache against a fresh `peers()` on every use.
+  Bounded by the replica count. Cold callers keep `peers()`.
+- **Frontier.** `quorum::frontier` fills a stack buffer (`[u64; 16]` per
+  majority branch, `[(u64, u64); 16]` per weighted branch) when the branch
+  has at most 16 children and a `Vec` otherwise, then sorts exactly as today.
+  Depth is bounded by `Limits::max_depth`, so the stack use is at most 33
+  levels × 256 B. Same values, same signature. Debug builds compare every
+  result with the old `Vec` implementation (kept under
+  `cfg(debug_assertions)`).
+- **Map oracle.** In debug builds `PeerSlots` also keeps the old
+  `BTreeMap<NodeId, T>` and checks every operation's result and the whole
+  occupied view against it, so every debug test (unit and integration) runs
+  the slot form and the map form side by side.
+- **Failure and cleanup.** No new error. `insert` cannot fail (`Vec::insert`
+  aborts only on allocation failure, as `BTreeMap::insert` did).
+- **Public API.** None. `Replication`, `AdmittedRange` and
+  `EmptyAppendAlias` gain `Debug, PartialEq, Eq` derives (crate-private).
+- **Acceptance.** Existing replication, frontier and commit tests unchanged.
+  New `src/raft/peer_slots_tests.rs`: (1) leader histories with a learner
+  join and a joint change mid-flight (requests outstanding to departing and
+  arriving peers), retirement of the leader, a lagging follower (refusals
+  and next-index backoff), and conflict truncation on a deposed leader that
+  is re-elected; at every step the commit decision equals the one recomputed
+  from the old map frontier, the slot view equals the map oracle, and the
+  slot keys are a subset of the current membership's peers (no departed
+  peer, key count ≤ replica count); (2) a randomized `PeerSlots` versus
+  `BTreeMap` operation history; (3) a randomized frontier comparison over
+  majority and weighted trees with branches of 1–40 children (both the
+  stack and the `Vec` buffers). Named mutation runs with counts. Driver
+  widths 1/231/515 (3 pairs) base vs head with samply per-site attribution
+  at width 1; the four-cell gate (`fwmac.sh e7520ce1 <head> 5`);
+  attribution controls once; fmt, four strict Clippy builds, matched
+  fmt/Clippy, suites.
+
+#### V3e implemented: per-peer replication slots (20 October 2026)
+
+Commits on `cpu/peer-slots` (from main `12fb21de`): `899072f6` (slots, peer
+order, frontier, oracles, tests, with the schema plan above), `0f281be2`
+(full slot view compiled only for the oracle and tests; release builds warned
+about dead code), `c030e952` (peer-order reset only at election, same-id
+replacement test) and `713ead7c` (reference frontier kept for release-mode
+tests). Final code head: `713ead7c`. The driver, profiles, two gate runs,
+the control and the attribution runs used `899072f6`; the third gate run used
+`713ead7c`. Between the two the hot path is unchanged: the later commits
+remove one store from `configuration_changed`, add a `cfg` to a function
+release builds never call, and change tests.
+
+- **Public API: no change.** Internal: `Raft.requests`, `admitted_ranges` and
+  `empty_append_aliases` are `PeerSlots<_>` (`src/raft/peer_slots.rs`);
+  `Raft` gained `peer_order: Vec<NodeId>` and `peer_order_for:
+  Option<ConfigurationId>`; `Replication`, `AdmittedRange` and
+  `EmptyAppendAlias` derive `Debug, Eq, PartialEq`; `quorum::frontier` keeps
+  its signature. No caller or existing test changed its form; one
+  `RequestWindow::current_replication` match was split because the two
+  request tables now have different types.
+- **Guarantees kept.** Every read of the three tables returns what the map
+  returned (occupied slots, in `NodeId` order); the frontier is the same
+  value; the hot broadcasts address the same peers in the same order. Debug
+  builds check all three on every call: the slots against a shadow
+  `BTreeMap`, the frontier against the old `Vec` code, the cached order
+  against a fresh `peers()`.
+- **Lifetime statement.** A slot key exists only for a peer inserted since
+  the table's last `clear`, and production inserts only address peers of the
+  installed configuration (`append_for` indexes `next_index[&peer]`,
+  `replicate_admitted` requires `early_peer`). Every configuration change,
+  term change and election clears the tables. So each table holds at most the
+  installed membership's replica count of keys and never a departed peer's;
+  its capacity is at most the largest replica set since recovery, which
+  `Configuration::new` bounds. The peer order is at most the replica count,
+  rebuilt in place. No counter, budget or lifetime limit.
+- **Differences from the plan.**
+  - Peer-order reset. The plan reset the cache in `configuration_changed`
+    and `become_leader`. Mutation M3 (no reset in `configuration_changed`)
+    survived every test: the id check already covers every change a leader
+    can make, and only a leader reads the cache. The case that needs a reset
+    is a reused id. A configuration id is unique along one log, not across a
+    truncation: a follower's uncommitted entry can be replaced, in one
+    install, by another leader's entry with the same id and other replicas,
+    and install (equal ids) resets nothing. The election reset covers it; the
+    other reset was removed (`c030e952`) and the new
+    `peer_order_follows_a_same_id_configuration_replaced_by_truncation` test
+    reproduces the case on durable member cores and fails without the
+    election reset.
+  - The slot-key bound is against the *installed* membership: while a
+    configuration is pending, the slots (like the maps) still hold the old
+    peers until it installs.
+- **Tests** (`src/raft/peer_slots.rs`, `src/raft/peer_slots_tests.rs`,
+  `src/quorum.rs`):
+  - `slots_match_the_map_over_a_random_operation_history` (20,000 seeded
+    insert/remove/clear/get steps against a `BTreeMap`; keys at most the 9
+    peers; capacity stops growing) and
+    `a_retired_slot_is_rewritten_in_place_without_allocating` (1,000 rounds,
+    buffer pointer unchanged).
+  - `buffered_frontier_matches_the_vec_form_on_random_trees` (400 seeded
+    majority and weighted trees with root widths up to 40, so both the stack
+    buffer and the `Vec` run; absent voters and ties).
+  - `slot_and_map_forms_decide_the_same_commits_through_joint_change_and_retirement`:
+    a real durable leader with a follower model that delivers out of order and
+    loses half of the lagging peer's messages (retries, refusals, next-index
+    backoff); a learner join and a joint change accepted while requests are
+    outstanding, Final, and retirement (the leader stops being a voter, steps
+    down and keeps no slot). After every core call: no slot outside the
+    installed membership, a leader's cached order equals `peers()`, every
+    planned commit equals the old map-form frontier (66 decisions) and no
+    quiescent leader misses a commit the map form would make (745 checks);
+    in debug builds it also counts 999 slot-oracle and 464 frontier-oracle
+    comparisons.
+  - `no_slot_is_retained_for_a_departed_peer`: learner 5 leaves while a
+    request to it is outstanding; its late reply is refused and creates no
+    slot; afterwards no table holds 5 and each holds at most 3 keys.
+  - `slots_follow_conflict_truncation_and_re_election_of_a_deposed_leader`
+    (real volatile cores: an orphan entry, a new leader's truncating append,
+    then the old leader re-elected) and the same-id test above.
+  - Existing replication, frontier, commit, membership and joint tests are
+    unchanged and pass with the debug oracles active (unit and integration).
+- **Mutations** (temporary edits on the final tree, restored by checkout;
+  debug: all 557 lib tests; release: the `peer_slots` and `quorum::tests`
+  filters, 7 tests, oracles compiled out):
+
+  | Edit | Debug lib | Release (explicit assertions only) |
+  | --- | --- | --- |
+  | M1 `remove` keeps the value (`.1.take()` → `.1`) | 44 fail | 6 of 7 fail |
+  | M2 `clear` keeps keys (values set to `None`, keys kept) | 6 fail (all slot tests; departed peer) | 6 of 7 fail |
+  | M3 no reset in `configuration_changed` | survived; the reset was redundant and is removed | — |
+  | M4 no reset in `become_leader` | 1 fails (same-id replacement) | 1 fails |
+  | M5 majority median off by one (`(len − 1) / 2`, buffered form) | 3 fail | 1 fails (random trees) |
+  | M6 weighted threshold `>` → `>=` (buffered form) | 8 fail | 1 fails |
+  | M7 `occupied` not decremented on remove | 44 fail | 6 of 7 fail |
+  | M8 wide branches lose children (`Vec` buffer cut to 16) | 1 fails (random trees) | 1 fails |
+  | M9 unsorted insert (`push` instead of the sorted position) | 4 fail | 1 fails |
+
+Deterministic driver (`R3_DRIVE`, `research-r4/tools-r4/drive.py` on both
+trees, one thread), quiet Mac (load 1.9), 3 interleaved pairs, medians:
+
+| Width | `e7520ce1` ns/write | `899072f6` ns/write | Pair ratios | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | --- | --- | --- |
+| 1 | 3,018.3 | 2,641.1 (−12.5%) | 0.88 0.88 0.88 | 44,997 → 40,980 (−8.9%) | 9,530 → 8,379 (−12.1%) |
+| 231 | 94.3 | 90.7 (−3.8%) | 0.96 0.96 0.97 | 1,758.7 → 1,733.1 (−1.5%) | 355.1 → 343.2 (−3.4%) |
+| 515 | 87.8 | 86.6 (−1.4%) | 0.99 0.98 0.97 | 1,857.7 → 1,841.4 (−0.9%) | 378.9 → 373.7 (−1.4%) |
+
+Per-site attribution: samply at 8 kHz on the width-1 driver
+(`R3_DRIVE=300000,1,1`), 2 runs per build, `expand_mac.py` folds,
+CPU-weighted ns per write (sampled totals run about 20% above unprofiled):
+
+| Site | `e7520ce1` incl / self | `899072f6` incl / self | Saved (incl) |
+| --- | ---: | ---: | ---: |
+| `retire_replication` (`BTreeMap::remove` 160.5, root free) | 163.4 / 163.4 | 7.6 / 1.1 | 156 |
+| `Raft::peers` (per-broadcast `Vec`) | 76.3 / 73.4 | 0 | 76 |
+| `refresh_peer_order` | 0 | 4.9 / 3.8 | −5 |
+| `quorum::frontier` (`Vec` collect, sort, free) | 135.1 / 123.6 | 74.9 / 64.1 | 60 |
+| `append_for` (map insert) | 134.6 / 82.9 | 92.8 / 27.6 | 42 |
+| `BTreeMap` insert, all callers | 53.8 | 26.5 | 27 |
+| `BTreeMap` get/index, all callers (`progress`, `next_index` remain) | 148.8 | 119.4 | 29 |
+| `PeerSlots`, all operations | 0 | 27.9 | −28 |
+| `receive_appended_into` | 446.1 / 76.0 | 224.9 / 67.8 | 221 |
+| `broadcast_ready_peers_into` | 256.9 / 65.8 | 135.8 / 47.3 | 121 |
+| `maybe_commit_into` | 201.0 / 11.5 | 135.6 / 11.1 | 65 |
+| All sampled | 3,502 | 2,853 | 649 |
+
+The named classes (map remove and its free, the peer `Vec`, the frontier
+`Vec`, map inserts) are about 330 ns of the 377 ns unprofiled saving; the
+slots cost 28 ns. Measured against the profile's estimate (421 ns on
+`d379783d`, 70–95% recoverable): the width-1 saving is within it.
+
+Gate: `target/claude/tools/fwmac.sh e7520ce1 <head> 5`, quiet Mac (load
+0.4–2.0, no other benchmark process), whole-process CPU per completed write:
+
+| Cell | Run 1 (`899072f6`) | Run 2 (`899072f6`) | Run 3 (`713ead7c`) | 15-pair median ratio | Expected |
+| --- | --- | --- | --- | ---: | ---: |
+| bulk 4096/4, 16 workers | 212 → 212 (0.0%) | 214 → 212 (−0.9%) | 211 → 215 (+1.9%) | 1.00 | ~0 |
+| singleton 1/1, 16 workers | 20,708 → 20,614 (−0.5%) | 20,913 → 20,509 (−1.9%) | 21,128 → 20,893 (−1.1%) | 0.99 | −1.3 to −1.8% |
+| bulk 4096/4, 1 worker | 187 → 189 (+1.1%) | 191 → 185 (−3.1%) | 189 → 188 (−0.5%) | 1.01 | ~0 |
+| singleton 1/1, 1 worker | 11,447 → 11,618 (+1.5%) | 11,407 → 11,647 (+2.1%) | 11,380 → 11,614 (+2.1%) | 1.02 | −2.3 to −3.1% |
+
+Pair ratios, run 1 / 2 / 3: bulk-16 `0.99 1.00 1.00 1.00 1.00` / `0.98 1.00
+0.98 1.00 1.01` / `1.01 1.05 0.95 1.02 1.00`; single-16 `1.00 0.99 1.00 0.98
+0.98` / `0.97 0.99 1.00 0.98 0.94` / `1.01 1.04 0.85 0.98 0.99`; bulk-1
+`1.05 1.02 1.03 1.01 1.01` / `0.87 1.00 1.02 0.97 0.96` / `1.01 0.99 0.99
+0.93 1.05`; single-1 `1.01 1.02 1.02 1.00 1.01` / `1.01 1.02 1.02 1.05 0.97`
+/ `1.04 0.98 1.02 1.00 1.03`. Single-1 throughput falls 3.6–4.0% in every
+run.
+
+**Single-1 is slower although the head does less work.** The single-1
+profile (samply, 2 runs per build) still shows the saving at the same sites
+(`retire_replication` −104, `peers` −74, `frontier` −66, `append_for` −35 ns
+per write, slots +22), but more time in tokio's select/notify/oneshot paths
+and the scheduler, and `time -l` over 3 runs per build shows:
+
+| Workers | User s | Sys s | Involuntary context switches per write | Instructions per write |
+| ---: | --- | --- | --- | --- |
+| 1 | 1.00–1.02 → 0.98–1.00 | 0.46–0.48 → 0.50–0.53 | 1.55–1.57 → 1.66–1.73 | 90,611–90,841 → 89,046–90,320 |
+| 16 | 1.48–1.53 → 1.42–1.43 | 1.22–1.30 → 1.25–1.27 | 3.29–3.31 → 3.28–3.30 | 119,351–120,077 → 115,634–115,961 (−3.4%) |
+
+Control (the user-visible test of the cause): a scratch head with a busy
+loop in `retire_replication`, iteration count from `V3E_SPIN`, calibrated on
+the width-1 driver (0: 2,653 ns; 100: 2,996 ns; 200: 3,522 ns; base 3,006 ns),
+so 100 iterations add back about the time the slots removed. Five
+interleaved rounds of `run.py` (same session):
+
+| Build | single-1 ns/write | single-1 rate/s | single-16 ns/write |
+| --- | ---: | ---: | ---: |
+| `e7520ce1` | 11,352 | 103,208 | 20,921 |
+| `899072f6` | 11,609 (+2.3%; pairs 1.00 1.03 1.03 1.02 1.03) | 98,329 | 20,740 (−0.9%) |
+| `899072f6` + 100-iteration spin | 11,281 (−0.6%; pairs 1.00 1.00 1.01 0.97 0.99) | 104,449 | 20,656 (−1.3%) |
+
+Adding back the removed time makes single-1 cheaper than the head and as fast
+as the base. So single-1's +1.5 to +2.1% is not library work: with one server
+worker shared by the three actors and one client thread, the server now
+finishes a write's tail work (follower acknowledgements and commit notices,
+where these savings are) before the client's next request arrives, parks,
+and pays a kernel wake on both sides (+7 to +10% context switches, +8% system
+time). The spin build is not a candidate; it exists only to show the cause.
+Single-16 (several workers) has no such shift and improves. Any later slice
+that shortens the same tail (V3f) can meet the same threshold in this cell.
+
+Attribution controls (`--attribution true`; one run per cell per revision,
+bulk-1 three runs; equal final frontiers, all writes completed, 0 phase
+failures everywhere):
+
+| Cell | Leader persists | Leader batches (max width) | Follower persists (sum) | Follower sends (sum) |
+| --- | --- | --- | --- | --- |
+| single-1 | 264,195 → 264,195 | 132,096 → 132,096 (1 → 1) | 488,337 → 488,606 (+0.06%) | 488,426 → 488,696 |
+| bulk-16 | 14,870 → 15,277 | 8,950 → 9,397 (1,952 → 2,188) | 11,795 → 11,831 | 13,882 → 13,896 |
+| bulk-1 (3 runs) | 26,337–28,479 → 25,650–30,130 | 21,316–23,438 → 20,698–25,084 | 11,284–11,368 → 11,110–11,167 | 15,823–15,843 → 15,495–15,844 |
+
+- Singleton: the leader persists exactly 264,195 at width 1 in both.
+  Followers are unchanged in this run; an earlier single-1 run of each build
+  gave 492,455 → 482,295 (−2.1%), so their count varies by about 2% between
+  runs in both builds and does not explain the cell's direction.
+- Bulk-16: leader batches +5% and persists +2.7%, followers unchanged;
+  within the ±15% single-run spread.
+- Bulk-1: the base's and the head's batch counts overlap (21.3k–23.4k and
+  20.7k–25.1k), followers within 1.5%: the one-worker spread seen in V3c and
+  V3d.
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics (pre-push hook, enabled, on every
+push); a release build of the library with no warnings; default `--lib
+--test volatile --test raft --test snapshot --test membership --test learners
+--test retirement --test learner_enrollment --test member_recovery --test
+log_owned --test worker --test runtime --test effect_owner` (556 lib, 1
+ignored, + 11/81/27/32/23/7/5/43/5/9/57/210) and all features (558 lib, 1
+ignored, + 11/81/27/32/24/7/5/44/5/9/57/210), one configuration at a time;
+`--release --lib -- peer_slots quorum::tests` 7/7; matched tests 75/75 in
+default and all features.
+
+Next candidates found here (not done): `progress` and `next_index` are still
+maps (`BTreeMap` get/index 119 ns per write at width 1); moving them into the
+slots would remove most of it. The single-1 park threshold above is a
+harness topology item for the orchestrator.
+
+#### V3f merge record (PR 24)
+
+Merged 21 October 2026 as `1e56e9f5` from final PR head
+`deaf8121e700bc1c2f6f86440d2699c560da7114`. Both reviewers approved
+`7845992b` (production code `e3471f31`):
+[GPT-6.1-Sol, review 5587412347](https://github.com/KarlLivesey/VoteBoat/pull/24#pullrequestreview-5587412347)
+and [Claude Opus 5.5, review 5587699240](https://github.com/KarlLivesey/VoteBoat/pull/24#pullrequestreview-5587699240).
+Their APPROVE verdicts are posted as comments because GitHub disallows
+self-approval. Round 2 folds the reviewer-supplied Compact/Delta refusal
+and spent-plan regressions plus documentation corrections; production code
+is unchanged from the reviewed head.
+
+Full exclusive-checkout gate on `deaf8121` (Linux, cores 4–9): default
+2,603 / 0; all-features 2,906 / 0 plus relay 9 / 0 (2,915 total);
+no-default-features 1,337 / 0 plus relay 9 / 0 (1,346 total);
+native-only 1,924 / 0; matched 75 / 0. Every expected executable has its
+own passing result: 124 default, 124 all-feature, 118 no-default, 120
+native-only and one matched executable. No filters were applied; the
+existing ignored library test remains in each root configuration.
+The original pre-fold default run was 2,601 / 0; the final-head rerun adds
+exactly the two library regressions and keeps every other target's count.
+Root fmt, four strict all-target Clippy configurations and matched
+fmt/Clippy passed (7/7, zero diagnostics). The split runner omits
+doctests, so `cargo +stable test --doc --locked --offline` was run
+separately with `--all-features` and `--no-default-features` after the
+sequence completed: both passed with zero doctest cases. Default and
+native full Cargo runs include their doctest result. Logs and per-binary
+audits are local in the main checkout at
+`target/claude/research-r4/pr24-suites/` (`gate-audit.json`);
+`test-default-final.log` preserves the final-head run separately.
+
+The code merged automatically with V3e. All three documentation conflicts
+retain both slices' complete sections, main's Done V3e row and its
+single-1 judging rule. On merged source `1e56e9f5`, default library
+564 / 0 and all-feature library 566 / 0 passed, each with volatile 11 / 0,
+Raft 81 / 0 and snapshot 27 / 0 (683 and 685 total); matched passed
+75 / 0. The enabled tracked pre-push hook also passed all seven checks
+on the merged source with zero diagnostics. Feature configurations ran
+sequentially in the owned checkout; later builds used
+`CARGO_INCREMENTAL=0` to bound compiler cache growth.
+
+P3 disposition: round 2 corrects `install_pending_plan`'s return type to
+`RaftError` and the peer-slots documentation conflict count to three.
+This merge record corrects the driver pair-consistency and bulk run-median
+wording and explicitly records the unattributed ~75 ns sampling gap below.
+The optional release-mode Busy refusal and installer-body consolidation
+remain deferred. T4 remains open: V3f is complete as a measured
+library/driver improvement, with no demonstrated whole-process cell gain.
+
+#### V3f schema plan: in-place install (20 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §3 (class "Pending /
+OwnedNextLog / Result by-value moves", ~350 ns at driver width 1 on
+`d379783d`) and §5 item 4. Branch `cpu/in-place-install` from main `379668af`
+(V3d and EO1 merged; V3e's peer slots in review on `cpu/peer-slots`, not
+included: this slice touches only the install path).
+
+Base profile (`379668af`, width-1 driver, samply 8 kHz, 2 runs, sampled
+3,519 ns per write against 3,734–3,786 measured), memmove self time by
+nearest library owner frame, ns per write: `install_pending_into` 124.5,
+`stage_pending_into` 60.3, `OwnedNextLog::install_unchanged` 31.2,
+`SummarizedLog::install` 23.3, `persist_update_into` 15.9, `OwnedAppend::new`
+11.4 (266.6 in all); `Result::branch` self 37.2 (all callers).
+
+By-value moves on the install path today (each run on every persistence
+round; six rounds per write at width 1):
+
+| # | Site | Moved | After this slice |
+| ---: | --- | --- | --- |
+| 1 | `install_pending_into`: `self.pending.take()` | the whole `Pending` (1,104 B) out of the core onto the stack | `self.pending.as_mut()`: the plan is installed where it lies |
+| 2 | `self.durable.install(p.next, p.planned)` | `OwnedNextLog` (672 B) into `SummarizedLog::install` | `&mut p.next` |
+| 3 | `install_unchanged(self, ..)` / `install(self, ..)` (`match self.0`) | the `OwnedAppend` / `CommitAdvance` out of the plan | `match &mut self.0`; only the suffix (32 B) is taken, and only after every check passed |
+| 4 | `install_append(current, suffix, summary) -> LogSummary`, then `*summary = …` | the planned `LogSummary` (336 B) in by value and out by value | one copy, from the plan into the log's summary |
+| 5 | checked path: `prepare_install(self) -> Result<PreparedOwnedLog, _>`, `.install(self) -> LogSummary`, `Result<LogSummary, _>` back to `SummarizedLog::install` | the plan into a large `Result`, out again, and the summary through a second `Result` | checks by reference, then install; the in-place call returns `Result<(), StorageError>` |
+| 6 | `after_durable(p.after, p.reply, ..)` | `After` (16 B) and `Option<Message>` (256 B) out of the stack copy | taken from the slot (`mem::replace`, `Option::take`); same sizes |
+
+Kept by value: `OwnedNextLog::install` / `prepare_install` and
+`PreparedOwnedLog` for the owned provider (`log/owned.rs`) and the
+transition tests, and the native store's `into_change` path (no T4 cell runs
+them). Their checks and errors are the same functions the in-place path
+calls.
+
+- **Data/API shape (all crate-private).**
+  - `OwnedNextLog::install_in_place(&mut self, current: &mut GroupLog,
+    summary: &mut LogSummary, unchanged: bool) -> Result<(), StorageError>`
+    replaces `install_unchanged`. `unchanged` is the V3d stamp decision: an
+    append or commit advance skips its predecessor comparison only then
+    (debug builds still assert it); otherwise, and for every cold `Other`
+    plan, the full check runs first. Every check precedes the first
+    mutation of `current`, `summary` or the plan.
+  - `NextLog::check_install(&self, current, update)` (the body of today's
+    `prepare_install`, which now calls it) and
+    `NextLog::install_in_place(&mut self, current, update) ->
+    Result<LogSummary, StorageError>` for the cold plans: a `Full` plan
+    swaps its planned log into `current` (the old log stays in the spent
+    plan and is dropped when the slot is cleared, a few instructions later);
+    a delta takes its suffix; a compaction trims as before.
+  - `SummarizedLog::install(&mut self, next: &mut OwnedNextLog, planned:
+    Option<LogStamp>)`: the stamp rule is unchanged (skip only when
+    `planned` is `Some` and equal to the log's own stamp; the stamp still
+    travels in `Pending.planned`). On error nothing changes: log, summary,
+    stamp and the plan.
+  - `Raft::install_pending_plan(&mut self) -> Result<Installed,
+    RaftError>` is the only caller. It installs `self.pending`'s plan in
+    place; on `Ok` it takes `membership`, `after` and `reply` out (a
+    16-byte-aligned 8 + 16 + 256 B, the parts the core still uses) and sets
+    the slot to `None`; on `Err` it returns before touching the slot.
+    `install_pending_into` calls it and, on `Err`, calls `storage_failed()`
+    exactly as today.
+  - `Pending` and `OwnedNextLog` keep their fields and sizes (1,104 B and
+    672 B): no size-bound change.
+- **State transitions of the pending slot.** Empty → Staged
+  (`stage_pending_into`) → install attempt. Failure: the plan is intact in
+  the slot when the install returns; `storage_failed()` then fences the
+  core and empties the slot, as today (so a failed install still leaves no
+  pending dependency, and the existing V3d tests are unchanged). Success:
+  the plan is spent (its suffix now belongs to the log, a `Full` plan holds
+  the old log) and the slot is emptied before any fallible step
+  (`configuration_changed`, retirement announcements, `after_durable`) and
+  before anything can stage again: the same point at which `take()` emptied
+  it before.
+- **What guards "cleared only after success".** Structure: the clear is on
+  the `Ok` arm of `install_pending_plan` only, and the install returns its
+  error before any mutation. A debug assertion in `stage_pending_into` that
+  the slot is empty: a spent plan left behind, or a live plan overwritten,
+  trips it on the next round in every debug test. Tests: below.
+- **Failure and cleanup.** Every install error kind keeps today's result:
+  the same `RaftError::Storage(StorageError::Rejected(..))`, the core fenced,
+  no pending dependency, log and summary unchanged.
+- **Restart and partial progress.** Unchanged: plans and stamps are not
+  persisted; a recovered core has no pending plan. A spent plan exists only
+  inside `install_pending_plan`.
+- **Public API.** None.
+- **Acceptance.**
+  - New tests (debug and `--release`), each failure kind through
+    `install_pending_plan` and then through the public completion path:
+    (1) predecessor mismatch: an append and a commit advance staged, the log
+    then changed behind them (test `edit`), so the stamp moved and the
+    checked compare refuses; (2) foreign stamp: a plan moved to another core
+    at the same version, refused by the checked compare; (3) cold-plan
+    refusal: a full plan (configuration entry) whose `NextLog` check refuses
+    after the log changed (the store-validation path the owned provider also
+    uses). Each checks that the returned error is today's, that `Pending`
+    is intact (same update, metadata, suffix, ticket, `After`, reply, stamp
+    and membership), and that the log, summary and stamp are unchanged; then
+    that the public path returns the same error and leaves the core fenced
+    with no pending dependency. A success test: after an install the slot is
+    empty and the installed log equals the oracle.
+  - Mutation proofs: without the clear on success, the success test fails
+    (and the stage assertion fires across the suite); with the suffix taken
+    before the check, the intact test fails.
+  - Unchanged: twin, completion, volatile/durable, sink and V3d stamp tests;
+    `pending_and_plan_sizes`.
+  - Measurement: per-site memmove before/after from width-1 driver samply
+    folds (2 runs per build); driver widths 1/231/515 (3 pairs); the gate
+    `fwmac.sh 379668af <head> 5`; attribution controls once (singleton
+    leader persists exactly 264,195 at width 1; bulk followers side by side).
+    Single-1 judging rule (PR 21's reviewers): judge by the driver, single-16
+    and both bulk cells; single-1 is a guard, and an adverse move counts only
+    if a control (head plus a busy loop adding back the removed time) does
+    not explain it; if it moves adversely, run that control once.
+  - Checks: fmt, the four strict Clippy builds, matched fmt/Clippy; `--lib`
+    (debug, and `--release` for the install tests), `volatile`, `raft`,
+    `snapshot`, `log_owned`, `worker`, `runtime`, `effect_owner`, matched
+    tests, in default and all features, one configuration at a time.
+- **Step 2 (staging side), only if the step-1 profile supports it.** The
+  staging moves (`stage_pending_into` 60.3, `persist_update_into` 15.9,
+  `Result::branch` on the plan) are a separate step, planned as an addendum
+  here before editing, after the step-1 profile shows what is left.
+
+#### V3f implemented: in-place install (20 October 2026)
+
+Commits on `cpu/in-place-install` (from main `379668af`): `7b1a3038` (the
+schema plan above), `f4803a4d` (step 1: in-place install, clear after
+success, staging assertion, tests) and `e3471f31` (`Installed` declared
+beside `Pending`, so the code merges with V3e without a conflict; comment
+wording). Code head: `e3471f31`. The driver and the profiles used
+`f4803a4d`; `e3471f31` changes only a declaration's position and a comment.
+
+- **Public API: no change.** Internal: `OwnedNextLog::install_in_place`
+  replaces `install_unchanged`; `NextLog::check_install` and
+  `NextLog::install_in_place` (cold plans), `CompactDelta::install_ref`;
+  `SummarizedLog::install` takes `&mut OwnedNextLog`;
+  `Raft::install_pending_plan` and the `Installed` parts struct. The
+  by-value `OwnedNextLog::install` is now test-only (the owned provider uses
+  `prepare_install`, unchanged). `Pending` 1,104 B and `OwnedNextLog` 672 B
+  are unchanged; `pending_and_plan_sizes` is unchanged and passes.
+- **Guarantees kept.** Every install still checks exactly what it checked:
+  the V3d stamp rule decides the skip (`planned` must be `Some` and equal to
+  the log's own stamp; the stamp still travels in `Pending.planned`), and
+  every other install, and every cold plan, runs the same comparisons with
+  the same errors. All checks precede the first change, so a refused install
+  changes nothing, the plan included; the core then fences through the same
+  `storage_failed()` call as before, which empties the slot as before. The
+  existing V3d tests that assert "fenced, no pending dependency, log
+  unchanged" after a refused install are unchanged and pass.
+- **Difference from the plan.** Step 2 (staging) was not done. The step-1
+  profile leaves `stage_pending_into` at 65.0 ns memmove per write (its
+  `self.pending = Some(Pending { .. })` line: the 672 B plan argument and
+  the 256 B reply written into the slot; the x86 code writes them straight
+  into the slot, no stack temporary) and `persist_update_into` 14.1 ns (the
+  `?` on `plan_owned`'s `Result`). Removing the plan copy would need the
+  plan built inside the slot expression, that is a second, core-only,
+  two-phase planning API beside `plan_owned` / `plan_commit` / `plan_copy`,
+  for at most about 45 ns per write at width 1 (about 1.5% of the driver,
+  0.4% of a singleton write). Not worth a second planning path; recorded as
+  a candidate.
+- **Tests** (`src/raft/install_in_place_tests.rs`, debug and `--release`,
+  default and all features):
+  `a_failed_install_after_a_predecessor_mismatch_leaves_the_plan_intact`
+  (a follower append with its reply, and a commit advance, each staged and
+  then the log changed behind it),
+  `a_failed_install_of_a_foreign_plan_leaves_the_plan_intact` (a plan moved
+  to another core at the same version),
+  `a_failed_install_of_a_refused_full_plan_leaves_the_plan_intact` (a durable
+  leader's configuration entry, a full plan with a membership and an
+  admitted ticket, refused by the `NextLog` check) and
+  `a_successful_install_empties_the_slot`. Each failure test checks, after
+  `install_pending_plan`: today's error (`Storage(Rejected("transition plan
+  predecessor or update mismatch"))`), the pending transition intact (its
+  update, metadata, kind, full log, membership, ticket, `After`, reply and
+  stamp), the log, summary and stamp unchanged, the core not yet fenced; then
+  the public completion (`persist_volatile`, `complete`, or the completions'
+  install for the moved plan): the same error, fenced, no pending
+  dependency, log unchanged.
+- **Mutations** (temporary edits, restored by checkout):
+
+  | Edit | Result |
+  | --- | --- |
+  | M1 no `self.pending = None` after a successful install | debug lib: 146 of 555 fail (113 by the staging assertion); release `install_in_place`: the success test fails |
+  | M2 the append's suffix taken before its check | 2 of 4 install tests fail (predecessor mismatch, foreign plan) |
+  | M3 a full plan swapped into the log before its check | 2 of 4 fail (refused full plan; the success test's configuration) |
+  | M4 a commit advance's summary written before its check | 1 of 4 fails (predecessor mismatch) |
+
+Deterministic driver (`R3_DRIVE`, `research-r4/tools-r4/drive.py` on both
+trees, one thread), quiet Mac (load 1.1–1.3), 3 interleaved pairs, medians:
+
+| Width | `379668af` ns/write | `f4803a4d` ns/write | Pair ratios | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | --- | --- | --- |
+| 1 | 3,010.7 | 2,914.6 (−3.2%) | 0.97 0.98 0.96 | 45,021.5 → 42,745.5 (−5.1%) | 9,496.8 → 9,139.1 (−3.8%) |
+| 231 | 93.1 | 92.0 (−1.2%) | 1.01 0.99 0.98 | 1,758.9 → 1,746.4 (−0.7%) | 349.2 → 344.9 (−1.2%) |
+| 515 | 87.5 | 87.3 (−0.2%) | 0.99 1.00 1.00 | 1,855.3 → 1,850.7 (−0.2%) | 373.9 → 372.3 (−0.4%) |
+
+Per-site attribution: samply at 8 kHz on the width-1 driver
+(`R3_DRIVE=300000,1,1`), 2 runs per build, `expand_mac.py` folds,
+CPU-weighted ns per write (sampled totals 3,519 → 3,427):
+
+| Site | `379668af` | `f4803a4d` | Change |
+| --- | ---: | ---: | ---: |
+| memmove in `install_pending_into` (`take()` 69.7 at the `Pending` take, 47.7 at the plan move into `install`) | 124.5 | 0 | −124.5 |
+| memmove in `install_unchanged` → `install_in_place` (the plan moved in; now only the 336 B summary written to the log) | 31.2 | 19.4 | −11.8 |
+| memmove in `SummarizedLog::install` (the plan moved on) | 23.3 | 0 | −23.3 |
+| memmove, install side in all | 179.0 | 19.4 | −159.6 |
+| new: dropping the spent plan at the clear (`Option<Pending>` drop glue) and taking the reply (`Option::take`) | — | 27.2 + 15.8 | +43.0 |
+| memmove in `stage_pending_into` / `persist_update_into` / `OwnedAppend::new` (not changed) | 60.3 / 15.9 / 11.4 | 65.0 / 14.1 / 12.1 | ~0 |
+| `install_pending_into` inclusive / self | 773.2 / 31.5 | 604.1 / 27.3 | −169.1 |
+| `SummarizedLog::install` inclusive | 132.1 | 90.3 | −41.8 |
+| `finish_volatile_into` inclusive | 782.1 | 615.2 | −166.9 |
+| All sampled | 3,519 | 3,427 | −92 |
+
+The 166.9 ns reduction in `finish_volatile_into` inclusive time exceeds
+the 92 ns whole-sample reduction by about 75 ns. That change elsewhere is
+unattributed; the two 8 kHz sample runs do not identify a cause.
+
+The profile's estimate for this slice was the library memmove at these
+sites, 250–330 ns of 356 on `d379783d` (single-1 running view); on
+`379668af` the install side was 179 ns of memmove at width 1 and 160 of it
+is gone. The staging side (about 90 ns) is the part left (above).
+
+Gate: `target/claude/tools/fwmac.sh 379668af 98e77aef 5` (`98e77aef` is the
+first pushed head; its code is `e3471f31`), quiet Mac (load 0.4–2.9, no
+other benchmark process), whole-process CPU per completed write, run three
+times:
+
+| Cell | Run 1 | Run 2 | Run 3 | 15-pair median ratio | Expected |
+| --- | --- | --- | --- | ---: | ---: |
+| bulk 4096/4, 16 workers | 212 → 217 (+2.4%) | 212 → 213 (+0.5%) | 213 → 213 (0.0%) | 1.00 | ~0 |
+| singleton 1/1, 16 workers | 21,057 → 20,970 (−0.4%) | 21,251 → 21,123 (−0.6%) | 21,113 → 21,176 (+0.3%) | 1.00 | about −0.5% (below) |
+| bulk 4096/4, 1 worker | 185 → 188 (+1.6%) | 189 → 187 (−1.1%) | 186 → 190 (+2.2%) | 1.01 | ~0 |
+| singleton 1/1, 1 worker | 11,446 → 11,273 (−1.5%) | 11,359 → 11,395 (+0.3%) | 11,391 → 11,380 (−0.1%) | 1.00 | about −0.9% (below) |
+
+Pair ratios, run 1 / 2 / 3: bulk-16 `0.98 1.02 0.99 1.01 1.02` / `0.99 1.01
+1.00 1.00 1.05` / `1.05 1.00 1.00 0.99 1.00`; single-16 `1.00 1.00 0.98 1.01
+1.00` / `0.99 0.97 0.99 1.00 1.06` / `1.02 1.00 1.00 1.00 0.99`; bulk-1 `1.01
+0.97 1.01 1.02 1.03` / `0.98 1.01 0.99 1.02 0.90` / `1.02 1.02 1.02 1.02
+0.97`; single-1 `0.99 0.98 0.99 0.98 0.97` / `1.02 1.00 1.00 1.00 0.99` /
+`1.00 1.00 0.99 1.00 1.00`.
+
+Judgement (PR 21's rule: the driver, single-16 and both bulk cells decide;
+single-1 is a guard). The driver medians improve at widths 1 and 231
+(−3.2% and −1.2%); width 231 includes one adverse pair (ratios
+1.01 / 0.99 / 0.98). The four cells are flat within noise (15-pair median
+ratios 1.00 / 1.00 / 1.01 / 1.00). That is the expected size: the install
+saving is about 100–170 ns per write at six persistence rounds (width 1),
+about 0.5% of a single-16 write (21.1 µs) and 0.9% of a single-1 write
+(11.4 µs), below these cells' run-to-run spread (single-16 pairs 0.97–1.06).
+A bulk round installs once per few hundred writes (under 0.5 ns per write),
+so these bulk medians stay within the observed run-to-run spread.
+Individual pair ratios have both signs in both bulk cells; bulk-16 run
+medians are all nonnegative, while bulk-1 run medians have both signs.
+The per-round evidence is the fixed-width driver. Single-1 did not move
+adversely (−1.5 / +0.3 / −0.1%,
+median ratio 1.00), so the busy-loop control was not needed and not run.
+
+Attribution controls (`--attribution true`, one run per cell per revision,
+`379668af` → `98e77aef`; 0 phase failures, all 131,072 / 3,997,696 writes
+completed, equal final frontiers 132,097 / 3,998,721 everywhere):
+
+| Cell | Leader persists | Leader admissions | Follower persists (sum) | Follower sends (sum) |
+| --- | --- | --- | --- | --- |
+| single-16 | 264,195 → 264,195 | 132,096 → 132,096 | 487,524 → 488,940 (+0.3%) | 487,611 → 489,029 |
+| single-1 | 264,195 → 264,195 | 132,096 → 132,096 | 496,937 → 503,071 (+1.2%) | 497,027 → 503,161 |
+| bulk-16 | 14,651 → 14,587 | 8,856 → 8,810 | 11,758 → 11,759 | 13,942 → 13,918 |
+| bulk-1 | 24,667 → 27,135 | 19,715 → 22,137 | 11,295 → 11,307 | 15,757 → 15,702 |
+
+- Singleton: the leader persists exactly 264,195 at width 1 in both. The
+  single-1 followers' +1.2% is inside the ~2% run-to-run spread V3d and V3e
+  recorded for this count in both builds.
+- Bulk: followers and sends are side by side (within 0.4%). The bulk-1
+  leader's admission count moves +12%, inside the 17–32% spread of this
+  one-worker cell recorded in V3c, V3d and V3e.
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics (pre-push hook, enabled, passed on
+every push); default `--lib --test volatile --test raft --test snapshot
+--test log_owned --test worker --test runtime --test effect_owner` (555 lib,
+1 ignored, + 11/81/27/5/9/57/211) and all features (557 lib, 1 ignored, +
+the same), one configuration at a time; with all features also `log_store`
+19, `membership` 32, `learners` 24, `retirement` 7, `member_recovery` 44;
+`--release --lib -- install_in_place summarized commit_advance completion`
+40/40 in default and all features; matched tests 75/75 in default and all
+features.
+
+V3e conflict check (`git merge --no-commit --no-ff origin/cpu/peer-slots` at
+`5a316689` in this worktree, then `git merge --abort`): the code merges
+without conflict (`src/raft.rs` auto-merges once `Installed` sits beside
+`Pending`; the first check, with it beside `Replication`, conflicted on
+V3e's derive line), and the merged tree passes `--lib` 562/562 (1 ignored,
+both slices' tests and V3e's debug oracles), `volatile` 11, `raft` 81 and
+`snapshot` 27. `docs/IMPLEMENTATION.md` conflicts in three places, all
+"take both": the adjacent V3e/V3f mini-plan rows, and both slices' sections
+inserted before "H2 round 2".
 
 #### H2 round 2: review fixes (19 October 2026)
 
@@ -42696,3 +43608,128 @@ only by actual full audited results. Next after that: parent's fair exact-head
 performance keep/reject decision, dependent on a stable qualified candidate and
 baseline, completed by the established gate and durable disposition. No new
 roadmap slices or indispensable rejected dependencies are assumed.
+
+## Superseded PR23 cumulative reconciliation record
+
+Historical record from published b95943a3 follows. Its ST2/DR1 dependency,
+16-byte protocol, current/next labels and qualification plans were superseded
+by the independent-main plan above; neither rejected production tree ships.
+Prior reports remain immutable historical evidence in n1c-final-reconcile and
+n1c-final-n0; they do not qualify this head.
+
+## PR23 cumulative source reconciliation (21 October 2026; qualification pending)
+
+This is reconciliation of existing N1c, not a new slice or a keep decision.
+Pinned inputs: N1c `44b95083e96f7b09ab4e900ed4e1c25042896c2a` and DR1
+`b0ff8c0fa9b2f777363352ebc38ae4f477030431`. DR1 contains main
+`bd714771e181d59c2cfaece3fc93dc411ce41ddb` (V3f retained) and **unqualified**
+ST2 `219ad7bb8489c19012c8298d1021ddd959861782`. These dependencies are not
+claimed merged or fully green. DR1's reported 390 focused tests and lint/hook
+checks pass; its full gate is pending. Both independent Sol source confirmations approve
+exact `b0ff8c0f` (reviews `5593265778` / `5593269910`), no P1/P2. Their shared
+P3 is the cluster/offered output's stale 8-byte label: actual commands are
+16 bytes. Parent will fold that metadata correction into the next dependency;
+no child-only fix here. ST2 has four actual default failures: startup 52 pass /
+3 fail (clock hypothesis unverified), plus native-benchmark uneven-three-lane
+`AddrInUse`. ST2's owner finishes the current default run and owns both repairs;
+this reconciliation does not diagnose or qualify them.
+
+### Linked macro and mini plans
+
+Macro NW1 remains cheaper usable networked writes and Rust embedding. This
+reconciliation advances source composition only; no roadmap expansion, online
+membership prerequisite, N1 flush, N1d release or d2 deadline change is added.
+
+| Mini deliverable | Purpose | Dependencies | Completion checks | Macro |
+| --- | --- | --- | --- | --- |
+| Current: reconcile PR23 cumulative source | Preserve both histories and approved holds with V3c sink, V3d stamp, V3e peer slots, V3f in-place install, EO1 order, ST2 admission/WAL/no-op/slots and DR1 EntryBatch/readiness/session protocol | Exact pins above, existing APIs | Focused default/all holds, original effect-owner 7/logical-voter 2, terminal and Counter integration; root fmt, four strict Clippy configs, matched fmt/Clippy and actual enabled pre-push hook; publish nonforce to existing PR23 | NW1 |
+| Next: parent dependency/source qualification | Establish reviewable stable cumulative inputs | Replacement ST2 dependency from owner; DR1 gates; published reconciliation | Fresh independent Sol confirmations and parent-owned full suites; record failures honestly | NW1 |
+| Following: parent exact cumulative comparison/decision | Judge this composition fairly | Stable qualified cumulative candidate and baseline | Parent measures exact heads with matching 16-byte Counter/session protocol and flags, then keep/reject/main integration decision | NW1 |
+
+### Reconciliation/schema plan (before source editing)
+
+- Data/API: reuse N1c's peer-bounded volatile held marks/ack order and per-group
+  timer deadlines. Adapt only existing interfaces for DR1 EntryBatch and Counter
+  session-1 operation IDs/16-byte commands; preserve history/index/window and
+  retained-byte assertions. No new public API, hold policy or batching strategy.
+- State/ownership: one correlated request per follower; holds require nonzero
+  confirmed prefix (data >= batch floor; notices >= last). In-flight coverage
+  must extend that prefix and decides scheduling only, never durable commitment.
+  Exact ack/frontier/current-term rules remain fixed. Commit notices may be held
+  in any group size, including two voters; data needs quorum coverage without
+  that peer. Byte-truncated release can safely rehold the spare mid-batch.
+- Failure/cleanup: preserve learner/catch-up/probe/configuration/transfer/
+  compaction/rejection/heartbeat paths and EO1 continuation position. Existing
+  explicit ReleaseHeldAppends fixtures and intentionally frozen clocks remain;
+  facade Heartbeat is admitted only after owner drain. No blanket eager sends.
+- Restart/partial progress: holds are volatile and cleared on role/configuration
+  reset; ST2 durable no-op/WAL/admission and DR1 session/checkpoint behavior remain
+  authoritative. Partial byte-limited sends retain exact correlated ranges;
+  late polls and per-group deadlines must still release via real timer admission.
+- Checks: focused integration only, sequential features, cores 10–11/nice 19/two
+  Cargo jobs/CARGO_INCREMENTAL=0; guard before builds; no full matrix, research,
+  performance/Mac rerun or competing ST2 diagnosis. Record actual commands/logs
+  separately from historical evidence, then sweep only this checkout.
+
+### Implemented reconciliation evidence (qualification pending)
+
+The exact DR1 merge is prepared preserving both histories. Three conflict files:
+`docs/IMPLEMENTATION.md` retains both records and the pre-edit plan;
+`src/raft.rs` keeps PeerSlots/cached peer order plus N1c fields, and the heartbeat
+performs ST2 stall/no-op work before N1c's broadcast/notice reset;
+`src/raft/progress_broadcast.rs` dispatches N1c holds and retains the cached
+peer-order eager path. No policy/API or production Counter change is added.
+Automatic merges retain DR1's Counter/EntryBatch fixture conversions, all
+original history/index/window/retained-charge assertions, explicit frozen-clock
+release fixtures and Cancel-before-transfer ordering. The only manual source
+delta beyond conflict resolution is the `hold_due` comment: byte-limited
+release can safely rehold the spare mid-batch, so "at most two batches" is not
+an unconditional wire-size guarantee.
+
+Source-preservation evidence compares 17 selected invariant files byte-for-byte
+with old N1c or exact DR1; every comparison matches. The executable hold module
+is unchanged from `44b95083` (comment excluded). The timed module gains only
+ST2's existing pressure/WAL-budget/account forwarding methods over old N1c;
+its hold/deadline logic is unchanged. Main V3c/V3d/V3e/V3f, EO1, ST2 and DR1
+remain present; no N1 same-poll flush, N1d quorum-ack release or d2 change.
+
+Resource correction (parent notice during this task): initial focused runs used
+relative `nice -n 19`, without kernel verification. Their processes had exited;
+no retroactive actual19 claim is made. Own tool helpers showed inherited -4
+(relative +19 would produce15 from that value). Live owned threads were set to
+absolute19; the bounded focused set is repeated with per-child kernel checks,
+affinity10–11 and two jobs. The outer sequence controller was observed back
+at -4 after its initial assertion; it was corrected again, while inner Cargo/
+test threads were already19. Future child launches reset/verify absolute19.
+See the committed resource note and live audit for precise observations.
+Historical requested-priority prose remains historical, not kernel evidence.
+
+Actual resource-verified focused repeat: default **60/0**, all features
+**63/0**. Per configuration: core boundaries41 (including N1c18, peer slots,
+in-place installs, progress retries, EO1 and WAL admission), hold timers7,
+original native owner failures7, logical-voter network2/4, terminal intent1/2,
+Counter service session/window/expired-retry1 and real-core EO1 snapshot order1.
+All14 child launches verify actual kernel nice19; the live all-thread resource
+audit is retained. Initial requested-priority passes remain separate evidence.
+Root fmt, all four strict Clippy profiles (default/all/no-default/native-only,
+locked/offline/keep-going/all-targets/-D warnings) and matched fmt/Clippy pass
+with zero diagnostics through `sh .githooks/pre-push` (exit0,102.436s). Its
+live14-thread audit verifies actual19/affinity10–11. The actual push retains
+and reruns the enabled hook; that result is recorded in the parent report/PR. Exact commands, logs, resource observations and result counts are in
+`validation/reliability/n1c-final-reconcile/` and parent
+`target/claude/research-r4/pr23-final-reconcile/`. Historical
+N1c evidence below is not cumulative validation. The old source's two Sol round-3
+approvals (`5589750084` / `5589751355`) apply to `44b95083`, not this merge;
+prior round-2 reviews were `5585615339` / `5585838531`.
+
+Performance: historical standalone CPU .866/.946/.951/.939/.878 and Linux
+.992 (7/10, neutral) retain the slow-regime +5% p99 and original paired TCP4k
+caveats. A separate later old-main `b4e36472` / old-N1c `44b95083` campaign
+completed 70/70 valid runs / 686,000 writes: CPU
+.976676/1.089646/1.250908/1.052628/.879391 and QUIC paired p99 +17.45%.
+That **does not clear performance**. Main contained V3e/EO1 absent from the old
+candidate, so this does not isolate N1c/round 3 or qualify the new composition.
+The compact report/detail/aggregate/commands are preserved unchanged under
+`validation/reliability/n1c-final-n0/`; durable comment `6299071370` retains the
+original record. No performance rerun in this task. Parent owns exact stable
+cumulative comparison with matching actual 16-byte Counter/session protocol.

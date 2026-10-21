@@ -1,0 +1,18 @@
+{
+  "controller_nice": 19,
+  "child_pid": 264982,
+  "child_nice_at_launch": 19,
+  "affinity_requested": [
+    10,
+    11
+  ],
+  "controller_affinity": [
+    10,
+    11
+  ],
+  "child_affinity_at_launch": [
+    10,
+    11
+  ],
+  "cargo_jobs": 2
+}

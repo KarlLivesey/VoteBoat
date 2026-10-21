@@ -1,0 +1,20 @@
+{
+  "name": "default-eo1-snapshot",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "-j",
+    "2",
+    "--test",
+    "snapshot_routes",
+    "eo1_repro",
+    "--",
+    "--test-threads=2"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+  "exit": 101,
+  "seconds": 4.834674596786499
+}

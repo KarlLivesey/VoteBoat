@@ -1,0 +1,25 @@
+{
+  "name": "all-core-boundaries",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "-j",
+    "2",
+    "--all-features",
+    "--lib",
+    "--",
+    "append_hold",
+    "peer_slots_tests",
+    "install_in_place_tests",
+    "progress_broadcast",
+    "continuation_tests",
+    "wal_admission",
+    "--test-threads=2"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-eaf904de",
+  "exit": 0,
+  "seconds": 33.254246950149536
+}

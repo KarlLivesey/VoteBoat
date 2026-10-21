@@ -43,6 +43,8 @@ pub use completion::{
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
+mod peer_slots;
+use peer_slots::PeerSlots;
 mod progress_broadcast;
 mod proposals;
 pub use proposals::{Proposal, ProposalBatch, MAX_PROPOSAL_BATCH_ENTRIES};
@@ -346,9 +348,16 @@ enum After {
     LeaderAppend,
     Commit,
     Compact,
-    // Snapshot references are boxed: every round moves `Pending`.
+    // Snapshot references are boxed: every round stages a `Pending`.
     CheckpointCompact(Box<SnapshotRef>),
     SnapshotInstall(Box<SnapshotRef>),
+}
+/// What the core still uses of an installed `Pending` once its plan is spent.
+struct Installed {
+    membership: Option<Box<Membership>>,
+    after: After,
+    reply: Option<Message>,
+    preserves_checkpoint_prefix: bool,
 }
 struct Pending {
     next: OwnedNextLog,
@@ -364,7 +373,7 @@ struct Pending {
     // predecessor comparison only if it is still the log's current one.
     planned: Option<LogStamp>,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Replication {
     context: RequestContext,
     configuration: ConfigurationId,
@@ -396,7 +405,14 @@ pub struct Raft {
     granted_vote_reply: Option<send_window::GrantedVoteReply>,
     progress: BTreeMap<NodeId, u64>,
     next_index: BTreeMap<NodeId, u64>,
-    requests: BTreeMap<NodeId, Replication>,
+    // Leader slots per peer: retired in place, cleared with every
+    // configuration or leadership change (see `peer_slots`).
+    requests: PeerSlots<Replication>,
+    admitted_ranges: PeerSlots<AdmittedRange>,
+    empty_append_aliases: PeerSlots<EmptyAppendAlias>,
+    // Hot broadcasts' peer order for one accepted configuration id.
+    peer_order: Vec<NodeId>,
+    peer_order_for: Option<ConfigurationId>,
     append_hold: AppendHold,
     // Leader only, at most one entry per peer: held peer -> leader tip when held.
     held: BTreeMap<NodeId, u64>,
@@ -407,8 +423,6 @@ pub struct Raft {
     // Set when a leader's commit first covers its latest configuration entry;
     // that commit notice is never held. Cleared by the next heartbeat.
     configuration_notice: bool,
-    admitted_ranges: BTreeMap<NodeId, AdmittedRange>,
-    empty_append_aliases: BTreeMap<NodeId, EmptyAppendAlias>,
     // Candidate-only transfer cursors; never quorum replication or ballots.
     repair_requests: BTreeMap<NodeId, Replication>,
     batched_joint_repair: bool,
@@ -534,14 +548,16 @@ impl Raft {
             granted_vote_reply: None,
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
-            requests: BTreeMap::new(),
+            requests: PeerSlots::new(),
+            admitted_ranges: PeerSlots::new(),
+            empty_append_aliases: PeerSlots::new(),
+            peer_order: Vec::new(),
+            peer_order_for: None,
             append_hold: AppendHold::Off,
             held: BTreeMap::new(),
             ack_order: Vec::new(),
             batch_floor: 0,
             configuration_notice: false,
-            admitted_ranges: BTreeMap::new(),
-            empty_append_aliases: BTreeMap::new(),
             repair_requests: BTreeMap::new(),
             batched_joint_repair: false,
             snapshot_joint_repair: false,
@@ -1320,23 +1336,24 @@ impl Raft {
         &mut self,
         out: &mut VecDeque<Effect>,
     ) -> Result<Option<Range<usize>>, RaftError> {
-        let Some(p) = self.pending.take() else {
-            return Err(RaftError::WrongCompletion);
-        };
         let previous_commit = self.durable.commit_index;
-        let configuration_changed = p
+        let installed = match self.install_pending_plan() {
+            Ok(installed) => installed,
+            Err(RaftError::Storage(error)) => {
+                // The plan is intact; the fence discards it, as before.
+                self.storage_failed();
+                return Err(error.into());
+            }
+            Err(error) => return Err(error),
+        };
+        let configuration_changed = installed
             .membership
             .as_ref()
             .is_some_and(|membership| membership.id() != self.membership.id());
-        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
-        if let Err(error) = self.durable.install(p.next, p.planned) {
-            self.storage_failed();
-            return Err(error.into());
-        }
-        if !preserves_checkpoint_prefix {
+        if !installed.preserves_checkpoint_prefix {
             self.checkpoint_lineage = CheckpointLineage::new();
         }
-        if let Some(membership) = p.membership {
+        if let Some(membership) = installed.membership {
             self.membership = *membership;
         }
         if configuration_changed {
@@ -1373,7 +1390,7 @@ impl Raft {
             self.next_index.clear();
         }
         let committed = if self.durable.commit_index > previous_commit
-            && !matches!(p.after, After::SnapshotInstall(_))
+            && !matches!(installed.after, After::SnapshotInstall(_))
         {
             Some(
                 (previous_commit - self.durable.base_index()) as usize
@@ -1384,11 +1401,34 @@ impl Raft {
         };
         let mark = out.len();
         out.extend(retirement);
-        self.after_durable(p.after, p.reply, out)?;
+        self.after_durable(installed.after, installed.reply, out)?;
         if self.remember_granted_vote(out.range(mark..)) {
             self.reset_election()?;
         }
         Ok(committed)
+    }
+    /// Install the pending plan where it lies (no move of `Pending` or its
+    /// plan). On success the slot is emptied and the parts the core still
+    /// uses are returned; the spent plan is dropped with the slot. On error
+    /// nothing changes: the log, its summary and stamp, and the pending
+    /// transition are as they were (`Storage`). Without a pending transition
+    /// it returns `WrongCompletion`. The only installer of `self.pending`.
+    fn install_pending_plan(&mut self) -> Result<Installed, RaftError> {
+        let Some(p) = self.pending.as_mut() else {
+            return Err(RaftError::WrongCompletion);
+        };
+        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
+        self.durable.install(&mut p.next, p.planned)?;
+        let installed = Installed {
+            membership: p.membership.take(),
+            after: std::mem::replace(&mut p.after, After::Commit),
+            reply: p.reply.take(),
+            preserves_checkpoint_prefix,
+        };
+        // Cleared only here, after the install succeeded: nothing between
+        // this point and the end of the round can see the spent plan.
+        self.pending = None;
+        Ok(installed)
     }
     fn after_durable(
         &mut self,
@@ -1612,6 +1652,12 @@ impl Raft {
         {
             self.clear_reads();
         }
+        // A plan is staged only into an empty slot: a live plan is never
+        // replaced, and a spent one was cleared by its install.
+        debug_assert!(
+            self.pending.is_none(),
+            "a pending transition was replaced before its install or fence"
+        );
         self.pending = Some(Pending {
             next,
             membership,
@@ -1634,6 +1680,29 @@ impl Raft {
             .map(|(node, _)| node)
             .filter(|node| *node != self.node)
             .collect()
+    }
+    /// Rebuild the hot broadcasts' peer order in place when the accepted
+    /// configuration id changed. Only a leader reads it, and a leader's
+    /// membership changes only through its own strictly increasing ids. An id
+    /// is not unique across a truncation (a follower's uncommitted entry can be
+    /// replaced by another with the same id), so every election resets it.
+    fn refresh_peer_order(&mut self) {
+        // Only a leader reads the cached order; a follower never refreshes it.
+        debug_assert_eq!(self.role, Role::Leader);
+        let id = self.membership().id();
+        if self.peer_order_for != Some(id) {
+            let mut order = std::mem::take(&mut self.peer_order);
+            order.clear();
+            order.extend(
+                self.membership()
+                    .replicas()
+                    .map(|(node, _)| node)
+                    .filter(|node| *node != self.node),
+            );
+            self.peer_order = order;
+            self.peer_order_for = Some(id);
+        }
+        debug_assert_eq!(self.peer_order, self.peers(), "cached peer order");
     }
     fn voting_peers(&self) -> Vec<NodeId> {
         self.peers()
@@ -1714,6 +1783,8 @@ impl Raft {
     }
     fn become_leader(&mut self) -> Result<Vec<Effect>, RaftError> {
         self.role = Role::Leader;
+        // A configuration id seen while following may name other replicas.
+        self.peer_order_for = None;
         self.progress.clear();
         self.next_index.clear();
         self.clear_replication_requests();
@@ -1746,7 +1817,10 @@ impl Raft {
         Ok(effects.into())
     }
     fn broadcast_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
-        for peer in self.peers() {
+        self.refresh_peer_order();
+        // `append_for` never changes membership, so the order stays fixed.
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             out.push_back(self.append_for(peer)?);
         }
         Ok(())
@@ -2228,8 +2302,12 @@ mod commit_advance_tests;
 #[cfg(test)]
 mod completion_tests;
 #[cfg(test)]
+mod install_in_place_tests;
+#[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;
+#[cfg(test)]
+mod peer_slots_tests;
 #[cfg(test)]
 mod summarized_log_tests;
 #[cfg(test)]
