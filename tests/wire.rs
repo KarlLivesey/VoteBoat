@@ -139,6 +139,8 @@ fn host_fixture_uses_only_public_wire_contract_without_native_features() {
 mod native {
     use super::*;
     use voteboat::{log::*, native::wire::NativeWireCodec, quorum::*, snapshot::*};
+    #[path = "../wire/entry_goldens.rs"]
+    mod entry_goldens;
     fn codec() -> NativeWireCodec {
         NativeWireCodec::new(WireLimits::default()).unwrap()
     }
@@ -160,7 +162,7 @@ mod native {
         message(Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![entry(1, 1, 7)],
+            entries: vec![entry(1, 1, 7)].into(),
             leader_commit: 0,
         })
     }
@@ -238,7 +240,8 @@ mod native {
                         payload: EntryPayload::Noop,
                     },
                     entry(2, 3, 9),
-                ],
+                ]
+                .into(),
                 leader_commit: 2,
             }),
             message(Rpc::Appended {
@@ -487,12 +490,14 @@ mod native {
         let Rpc::Append { entries, .. } = &mut larger.rpc else {
             panic!()
         };
-        let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
-            panic!()
-        };
-        let mut replacement = bytes.to_vec();
-        replacement.extend([1, 2, 3]);
-        *bytes = replacement.into();
+        entries.edit(|entries| {
+            let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                panic!()
+            };
+            let mut replacement = bytes.to_vec();
+            replacement.extend([1, 2, 3]);
+            *bytes = replacement.into();
+        });
         assert_eq!(
             short_command.encode_batch(scope(), &[larger.clone()]),
             Err(WireError::TooLarge)
@@ -556,7 +561,7 @@ mod native {
         let entries = message(Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![entry(1, 1, 1), entry(2, 2, 2)],
+            entries: vec![entry(1, 1, 1), entry(2, 2, 2)].into(),
             leader_commit: 0,
         });
         let one_entry = NativeWireCodec::new(WireLimits {
@@ -585,6 +590,89 @@ mod native {
         assert!(tiny
             .encode_batch(scope(), &[message(Rpc::ReadProbe)])
             .is_ok());
+    }
+
+    #[test]
+    fn decoded_memory_budget_charges_the_index_of_the_decoded_entries_exactly() {
+        use std::mem::size_of;
+        use voteboat::outbound::message_cost;
+        let noop = |index: u64| LogEntry {
+            index,
+            term: 1,
+            payload: EntryPayload::Noop,
+        };
+        // Alternating Noop and one-byte commands are mixed; commands alone
+        // are alike.
+        let entries = |first: u64, count: u64, mixed: bool| -> Vec<LogEntry> {
+            (first..first + count)
+                .map(|index| {
+                    if mixed && index % 2 == 0 {
+                        noop(index)
+                    } else {
+                        entry(index, 1, 1)
+                    }
+                })
+                .collect()
+        };
+        // A uniform subrange of a mixed source backing: the source's index
+        // stays with the sender and is not decoded.
+        let mut source = entries(1, 24, true);
+        source.extend(entries(25, 16, false));
+        let source: EntryBatch = source.into();
+        let mut cases: Vec<(u64, EntryBatch, bool)> = Vec::new();
+        for count in [15, 16] {
+            for mixed in [false, true] {
+                cases.push((0, entries(1, count, mixed).into(), mixed));
+            }
+        }
+        cases.push((24, source.slice(24..40).unwrap(), false));
+        cases.push((20, source.slice(20..40).unwrap(), true));
+        for (previous_index, batch, mixed) in cases {
+            let count = batch.len();
+            let plain = size_of::<Message>()
+                + count * size_of::<LogEntry>()
+                + batch
+                    .iter()
+                    .map(LogEntry::retained_payload_bytes)
+                    .sum::<usize>();
+            let input = message(Rpc::Append {
+                previous_index,
+                previous_term: u64::from(previous_index != 0),
+                entries: batch,
+                leader_commit: 0,
+            });
+            let frame = codec()
+                .encode_batch(scope(), std::slice::from_ref(&input))
+                .unwrap();
+            let decoded = codec().decode_batch(scope(), &frame).unwrap().remove(0);
+            assert_eq!(decoded, input);
+            let retained = message_cost(&decoded, usize::MAX).unwrap().1;
+            let index = if mixed && count >= 16 {
+                (count + 1) * 3 * size_of::<usize>()
+            } else {
+                0
+            };
+            assert_eq!(retained, plain + index, "{previous_index} {count} {mixed}");
+            for (max_decoded_bytes, fits) in [(retained - 1, false), (retained, true)] {
+                let limited = NativeWireCodec::new(WireLimits {
+                    max_decoded_bytes,
+                    ..WireLimits::default()
+                })
+                .unwrap();
+                assert_eq!(
+                    limited.decode_batch(scope(), &frame).is_ok(),
+                    fits,
+                    "{previous_index} {count} {mixed} {max_decoded_bytes}"
+                );
+                assert_eq!(
+                    limited
+                        .encode_batch(scope(), std::slice::from_ref(&input))
+                        .is_ok(),
+                    fits,
+                    "{previous_index} {count} {mixed} {max_decoded_bytes}"
+                );
+            }
+        }
     }
 
     fn membership_codec() -> NativeWireCodec {
@@ -654,7 +742,7 @@ mod native {
         message(Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: configuration_entries(),
+            entries: configuration_entries().into(),
             leader_commit: 2,
         })
     }

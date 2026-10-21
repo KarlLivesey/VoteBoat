@@ -284,7 +284,8 @@ fn append(owner: &mut Owner, wal: &mut HostWorker, app: &mut Counter) {
                             operation: Counter::operation(1, 5).unwrap(),
                             bytes: Counter::command(0, 9).into(),
                         },
-                    }],
+                    }]
+                    .into(),
                 },
             }),
         )

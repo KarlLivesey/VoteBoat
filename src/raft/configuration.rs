@@ -158,7 +158,7 @@ impl Raft {
             self.durable.commit_index,
             Some(Suffix {
                 from: index,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
             After::LeaderAppend,
             None,

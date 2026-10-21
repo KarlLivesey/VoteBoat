@@ -52,7 +52,7 @@ impl OwnedNextLog {
         if append_eligible(view, summary, update) {
             let metadata = validate_append_metadata(view, update, limits)?;
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                *view.metadata(),
+                view,
                 summary,
                 metadata,
                 update.suffix.clone(),
@@ -64,20 +64,19 @@ impl OwnedNextLog {
             }))
         }
     }
-    /// A provider already owns this exact input. Only admitted new append
-    /// allocations are normalized; no retained canonical history is copied.
+    /// A provider already owns this exact input. Its shared entries move into
+    /// the plan; no retained canonical history is copied.
     pub(crate) fn plan_owned(
         view: &LogView<'_>,
         summary: &LogSummary,
-        mut update: LogUpdate,
+        update: LogUpdate,
         limits: LogLimits,
     ) -> Result<Self, StorageError> {
         let limits = validate_base(view, summary, &update, limits)?;
         if append_eligible(view, summary, &update) {
             let metadata = validate_append_metadata(view, &update, limits)?;
-            normalize_append(&mut update);
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                *view.metadata(),
+                view,
                 summary,
                 metadata,
                 update.suffix,
@@ -98,7 +97,7 @@ impl OwnedNextLog {
         limits: LogLimits,
     ) -> Result<Self, StorageError> {
         limits.validate()?;
-        if !summary.matches_metadata(view.metadata()) {
+        if !view.summarized_by(summary) {
             return Err(StorageError::Rejected("stale log summary"));
         }
         let current = view.metadata();
@@ -128,7 +127,7 @@ impl OwnedNextLog {
         };
         Ok(Self(OwnedChange::Commit(CommitAdvance {
             predecessor: *current,
-            summary: append_summary(summary, next, None),
+            summary: append_summary(view, summary, next, None),
         })))
     }
     /// The planned suffix, borrowed; a commit advance has none.
@@ -256,8 +255,52 @@ impl OwnedNextLog {
                 .map(PreparedOwnedLog::Other),
         }
     }
+    #[cfg(test)]
     pub(crate) fn install(self, current: &mut GroupLog) -> Result<LogSummary, StorageError> {
         Ok(self.prepare_install(current)?.install(current))
+    }
+    /// Install this plan into `current` where it lies and write the
+    /// installed log's summary to `summary`. `unchanged` means the plan was
+    /// made from a [`SummarizedLog`] view of `current` with no change since
+    /// (its stamp is unchanged): the predecessor is then `current`'s
+    /// metadata, so an append or commit advance installs without comparing
+    /// it. Every other plan, and every plan when `unchanged` is false, is
+    /// checked as [`Self::install`] checks it.
+    ///
+    /// Every check precedes the first change: on error `current`, `summary`
+    /// and this plan are as they were. On success the plan is spent (its
+    /// suffix belongs to `current`; a full plan holds the replaced log) and
+    /// must be dropped without further use.
+    pub(super) fn install_in_place(
+        &mut self,
+        current: &mut GroupLog,
+        summary: &mut LogSummary,
+        unchanged: bool,
+    ) -> Result<(), StorageError> {
+        match &mut self.0 {
+            OwnedChange::Append(append) => {
+                if unchanged {
+                    debug_assert!(append.check_install(LogMetadata::from_log(current)).is_ok());
+                } else {
+                    append.check_install(LogMetadata::from_log(current))?;
+                }
+                install_append_ref(current, append.suffix.take(), &append.summary);
+                *summary = append.summary;
+            }
+            OwnedChange::Commit(commit) => {
+                if unchanged {
+                    debug_assert_eq!(commit.predecessor, LogMetadata::from_log(current));
+                } else {
+                    check_predecessor(&commit.predecessor, LogMetadata::from_log(current))?;
+                }
+                install_append_ref(current, None, &commit.summary);
+                *summary = commit.summary;
+            }
+            OwnedChange::Other { next, update } => {
+                *summary = next.install_in_place(current, update)?;
+            }
+        }
+        Ok(())
     }
     #[cfg(feature = "native")]
     pub(crate) fn into_change(self) -> OwnedChange {
@@ -283,14 +326,14 @@ impl OwnedNextLog {
 }
 impl OwnedAppend {
     fn new(
-        predecessor: LogMetadata,
+        view: &LogView<'_>,
         summary: &LogSummary,
         metadata: LogMetadata,
         suffix: Option<Suffix>,
     ) -> Self {
         Self {
-            predecessor,
-            summary: append_summary(summary, metadata, suffix.as_ref()),
+            predecessor: *view.metadata(),
+            summary: append_summary(view, summary, metadata, suffix.as_ref()),
             suffix,
         }
     }
@@ -302,13 +345,8 @@ impl OwnedAppend {
         self.summary
     }
     pub(crate) fn check_install(&self, current: LogMetadata) -> Result<(), StorageError> {
-        if current != self.predecessor {
-            return Err(StorageError::Rejected(
-                "transition plan predecessor or update mismatch",
-            ));
-        }
         // The original is immutable and bound to this plan before sealing.
-        Ok(())
+        check_predecessor(&self.predecessor, current)
     }
     #[cfg(feature = "native")]
     pub(crate) fn predecessor(&self) -> LogMetadata {
@@ -380,16 +418,28 @@ fn plain_update(
         snapshot_membership: None,
     }
 }
+fn check_predecessor(predecessor: &LogMetadata, current: LogMetadata) -> Result<(), StorageError> {
+    if current != *predecessor {
+        return Err(StorageError::Rejected(
+            "transition plan predecessor or update mismatch",
+        ));
+    }
+    Ok(())
+}
 fn install_append(
     current: &mut GroupLog,
     suffix: Option<Suffix>,
     summary: LogSummary,
 ) -> LogSummary {
-    if let Some(suffix) = suffix {
-        current.entries.extend(suffix.entries);
-    }
-    summary.metadata.install_header(current);
+    install_append_ref(current, suffix, &summary);
     summary
+}
+/// Append `suffix` and install `next`'s header; the caller stores `next`.
+fn install_append_ref(current: &mut GroupLog, suffix: Option<Suffix>, next: &LogSummary) {
+    if let Some(suffix) = suffix {
+        current.entries.append(suffix.entries);
+    }
+    next.metadata.install_header(current);
 }
 fn validate_base(
     view: &LogView<'_>,
@@ -401,17 +451,8 @@ fn validate_base(
     if view.metadata().group != update.group {
         return Err(StorageError::Rejected("group not bootstrapped"));
     }
-    if !summary.matches_metadata(view.metadata()) {
+    if !view.summarized_by(summary) {
         return Err(StorageError::Rejected("stale log summary"));
     }
     Ok(limits)
-}
-fn normalize_append(update: &mut LogUpdate) {
-    if let Some(suffix) = &mut update.suffix {
-        if suffix.entries.capacity() != suffix.entries.len() {
-            suffix.entries = std::mem::take(&mut suffix.entries)
-                .into_boxed_slice()
-                .into_vec();
-        }
-    }
 }

@@ -185,7 +185,6 @@ impl Cluster {
         };
         let transport = setup::physical_transport_limits();
         let owner = parts.local.owner.identity();
-        let first = owner.store.session.get().checked_mul(10000).unwrap();
         assert!(parts.local.outbound.is_drained());
         let mut outbound = parts.local.outbound.binding();
         outbound.generation = voteboat::identity::OutboundGeneration::new(2).unwrap();
@@ -213,6 +212,10 @@ impl Cluster {
             transport,
         )
         .unwrap();
+        // The contract for a replacement roster in the same store session:
+        // close the drained predecessor and start at its reclaimed generation.
+        peers.roster.close();
+        let first_generation = peers.roster.reclaim_generation().unwrap();
         peers.roster = PeerRoster::new(
             PeerRosterConfig {
                 local: LocalIdentity {
@@ -220,11 +223,7 @@ impl Cluster {
                     store: owner.store,
                 },
                 outbound: parts.local.outbound.binding(),
-                first_generation: voteboat::identity::SecureSessionGeneration::new(first).unwrap(),
-                last_generation: voteboat::identity::SecureSessionGeneration::new(
-                    first.checked_add(9999).unwrap(),
-                )
-                .unwrap(),
+                first_generation,
                 wire_version: 8,
                 limits: PeerRosterLimits::default(),
                 transport_limits: transport,

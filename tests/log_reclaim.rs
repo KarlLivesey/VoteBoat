@@ -44,7 +44,7 @@ fn populated_with<I: JournalIo, C: LogCodec>(io: I, codec: C) -> NativeLogStore<
                     0,
                     Some(Suffix {
                         from: 1,
-                        entries: vec![entry(1, term, term as u8)],
+                        entries: (vec![entry(1, term, term as u8)]).into(),
                     }),
                 ),
                 update(&second, term, 0, None),
@@ -62,7 +62,7 @@ fn populated_with<I: JournalIo, C: LogCodec>(io: I, codec: C) -> NativeLogStore<
                 1,
                 Some(Suffix {
                     from: 2,
-                    entries: vec![entry(2, 20, 2), entry(3, 20, 3)],
+                    entries: vec![entry(2, 20, 2), entry(3, 20, 3)].into(),
                 }),
             ),
             LogMutation::Update(LogUpdate {
@@ -277,7 +277,7 @@ fn live_image_can_exceed_one_batch_without_losing_cold_group_or_suffix() {
                 0,
                 Some(Suffix {
                     from: index,
-                    entries: vec![entry(index, 1, index as u8)],
+                    entries: (vec![entry(index, 1, index as u8)]).into(),
                 }),
             )],
         );

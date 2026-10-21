@@ -46,7 +46,7 @@ fn follower(volatile: bool) -> (Raft, VolatileLog) {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![command(2, 9), command(3, 10)],
+                entries: vec![command(2, 9), command(3, 10)].into(),
             }),
             After::Reply,
             None,
@@ -80,7 +80,9 @@ fn advanced(before: &GroupLog, commit: u64) -> GroupLog {
 fn volatile_commit_only_round_is_scalar_and_installs_only_the_commit_index() {
     let (mut core, log) = follower(true);
     let before = core.state().clone();
-    let entries = core.state().entries.as_ptr();
+    // Where the canonical entries live now; the round must not move them.
+    let first: *const LogEntry = &core.state().entries[0];
+    let second: *const LogEntry = &core.state().entries[1];
     let persist = token(&commit_only(&mut core, 3));
     assert_eq!(persist.revision().get(), before.revision.get() + 1);
     assert_eq!(persist.generation(), before.generation);
@@ -94,11 +96,14 @@ fn volatile_commit_only_round_is_scalar_and_installs_only_the_commit_index() {
     let result = persist_volatile(&mut core, &log, persist).unwrap();
     let committed = result.committed().unwrap();
     assert_eq!(committed.len(), 2);
-    assert_eq!(committed.as_ptr(), entries.wrapping_add(1));
+    assert!(std::ptr::eq(&committed[0], second));
     assert!(result.following().is_empty());
     assert_eq!(core.state(), &advanced(&before, 3));
-    assert_eq!(core.state().entries.as_ptr(), entries);
-    assert_eq!(core.log_summary, LogSummary::from_validated(core.state()));
+    assert!(std::ptr::eq(&core.state().entries[0], first));
+    assert_eq!(
+        *core.durable.summary(),
+        LogSummary::from_validated(core.state())
+    );
     assert!(!core.has_pending_dependency());
 }
 
@@ -126,7 +131,7 @@ fn durable_commit_only_round_emits_the_identical_update_and_completes_through_th
     wrong[2].hard_state.term += 1;
     wrong[3].suffix = Some(Suffix {
         from: 4,
-        entries: Vec::new(),
+        entries: Vec::new().into(),
     });
     for update in &wrong {
         assert_eq!(
@@ -137,11 +142,14 @@ fn durable_commit_only_round_emits_the_identical_update_and_completes_through_th
     assert!(!core.is_fenced());
     // The store validates and applies the same update with its full path.
     let result = persist_effect_borrowed(&mut core, &mut store, update(effects)).unwrap();
-    assert_eq!(result.committed().map(<[LogEntry]>::len), Some(2));
+    assert_eq!(result.committed().map(|range| range.len()), Some(2));
     assert!(result.following().is_empty());
     assert_eq!(core.state(), &advanced(&before, 3));
     assert_eq!(core.state(), &store.state(before.bootstrap.group).unwrap());
-    assert_eq!(core.log_summary, LogSummary::from_validated(core.state()));
+    assert_eq!(
+        *core.durable.summary(),
+        LogSummary::from_validated(core.state())
+    );
     assert_eq!(store.submissions, 1);
 }
 
@@ -186,7 +194,9 @@ fn incomplete_commit_only_round_fences_and_keeps_the_last_completed_state() {
     // A failed install fences too: the predecessor check precedes mutation.
     let (mut core, log) = follower(true);
     let persist = token(&commit_only(&mut core, 3));
-    core.durable.hard_state.voted_for = Some(core.node);
+    let node = core.node;
+    core.durable
+        .edit(|log| log.hard_state.voted_for = Some(node));
     let moved = core.state().clone();
     assert!(matches!(
         persist_volatile(&mut core, &log, persist),
@@ -262,7 +272,7 @@ fn ballot_entries_or_snapshot_rounds_do_not_take_the_scalar_path() {
             3,
             Some(Suffix {
                 from: 4,
-                entries: vec![command(4, 11)],
+                entries: vec![command(4, 11)].into(),
             }),
             After::Reply,
             None,
@@ -314,5 +324,32 @@ fn pending_and_plan_sizes() {
     assert!(size_of::<After>() <= 16);
     assert!(size_of::<Option<Box<Membership>>>() <= 8);
 }
-const PENDING_BYTES: usize = 1_088;
+// V3d round 3: 1,088 → 1,104 B for the 16-byte install stamp (`Pending` is
+// 16-byte aligned and had no padding left).
+const PENDING_BYTES: usize = 1_104;
 const PLAN_BYTES: usize = 672;
+
+/// Bounds the plan and log types on the composed V2 + V3 tree at their
+/// measured 64-bit sizes, as `pending_and_plan_sizes` bounds V2's: a shared
+/// batch is no larger than the vector it replaced, and `Suffix`/`LogUpdate`
+/// keep main's sizes. `GroupLog` carries the cached tail (+48 B over main).
+#[test]
+#[cfg(target_pointer_width = "64")]
+fn composed_type_sizes() {
+    let sizes = [
+        ("EntryBatch", size_of::<EntryBatch>(), 24),
+        ("Suffix", size_of::<Suffix>(), 32),
+        ("LogUpdate", size_of::<LogUpdate>(), 240),
+        ("GroupLog", size_of::<GroupLog>(), 432),
+    ];
+    for (name, size, bound) in sizes {
+        assert!(size <= bound, "{name} is {size} B, bound {bound} B");
+    }
+    // These plan parts are only re-exported where native stores install them.
+    #[cfg(feature = "native")]
+    {
+        use crate::log::transition::{OwnedAppend, OwnedChange};
+        assert!(size_of::<OwnedAppend>() <= PLAN_BYTES);
+        assert!(size_of::<OwnedChange>() <= PLAN_BYTES);
+    }
+}

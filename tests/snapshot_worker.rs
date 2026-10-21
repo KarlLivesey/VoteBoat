@@ -244,7 +244,7 @@ fn checkpoint_source() -> (Raft, HostLogStore, Counter) {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![command.clone()],
+            entries: vec![command.clone()].into(),
         }),
     );
     append(&mut log, vec![mutation]);
@@ -722,7 +722,7 @@ mod native {
                 1,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![command.clone()],
+                    entries: vec![command.clone()].into(),
                 }),
             )],
         );
@@ -869,7 +869,7 @@ mod native {
                 2,
                 Some(Suffix {
                     from: 1,
-                    entries: commands.clone(),
+                    entries: commands.clone().into(),
                 }),
             );
             append(&mut log, vec![mutation]);

@@ -66,7 +66,7 @@ fn deferred_trim_composes_with_accepted_tail_and_subset_publication() {
         5,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 1), entry(5, 1)],
+            entries: vec![entry(4, 1), entry(5, 1)].into(),
         }),
     );
     let old = accept(&mut store, &mut oracle, update);
@@ -84,7 +84,7 @@ fn deferred_trim_composes_with_accepted_tail_and_subset_publication() {
         5,
         Some(Suffix {
             from: 6,
-            entries: vec![entry(6, 1)],
+            entries: vec![entry(6, 1)].into(),
         }),
     );
     let appended = accept(&mut store, &mut oracle, update);
@@ -97,7 +97,7 @@ fn deferred_trim_composes_with_accepted_tail_and_subset_publication() {
         5,
         Some(Suffix {
             from: 7,
-            entries: vec![entry(7, 1)],
+            entries: vec![entry(7, 1)].into(),
         }),
     );
     let later = accept(&mut store, &mut oracle, update);
@@ -126,7 +126,7 @@ fn invalid_later_unit_does_not_trim_or_write_the_earlier_compaction() {
         2,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1), entry(2, 1)],
+            entries: vec![entry(1, 1), entry(2, 1)].into(),
         }),
     );
     commit(&mut store, vec![initial]);
@@ -191,7 +191,7 @@ fn trimmed_accepted_view_materializes_exact_configuration_and_replacement_fallba
             2,
             Some(Suffix {
                 from,
-                entries: vec![payload],
+                entries: vec![payload].into(),
             }),
         );
         let ticket = accept(&mut store, &mut oracle, update);

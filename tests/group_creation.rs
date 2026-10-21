@@ -207,7 +207,8 @@ fn existing_unbound_or_conflicting_creation_never_resets_a_group() {
                     index: 1,
                     term: 1,
                     payload: EntryPayload::Noop,
-                }],
+                }]
+                .into(),
             }),
         )],
     );

@@ -49,14 +49,16 @@ pub fn select(
         },
     )
     .unwrap();
-    let first = owner.store.session.get().checked_mul(10000).unwrap();
     peers.factory = NativeTransportFactory::new(codec(), transport()).unwrap();
+    // The contract for a replacement roster in the same store session:
+    // close the drained predecessor and start at its reclaimed generation.
+    peers.roster.close();
+    let first_generation = peers.roster.reclaim_generation().unwrap();
     peers.roster = PeerRoster::new(
         PeerRosterConfig {
             local,
             outbound,
-            first_generation: SecureSessionGeneration::new(first).unwrap(),
-            last_generation: SecureSessionGeneration::new(first + 9999).unwrap(),
+            first_generation,
             wire_version: 8,
             limits: PeerRosterLimits {
                 peers: 2,

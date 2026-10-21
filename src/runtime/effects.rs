@@ -23,6 +23,9 @@ mod overlap;
 mod ready;
 pub use inspection::{EffectLeaseInspectionKind, EffectVisitInspection};
 #[cfg(all(test, feature = "native"))]
+#[path = "effects/continuation_tests.rs"]
+mod continuation_tests;
+#[cfg(all(test, feature = "native"))]
 #[path = "effects/peer_ingress_tests.rs"]
 mod peer_ingress_tests;
 
@@ -144,6 +147,8 @@ struct Request {
 /// after ordered application. ReadReady is consumed on the core before its
 /// completion callback. Persist leases use submit_persists, never generic release.
 /// Callbacks run on the serialized owner and must not perform blocking I/O.
+/// The effects a completion callback returns take the released effect's place
+/// in its visit's order, ahead of the effects its step emitted after it.
 /// SnapshotRouter retains snapshot leases through asynchronous work and
 /// delivers exact completions through the same serialized callback path. Extend
 /// a reservation before starting host work whose result can exceed the original bound.
@@ -934,7 +939,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             if retained.is_none_or(|n| n > a.reserved) {
                 return self.fail(EffectOwnerError::ReservationTooLarge);
             }
-            a.effects.extend(effects);
+            // The continuation expands the released effect in place. A visit
+            // leases only its front effect, so that place is the queue front:
+            // effects the same step emitted behind it, such as the Persist
+            // that must stay last for `submit_persists`, stay behind it.
+            for effect in effects.into_iter().rev() {
+                a.effects.push_front(effect);
+            }
             a.leased = None;
             a.leased_bytes = 0;
             a.kind = None;
@@ -1216,11 +1227,7 @@ fn effect_bytes(effects: &[Effect], capacity: usize) -> Option<usize> {
                 .checked_mul(size_of::<LogEntry>())?
                 .checked_add(entries_bytes(entries)?)?,
             Effect::Persist(update) => (match &update.suffix {
-                Some(suffix) => suffix
-                    .entries
-                    .capacity()
-                    .checked_mul(size_of::<LogEntry>())?
-                    .checked_add(entries_bytes(&suffix.entries)?)?,
+                Some(suffix) => suffix.entries.retained_bytes()?,
                 None => 0,
             })
             .checked_add(

@@ -89,7 +89,7 @@ fn append(a: &LogicalApplication, id: u128, entries: Vec<LogEntry>) -> Command {
             0,
             Some(Suffix {
                 from: entries[0].index,
-                entries,
+                entries: entries.into(),
             }),
         ),
     )
@@ -186,7 +186,7 @@ fn original_mixed_action_uses_reserved_capacity_and_replays_without_splitting() 
         panic!("mutation")
     };
     assert_eq!(
-        a.state.parent.as_ref().unwrap().entries[1..],
+        a.state.parent.as_ref().unwrap().entries.to_vec()[1..],
         update.suffix.as_ref().unwrap().entries
     );
     let checkpoint = a.checkpoint(usize::MAX).unwrap();

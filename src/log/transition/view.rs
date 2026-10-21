@@ -62,37 +62,77 @@ impl LogMetadata {
 #[derive(Clone, Copy)]
 pub(crate) struct LogView<'a> {
     base: &'a GroupLog,
-    tail: &'a [LogEntry],
+    tail: Option<&'a EntryLog>,
     metadata: LogMetadata,
     removed: usize,
+    // The summary this view's metadata was copied from, and the stamp of
+    // the summarized log it describes (`None` if that log has none).
+    summary: Option<(&'a LogSummary, Option<LogStamp>)>,
 }
 impl<'a> LogView<'a> {
     pub(crate) fn new(base: &'a GroupLog) -> Self {
         Self {
             base,
-            tail: &[],
+            tail: None,
             metadata: LogMetadata::from_log(base),
             removed: 0,
+            summary: None,
         }
+    }
+    /// `summary` describes `base` exactly and `stamp` is `base`'s current
+    /// stamp ([`SummarizedLog`] keeps both so).
+    pub(super) fn summarized(
+        base: &'a GroupLog,
+        summary: &'a LogSummary,
+        stamp: Option<LogStamp>,
+    ) -> Self {
+        Self {
+            base,
+            tail: None,
+            metadata: summary.metadata,
+            removed: 0,
+            summary: Some((summary, stamp)),
+        }
+    }
+    /// The stamp of the summarized log this view was taken from, if any:
+    /// stage a plan made from this view with it.
+    #[inline]
+    pub(crate) fn stamp(&self) -> Option<LogStamp> {
+        self.summary.and_then(|(_, stamp)| stamp)
+    }
+    /// Whether `summary` describes this view's metadata. A view copied from
+    /// that same summary needs no comparison: it borrows the summary, which
+    /// cannot change while the view exists.
+    #[inline]
+    pub(crate) fn summarized_by(&self, summary: &LogSummary) -> bool {
+        if self
+            .summary
+            .is_some_and(|(own, _)| std::ptr::eq(own, summary))
+        {
+            debug_assert!(summary.matches_metadata(&self.metadata));
+            return true;
+        }
+        summary.matches_metadata(&self.metadata)
     }
     /// Prefix/tail were admitted by this owner; metadata describes their exact
     /// accepted version. This is not an unchecked public storage admission API.
     #[cfg(test)]
-    pub(crate) fn overlay(base: &'a GroupLog, tail: &'a [LogEntry], metadata: LogMetadata) -> Self {
+    pub(crate) fn overlay(base: &'a GroupLog, tail: &'a EntryLog, metadata: LogMetadata) -> Self {
         Self::trimmed_overlay(base, tail, metadata, 0)
     }
     #[cfg(any(feature = "native", test))]
     pub(crate) fn trimmed_overlay(
         base: &'a GroupLog,
-        tail: &'a [LogEntry],
+        tail: &'a EntryLog,
         metadata: LogMetadata,
         removed: usize,
     ) -> Self {
         Self {
             base,
-            tail,
+            tail: Some(tail).filter(|tail| !tail.is_empty()),
             metadata,
             removed,
+            summary: None,
         }
     }
     pub(crate) fn metadata(&self) -> &LogMetadata {
@@ -109,21 +149,46 @@ impl<'a> LogView<'a> {
             return None;
         }
         if index > self.base.last_index() {
-            return self
-                .tail
-                .get(usize::try_from(index.checked_sub(self.tail.first()?.index)?).ok()?)
+            let tail = self.tail?;
+            return tail
+                .get(usize::try_from(index.checked_sub(tail.first()?.index)?).ok()?)
                 .map(|entry| entry.term);
         }
         self.base.term_at(index)
     }
     pub(crate) fn materialize(&self) -> GroupLog {
         let mut current = self.base.clone();
-        current.entries.drain(..self.removed);
-        current.entries.extend(self.tail.iter().cloned());
+        current.entries.trim_prefix(self.removed);
+        if let Some(tail) = self.tail {
+            current.entries.append(tail.to_batch());
+        }
         self.metadata.install_header(&mut current);
         current
     }
-    pub(crate) fn entries(&self) -> impl Iterator<Item = &'a LogEntry> + use<'a> {
-        self.base.entries[self.removed..].iter().chain(self.tail)
+    /// Exact charge of this view's entries after trimming `count`, as the
+    /// materialized log will hold them. An owner-held tail or earlier trim is
+    /// joined by descriptors only.
+    pub(crate) fn trimmed_charge(&self, count: usize) -> Option<usize> {
+        match self.tail {
+            None => self.base.entries.trimmed_charge(self.removed + count),
+            Some(tail) => self
+                .base
+                .entries
+                .joined_trimmed_charge(self.removed, tail, count),
+        }
+    }
+    /// Retained charge after appending `batch` to this view's entries, as
+    /// the installed log will hold them: a first piece adjoining the view's
+    /// last piece extends it, other shared pieces add their whole backing and
+    /// owned pieces their visible entries. A view with no entries left has
+    /// nothing to adjoin.
+    pub(crate) fn appended_charge(&self, retained: usize, batch: &EntryBatch) -> Option<usize> {
+        match self.tail {
+            Some(tail) => tail.appended_charge(retained, batch),
+            None if self.removed < self.base.entries.len() => {
+                self.base.entries.appended_charge(retained, batch)
+            }
+            None => retained.checked_add(batch.log_charge()?),
+        }
     }
 }

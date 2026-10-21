@@ -4,12 +4,12 @@
 use super::*;
 use std::mem::size_of;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct AdmittedRange {
     ticket: LogTicket,
     context: RequestContext,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct EmptyAppendAlias {
     original: Replication,
     successor: RequestContext,
@@ -107,7 +107,7 @@ impl Raft {
             || self.role != Role::Leader
             || !self.local_voter()
             || self.transfer.is_some()
-            || !self.log_summary.is_plain()
+            || !self.durable.summary().is_plain()
             || !pending.next.is_append()
             || pending.membership.is_some()
             || !matches!(pending.after, After::LeaderAppend)
@@ -232,9 +232,13 @@ impl Raft {
         self.admitted_ranges.clear();
         self.empty_append_aliases.clear();
     }
-    pub(super) fn broadcast_after_admission(&mut self) -> Result<Vec<Effect>, RaftError> {
-        let mut effects = Vec::new();
-        for peer in self.peers() {
+    pub(super) fn broadcast_after_admission_into(
+        &mut self,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
+        self.refresh_peer_order();
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             if self.admitted_ranges.get(&peer).is_some_and(|range| {
                 range.ticket.revision == self.durable.revision
                     && self
@@ -244,9 +248,9 @@ impl Raft {
             }) {
                 continue;
             }
-            effects.push(self.append_for(peer)?);
+            out.push_back(self.append_for(peer)?);
         }
-        Ok(effects)
+        Ok(())
     }
 }
 

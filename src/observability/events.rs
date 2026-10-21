@@ -55,10 +55,15 @@ pub enum EventKind {
         completions: u64,
         installs: u64,
     },
+    /// Work the node is refusing or failing without leaving service.
+    /// `generations_exhausted` is reported once when first seen.
     Pressure {
         ingress_blocked: u64,
         snapshot_refusals: u64,
         connection_failures: u64,
+        accept_errors: u64,
+        accept_backoffs: u64,
+        generations_exhausted: bool,
     },
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -165,6 +170,9 @@ pub struct EventDelivery {
 pub struct EventReporter {
     binding: EventBinding,
     state: Option<NodeState>,
+    /// Exhaustion already recorded, so a permanent condition is one event,
+    /// not one per poll.
+    exhaustion_reported: bool,
     rejected: u64,
 }
 impl EventReporter {
@@ -172,6 +180,7 @@ impl EventReporter {
         Self {
             binding,
             state: None,
+            exhaustion_reported: false,
             rejected: 0,
         }
     }
@@ -187,6 +196,11 @@ impl EventReporter {
             return Err(EventError::WrongBinding);
         }
         let c = sample.counters;
+        let exhausted = sample.network.generations_exhausted;
+        if !exhausted {
+            self.exhaustion_reported = false;
+        }
+        let newly_exhausted = exhausted && !self.exhaustion_reported;
         let kinds = [
             (self.state != Some(sample.state)).then_some(EventKind::StateChanged {
                 previous: self.state,
@@ -204,11 +218,19 @@ impl EventReporter {
                     installs: c.snapshot_installs,
                 },
             ),
-            (c.ingress_blocked != 0 || c.snapshot_send_refusals != 0 || c.connection_failures != 0)
+            (c.ingress_blocked != 0
+                || c.snapshot_send_refusals != 0
+                || c.connection_failures != 0
+                || c.accept_errors != 0
+                || c.accept_backoffs != 0
+                || newly_exhausted)
                 .then_some(EventKind::Pressure {
                     ingress_blocked: c.ingress_blocked,
                     snapshot_refusals: c.snapshot_send_refusals,
                     connection_failures: c.connection_failures,
+                    accept_errors: c.accept_errors,
+                    accept_backoffs: c.accept_backoffs,
+                    generations_exhausted: exhausted,
                 }),
         ];
         let mut delivery = EventDelivery::default();
@@ -221,8 +243,13 @@ impl EventReporter {
             }) {
                 Ok(_) => {
                     delivery.recorded += 1;
-                    if matches!(kind, EventKind::StateChanged { .. }) {
-                        self.state = Some(sample.state);
+                    match kind {
+                        EventKind::StateChanged { .. } => self.state = Some(sample.state),
+                        EventKind::Pressure {
+                            generations_exhausted: true,
+                            ..
+                        } => self.exhaustion_reported = true,
+                        _ => {}
                     }
                 }
                 Err(error) => {

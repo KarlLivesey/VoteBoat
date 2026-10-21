@@ -352,10 +352,11 @@ The source connector is dedicated to the configured discovery peer; the data
 connector independently authenticates every peer selected by a hint. Initial
 source authentication remains explicit host work.
 
-`SourceReconnectConfig` supplies a numeric source endpoint, bounded retry delay
-and a reserved inclusive connection-generation range. Reserve generations above
-the initial source session, without reusing them in the same local store session.
-Exhaustion stops reconnecting. Construction returns both original owners on
+`SourceReconnectConfig` supplies a numeric source endpoint and a bounded retry
+delay. Reconnect generations continue after the initial source session's
+generation through `u64::MAX` in the same local store session (2^64 attempts at
+the 1 ms minimum retry take 584 million years); only then does the typed
+`Exhausted` status stop reconnecting. Construction returns both original owners on
 refusal. Polling the Node drives source repair through the existing bounded
 discovery visits; no independent client-side poller is required or permitted.
 

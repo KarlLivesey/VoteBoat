@@ -27,6 +27,8 @@ use voteboat::{
     quorum::*,
     runtime::*,
 };
+#[path = "startup/connection_generations.rs"]
+mod connection_generations;
 #[path = "startup/discovery.rs"]
 mod discovery;
 #[path = "startup/log_limits.rs"]

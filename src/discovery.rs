@@ -50,6 +50,9 @@ pub enum DiscoveryError {
     WrongBinding,
     TimeWentBack,
     Closed,
+    /// A per-session counter (such as a source's connection generations) is
+    /// spent. Typed and not retryable, so discovery never stops silently.
+    Exhausted,
 }
 impl DiscoveryError {
     pub fn retryable(self) -> bool {

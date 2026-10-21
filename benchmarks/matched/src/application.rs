@@ -21,19 +21,42 @@ impl StateMachine for Noop {
         self.applied
     }
     fn apply_batch(&mut self, entries: &[LogEntry]) -> Result<Vec<OperationId>, ApplicationError> {
+        self.apply_pieces(std::iter::once(entries))
+    }
+    /// One call per committed interval, as `apply_batch`, visiting each
+    /// shared piece in order instead of first copying the interval.
+    fn apply_entries(
+        &mut self,
+        entries: EntryRange<'_>,
+    ) -> Result<Vec<OperationId>, ApplicationError> {
+        match entries.as_slice() {
+            Some(entries) => self.apply_pieces(std::iter::once(entries)),
+            None => self.apply_pieces(entries.slices()),
+        }
+    }
+}
+impl Noop {
+    /// The same per-entry checks and results for every caller; state changes
+    /// only when the whole interval succeeds.
+    fn apply_pieces<'a>(
+        &mut self,
+        pieces: impl Iterator<Item = &'a [LogEntry]>,
+    ) -> Result<Vec<OperationId>, ApplicationError> {
         let mut applied = self.applied;
         let mut results = Vec::new();
-        for entry in entries {
-            if applied.checked_add(1) != Some(entry.index) {
-                return Err(ApplicationError::IndexGap);
-            }
-            if let EntryPayload::Command { operation, bytes } = &entry.payload {
-                if !bytes.is_empty() {
-                    return Err(ApplicationError::InvalidCommand);
+        for entries in pieces {
+            for entry in entries {
+                if applied.checked_add(1) != Some(entry.index) {
+                    return Err(ApplicationError::IndexGap);
                 }
-                results.push(*operation);
+                if let EntryPayload::Command { operation, bytes } = &entry.payload {
+                    if !bytes.is_empty() {
+                        return Err(ApplicationError::InvalidCommand);
+                    }
+                    results.push(*operation);
+                }
+                applied = entry.index;
             }
-            applied = entry.index;
         }
         self.applied = applied;
         Ok(results)

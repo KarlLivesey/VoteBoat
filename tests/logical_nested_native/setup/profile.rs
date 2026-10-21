@@ -325,7 +325,8 @@ fn complete_declared_middle_journal_and_snapshot_framing_fit_lower_bounds() {
                             operation: OperationId::new(u128::from(index)).unwrap(),
                             bytes: vec![0; limits.parent_log.max_command_bytes].into(),
                         },
-                    }],
+                    }]
+                    .into(),
                 }),
                 snapshot: None,
                 snapshot_membership: None,

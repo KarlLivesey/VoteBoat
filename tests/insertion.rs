@@ -330,7 +330,7 @@ fn insertion_intent_native_torn_frames_recover_exact_reservations_and_lock() {
                 4,
                 Some(Suffix {
                     from: 1,
-                    entries: prefix.clone(),
+                    entries: prefix.clone().into(),
                 }),
             )],
         );
@@ -344,7 +344,7 @@ fn insertion_intent_native_torn_frames_recover_exact_reservations_and_lock() {
         5,
         Some(Suffix {
             from: 5,
-            entries: vec![entry(5, 200, intent.encode(100000).unwrap())],
+            entries: vec![entry(5, 200, intent.encode(100000).unwrap())].into(),
         }),
     );
     let frame = NativeLogCodec

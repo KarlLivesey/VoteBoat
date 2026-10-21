@@ -81,7 +81,7 @@ pub(super) fn validate_state(
                 commit_index: s.commit_index,
                 suffix: Some(Suffix {
                     from,
-                    entries: s.entries.clone(),
+                    entries: s.entries.to_batch(),
                 }),
                 snapshot: None,
             })],

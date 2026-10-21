@@ -412,8 +412,14 @@ mod client_admission {
         pump(&mut owner, &mut worker, &mut apps, MonoTime(400));
         for g in 1..=count {
             let mut app = Counter::new(capacity).unwrap();
-            app.apply_batch(owner.core(group(g)).unwrap().replay_committed())
-                .unwrap();
+            app.apply_batch(
+                &owner
+                    .core(group(g))
+                    .unwrap()
+                    .replay_committed()
+                    .contiguous(),
+            )
+            .unwrap();
             apps.insert(group(g), app);
         }
         let clients = Clients::new(
@@ -2132,7 +2138,6 @@ mod native {
                     local: locals[i],
                     outbound: n.outbound.binding(),
                     first_generation: SecureSessionGeneration::new(1).unwrap(),
-                    last_generation: SecureSessionGeneration::new(10000).unwrap(),
                     wire_version: 1,
                     limits: PeerRosterLimits::default(),
                     transport_limits: TransportLimits::default(),
@@ -2812,7 +2817,8 @@ mod native {
                                     operation: Counter::operation(1, 1).unwrap(),
                                     bytes: Counter::command(0, 7).into(),
                                 },
-                            }],
+                            }]
+                            .into(),
                         }),
                     )
                 })
@@ -2876,7 +2882,8 @@ mod native {
                     store.limits(),
                 )
                 .unwrap();
-                app.apply_batch(core.replay_committed()).unwrap();
+                app.apply_batch(&core.replay_committed().contiguous())
+                    .unwrap();
                 core
             };
             if with_snapshots && !recover && id <= 2 {
@@ -3159,6 +3166,7 @@ mod snapshot_routes {
     use super::*;
     use voteboat::{contracts::StorageError, snapshot::*, snapshot_worker::*};
     mod envelopes;
+    mod eo1_repro;
     mod recovery_budget;
     mod reservation;
     pub(super) struct Worker {
@@ -3767,7 +3775,6 @@ mod ingress {
                     generation: OutboundGeneration::new(1).unwrap(),
                 },
                 first_generation: SecureSessionGeneration::new(1).unwrap(),
-                last_generation: SecureSessionGeneration::new(u64::MAX).unwrap(),
                 wire_version: 1,
                 limits: PeerRosterLimits::default(),
                 transport_limits: TransportLimits::default(),
@@ -3830,7 +3837,8 @@ mod ingress {
                         operation: Counter::operation(1, g as u64).unwrap(),
                         bytes: Counter::command(0, 1).into(),
                     },
-                }],
+                }]
+                .into(),
             },
             MessageClass::Background => Rpc::Snapshot {
                 snapshot: Box::new(Snapshot {
@@ -4413,7 +4421,13 @@ mod read_results {
         let mut caught_up = lagging;
         caught_up
             .counter
-            .apply_batch(owner.core(group(1)).unwrap().replay_committed())
+            .apply_batch(
+                &owner
+                    .core(group(1))
+                    .unwrap()
+                    .replay_committed()
+                    .contiguous(),
+            )
             .unwrap();
         r.submit(&mut owner, lease, &caught_up, query, MonoTime(400))
             .unwrap();
@@ -4752,7 +4766,13 @@ mod read_invocations {
         assert!(reads.is_drained());
         assert!(owner.is_drained());
         app.counter
-            .apply_batch(owner.core(group(1)).unwrap().replay_committed())
+            .apply_batch(
+                &owner
+                    .core(group(1))
+                    .unwrap()
+                    .replay_committed()
+                    .contiguous(),
+            )
             .unwrap();
         let next = reads.submit(&mut owner, &app, group(1), vec![3]).unwrap();
         assert!(next.request > ticket.request);
@@ -5035,7 +5055,8 @@ fn prospective_fanout_rejection_returns_input_without_ticket_or_fencing() {
                     expected: initial.configuration,
                     change: ConfigurationChange::Learners(next),
                 })),
-            }],
+            }]
+            .into(),
         },
     });
     let timer = owner.deadline(group(1));

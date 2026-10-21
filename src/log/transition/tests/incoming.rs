@@ -17,7 +17,7 @@ fn owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge() 
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     let incoming = pointer(&change.suffix.as_ref().unwrap().entries[0]);
@@ -43,19 +43,22 @@ fn owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge() 
 #[test]
 fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
     let state = current();
-    let mut change = update(
+    let mut raw = Vec::with_capacity(101);
+    raw.push(entry(3, 1));
+    let change = update(
         &state,
         1,
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: raw.into(),
         }),
     );
-    let suffix = change.suffix.as_mut().unwrap();
-    suffix.entries.reserve(100);
-    let raw_capacity = suffix.entries.capacity();
-    let EntryPayload::Command { bytes, .. } = &mut suffix.entries[0].payload else {
+    let suffix = change.suffix.as_ref().unwrap();
+    let raw_backing = suffix.entries.first_backing_ptr();
+    let raw_capacity = suffix.entries.allocated_entries();
+    assert!(raw_capacity >= 101);
+    let EntryPayload::Command { bytes, .. } = &suffix.entries[0].payload else {
         unreachable!()
     };
     let raw_charge = bytes.retained_bytes();
@@ -72,7 +75,11 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
         unreachable!()
     };
     assert_eq!(bytes.retained_bytes(), raw_charge);
-    assert_eq!(owned.entries.capacity(), owned.entries.len());
+    // A small batch is an owned value: the core keeps its own normalized
+    // copy, sharing only the immutable payload bytes.
+    assert!(!owned.entries.is_shared());
+    assert_ne!(owned.entries.first_backing_ptr(), raw_backing);
+    assert_eq!(owned.entries.allocated_entries(), owned.entries.len());
     assert_eq!(bytes.as_ptr(), raw_pointer);
     assert_eq!(pointer(plan.entry_at(3).unwrap()), bytes.as_ptr());
     let EntryPayload::Command { bytes, .. } = &change.suffix.as_ref().unwrap().entries[0].payload
@@ -80,7 +87,11 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
         unreachable!()
     };
     assert_eq!(
-        change.suffix.as_ref().unwrap().entries.capacity(),
+        change.suffix.as_ref().unwrap().entries.first_backing_ptr(),
+        raw_backing
+    );
+    assert_eq!(
+        change.suffix.as_ref().unwrap().entries.allocated_entries(),
         raw_capacity
     );
     assert_eq!(bytes.as_ptr(), raw_pointer);
@@ -100,17 +111,17 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
-    let EntryPayload::Command { bytes, .. } =
-        &mut change.suffix.as_mut().unwrap().entries[0].payload
-    else {
-        unreachable!()
-    };
-    let mut raw = bytes.to_vec();
-    raw.reserve(10000);
-    *bytes = raw.into();
+    change.suffix.as_mut().unwrap().entries.edit(|entries| {
+        let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+            unreachable!()
+        };
+        let mut raw = bytes.to_vec();
+        raw.reserve(10000);
+        *bytes = raw.into();
+    });
     let original = change.clone();
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
     let plan = OwnedNextLog::plan_owned(
@@ -122,20 +133,22 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
     .unwrap();
     for operation in [false, true] {
         let mut wrong = original.clone();
-        let EntryPayload::Command {
-            operation: id,
-            bytes,
-        } = &mut wrong.suffix.as_mut().unwrap().entries[0].payload
-        else {
-            unreachable!()
-        };
-        if operation {
-            *id = OperationId::new(99).unwrap();
-        } else {
-            let mut raw = bytes.to_vec();
-            raw[0] ^= 1;
-            *bytes = raw.into();
-        }
+        wrong.suffix.as_mut().unwrap().entries.edit(|entries| {
+            let EntryPayload::Command {
+                operation: id,
+                bytes,
+            } = &mut entries[0].payload
+            else {
+                unreachable!()
+            };
+            if operation {
+                *id = OperationId::new(99).unwrap();
+            } else {
+                let mut raw = bytes.to_vec();
+                raw[0] ^= 1;
+                *bytes = raw.into();
+            }
+        });
         assert!(!plan.matches_update(&wrong));
     }
     let mut canonical = state;
@@ -158,7 +171,7 @@ fn owned_validation_and_terms_match_borrowed_oracle_for_valid_invalid_and_compac
                         commit,
                         Some(Suffix {
                             from,
-                            entries: vec![entry(from, term)],
+                            entries: vec![entry(from, term)].into(),
                         }),
                     );
                     compare_owned(&state, change);
@@ -200,7 +213,7 @@ fn owned_preparation_rejects_stale_predecessor_without_installation() {
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     let plan = OwnedNextLog::plan_owned(
@@ -257,7 +270,7 @@ fn assert_commit_equivalent(
     wrong[3].commit_index += 1;
     wrong[4].suffix = Some(Suffix {
         from: state.last_index() + 1,
-        entries: Vec::new(),
+        entries: Vec::new().into(),
     });
     wrong[5].snapshot = Some(SnapshotRef {
         store: store(1),
@@ -373,4 +386,50 @@ fn scalar_commit_plan_matches_on_configured_and_compacted_logs() {
     // Each base admits commits from its commit index to its last index; every
     // term-zero vote and exhausted revision is refused, as `plan_owned` is.
     assert_eq!((valid, refused), (12, 150));
+}
+#[test]
+fn appending_to_an_empty_log_charges_what_the_installed_log_holds() {
+    // An owned batch keeps its spare capacity; on a log with no entries left
+    // the summary still charges the visible entries, as the installed log and
+    // a fresh recount do. A wide batch is frozen and charged with the small
+    // spare capacity it keeps.
+    let mut states = BTreeMap::new();
+    let bootstrap = current().bootstrap;
+    apply_batch(
+        &mut states,
+        &[LogMutation::Create(bootstrap)],
+        LogLimits::default(),
+    )
+    .unwrap();
+    let empty = states.remove(&group()).unwrap();
+    assert!(empty.entries.is_empty());
+    for width in [1, 3, crate::log::SHARE_MIN] {
+        let mut entries = Vec::with_capacity(width + 7);
+        entries.extend((1..=width as u64).map(|index| entry(index, 1)));
+        let mut state = empty.clone();
+        let change = update(
+            &state,
+            1,
+            0,
+            Some(Suffix {
+                from: 1,
+                entries: entries.into(),
+            }),
+        );
+        assert!(change.suffix.as_ref().unwrap().entries.allocated_entries() > width);
+        let plan = OwnedNextLog::plan_owned(
+            &LogView::new(&state),
+            &LogSummary::from_validated(&state),
+            change,
+            LogLimits::default(),
+        )
+        .unwrap();
+        let summary = plan.install(&mut state).unwrap();
+        assert_eq!(summary, LogSummary::from_validated(&state), "{width}");
+        assert_eq!(
+            summary.retained_bytes(),
+            state.entries.retained_bytes(),
+            "{width}"
+        );
+    }
 }

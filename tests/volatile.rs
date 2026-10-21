@@ -30,6 +30,20 @@ struct Replica {
     log: Log,
     snapshots: HostSnapshots,
     application: Counter,
+    /// The one reused effect queue of an `Api::Sink` replica.
+    queue: VecDeque<Effect>,
+}
+/// Which public API family a cluster drives.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Api {
+    /// `step`, `propose_batch` and `persist_volatile(..).into_owned()`.
+    Vec,
+    /// The Vec forms, with batches staged by `propose_entries`.
+    Entries,
+    /// `step_into`, `propose_entries_into` and `persist_volatile_into`
+    /// into one reused queue per replica. Every call finds sentinel effects
+    /// already queued, which it must keep, unread, ahead of its own.
+    Sink,
 }
 /// Persistence effects of either seam compare equal; every other effect must
 /// match exactly, including message contexts and committed entries.
@@ -44,6 +58,10 @@ struct Cluster {
     blocked: BTreeSet<(u64, u64)>,
     trace: Vec<(u64, Seen)>,
     installs: usize,
+    api: Api,
+    /// Committed intervals a sink completion returned and the host inserted
+    /// behind earlier queued effects.
+    inserted: usize,
 }
 fn binding(id: u64) -> StoreBinding {
     StoreBinding {
@@ -57,7 +75,32 @@ fn host_snapshots(id: u64) -> HostSnapshots {
     s.binding.identity = s.identity.store;
     s
 }
+/// Effects every sink call finds already queued. The granted vote is one
+/// this core never emitted: a call that scanned the whole queue for its own
+/// grant would remember it and reset its election timer.
+fn sentinels() -> Vec<Effect> {
+    let mut granted = probe(9);
+    granted.rpc = Rpc::Voted { granted: true };
+    vec![
+        Effect::Send(probe(7)),
+        Effect::Send(granted),
+        Effect::Send(probe(8)),
+    ]
+}
+/// The sentinels lead `queue`, unchanged; remove them.
+fn take_sentinels(queue: &mut VecDeque<Effect>, from: usize) {
+    let sentinels = sentinels();
+    let end = from + sentinels.len();
+    assert!(queue.range(from..end).eq(sentinels.iter()));
+    queue.drain(from..end);
+}
 impl Cluster {
+    fn sink(api: Api) -> Self {
+        Self {
+            api,
+            ..Self::new(true)
+        }
+    }
     fn new(volatile: bool) -> Self {
         let bootstrap = bootstrap(1, 3);
         let mut replicas = BTreeMap::new();
@@ -82,6 +125,7 @@ impl Cluster {
                     log,
                     snapshots: host_snapshots(id),
                     application: Counter::new(100).unwrap(),
+                    queue: VecDeque::new(),
                 },
             );
         }
@@ -91,9 +135,19 @@ impl Cluster {
             blocked: BTreeSet::new(),
             trace: Vec::new(),
             installs: 0,
+            api: Api::Vec,
+            inserted: 0,
         }
     }
     fn act(&mut self, id: u64, event: Event) {
+        if self.api == Api::Sink {
+            let r = self.replicas.get_mut(&id).unwrap();
+            assert!(r.queue.is_empty(), "an effect outlived its drain");
+            r.queue.extend(sentinels());
+            r.core.step_into(event, &mut r.queue).unwrap();
+            take_sentinels(&mut r.queue, 0);
+            return self.drain(id);
+        }
         let effects = self
             .replicas
             .get_mut(&id)
@@ -111,9 +165,26 @@ impl Cluster {
                 bytes: Counter::command(0, delta),
             })
             .collect();
-        let core = &mut self.replicas.get_mut(&id).unwrap().core;
-        let effects = core.propose_batch(proposals).unwrap();
-        self.effects(id, effects);
+        let r = self.replicas.get_mut(&id).unwrap();
+        if self.api == Api::Vec {
+            let effects = r.core.propose_batch(proposals).unwrap();
+            self.effects(id, effects);
+            return self.pump();
+        }
+        let mut batch = r.core.proposal_batch(proposals.len()).unwrap();
+        for Proposal { operation, bytes } in proposals {
+            batch.push(operation, bytes).unwrap();
+        }
+        if self.api == Api::Sink {
+            assert!(r.queue.is_empty(), "an effect outlived its drain");
+            r.queue.extend(sentinels());
+            r.core.propose_entries_into(batch, &mut r.queue).unwrap();
+            take_sentinels(&mut r.queue, 0);
+            self.drain(id);
+        } else {
+            let effects = r.core.propose_entries(batch).unwrap();
+            self.effects(id, effects);
+        }
         self.pump();
     }
     fn propose(&mut self, id: u64, operation: u128, delta: i64) {
@@ -128,6 +199,17 @@ impl Cluster {
     }
     fn effects(&mut self, id: u64, effects: Vec<Effect>) {
         let mut queue = VecDeque::from(effects);
+        self.run(id, &mut queue);
+    }
+    /// Handle a sink replica's queue, which must end empty and is kept.
+    fn drain(&mut self, id: u64) {
+        let mut queue = std::mem::take(&mut self.replicas.get_mut(&id).unwrap().queue);
+        self.run(id, &mut queue);
+        assert!(queue.is_empty());
+        queue.clear();
+        self.replicas.get_mut(&id).unwrap().queue = queue;
+    }
+    fn run(&mut self, id: u64, queue: &mut VecDeque<Effect>) {
         while let Some(effect) = queue.pop_front() {
             let seen = match &effect {
                 Effect::Persist(_) | Effect::PersistVolatile(_) => Seen::Persist,
@@ -138,6 +220,21 @@ impl Cluster {
             let more = match (effect, &mut r.log) {
                 (Effect::Persist(update), Log::Durable(log)) => {
                     persist_effect(&mut r.core, log, update).unwrap()
+                }
+                (Effect::PersistVolatile(persist), Log::Volatile(log)) if self.api == Api::Sink => {
+                    // Earlier work stays first: the interval goes where this
+                    // call's effects start, ahead of them.
+                    let queued = queue.len();
+                    queue.extend(sentinels());
+                    let mark = queue.len();
+                    let committed =
+                        persist_volatile_into(&mut r.core, log, persist, queue).unwrap();
+                    if let Some(entries) = committed {
+                        queue.insert(mark, Effect::Committed(entries.to_vec()));
+                        self.inserted += 1;
+                    }
+                    take_sentinels(queue, queued);
+                    Vec::new()
                 }
                 (Effect::PersistVolatile(persist), Log::Volatile(log)) => {
                     persist_volatile(&mut r.core, log, persist)
@@ -221,7 +318,10 @@ impl Cluster {
         while let Some(m) = self.messages.pop_front() {
             events += 1;
             assert!(events < 10000, "history did not converge");
-            if !self.blocked.contains(&(m.from.get(), m.to.get())) {
+            // A learner outside the three replicas receives nothing.
+            if !self.blocked.contains(&(m.from.get(), m.to.get()))
+                && self.replicas.contains_key(&m.to.get())
+            {
                 self.act(m.to.get(), Event::Receive(m));
             }
         }
@@ -275,6 +375,30 @@ impl Cluster {
                 unreachable!()
             };
             assert_eq!(&log.state(group(1)).unwrap(), twin.core.state());
+        }
+    }
+}
+
+impl Cluster {
+    /// Same effects in the same order, same states, roles and applications.
+    fn assert_same(&self, other: &Self) {
+        assert_eq!(self.trace, other.trace);
+        assert_eq!(self.installs, other.installs);
+        for (id, r) in &self.replicas {
+            let twin = &other.replicas[id];
+            assert_eq!(r.core.state(), twin.core.state());
+            assert_eq!(r.core.role(), twin.core.role());
+            assert_eq!(r.core.is_fenced(), twin.core.is_fenced());
+            assert_eq!(
+                r.core.election_reset_sequence(),
+                twin.core.election_reset_sequence()
+            );
+            let applied = r.application.applied_index();
+            assert_eq!(applied, twin.application.applied_index());
+            assert_eq!(
+                r.application.read_applied(applied),
+                twin.application.read_applied(applied)
+            );
         }
     }
 }
@@ -623,7 +747,8 @@ fn durable_helpers_refuse_volatile_core() {
                     operation: OperationId::new(2).unwrap(),
                     bytes: vec![1, 0, 0, 0, 0, 0, 0, 0].into(),
                 },
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -999,4 +1124,301 @@ fn volatile_follower_refuses_replicated_configuration_and_recovers() {
     }
     assert!(snapshots > 0);
     recovers_after_fence(&mut cluster, 2);
+}
+
+#[test]
+fn sink_forms_match_vec_forms_over_the_twin_histories() {
+    for script in [
+        history as fn(&mut Cluster),
+        snapshot_history,
+        transfer_history,
+    ] {
+        let mut sink = Cluster::sink(Api::Sink);
+        let mut entries = Cluster::sink(Api::Entries);
+        let mut vec = Cluster::new(true);
+        script(&mut sink);
+        script(&mut entries);
+        script(&mut vec);
+        sink.assert_same(&entries);
+        sink.assert_same(&vec);
+        // Committed intervals were placed behind queued effects.
+        assert!(sink.inserted > 0);
+        assert!(sink.trace.len() > 50);
+    }
+}
+
+fn transfer_request(target: u64) -> LeadershipTransferRequest {
+    LeadershipTransferRequest {
+        operation: OperationId::new(100).unwrap(),
+        target: voteboat::secure::PeerIdentity {
+            node: node(target),
+            store: identity(target.into()),
+        },
+        configuration: ConfigurationId::new(1).unwrap(),
+    }
+}
+fn has_rpc(cluster: &Cluster, from: u64, rpc: impl Fn(&Rpc) -> bool) -> bool {
+    cluster.trace.iter().any(|(id, seen)| {
+        *id == from
+            && matches!(seen, Seen::Other(e) if matches!(&**e, Effect::Send(m) if rpc(&m.rpc)))
+    })
+}
+/// Leadership transfer to a lagging target, whose handoff signal is emitted
+/// after the body of the leader's step that receives its catch-up reply; then
+/// a lower-term append that the new term's follower refuses.
+fn transfer_history(cluster: &mut Cluster) {
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.propose(1, 1, 4);
+    cluster.act(1, Event::Heartbeat);
+    let stale = cluster
+        .messages
+        .iter()
+        .find(|m| m.to == node(3) && matches!(m.rpc, Rpc::Append { .. }))
+        .unwrap()
+        .clone();
+    cluster.pump();
+    cluster.isolate(2);
+    cluster.propose(1, 2, 3);
+    cluster.act(1, Event::TransferLeadership(transfer_request(2)));
+    cluster.pump();
+    assert!(!has_rpc(cluster, 1, |rpc| matches!(
+        rpc,
+        Rpc::TimeoutNow { .. }
+    )));
+    cluster.blocked.clear();
+    cluster.act(1, Event::Heartbeat);
+    cluster.pump();
+    assert!(has_rpc(cluster, 1, |rpc| matches!(
+        rpc,
+        Rpc::TimeoutNow { .. }
+    )));
+    assert_eq!(cluster.replicas[&2].core.role(), Role::Leader);
+    assert!(stale.term < cluster.replicas[&3].core.state().hard_state.term);
+    cluster.act(3, Event::Receive(stale));
+    assert!(has_rpc(cluster, 3, |rpc| matches!(
+        rpc,
+        Rpc::Appended { success: false, .. }
+    )));
+    cluster.pump();
+    cluster.propose(2, 3, 2);
+}
+
+/// Durable replicas that all selected configuration replication.
+fn durable_api(api: Api) -> Cluster {
+    let mut cluster = Cluster {
+        api,
+        ..Cluster::new(false)
+    };
+    for (id, r) in &mut cluster.replicas {
+        let Log::Durable(store) = &r.log else {
+            unreachable!()
+        };
+        let state = store.state(group(1)).unwrap();
+        r.core = Raft::recover(node(*id), store.binding(), state, store.limits())
+            .unwrap()
+            .with_configuration_replication();
+    }
+    cluster
+}
+/// The current leader adds learner 4, which the three voters commit.
+fn configure_learners(cluster: &mut Cluster) {
+    let (&leader, r) = cluster
+        .replicas
+        .iter()
+        .find(|(_, r)| r.core.role() == Role::Leader)
+        .unwrap();
+    let proposal = learners_proposal(r.core.state());
+    cluster.act(leader, Event::Configure(Box::new(proposal)));
+    cluster.pump();
+    cluster.act(leader, Event::Heartbeat);
+    cluster.pump();
+    for r in cluster.replicas.values() {
+        let state = r.core.state();
+        assert!(has_configuration(state));
+        assert_eq!(state.commit_index, state.last_index());
+    }
+}
+
+#[test]
+fn durable_sink_forms_match_vec_forms_through_histories_and_a_learner_configuration() {
+    for script in [
+        history as fn(&mut Cluster),
+        snapshot_history,
+        transfer_history,
+    ] {
+        let mut sink = durable_api(Api::Sink);
+        let mut entries = durable_api(Api::Entries);
+        let mut vec = durable_api(Api::Vec);
+        for cluster in [&mut sink, &mut entries, &mut vec] {
+            script(cluster);
+            configure_learners(cluster);
+        }
+        sink.assert_same(&entries);
+        sink.assert_same(&vec);
+        assert!(sink.trace.iter().any(|(_, seen)| *seen == Seen::Persist));
+        assert_eq!(sink.inserted, 0, "durable completions have no sink form");
+    }
+}
+
+fn committed_api(api: Api) -> Cluster {
+    let mut cluster = Cluster::sink(api);
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.propose(1, 1, 4);
+    cluster
+}
+fn command(operation: u128) -> Event {
+    Event::Propose {
+        operation: OperationId::new(operation).unwrap(),
+        bytes: vec![1],
+    }
+}
+fn one_batch(core: &Raft, operation: u128) -> ProposalBatch {
+    let mut batch = core.proposal_batch(1).unwrap();
+    batch
+        .push(OperationId::new(operation).unwrap(), vec![2])
+        .unwrap();
+    batch
+}
+
+#[test]
+fn refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms() {
+    let mut sink = committed_api(Api::Sink);
+    let mut twin = committed_api(Api::Entries);
+    sink.assert_same(&twin);
+    let mut queue = VecDeque::from(sentinels());
+    let same = |sink: &Cluster, twin: &Cluster, queue: &VecDeque<Effect>| {
+        assert!(queue.iter().eq(sentinels().iter()));
+        sink.assert_same(twin);
+    };
+    // A follower refuses proposals in either form.
+    let (s, t) = (
+        sink.replicas.get_mut(&2).unwrap(),
+        twin.replicas.get_mut(&2).unwrap(),
+    );
+    assert_eq!(
+        s.core.step_into(command(5), &mut queue),
+        t.core.step(command(5)).map(drop)
+    );
+    assert_eq!(
+        s.core.step_into(command(5), &mut queue),
+        Err(RaftError::NotLeader)
+    );
+    let refused = s
+        .core
+        .propose_entries_into(one_batch(&s.core, 5), &mut queue);
+    assert_eq!(refused, Err(RaftError::NotLeader));
+    assert_eq!(
+        t.core.propose_entries(one_batch(&t.core, 5)).map(drop),
+        refused
+    );
+    same(&sink, &twin, &queue);
+    // A leader with a pending transition is busy in either form.
+    let (s, t) = (
+        sink.replicas.get_mut(&1).unwrap(),
+        twin.replicas.get_mut(&1).unwrap(),
+    );
+    let mut pending = VecDeque::new();
+    s.core.step_into(command(6), &mut pending).unwrap();
+    let vec_effects = t.core.step(command(6)).unwrap();
+    let [Effect::PersistVolatile(token)] = pending.make_contiguous() else {
+        panic!("one token: {pending:?}")
+    };
+    let token = *token;
+    assert!(matches!(vec_effects[..], [Effect::PersistVolatile(_)]));
+    assert_eq!(
+        s.core.step_into(Event::Heartbeat, &mut queue),
+        Err(RaftError::Busy)
+    );
+    assert_eq!(
+        t.core.step(Event::Heartbeat).map(drop),
+        Err(RaftError::Busy)
+    );
+    let refused = s
+        .core
+        .propose_entries_into(one_batch(&s.core, 7), &mut queue);
+    assert_eq!(refused, Err(RaftError::Busy));
+    assert_eq!(
+        t.core.propose_entries(one_batch(&t.core, 7)).map(drop),
+        refused
+    );
+    same(&sink, &twin, &queue);
+    // A stale token fences in either form and leaves no partial effects.
+    let Effect::PersistVolatile(twin_token) = vec_effects[0] else {
+        unreachable!()
+    };
+    let (s, t) = (
+        sink.replicas.get_mut(&1).unwrap(),
+        twin.replicas.get_mut(&1).unwrap(),
+    );
+    let (Log::Volatile(s_log), Log::Volatile(t_log)) = (&s.log, &t.log) else {
+        unreachable!()
+    };
+    assert!(persist_volatile_into(&mut s.core, s_log, token, &mut pending).is_ok());
+    assert!(persist_volatile(&mut t.core, t_log, twin_token).is_ok());
+    let committed = s.core.state().clone();
+    assert!(matches!(
+        persist_volatile_into(&mut s.core, s_log, token, &mut queue),
+        Err(RaftError::WrongCompletion)
+    ));
+    assert!(matches!(
+        persist_volatile(&mut t.core, t_log, twin_token),
+        Err(RaftError::WrongCompletion)
+    ));
+    assert!(s.core.is_fenced());
+    assert_eq!(s.core.state(), &committed);
+    same(&sink, &twin, &queue);
+    // A fenced core refuses every sink call without touching the queue.
+    let (s, t) = (
+        sink.replicas.get_mut(&1).unwrap(),
+        twin.replicas.get_mut(&1).unwrap(),
+    );
+    assert_eq!(
+        s.core.step_into(Event::Heartbeat, &mut queue),
+        Err(RaftError::Fenced)
+    );
+    assert_eq!(
+        t.core.step(Event::Heartbeat).map(drop),
+        Err(RaftError::Fenced)
+    );
+    let refused = s
+        .core
+        .propose_entries_into(one_batch(&s.core, 8), &mut queue);
+    assert_eq!(refused, Err(RaftError::Fenced));
+    same(&sink, &twin, &queue);
+}
+
+#[test]
+fn reused_sink_queues_keep_their_allocation_and_hold_nothing_between_calls() {
+    let mut cluster = Cluster::sink(Api::Sink);
+    for r in cluster.replicas.values_mut() {
+        r.application = Counter::new(2048).unwrap();
+    }
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    for operation in 1..66 {
+        cluster.propose(1, operation, 1);
+    }
+    let allocation = |cluster: &Cluster| {
+        cluster
+            .replicas
+            .values()
+            .map(|r| {
+                assert!(r.queue.is_empty());
+                (r.queue.as_slices().0.as_ptr(), r.queue.capacity())
+            })
+            .collect::<Vec<_>>()
+    };
+    let warm = allocation(&cluster);
+    assert!(warm.iter().all(|&(_, capacity)| capacity > 0));
+    for operation in 66..1066 {
+        cluster.propose(1, operation, 1);
+        assert_eq!(allocation(&cluster), warm);
+    }
+    for r in cluster.replicas.values() {
+        assert_eq!(r.core.state().commit_index, r.core.state().last_index());
+        assert_eq!(r.core.state().commit_index, 1066);
+        assert_eq!(r.application.read_applied(1066), Ok(1065));
+    }
 }

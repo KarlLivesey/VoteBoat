@@ -605,7 +605,7 @@ fn native_metadata_owner_adoption_cuts_preserve_data_and_resume_exact_control() 
                 2,
                 Some(Suffix {
                     from: 1,
-                    entries: entries[..2].to_vec(),
+                    entries: entries[..2].to_vec().into(),
                 }),
             )],
         );
@@ -618,7 +618,7 @@ fn native_metadata_owner_adoption_cuts_preserve_data_and_resume_exact_control() 
         3,
         Some(Suffix {
             from: 3,
-            entries: entries[2..].to_vec(),
+            entries: entries[2..].to_vec().into(),
         }),
     );
     let frame = NativeLogCodec

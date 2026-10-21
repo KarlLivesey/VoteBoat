@@ -81,7 +81,7 @@ fn message(peer: u64, class: MessageClass) -> Message {
             MessageClass::Data => Rpc::Append {
                 previous_index: 0,
                 previous_term: 0,
-                entries: vec![entry(1, 1, 7)],
+                entries: vec![entry(1, 1, 7)].into(),
                 leader_commit: 0,
             },
             MessageClass::Background => Rpc::Snapshot {
@@ -219,7 +219,8 @@ fn rejection_and_background(mut queue: impl OutboundQueue) {
     );
     let mut payload = message(2, MessageClass::Data);
     if let Rpc::Append { entries, .. } = &mut payload.rpc {
-        let voteboat::log::EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+        let mut edited = entries.to_vec();
+        let voteboat::log::EntryPayload::Command { bytes, .. } = &mut edited[0].payload else {
             panic!()
         };
         let mut spare = Vec::with_capacity(8192);
@@ -235,6 +236,7 @@ fn rejection_and_background(mut queue: impl OutboundQueue) {
         // Mutable source spare capacity is not retained. Actual immutable
         // content still exceeds the same outbound byte budget atomically.
         *bytes = vec![7; 8192].into();
+        *entries = edited.into();
     }
     assert_eq!(
         queue.submit(vec![payload]).unwrap_err().reason,

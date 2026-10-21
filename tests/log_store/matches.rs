@@ -40,7 +40,7 @@ fn borrowed_equality_reads_durable_not_pending_and_survives_subset_barrier_reope
                 0,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![entry(1, 1, 7)],
+                    entries: vec![entry(1, 1, 7)].into(),
                 }),
             )
         })
@@ -87,7 +87,7 @@ fn equality_fencing_precedes_missing_and_recovery_retains_exact_crash_state() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 7)],
+                entries: vec![entry(1, 1, 7)].into(),
             }),
         );
         let mut next = BTreeMap::from([(group(1), old.clone())]);

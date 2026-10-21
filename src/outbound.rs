@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 //! Bounded outbound ownership before a transport. Local completion cannot
 //! establish a durable follower acknowledgement or read authority.
-use crate::{identity::*, log::EntryPayload, quorum::Tree, raft::*};
+use crate::{identity::*, quorum::Tree, raft::*};
 use std::mem::size_of;
 
 pub const OUTBOUND_CONTRACT_VERSION: u32 = 2;
@@ -288,6 +288,14 @@ pub trait OutboundQueue {
     }
 }
 
+/// Fixed charge of one outbound batch beside its messages.
+pub(crate) const BATCH_HEADER_BYTES: usize = 256;
+/// What [`batch_cost`] charges one message submitted alone beyond the content
+/// [`message_cost`] retains for it: the message itself and the batch header.
+/// A leader's Append keeps hidden backing bytes only while this envelope, a
+/// plain copy of its visible entries and those bytes fit `max_batch_bytes`.
+pub(crate) const SOLE_MESSAGE_ENVELOPE: usize = size_of::<Message>() + BATCH_HEADER_BYTES;
+
 /// Conservative retained capacity accounting shared with runtime ingress.
 /// Counts owned payloads/index units, not allocator metadata or exact RSS.
 pub fn message_cost(
@@ -307,27 +315,30 @@ pub fn message_cost(
             add(size_of::<crate::raft::LearnerReadinessRequest>())?;
             MessageClass::Control
         }
-        Rpc::Append { entries, .. } | Rpc::LearnerRepair { entries, .. } => {
-            if let Rpc::LearnerRepair { joint, .. } = &message.rpc {
-                add(size_of::<crate::log::LogEntry>())?;
-                add(joint.retained_payload_bytes())?;
+        Rpc::Append { entries, .. } => {
+            // Every shared backing the message keeps alive, in full, from its
+            // cached charge; the class depends only on the visible entries.
+            let (retained, data) = entries
+                .retained_bytes_and_data()
+                .ok_or(OutboundError::BatchTooLarge)?;
+            add(retained)?;
+            if data {
+                MessageClass::Data
+            } else {
+                MessageClass::Control
             }
+        }
+        Rpc::LearnerRepair { joint, entries, .. } => {
+            add(size_of::<crate::log::LogEntry>())?;
+            add(joint.retained_payload_bytes())?;
             add(entries
                 .capacity()
                 .checked_mul(size_of::<crate::log::LogEntry>())
                 .ok_or(OutboundError::BatchTooLarge)?)?;
-            let mut class = if matches!(message.rpc, Rpc::LearnerRepair { .. }) {
-                MessageClass::Data
-            } else {
-                MessageClass::Control
-            };
             for entry in entries {
                 add(entry.retained_payload_bytes())?;
-                if !matches!(entry.payload, EntryPayload::Noop) {
-                    class = MessageClass::Data;
-                }
             }
-            class
+            MessageClass::Data
         }
         Rpc::Snapshot { snapshot }
         | Rpc::LearnerRepairSnapshot { snapshot }
@@ -403,7 +414,7 @@ pub fn batch_cost(
     }
     let mut bytes = capacity
         .checked_mul(size_of::<Message>())
-        .and_then(|v| v.checked_add(256))
+        .and_then(|v| v.checked_add(BATCH_HEADER_BYTES))
         .ok_or(OutboundError::BatchTooLarge)?;
     let mut class = MessageClass::Control;
     for message in messages {

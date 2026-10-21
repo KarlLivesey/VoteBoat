@@ -73,7 +73,7 @@ pub(super) fn shard_with_batch_limits(
         commit_index: 0,
         snapshot: None,
         snapshot_membership: None,
-        entries: Vec::new(),
+        entries: Vec::new().into(),
     };
     let mut core = Raft::recover(node, binding, state, log).unwrap();
     core.configure_batch_limits(batch).unwrap();

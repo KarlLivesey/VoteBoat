@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::setup::Service;
+use super::{accept_health::AcceptHealth, setup::Service};
 use std::fmt::Write;
 use voteboat::{outbound::*, runtime::PeerDriverUsage, transport::PeerRosterUsage};
 
@@ -12,6 +12,8 @@ struct Peer {
 }
 struct Snapshot {
     driver: Option<(PeerDriverUsage, PeerRosterUsage)>,
+    /// Live listener and generation health.
+    accept: AcceptHealth,
     authorized: usize,
     bound: usize,
     tracked: usize,
@@ -22,6 +24,7 @@ impl Snapshot {
     fn capture(service: &Service) -> Self {
         let mut value = Self {
             driver: None,
+            accept: AcceptHealth::capture(service.peers()),
             authorized: 0,
             bound: 0,
             tracked: 0,
@@ -56,6 +59,7 @@ impl Snapshot {
             u8::from(d.failed_send), u8::from(d.failed_receive), r.connections, r.connecting,
             r.reserved_bytes, self.authorized, self.bound, self.tracked,
             self.outbound.batches, self.outbound.messages, self.outbound.bytes).unwrap();
+        self.accept.append(reply);
         let count = self.peers.len().min(DETAILS);
         write!(
             reply,
@@ -110,6 +114,17 @@ mod tests {
                     reserved_bytes: usize::MAX,
                 },
             )),
+            accept: AcceptHealth {
+                status: Some(voteboat::connect::AcceptStatus {
+                    transient_errors: u64::MAX,
+                    backoffs: u64::MAX,
+                    last_error: Some(std::io::ErrorKind::Other),
+                    last_os_error: Some(i32::MAX),
+                    retry_at: Some(voteboat::runtime::MonoTime(u64::MAX)),
+                }),
+                paused: true,
+                generations_exhausted: true,
+            },
             authorized: usize::MAX,
             bound: usize::MAX,
             tracked: 16,
@@ -127,6 +142,11 @@ mod tests {
         snapshot.append(&mut reply);
         assert!(reply.len() < 4096, "reply length={}", reply.len());
         assert!(reply.contains("peer_details=8 peer_omitted=8"));
+        assert!(reply.contains(&format!(
+            "peer_accept_listener=1 peer_accept_errors={0} peer_accept_backoffs={0} peer_accept_paused=1 peer_accept_last_os_error={1} peer_generations_exhausted=1",
+            u64::MAX,
+            i32::MAX
+        )));
         assert!(reply.contains(&format!("peer_{}_bytes={}", u64::MAX - 7, usize::MAX)));
         assert!(!reply.contains(&format!("peer_{}_bound=", u64::MAX - 8)));
         for field in reply.split_whitespace().skip(1) {

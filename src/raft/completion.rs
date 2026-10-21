@@ -20,13 +20,15 @@ pub(super) struct PreparedCompletion {
 /// [`Self::into_owned`] without changing effect order.
 #[derive(Debug)]
 pub struct CompletionEffects<'a> {
-    committed: Option<&'a [LogEntry]>,
+    committed: Option<EntryRange<'a>>,
     following: Vec<Effect>,
 }
 
 impl<'a> CompletionEffects<'a> {
     /// Newly committed contiguous entries, before all following effects.
-    pub fn committed(&self) -> Option<&[LogEntry]> {
+    /// The interval may span several shared pieces; apply it in one call,
+    /// for example with [`crate::application::StateMachine::apply_entries`].
+    pub fn committed(&self) -> Option<EntryRange<'a>> {
         self.committed
     }
 
@@ -37,7 +39,7 @@ impl<'a> CompletionEffects<'a> {
 
     /// Consume the result for immediate application and later effect handling.
     /// The interval continues to borrow the core until its last use.
-    pub fn into_parts(self) -> (Option<&'a [LogEntry]>, Vec<Effect>) {
+    pub fn into_parts(self) -> (Option<EntryRange<'a>>, Vec<Effect>) {
         (self.committed, self.following)
     }
 
@@ -66,7 +68,12 @@ impl Raft {
 
     fn borrow_completion(&self, prepared: PreparedCompletion) -> CompletionEffects<'_> {
         CompletionEffects {
-            committed: prepared.committed.map(|range| &self.durable.entries[range]),
+            committed: prepared.committed.map(|range| {
+                self.durable
+                    .entries
+                    .borrowed(range)
+                    .expect("committed interval is retained")
+            }),
             following: prepared.following,
         }
     }
@@ -76,6 +83,12 @@ impl Raft {
 /// a committed interval borrowed only after all completion checks succeed.
 /// Exact update validation precedes submission; any pipeline error fences the
 /// core. Networking and application remain the host's responsibility.
+///
+/// Durable completions have no host-owned queue form (there is no
+/// `persist_effect_into`, unlike [`persist_volatile_into`]): each one already
+/// pays a store submission and barrier, the native runtime keeps its owned
+/// per-visit effects, and no measured caller drives this path. Its following
+/// effects are a new `Vec` per completion.
 pub fn persist_effect_borrowed<'a, S: LogStore>(
     raft: &'a mut Raft,
     store: &mut S,
@@ -124,14 +137,44 @@ pub fn persist_volatile<'a>(
     log: &VolatileLog,
     persist: VolatilePersist,
 ) -> Result<CompletionEffects<'a>, RaftError> {
+    let mut following = VecDeque::new();
+    let committed = persist_volatile_into(raft, log, persist, &mut following)?;
+    Ok(CompletionEffects {
+        committed,
+        following: following.into(),
+    })
+}
+
+/// [`persist_volatile`] into a host-owned queue. The following effects are
+/// appended, in order, after any effects `out` already holds, which are never
+/// read or changed; the returned committed interval precedes them. A host that
+/// already queued work before this call keeps FIFO order by inserting
+/// `Effect::Committed(entries.to_vec())` at the queue's length before the call
+/// (as [`CompletionEffects::into_owned`] places it first); a host whose queue
+/// was empty can apply the interval immediately. Every check is the same as
+/// [`persist_volatile`]'s: on any error the core is fenced and `out` is
+/// truncated back to its earlier effects.
+pub fn persist_volatile_into<'a>(
+    raft: &'a mut Raft,
+    log: &VolatileLog,
+    persist: VolatilePersist,
+    out: &mut VecDeque<Effect>,
+) -> Result<Option<EntryRange<'a>>, RaftError> {
+    let mark = out.len();
     let result = if log.binding() != raft.binding {
         Err(RaftError::WrongIdentity)
     } else {
-        raft.finish_volatile(persist)
+        raft.finish_volatile_into(persist, out)
     };
     match result {
-        Ok(prepared) => Ok(raft.borrow_completion(prepared)),
+        Ok(committed) => Ok(committed.map(|range| {
+            raft.durable
+                .entries
+                .borrowed(range)
+                .expect("committed interval is retained")
+        })),
         Err(error) => {
+            out.truncate(mark);
             raft.storage_failed();
             Err(error)
         }

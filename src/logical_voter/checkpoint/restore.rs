@@ -178,13 +178,13 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         let LogMutation::Update(update) = mutations.remove(0) else {
             return Err(ApplicationError::InvalidCheckpoint);
         };
-        let Some(mut suffix) = update.suffix else {
+        let Some(suffix) = update.suffix else {
             return Err(ApplicationError::InvalidCheckpoint);
         };
         if update.group != self.mapping.child || suffix.entries.len() != 1 {
             return Err(ApplicationError::InvalidCheckpoint);
         }
-        Ok(suffix.entries.remove(0))
+        Ok(suffix.entries[0].clone())
     }
     fn decode_materialized(
         &self,

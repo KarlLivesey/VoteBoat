@@ -307,6 +307,9 @@ impl<C: PeerConnector<Endpoint = SocketAddr>, R: PeerDiscovery> PeerConnector
     }
     type Endpoint = SocketAddr;
     type Session = C::Session;
+    fn accept_status(&self) -> Option<AcceptStatus> {
+        self.connector.accept_status()
+    }
     fn local(&self) -> LocalIdentity {
         self.connector.local()
     }

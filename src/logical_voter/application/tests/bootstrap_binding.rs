@@ -218,7 +218,7 @@ impl Child {
                 commit_index: 1,
                 suffix: Some(Suffix {
                     from: 1,
-                    entries: vec![assignment],
+                    entries: vec![assignment].into(),
                 }),
                 snapshot: None,
                 snapshot_membership: None,
@@ -335,7 +335,7 @@ fn binding_gap(mut bound: LogicalApplication, mut other: LogicalApplication, ent
     assert_eq!(other.validate_deployment_requirements(declared), Ok(()));
     let mut child = Child::new();
     for app in [&mut bound, &mut other] {
-        app.apply_batch(child.learner.replay_committed()).unwrap();
+        StateMachine::apply_entries(app, child.learner.replay_committed()).unwrap();
         assert_eq!(app.applied_index(), 2);
         assert!(!app.deployment_bound());
     }
@@ -366,7 +366,8 @@ fn binding_gap(mut bound: LogicalApplication, mut other: LogicalApplication, ent
     );
     let index = child.commit(entry.operation, bytes);
     assert_eq!(index, 3);
-    let committed = &child.learner.replay_committed()[2..];
+    let replay = child.learner.replay_committed().contiguous();
+    let committed = &replay[2..];
     assert_eq!(committed.len(), 1);
     let receipts = bound.apply_batch(committed).unwrap();
     assert_eq!(receipts[0].outcome, LogicalOutcome::Claimed);

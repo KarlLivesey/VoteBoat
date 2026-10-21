@@ -110,6 +110,12 @@ ten-second deadline and one outstanding request. The owner drains accepted
 reads and their underlying Node credits after disconnect before accepting a
 new command. The `manifest read accepted` diagnostic identifies that boundary.
 
+Every reply from the authority also carries its listener health as
+`peer_accept_listener`, `peer_accept_errors`, `peer_accept_backoffs`,
+`peer_accept_paused`, `peer_accept_last_os_error` and
+`peer_generations_exhausted` (see `docs/CONNECTIONS.md`): an authority that has
+stopped accepting peers or issuing connection attempts is never silent about it.
+
 ## Resolve a hierarchy
 
 Provide command endpoints and pinned TLS names for each metadata authority:

@@ -353,4 +353,20 @@ fn invalid_selected_enrollment_limits_leave_original_application_and_files_untou
         .is_err());
     assert_eq!(application.checkpoint(4096).unwrap(), before);
     assert!(!directory.exists());
+    // Valid WAL limits whose batch no outbound budget can hold are refused
+    // before any file is created, as every later start would refuse them.
+    let refused = selected
+        .enroll_snapshot_with_log_limits(
+            &incoming,
+            &mut application,
+            LogLimits {
+                max_batch_bytes: 1 << 30,
+                max_wal_bytes: 1 << 30,
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
+    assert_eq!(refused.stage, "outbound limits");
+    assert_eq!(application.checkpoint(4096).unwrap(), before);
+    assert!(!directory.exists());
 }

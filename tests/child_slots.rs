@@ -754,7 +754,7 @@ fn retirement_native_journal_cuts_recover_only_original_or_completed_routes() {
         3,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 220, bytes.clone())],
+            entries: vec![entry(3, 220, bytes.clone())].into(),
         }),
     );
     let frame = NativeLogCodec
@@ -891,7 +891,7 @@ fn seed_retirement_log(
             2,
             Some(Suffix {
                 from: 1,
-                entries: prefix.to_vec(),
+                entries: prefix.to_vec().into(),
             }),
         )],
     );

@@ -31,8 +31,14 @@ type WrappedSetup = (
 fn wrapped(capacity: usize, maintenance: bool) -> WrappedSetup {
     let (owner, worker, _, _, _) = setup_with_visit_items(1, capacity, 64);
     let mut app = Application::new(Counter::new(capacity).unwrap(), maintenance).unwrap();
-    app.apply_batch(owner.core(group(1)).unwrap().replay_committed())
-        .unwrap();
+    app.apply_batch(
+        &owner
+            .core(group(1))
+            .unwrap()
+            .replay_committed()
+            .contiguous(),
+    )
+    .unwrap();
     let clients = ClientRouter::new(
         ClientRouterBinding::new(
             owner.authorization(),
@@ -149,7 +155,7 @@ fn plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds() {
     let entries = &update.suffix.as_ref().unwrap().entries;
     assert_eq!(entries.len(), 4);
     assert_eq!(
-        apps[&group(1)].receipt_bytes_bound(entries),
+        apps[&group(1)].receipt_bytes_bound(&entries.to_vec()),
         Ok(4 * std::mem::size_of::<Receipt>())
     );
     assert!(owner.take_effect().unwrap().is_none());

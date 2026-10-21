@@ -17,7 +17,7 @@ fn payload_pointer(entry: &LogEntry) -> *const u8 {
     };
     bytes.as_ptr()
 }
-fn tail(store: &Store) -> &Vec<LogEntry> {
+fn tail(store: &Store) -> &EntryLog {
     let Overlay::Plain(plain) = &store.accepted.overlays[&group(1)] else {
         panic!("plain overlay required")
     };
@@ -44,7 +44,7 @@ fn original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barr
         128,
         Some(Suffix {
             from: 129,
-            entries: vec![input],
+            entries: vec![input].into(),
         }),
     );
     let first = store.append_batch(vec![first_update]).unwrap();
@@ -64,7 +64,7 @@ fn original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barr
         129,
         Some(Suffix {
             from: 130,
-            entries: vec![entry(130, 1)],
+            entries: vec![entry(130, 1)].into(),
         }),
     );
     let second = store.append_batch(vec![second_update]).unwrap();
@@ -92,7 +92,7 @@ fn original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barr
         130,
         Some(Suffix {
             from: 131,
-            entries: vec![entry(131, 1)],
+            entries: vec![entry(131, 1)].into(),
         }),
     );
     let newer = store.append_batch(vec![newer_update]).unwrap();
@@ -116,7 +116,7 @@ fn metadata_update_does_not_allocate_a_second_retained_log() {
         0,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1)],
+            entries: vec![entry(1, 1)].into(),
         }),
     );
     commit(&mut store, vec![update]);
@@ -145,7 +145,7 @@ fn invalid_later_group_and_stale_summary_refuse_before_any_append() {
         0,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1)],
+            entries: vec![entry(1, 1)].into(),
         }),
     );
     let LogMutation::Update(mut second) = mutation(&store, 2, 0, None) else {
@@ -183,7 +183,7 @@ fn uncertain_append_sync_or_publication_does_not_promote_an_overlay() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1)],
+                entries: vec![entry(1, 1)].into(),
             }),
         );
         match store.append_batch(vec![update]) {
@@ -212,7 +212,7 @@ fn replacement_materializes_the_exact_accepted_tail_and_invalidates_old_generati
         0,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1), entry(2, 1)],
+            entries: vec![entry(1, 1), entry(2, 1)].into(),
         }),
     );
     let first = store.append_batch(vec![first_update]).unwrap();
@@ -224,7 +224,7 @@ fn replacement_materializes_the_exact_accepted_tail_and_invalidates_old_generati
         1,
         Some(Suffix {
             from: 2,
-            entries: vec![entry(2, 2)],
+            entries: vec![entry(2, 2)].into(),
         }),
     );
     let replacement = store.append_batch(vec![replacement]).unwrap();

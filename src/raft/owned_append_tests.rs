@@ -47,7 +47,7 @@ fn incoming(receiver: &Raft, entries: Vec<LogEntry>) -> Message {
         rpc: Rpc::Append {
             previous_index: 1,
             previous_term: 1,
-            entries,
+            entries: entries.into(),
             leader_commit: matching,
         },
     }
@@ -124,16 +124,21 @@ fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
     assert!(pending.matches_update(original));
     let raw = original.suffix.as_ref().unwrap();
     let owned = pending.suffix().unwrap();
-    assert_ne!(raw.entries.as_ptr(), owned.entries.as_ptr());
+    // A small batch is an owned value, so the store's input and the core's
+    // plan are independent copies; a wide one would share its backing.
+    assert_eq!(
+        raw.entries.first_backing_ptr() == owned.entries.first_backing_ptr(),
+        raw.entries.is_shared()
+    );
     assert_eq!(
         bytes(&raw.entries[1]).as_ptr(),
         bytes(&owned.entries[1]).as_ptr()
     );
     for change_id in [false, true] {
         let mut wrong = original.clone();
-        let EntryPayload::Command { operation, bytes } =
-            &mut wrong.suffix.as_mut().unwrap().entries[1].payload
-        else {
+        let suffix = wrong.suffix.as_mut().unwrap();
+        let mut edited = suffix.entries.to_vec();
+        let EntryPayload::Command { operation, bytes } = &mut edited[1].payload else {
             unreachable!()
         };
         if change_id {
@@ -143,6 +148,7 @@ fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
             replacement[0] ^= 1;
             *bytes = replacement.into();
         }
+        suffix.entries = edited.into();
         assert_eq!(
             receiver.validate_persist_effect(&wrong),
             Err(RaftError::WrongCompletion)
@@ -168,7 +174,10 @@ fn tight_owned_append_matches_forced_clone_with_independent_delayed_completion()
         .step(Event::Receive(incoming(&cloned, forced)))
         .unwrap();
     assert_eq!(effects, reference);
-    assert_eq!(suffix(&effects).entries.as_ptr(), input_pointer);
+    assert_eq!(
+        suffix(&effects).entries.first_backing_ptr(),
+        Some(input_pointer)
+    );
     assert_eq!(
         bytes(&suffix(&effects).entries[1]).as_ptr(),
         payload_pointer
@@ -190,7 +199,7 @@ fn tight_owned_append_matches_forced_clone_with_independent_delayed_completion()
 }
 
 #[test]
-fn spare_outer_falls_back_and_command_input_capacity_is_normalized_at_capture() {
+fn spare_outer_is_kept_by_a_narrow_batch_and_command_input_capacity_is_normalized_at_capture() {
     for shape in 0..3 {
         let mut receiver = follower(core(), 1);
         let mut entries = plain_entries();
@@ -219,13 +228,19 @@ fn spare_outer_falls_back_and_command_input_capacity_is_normalized_at_capture() 
             .unwrap();
         let retained = &suffix(&effects).entries;
         assert_eq!(retained, &expected);
-        if shape == 0 {
-            assert_ne!(retained.as_ptr(), input_pointer);
-        } else {
-            assert_eq!(retained.as_ptr(), input_pointer);
-        }
+        // A batch this narrow stays owned: the input allocation is kept,
+        // spare outer capacity included (messages and pending plans charge
+        // it; the installed log charges the visible entries). A wide input
+        // is frozen, releasing spare capacity beyond 4 KiB.
+        assert!(expected.len() < crate::log::SHARE_MIN);
+        assert_eq!(retained.first_backing_ptr(), Some(input_pointer));
+        assert_eq!(
+            retained.allocated_entries() > retained.len(),
+            shape == 0,
+            "{shape}"
+        );
         assert_eq!(bytes(&retained[1]).as_ptr(), payload_pointer);
-        assert_eq!(retained.capacity(), retained.len());
+        assert_eq!(retained.backing_count(), 1);
         assert_eq!(bytes(&retained[0]).retained_bytes(), 0);
         assert_eq!(
             bytes(&retained[1]).retained_bytes(),
@@ -238,7 +253,7 @@ fn spare_outer_falls_back_and_command_input_capacity_is_normalized_at_capture() 
 }
 
 #[test]
-fn configuration_payload_always_clones_and_preserves_full_membership() {
+fn configuration_payload_shares_its_input_and_preserves_full_membership() {
     let mut receiver = follower(core(), 1);
     let entry = LogEntry {
         index: 2,
@@ -262,7 +277,10 @@ fn configuration_payload_always_clones_and_preserves_full_membership() {
     );
     let effects = receiver.receive_inner(message).unwrap();
     assert_eq!(suffix(&effects).entries, expected);
-    assert_ne!(suffix(&effects).entries.as_ptr(), input_pointer);
+    assert_eq!(
+        suffix(&effects).entries.first_backing_ptr(),
+        Some(input_pointer)
+    );
     assert_eq!(receiver.state().membership().unwrap().id(), cid(1));
     delayed_completion(&mut receiver, &effects);
     assert_eq!(receiver.membership().id(), cid(2));
@@ -275,7 +293,7 @@ fn configuration_payload_always_clones_and_preserves_full_membership() {
 }
 
 #[test]
-fn matching_prefix_clones_only_the_unmatched_suffix_and_replay_has_no_persist() {
+fn matching_prefix_shares_only_the_unmatched_suffix_and_replay_has_no_persist() {
     let mut receiver = follower(core(), 1);
     let tail = command(2, 1, (1 << 127) | 5, vec![4, 5]);
     let entries = vec![receiver.state().entries[0].clone(), tail.clone()];
@@ -295,7 +313,8 @@ fn matching_prefix_clones_only_the_unmatched_suffix_and_replay_has_no_persist() 
     let effects = receiver.step(Event::Receive(message)).unwrap();
     assert_eq!(suffix(&effects).from, 2);
     assert_eq!(suffix(&effects).entries, [tail]);
-    assert_eq!(suffix(&effects).entries.capacity(), 1);
+    assert_eq!(suffix(&effects).entries.len(), 1);
+    assert_eq!(suffix(&effects).entries.backing_count(), 1);
     assert_eq!(
         bytes(&suffix(&effects).entries[0]).as_ptr(),
         payload_pointer
@@ -322,7 +341,7 @@ fn uncommitted_rewrite_has_the_same_atomic_term_commit_and_reply_as_clone() {
             1,
             Some(Suffix {
                 from: 2,
-                entries: plain_entries(),
+                entries: plain_entries().into(),
             }),
             After::Reply,
             None,
@@ -350,7 +369,10 @@ fn uncommitted_rewrite_has_the_same_atomic_term_commit_and_reply_as_clone() {
         .step(Event::Receive(incoming(&cloned, forced)))
         .unwrap();
     assert_eq!(effects, oracle);
-    assert_eq!(suffix(&effects).entries.as_ptr(), input_pointer);
+    assert_eq!(
+        suffix(&effects).entries.first_backing_ptr(),
+        Some(input_pointer)
+    );
     assert_eq!(optimized.state(), &before);
     let completed = delayed_completion(&mut optimized, &effects);
     let expected = delayed_completion(&mut cloned, &oracle);
@@ -404,6 +426,6 @@ fn failed_ownership_fences_without_install_and_restart_retries_original() {
         assert_eq!(recovered.admitted(stale), Err(RaftError::WrongCompletion));
         delayed_completion(&mut recovered, &effects);
         assert_eq!(recovered.state().commit_index, 5);
-        assert_eq!(recovered.state().entries[1..], plain_entries());
+        assert_eq!(recovered.state().entries.to_vec()[1..], plain_entries());
     }
 }

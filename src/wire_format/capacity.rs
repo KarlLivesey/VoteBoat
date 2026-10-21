@@ -77,15 +77,18 @@ pub(super) fn check(
                 index: required.index,
                 term: 1,
                 payload: EntryPayload::Configuration(Box::new(required.record.clone())),
-            }],
+            }]
+            .into(),
         },
     };
     let append = footprint(codec, scope, &message, 0)?;
     if let Rpc::Append { entries, .. } = &mut message.rpc {
-        entries[0].payload = EntryPayload::Command {
+        let mut edited = entries.to_vec();
+        edited[0].payload = EntryPayload::Command {
             operation: required.record.operation,
             bytes: vec![0].into(),
         };
+        *entries = edited.into();
     }
     let command = footprint(codec, scope, &message, app.command_bytes - 1)?;
     message.configuration = next.id();

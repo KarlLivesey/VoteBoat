@@ -174,25 +174,34 @@ fn full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries() 
             term: 1,
             payload: configurations().pop().unwrap(),
         },
-    ];
+    ]
+    .into();
     store.durable.insert(group(1), state.clone());
     let object: &dyn LogStore = &store;
     assert_eq!(object.matches_state(group(1), &state), Ok(true));
     let changes: &[fn(&mut GroupLog)] = &[
         |s| s.revision = LogRevision::new(99).unwrap(),
-        |s| s.entries[0].index += 1,
-        |s| s.entries[0].term += 1,
-        |s| s.entries[0].payload = EntryPayload::Noop,
+        |s| s.entries.edit(|entries| entries[0].index += 1),
+        |s| s.entries.edit(|entries| entries[0].term += 1),
         |s| {
-            let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload else {
-                unreachable!()
-            };
-            let mut replacement = bytes.to_vec();
-            replacement.push(7);
-            *bytes = replacement.into();
+            s.entries
+                .edit(|entries| entries[0].payload = EntryPayload::Noop)
         },
-        |s| s.entries.swap(0, 1),
-        |s| s.entries[2].payload = EntryPayload::Noop,
+        |s| {
+            s.entries.edit(|entries| {
+                let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                    unreachable!()
+                };
+                let mut replacement = bytes.to_vec();
+                replacement.push(7);
+                *bytes = replacement.into();
+            })
+        },
+        |s| s.entries.edit(|entries| entries.swap(0, 1)),
+        |s| {
+            s.entries
+                .edit(|entries| entries[2].payload = EntryPayload::Noop)
+        },
     ];
     for change in changes {
         let mut different = state.clone();

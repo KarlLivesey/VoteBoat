@@ -590,7 +590,7 @@ fn seed_member_service(root: &std::path::Path, final_view: bool, include_learner
                 term: 1,
                 payload: EntryPayload::Configuration(Box::new(r.clone())),
             })
-            .collect::<Vec<_>>();
+            .collect::<EntryBatch>();
         let tickets = log
             .append_batch(vec![LogMutation::Update(LogUpdate {
                 group,
@@ -923,7 +923,8 @@ fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i6
                         operation: Counter::operation(1, operation as u64).unwrap(),
                         bytes: Counter::command(0, delta).into(),
                     },
-                }],
+                }]
+                .into(),
             }),
             snapshot: None,
             snapshot_membership: None,
@@ -1180,7 +1181,8 @@ fn enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_cre
                                 expected: ConfigurationId::new(3).unwrap(),
                                 change: ConfigurationChange::Learners(next),
                             })),
-                        }],
+                        }]
+                        .into(),
                     }),
                     snapshot: None,
                     snapshot_membership: None,
@@ -2837,7 +2839,8 @@ fn seed_fourth_learner(cluster: &Cluster, fourth: voteboat::identity::StoreIdent
                                 expected: ConfigurationId::new(3).unwrap(),
                                 change: ConfigurationChange::Learners(next),
                             })),
-                        }],
+                        }]
+                        .into(),
                     }),
                     snapshot: None,
                     snapshot_membership: None,

@@ -16,7 +16,7 @@ fn accepted_begin_rollback_replays_only_the_surviving_exact_binding() {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![data(1, 1, 7), command(2, 1, LeadershipCommand::Begin(i))],
+            entries: vec![data(1, 1, 7), command(2, 1, LeadershipCommand::Begin(i))].into(),
         }),
     );
     append(&mut log, vec![seed]);
@@ -33,7 +33,8 @@ fn accepted_begin_rollback_replays_only_the_surviving_exact_binding() {
                 index: 2,
                 term: 2,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
     );
     append(&mut log, vec![replacement]);
@@ -41,7 +42,7 @@ fn accepted_begin_rollback_replays_only_the_surviving_exact_binding() {
     let mut log = NativeLogStore::recover(io.clone(), identity(2), LogLimits::default()).unwrap();
     let surviving = log.state(group(1)).unwrap();
     let mut a = app(2);
-    a.apply_batch(&surviving.entries[..surviving.commit_index as usize])
+    a.apply_batch(&surviving.entries.to_vec()[..surviving.commit_index as usize])
         .unwrap();
     assert!(a.record(i.request.operation).is_none());
     assert_eq!(a.inner().read_applied(a.applied_index()), Ok(7));
@@ -63,7 +64,7 @@ fn accepted_begin_rollback_replays_only_the_surviving_exact_binding() {
         4,
         Some(Suffix {
             from: 3,
-            entries: entries.clone(),
+            entries: entries.clone().into(),
         }),
     );
     append(&mut log, vec![finish]);
@@ -74,7 +75,7 @@ fn accepted_begin_rollback_replays_only_the_surviving_exact_binding() {
         .unwrap();
     let mut restored = app(2);
     restored
-        .apply_batch(&recovered.entries[..recovered.commit_index as usize])
+        .apply_batch(&recovered.entries.to_vec()[..recovered.commit_index as usize])
         .unwrap();
     let record = restored.record(i.request.operation).unwrap();
     assert_eq!(record.intent, i);

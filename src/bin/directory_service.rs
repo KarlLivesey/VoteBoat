@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Native replicated metadata authority with explicit trusted initial grants.
+#[path = "support/accept_health.rs"]
+mod accept_health;
 #[path = "support/authority_endpoints.rs"]
 mod authority_endpoints;
 #[path = "support/command_client.rs"]
@@ -39,6 +41,8 @@ mod peer_credentials;
 mod policy_input;
 #[path = "support/preview_input.rs"]
 mod preview_input;
+#[path = "support/quic_hint.rs"]
+mod quic_hint;
 #[path = "support/route_client.rs"]
 mod route_client;
 #[path = "support/route_discovery.rs"]
@@ -120,6 +124,8 @@ fn options(args: &[String]) -> Result<Options, Failure> {
                     "tcp" => NativePeerProtocol::TcpTls,
                     #[cfg(feature = "quic")]
                     "quic" => NativePeerProtocol::Quic,
+                    #[cfg(not(feature = "quic"))]
+                    "quic" => return Err(quic_hint::QuicNotBuilt.into()),
                     _ => return Err("unsupported transport".into()),
                 };
             }
@@ -223,7 +229,7 @@ fn run(
     let mut sequence = 0u64;
     let mut quit = false;
     let mut shutdown = None;
-    let mut host = service_setup::HostWait::new();
+    let mut host = service_setup::HostWait::new(service_setup::host_wake());
     println!(
         "ready directory node={id} authority={:?} command={}",
         plan.authority,

@@ -430,7 +430,7 @@ fn every_torn_native_activation_frame_recovers_nonserving_or_exact_activation() 
         2,
         Some(Suffix {
             from: 2,
-            entries: vec![entry(2, 4, activation.clone())],
+            entries: vec![entry(2, 4, activation.clone())].into(),
         }),
     );
     let frame = NativeLogCodec
@@ -459,7 +459,8 @@ fn every_torn_native_activation_frame_recovers_nonserving_or_exact_activation() 
         )
         .unwrap();
         let mut app = target(&p);
-        app.apply_batch(core.replay_committed()).unwrap();
+        app.apply_batch(&core.replay_committed().contiguous())
+            .unwrap();
         match core.state().commit_index {
             1 => {
                 old = true;
@@ -486,7 +487,7 @@ fn every_torn_native_activation_frame_recovers_nonserving_or_exact_activation() 
                 index,
                 Some(Suffix {
                     from: index,
-                    entries: vec![entry(index, 4, activation.clone())],
+                    entries: vec![entry(index, 4, activation.clone())].into(),
                 }),
             )],
         );
@@ -498,7 +499,9 @@ fn every_torn_native_activation_frame_recovers_nonserving_or_exact_activation() 
         )
         .unwrap();
         let mut retried = target(&p);
-        retried.apply_batch(core.replay_committed()).unwrap();
+        retried
+            .apply_batch(&core.replay_committed().contiguous())
+            .unwrap();
         assert_eq!(retried.status().activation_index, Some(2));
         assert_eq!(
             retried.read_at(index, query()).unwrap(),
@@ -570,7 +573,7 @@ fn seed_activation_log(
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 3, init.to_vec())],
+                entries: vec![entry(1, 3, init.to_vec())].into(),
             }),
         )],
     );

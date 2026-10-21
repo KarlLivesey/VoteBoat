@@ -44,7 +44,7 @@ fn one_group_stripes_original_bytes_and_reopens_exact_suffix_snapshot_and_sessio
             commit_index: 1,
             suffix: Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 9)],
+                entries: vec![entry(2, 2, 9)].into(),
             }),
             snapshot: None,
             snapshot_membership: None,

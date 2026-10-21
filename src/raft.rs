@@ -15,7 +15,9 @@
 //! Deterministic static-configuration Raft. Host drives elections and delivery.
 //! Every persistence-dependent send/application notification waits for its exact
 //! store/group/revision/generation ticket. No transport or clock is constructed.
-use crate::log::transition::{LogSummary, LogView, OwnedNextLog};
+use crate::log::transition::{LogStamp, OwnedNextLog, SummarizedLog};
+#[cfg(test)]
+use crate::log::transition::{LogSummary, LogView};
 use crate::{
     contracts::{HardState, StorageError},
     identity::*,
@@ -24,7 +26,8 @@ use crate::{
     secure::PeerIdentity,
     snapshot::{Snapshot, SnapshotRef},
 };
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::ops::Range;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 mod admitted_replication;
@@ -32,13 +35,17 @@ mod batch_limits;
 pub use batch_limits::BatchLimits;
 mod completion;
 use completion::PreparedCompletion;
-pub use completion::{persist_effect_borrowed, persist_volatile, CompletionEffects};
+pub use completion::{
+    persist_effect_borrowed, persist_volatile, persist_volatile_into, CompletionEffects,
+};
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
+mod peer_slots;
+use peer_slots::PeerSlots;
 mod progress_broadcast;
 mod proposals;
-pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
+pub use proposals::{Proposal, ProposalBatch, MAX_PROPOSAL_BATCH_ENTRIES};
 mod readiness;
 mod receive;
 mod send_window;
@@ -48,6 +55,17 @@ pub use readiness::*;
 mod configuration;
 pub use authority::ReplicationAuthorizationStatus;
 pub use configuration::*;
+
+/// A host-owned effect queue that cold paths append their owned effects to.
+trait AppendEffects {
+    fn append_result(&mut self, effects: Result<Vec<Effect>, RaftError>) -> Result<(), RaftError>;
+}
+impl AppendEffects for VecDeque<Effect> {
+    fn append_result(&mut self, effects: Result<Vec<Effect>, RaftError>) -> Result<(), RaftError> {
+        self.extend(effects?);
+        Ok(())
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RequestContext {
@@ -98,7 +116,8 @@ pub enum Rpc {
     Append {
         previous_index: u64,
         previous_term: u64,
-        entries: Vec<LogEntry>,
+        /// Shared immutable entries; the wire encoding is the visible sequence.
+        entries: EntryBatch,
         leader_commit: u64,
     },
     Appended {
@@ -325,9 +344,16 @@ enum After {
     LeaderAppend,
     Commit,
     Compact,
-    // Snapshot references are boxed: every round moves `Pending`.
+    // Snapshot references are boxed: every round stages a `Pending`.
     CheckpointCompact(Box<SnapshotRef>),
     SnapshotInstall(Box<SnapshotRef>),
+}
+/// What the core still uses of an installed `Pending` once its plan is spent.
+struct Installed {
+    membership: Option<Box<Membership>>,
+    after: After,
+    reply: Option<Message>,
+    preserves_checkpoint_prefix: bool,
 }
 struct Pending {
     next: OwnedNextLog,
@@ -339,8 +365,11 @@ struct Pending {
     ticket: Option<LogTicket>,
     after: After,
     reply: Option<Message>,
+    // The stamp of the view `next` was planned from; the install skips the
+    // predecessor comparison only if it is still the log's current one.
+    planned: Option<LogStamp>,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Replication {
     context: RequestContext,
     configuration: ConfigurationId,
@@ -361,9 +390,9 @@ pub struct Raft {
     limits: LogLimits,
     batch_limits: BatchLimits,
     batch_limits_locked: bool,
-    durable: GroupLog,
+    // The canonical log and its summary, changed only together at install.
+    durable: SummarizedLog,
     checkpoint_lineage: CheckpointLineage,
-    log_summary: LogSummary,
     membership: Membership,
     role: Role,
     campaigning_enabled: bool,
@@ -372,9 +401,14 @@ pub struct Raft {
     granted_vote_reply: Option<send_window::GrantedVoteReply>,
     progress: BTreeMap<NodeId, u64>,
     next_index: BTreeMap<NodeId, u64>,
-    requests: BTreeMap<NodeId, Replication>,
-    admitted_ranges: BTreeMap<NodeId, AdmittedRange>,
-    empty_append_aliases: BTreeMap<NodeId, EmptyAppendAlias>,
+    // Leader slots per peer: retired in place, cleared with every
+    // configuration or leadership change (see `peer_slots`).
+    requests: PeerSlots<Replication>,
+    admitted_ranges: PeerSlots<AdmittedRange>,
+    empty_append_aliases: PeerSlots<EmptyAppendAlias>,
+    // Hot broadcasts' peer order for one accepted configuration id.
+    peer_order: Vec<NodeId>,
+    peer_order_for: Option<ConfigurationId>,
     // Candidate-only transfer cursors; never quorum replication or ballots.
     repair_requests: BTreeMap<NodeId, Replication>,
     batched_joint_repair: bool,
@@ -492,8 +526,7 @@ impl Raft {
             limits,
             batch_limits: BatchLimits::default(),
             batch_limits_locked: false,
-            log_summary: LogSummary::from_validated(&state),
-            durable: state,
+            durable: SummarizedLog::new(state),
             checkpoint_lineage: CheckpointLineage::new(),
             membership,
             role: Role::Follower,
@@ -503,9 +536,11 @@ impl Raft {
             granted_vote_reply: None,
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
-            requests: BTreeMap::new(),
-            admitted_ranges: BTreeMap::new(),
-            empty_append_aliases: BTreeMap::new(),
+            requests: PeerSlots::new(),
+            admitted_ranges: PeerSlots::new(),
+            empty_append_aliases: PeerSlots::new(),
+            peer_order: Vec::new(),
+            peer_order_for: None,
             repair_requests: BTreeMap::new(),
             batched_joint_repair: false,
             snapshot_joint_repair: false,
@@ -799,13 +834,16 @@ impl Raft {
         self.reserve_effects(input_bytes, peers)
     }
     fn rollback_replicas(&self) -> usize {
-        if self.log_summary.matches(&self.durable) && self.log_summary.is_plain() {
-            return self
-                .durable
-                .bootstrap
-                .voter_stores
-                .len()
-                .max(self.membership().replicas().count());
+        if self.durable.summary().is_plain() {
+            // A plain log has no configuration entry or snapshot membership:
+            // its accepted membership is the bootstrap electorate. Only a
+            // pending full plan can name other replicas.
+            let voters = self.durable.bootstrap.voter_stores.len();
+            debug_assert_eq!(self.membership.replicas().count(), voters);
+            return match self.pending.as_ref().and_then(|p| p.membership.as_deref()) {
+                Some(pending) => voters.max(pending.replicas().count()),
+                None => voters,
+            };
         }
         use crate::membership::ConfigurationChange;
         let base = self.durable.snapshot_membership.as_deref();
@@ -882,8 +920,11 @@ impl Raft {
             || self.checkpoint_reconcile.is_some()
     }
     /// Host replays these through its application checkpoint/dedup contract.
-    pub fn replay_committed(&self) -> &[LogEntry] {
-        &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
+    pub fn replay_committed(&self) -> EntryRange<'_> {
+        self.durable
+            .entries
+            .borrowed(0..(self.durable.commit_index - self.durable.base_index()) as usize)
+            .expect("committed prefix is retained")
     }
     pub fn storage_failed(&mut self) {
         self.checkpoint_lineage = CheckpointLineage::new();
@@ -1002,7 +1043,31 @@ impl Raft {
         }
     }
 
+    /// Handle one event, returning its effects in a new `Vec`. This wraps
+    /// [`Self::step_into`] over a fresh queue, so a non-empty result has at
+    /// least the standard library's minimum non-empty capacity: four effects
+    /// (4 × 272 B on 64-bit targets) for a one-effect result. A host that
+    /// charges memory by capacity sees that; reuse one queue with `step_into`
+    /// to allocate no effect storage per call.
     pub fn step(&mut self, event: Event) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = VecDeque::new();
+        self.step_into(event, &mut effects)?;
+        Ok(effects.into())
+    }
+    /// [`Self::step`] into a host-owned queue: this event's effects are
+    /// appended, in the same order, after any effects `out` already holds.
+    /// Earlier effects are never read or changed. On error `out` is truncated
+    /// back to them, as the Vec form returns no effects. Reusing one queue
+    /// across calls avoids allocating effect storage per call.
+    pub fn step_into(&mut self, event: Event, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+        let mark = out.len();
+        let result = self.step_effects(event, out);
+        if result.is_err() {
+            out.truncate(mark);
+        }
+        result
+    }
+    fn step_effects(&mut self, event: Event, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
         self.begin_step()?;
         let effects = match event {
             Event::TransferLeadership(request) => self.start_transfer(request),
@@ -1043,15 +1108,15 @@ impl Raft {
                     transfer.signal_sent = false;
                 }
                 if self.role == Role::Leader {
-                    let mut effects = self.broadcast()?;
-                    effects.extend(self.read_probes());
-                    Ok(effects)
-                } else {
-                    Ok(Vec::new())
+                    self.broadcast_into(out)?;
+                    out.extend(self.read_probes());
                 }
+                Ok(Vec::new())
             }
-            Event::Propose { operation, bytes } => self.propose(operation, bytes),
-            Event::Receive(message) => self.receive(message),
+            Event::Propose { operation, bytes } => self
+                .propose_into(operation, bytes, out)
+                .map(|()| Vec::new()),
+            Event::Receive(message) => self.receive_into(message, out).map(|()| Vec::new()),
             Event::Read { request } => self.begin_read(request),
             Event::CancelRead { request } => {
                 if self
@@ -1067,7 +1132,8 @@ impl Raft {
                 }
             }
         }?;
-        self.finish_step(effects)
+        out.extend(effects);
+        self.finish_step_into(out)
     }
     fn set_campaigning(&mut self, enabled: bool) -> Result<Vec<Effect>, RaftError> {
         if self.campaigning_enabled != enabled {
@@ -1209,15 +1275,23 @@ impl Raft {
         if !completion.tickets.contains(&ticket) {
             return Err(RaftError::WrongCompletion);
         }
-        self.install_pending()
+        let mut following = VecDeque::new();
+        let committed = self.install_pending_into(&mut following)?;
+        Ok(PreparedCompletion {
+            committed,
+            following: following.into(),
+        })
     }
     /// The exact single pending transition of this volatile core incarnation.
     /// Its revision advances on every transition and at most one is in
     /// flight; the incarnation is unique to this `recover_volatile` call.
-    fn finish_volatile(
+    /// Following effects are appended to `out`; the committed interval, which
+    /// precedes them, is returned.
+    fn finish_volatile_into(
         &mut self,
         persist: VolatilePersist,
-    ) -> Result<PreparedCompletion, RaftError> {
+        out: &mut VecDeque<Effect>,
+    ) -> Result<Option<Range<usize>>, RaftError> {
         if self.fenced {
             return Err(RaftError::Fenced);
         }
@@ -1233,28 +1307,34 @@ impl Raft {
         }) {
             return Err(RaftError::WrongCompletion);
         }
-        self.install_pending()
+        self.install_pending_into(out)
     }
     /// Install the correlated pending transition; callers check correlation.
-    fn install_pending(&mut self) -> Result<PreparedCompletion, RaftError> {
-        let p = self.pending.take().ok_or(RaftError::WrongCompletion)?;
+    /// Following effects are appended to `out` after its existing effects;
+    /// the committed interval is returned. On error the caller discards what
+    /// this call appended.
+    fn install_pending_into(
+        &mut self,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<Option<Range<usize>>, RaftError> {
         let previous_commit = self.durable.commit_index;
-        let configuration_changed = p
-            .membership
-            .as_ref()
-            .is_some_and(|membership| membership.id() != self.membership.id());
-        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
-        self.log_summary = match p.next.install(&mut self.durable) {
-            Ok(summary) => summary,
-            Err(error) => {
+        let installed = match self.install_pending_plan() {
+            Ok(installed) => installed,
+            Err(RaftError::Storage(error)) => {
+                // The plan is intact; the fence discards it, as before.
                 self.storage_failed();
                 return Err(error.into());
             }
+            Err(error) => return Err(error),
         };
-        if !preserves_checkpoint_prefix {
+        let configuration_changed = installed
+            .membership
+            .as_ref()
+            .is_some_and(|membership| membership.id() != self.membership.id());
+        if !installed.preserves_checkpoint_prefix {
             self.checkpoint_lineage = CheckpointLineage::new();
         }
-        if let Some(membership) = p.membership {
+        if let Some(membership) = installed.membership {
             self.membership = *membership;
         }
         if configuration_changed {
@@ -1285,7 +1365,7 @@ impl Raft {
             self.next_index.clear();
         }
         let committed = if self.durable.commit_index > previous_commit
-            && !matches!(p.after, After::SnapshotInstall(_))
+            && !matches!(installed.after, After::SnapshotInstall(_))
         {
             Some(
                 (previous_commit - self.durable.base_index()) as usize
@@ -1294,22 +1374,42 @@ impl Raft {
         } else {
             None
         };
-        let mut effects = Vec::new();
-        effects.extend(retirement);
-        self.after_durable(p.after, p.reply, &mut effects)?;
-        if self.remember_granted_vote(&effects) {
+        let mark = out.len();
+        out.extend(retirement);
+        self.after_durable(installed.after, installed.reply, out)?;
+        if self.remember_granted_vote(out.range(mark..)) {
             self.reset_election()?;
         }
-        Ok(PreparedCompletion {
-            committed,
-            following: effects,
-        })
+        Ok(committed)
+    }
+    /// Install the pending plan where it lies (no move of `Pending` or its
+    /// plan). On success the slot is emptied and the parts the core still
+    /// uses are returned; the spent plan is dropped with the slot. On error
+    /// nothing changes: the log, its summary and stamp, and the pending
+    /// transition are as they were (`Storage`). Without a pending transition
+    /// it returns `WrongCompletion`. The only installer of `self.pending`.
+    fn install_pending_plan(&mut self) -> Result<Installed, RaftError> {
+        let Some(p) = self.pending.as_mut() else {
+            return Err(RaftError::WrongCompletion);
+        };
+        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
+        self.durable.install(&mut p.next, p.planned)?;
+        let installed = Installed {
+            membership: p.membership.take(),
+            after: std::mem::replace(&mut p.after, After::Commit),
+            reply: p.reply.take(),
+            preserves_checkpoint_prefix,
+        };
+        // Cleared only here, after the install succeeded: nothing between
+        // this point and the end of the round can see the spent plan.
+        self.pending = None;
+        Ok(installed)
     }
     fn after_durable(
         &mut self,
         after: After,
         reply: Option<Message>,
-        effects: &mut Vec<Effect>,
+        effects: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
         match after {
             After::Campaign => {
@@ -1329,7 +1429,7 @@ impl Raft {
                     let context = self.context()?;
                     self.vote_context = Some(context);
                     for peer in self.voting_peers() {
-                        effects.push(Effect::Send(self.message(
+                        effects.push_back(Effect::Send(self.message(
                             peer,
                             context,
                             Rpc::Vote {
@@ -1343,37 +1443,37 @@ impl Raft {
             After::Reply => {
                 if let Some(mut reply) = reply {
                     reply.term = self.durable.hard_state.term;
-                    effects.push(Effect::Send(reply));
+                    effects.push_back(Effect::Send(reply));
                 }
             }
             After::LeaderAppend => {
                 self.progress.insert(self.node, self.durable.last_index());
-                effects.extend(self.broadcast_append_progress()?);
-                effects.extend(self.maybe_commit()?);
+                self.broadcast_append_progress_into(effects)?;
+                self.maybe_commit_into(effects)?;
             }
             After::Commit if self.role == Role::Leader => {
-                effects.extend(self.broadcast_commit_progress()?)
+                self.broadcast_commit_progress_into(effects)?
             }
             After::Commit => (),
             After::Compact => {
                 self.clear_replication_requests();
                 self.repair_requests.clear();
                 if self.role == Role::Leader {
-                    effects.extend(self.broadcast()?);
+                    self.broadcast_into(effects)?;
                 }
             }
             After::SnapshotInstall(reference) => {
                 let reference = *reference;
                 self.application_install =
                     Some((reference, reply.ok_or(RaftError::WrongCompletion)?));
-                effects.push(Effect::SnapshotInstalled(reference));
+                effects.push_back(Effect::SnapshotInstalled(reference));
             }
             After::CheckpointCompact(reference) => {
                 let reference = *reference;
                 self.clear_replication_requests();
                 self.repair_requests.clear();
                 self.checkpoint_reconcile = Some(reference);
-                effects.push(Effect::CheckpointCompacted(reference));
+                effects.push_back(Effect::CheckpointCompacted(reference));
             }
         }
         Ok(())
@@ -1387,8 +1487,21 @@ impl Raft {
         after: After,
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = VecDeque::new();
+        self.persist_into(hard_state, commit_index, suffix, after, reply, &mut effects)?;
+        Ok(effects.into())
+    }
+    fn persist_into(
+        &mut self,
+        hard_state: HardState,
+        commit_index: u64,
+        suffix: Option<Suffix>,
+        after: After,
+        reply: Option<Message>,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         if suffix.is_none() && hard_state == self.durable.hard_state {
-            return self.persist_commit(commit_index, after, reply);
+            return self.persist_commit_into(commit_index, after, reply, out);
         }
         let update = LogUpdate {
             snapshot_membership: None,
@@ -1399,22 +1512,21 @@ impl Raft {
             suffix,
             snapshot: None,
         };
-        self.persist_update(update, after, reply)
+        self.persist_update_into(update, after, reply, out)
     }
     /// A round that only advances the commit index (or only the revision) plans
     /// a scalar advance. A durable store still receives the same update.
-    fn persist_commit(
+    fn persist_commit_into(
         &mut self,
         commit_index: u64,
         after: After,
         reply: Option<Message>,
-    ) -> Result<Vec<Effect>, RaftError> {
-        let next = OwnedNextLog::plan_commit(
-            &LogView::new(&self.durable),
-            &self.log_summary,
-            commit_index,
-            self.limits,
-        )?;
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
+        let view = self.durable.view();
+        let next =
+            OwnedNextLog::plan_commit(&view, self.durable.summary(), commit_index, self.limits)?;
+        let planned = view.stamp();
         let update = if self.volatile {
             None
         } else {
@@ -1428,7 +1540,7 @@ impl Raft {
                 snapshot: None,
             })
         };
-        self.stage_pending(next, update, after, reply)
+        self.stage_pending_into(next, planned, update, after, reply, out)
     }
     fn persist_update(
         &mut self,
@@ -1436,35 +1548,50 @@ impl Raft {
         after: After,
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = VecDeque::new();
+        self.persist_update_into(update, after, reply, &mut effects)?;
+        Ok(effects.into())
+    }
+    fn persist_update_into(
+        &mut self,
+        update: LogUpdate,
+        after: After,
+        reply: Option<Message>,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         // A volatile core is the only owner of its log: move the update into
         // the plan instead of keeping a copy for a store to validate again.
         if self.volatile {
-            let next = OwnedNextLog::plan_owned(
-                &LogView::new(&self.durable),
-                &self.log_summary,
-                update,
-                self.limits,
-            )?;
-            self.stage_pending(next, None, after, reply)
+            // The plan moves the update's batch without reallocating it. A
+            // narrow owned batch keeps any spare capacity (the plan charges
+            // it, the installed log charges the visible entries); a wide
+            // batch was frozen, releasing spare capacity beyond 4 KiB.
+            let view = self.durable.view();
+            let next =
+                OwnedNextLog::plan_owned(&view, self.durable.summary(), update, self.limits)?;
+            let planned = view.stamp();
+            self.stage_pending_into(next, planned, None, after, reply, out)
         } else {
-            let next = OwnedNextLog::plan_copy(
-                &LogView::new(&self.durable),
-                &self.log_summary,
-                &update,
-                self.limits,
-            )?;
-            self.stage_pending(next, Some(update), after, reply)
+            let view = self.durable.view();
+            let next =
+                OwnedNextLog::plan_copy(&view, self.durable.summary(), &update, self.limits)?;
+            let planned = view.stamp();
+            self.stage_pending_into(next, planned, Some(update), after, reply, out)
         }
     }
-    /// Make `next` the single pending transition. `update` is the durable
-    /// store's exact input; without one the core is volatile and emits a token.
-    fn stage_pending(
+    /// Make `next` the single pending transition. `planned` is the stamp of
+    /// the view `next` was planned from (`LogView::stamp`). `update` is the
+    /// durable store's exact input; without one the core is volatile and
+    /// emits a token.
+    fn stage_pending_into(
         &mut self,
         next: OwnedNextLog,
+        planned: Option<LogStamp>,
         update: Option<LogUpdate>,
         after: After,
         reply: Option<Message>,
-    ) -> Result<Vec<Effect>, RaftError> {
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         let membership = next
             .full()
             .map(|full| full.membership().map(Box::new))
@@ -1498,14 +1625,22 @@ impl Raft {
         {
             self.clear_reads();
         }
+        // A plan is staged only into an empty slot: a live plan is never
+        // replaced, and a spent one was cleared by its install.
+        debug_assert!(
+            self.pending.is_none(),
+            "a pending transition was replaced before its install or fence"
+        );
         self.pending = Some(Pending {
             next,
             membership,
             ticket: None,
             after,
             reply,
+            planned,
         });
-        Ok(vec![effect])
+        out.push_back(effect);
+        Ok(())
     }
     /// Exact accepted node/store voting assignment, never durability evidence.
     /// Learners and replaced/removed physical replicas return false.
@@ -1518,6 +1653,29 @@ impl Raft {
             .map(|(node, _)| node)
             .filter(|node| *node != self.node)
             .collect()
+    }
+    /// Rebuild the hot broadcasts' peer order in place when the accepted
+    /// configuration id changed. Only a leader reads it, and a leader's
+    /// membership changes only through its own strictly increasing ids. An id
+    /// is not unique across a truncation (a follower's uncommitted entry can be
+    /// replaced by another with the same id), so every election resets it.
+    fn refresh_peer_order(&mut self) {
+        // Only a leader reads the cached order; a follower never refreshes it.
+        debug_assert_eq!(self.role, Role::Leader);
+        let id = self.membership().id();
+        if self.peer_order_for != Some(id) {
+            let mut order = std::mem::take(&mut self.peer_order);
+            order.clear();
+            order.extend(
+                self.membership()
+                    .replicas()
+                    .map(|(node, _)| node)
+                    .filter(|node| *node != self.node),
+            );
+            self.peer_order = order;
+            self.peer_order_for = Some(id);
+        }
+        debug_assert_eq!(self.peer_order, self.peers(), "cached peer order");
     }
     fn voting_peers(&self) -> Vec<NodeId> {
         self.peers()
@@ -1595,6 +1753,8 @@ impl Raft {
     }
     fn become_leader(&mut self) -> Result<Vec<Effect>, RaftError> {
         self.role = Role::Leader;
+        // A configuration id seen while following may name other replicas.
+        self.peer_order_for = None;
         self.progress.clear();
         self.next_index.clear();
         self.clear_replication_requests();
@@ -1615,18 +1775,25 @@ impl Raft {
             self.durable.commit_index,
             Some(Suffix {
                 from: next,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
             After::LeaderAppend,
             None,
         )
     }
     fn broadcast(&mut self) -> Result<Vec<Effect>, RaftError> {
-        let mut effects = Vec::new();
-        for peer in self.peers() {
-            effects.push(self.append_for(peer)?);
+        let mut effects = VecDeque::new();
+        self.broadcast_into(&mut effects)?;
+        Ok(effects.into())
+    }
+    fn broadcast_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+        self.refresh_peer_order();
+        // `append_for` never changes membership, so the order stays fixed.
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
+            out.push_back(self.append_for(peer)?);
         }
-        Ok(effects)
+        Ok(())
     }
     fn append_for(&mut self, peer: NodeId) -> Result<Effect, RaftError> {
         // Keep an outstanding request's range/context across heartbeat retries.
@@ -1659,31 +1826,19 @@ impl Raft {
                 reference,
             });
         }
-        let remaining = self
-            .durable
-            .entries
-            .get((next - self.durable.base_index() - 1) as usize..)
-            .unwrap_or(&[]);
-        let mut count = 0usize;
-        let mut bytes = 0usize;
+        let offset = (next - self.durable.base_index() - 1) as usize;
         // One bounded RPC can carry several entries; outer wire limits are
-        // negotiated by the later codec/transport assembly. Select before
-        // copying so the owned range needs only one exact allocation.
-        for entry in remaining
-            .iter()
-            .take(self.batch_limits.max_replication_entries)
-        {
-            let size = 37 + entry.payload_bytes();
-            if size > self.limits.max_batch_bytes.saturating_sub(bytes + 256) {
-                break;
-            }
-            count += 1;
-            bytes += size;
-        }
-        if count == 0 && next <= self.durable.last_index() {
+        // negotiated by the later codec/transport assembly. The selection is
+        // the original per-entry rule, evaluated from cached facts, and the
+        // selected range shares the canonical backings.
+        let entries = self.durable.entries.replication_range(
+            offset,
+            self.batch_limits.max_replication_entries,
+            self.limits.max_batch_bytes,
+        );
+        if entries.is_empty() && next <= self.durable.last_index() {
             return Err(StorageError::Rejected("entry exceeds replication batch budget").into());
         }
-        let entries = remaining[..count].to_vec();
         let end = entries.last().map_or(next - 1, |e| e.index);
         let context = self.context()?;
         self.requests.insert(
@@ -1709,6 +1864,11 @@ impl Raft {
         )))
     }
     fn maybe_commit(&mut self) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = VecDeque::new();
+        self.maybe_commit_into(&mut effects)?;
+        Ok(effects.into())
+    }
+    fn maybe_commit_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
         let frontier = self
             .membership()
             .frontier(&self.progress)
@@ -1716,9 +1876,16 @@ impl Raft {
         if frontier > self.durable.commit_index
             && self.durable.term_at(frontier) == Some(self.durable.hard_state.term)
         {
-            self.persist(self.durable.hard_state, frontier, None, After::Commit, None)
+            self.persist_into(
+                self.durable.hard_state,
+                frontier,
+                None,
+                After::Commit,
+                None,
+                out,
+            )
         } else {
-            Ok(Vec::new())
+            Ok(())
         }
     }
 
@@ -1762,7 +1929,7 @@ impl Raft {
                     Rpc::Append {
                         previous_index: index,
                         previous_term: term,
-                        entries: Vec::new(),
+                        entries: EntryBatch::default(),
                         leader_commit: index,
                     },
                 ))
@@ -1817,7 +1984,11 @@ impl Raft {
             && m.term > 0
             && self.membership().voter_store(m.from) == Some(m.sender.identity)
     }
-    fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
+    fn receive_into(
+        &mut self,
+        mut m: Message,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         // A volatile log has static membership. Learner repair always carries
         // configuration state; ordinary replication is refused below.
         if self.volatile
@@ -1835,7 +2006,7 @@ impl Raft {
         // whose historical view no longer owns this replica's voting state.
         if self.authenticated_repair_source(&m) {
             if m.term < self.durable.hard_state.term {
-                return Ok(Vec::new());
+                return Ok(());
             }
             if self.local_voter() && m.configuration < self.membership().id() {
                 return Err(RaftError::WrongIdentity);
@@ -1845,13 +2016,13 @@ impl Raft {
             m.rpc,
             Rpc::LearnerRepairSnapshot { .. } | Rpc::CommittedLearnerRepairSnapshot { .. }
         ) {
-            return self.receive_repair_snapshot(m);
+            return out.append_result(self.receive_repair_snapshot(m));
         }
         if matches!(
             m.rpc,
             Rpc::LearnerRepair { .. } | Rpc::LearnerRepaired { .. }
         ) {
-            return self.receive_learner_repair(m);
+            return out.append_result(self.receive_learner_repair(m));
         }
         // Static/default assemblies retain the strict learner-repair exception.
         // Explicit member assemblies use ordinary authorized replication and
@@ -1859,7 +2030,7 @@ impl Raft {
         // A volatile core refuses all configuration ingress, before any state
         // change: static voter recovery could not accept the result.
         if (self.volatile || !self.configuration_replication)
-            && (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
+            && (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.has_configuration())
                 || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()))
         {
             if self.volatile || !self.permits_joint_repair(&m) {
@@ -1874,15 +2045,16 @@ impl Raft {
                 Rpc::Append { .. } | Rpc::ReadProbe | Rpc::Snapshot { .. }
             );
         let leader = (m.sender, m.from, m.term);
-        let effects = self.receive_inner(m)?;
+        let mark = out.len();
+        self.receive_inner_into(m, out)?;
         if contact {
             self.leader_contact = Some(leader);
         }
-        let granted = self.remember_granted_vote(&effects);
+        let granted = self.remember_granted_vote(out.range(mark..));
         if contact || granted {
             self.reset_election()?;
         }
-        Ok(effects)
+        Ok(())
     }
     pub(crate) fn begin_compact(
         &mut self,
@@ -1922,7 +2094,7 @@ impl Raft {
         index: u64,
     ) -> Result<Option<Box<crate::membership::Membership>>, crate::membership::MembershipError>
     {
-        if self.log_summary.matches(&self.durable) && self.log_summary.is_plain() {
+        if self.durable.summary().is_plain() {
             if index < self.durable.base_index() || index > self.durable.last_index() {
                 return Err(crate::membership::MembershipError::InvalidHistory);
             }
@@ -2099,8 +2271,14 @@ mod commit_advance_tests;
 #[cfg(test)]
 mod completion_tests;
 #[cfg(test)]
+mod install_in_place_tests;
+#[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;
+#[cfg(test)]
+mod peer_slots_tests;
+#[cfg(test)]
+mod summarized_log_tests;
 #[cfg(test)]
 mod volatile_tests;
 

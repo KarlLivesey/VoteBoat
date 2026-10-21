@@ -60,7 +60,7 @@ fn record<S: LogStore>(log: &mut S, operation: u128, change: ConfigurationChange
         commit,
         Some(Suffix {
             from: entry.index,
-            entries: vec![entry],
+            entries: vec![entry].into(),
         }),
     );
     if let LogMutation::Update(u) = &mut mutation {
@@ -190,8 +190,8 @@ fn dynamic_recovery_requires_exact_assignment_in_both_views_and_valid_history() 
             0 => state.commit_index = 0,
             1 => binding.identity = identity(44),
             2 => local = node(99),
-            3 => state.entries[1].index = 8,
-            4 => state.entries[1].term = 9,
+            3 => state.entries.edit(|entries| entries[1].index = 8),
+            4 => state.entries.edit(|entries| entries[1].term = 9),
             _ => {
                 state.ballot_origin = Some(BallotOrigin {
                     configuration: cid(3),
@@ -323,13 +323,15 @@ fn checkpoint<L: LogStore, S: SnapshotRetention>(log: &mut L, snapshots: &mut S)
                         operation: Counter::operation(1, 9).unwrap(),
                         bytes: Counter::command(0, 7).into(),
                     },
-                }],
+                }]
+                .into(),
             }),
         )],
     );
     let mut core = recover(log);
     let mut app = Counter::new(16).unwrap();
-    app.apply_batch(core.replay_committed()).unwrap();
+    app.apply_batch(&core.replay_committed().contiguous())
+        .unwrap();
     let receipt = checkpoint_application(&core, &app, snapshots).unwrap();
     compact_replica(&mut core, log, snapshots, &app, receipt.reference()).unwrap();
     assert!(Raft::recover_member(
@@ -429,7 +431,7 @@ fn rollback_restores_joint_rules_and_historical_ballot_survives_final_restart() 
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![],
+            entries: vec![].into(),
         }),
     );
     if let LogMutation::Update(u) = &mut rollback {
@@ -605,7 +607,8 @@ mod native {
                             next: configuration(4, &[1, 2, 4], &[3, 5]),
                         },
                     })),
-                }],
+                }]
+                .into(),
             }),
         );
         let tickets = log.append_batch(vec![mutation]).unwrap();
@@ -714,7 +717,8 @@ fn failed_joint_barriers_recover_only_a_complete_old_or_new_membership() {
                             next: configuration(4, &[1, 2, 4], &[3, 5]),
                         },
                     })),
-                }],
+                }]
+                .into(),
             }),
         );
         let mut expected = [(group(1), old.clone())].into();
@@ -755,7 +759,7 @@ fn retired_notice() -> Message {
         rpc: Rpc::Append {
             previous_index: 3,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 3,
         },
     }
@@ -1184,7 +1188,10 @@ mod joint_repair {
                     expected_revision: state.revision,
                     hard_state: state.hard_state,
                     commit_index: state.commit_index,
-                    suffix: Some(Suffix { from: 2, entries }),
+                    suffix: Some(Suffix {
+                        from: 2,
+                        entries: entries.into(),
+                    }),
                     snapshot: None,
                     snapshot_membership: None,
                 })],
@@ -1286,14 +1293,16 @@ mod joint_repair {
                     let Rpc::Append { entries, .. } = &mut bad.rpc else {
                         unreachable!()
                     };
-                    let EntryPayload::Configuration(record) = &mut entries[0].payload else {
-                        unreachable!()
-                    };
-                    if defect == 4 {
-                        record.expected = cid(99);
-                    } else {
-                        record.operation = OperationId::new(2).unwrap();
-                    }
+                    entries.edit(|entries| {
+                        let EntryPayload::Configuration(record) = &mut entries[0].payload else {
+                            unreachable!()
+                        };
+                        if defect == 4 {
+                            record.expected = cid(99);
+                        } else {
+                            record.operation = OperationId::new(2).unwrap();
+                        }
+                    });
                 }
             }
             assert!(
@@ -1719,7 +1728,7 @@ mod joint_repair {
                         let Rpc::LearnerRepair { entries, .. } = &first.rpc else {
                             unreachable!()
                         };
-                        assert_eq!(&state.entries[1..], entries.as_slice());
+                        assert_eq!(&state.entries.to_vec()[1..], entries.as_slice());
                         assert_eq!(state.hard_state.term, first.term);
                         assert_eq!(state.hard_state.voted_for, None);
                     }
@@ -1768,7 +1777,9 @@ mod joint_repair {
         .unwrap()
         .with_snapshot_joint_repair();
         let mut application = Counter::new(100).unwrap();
-        application.apply_batch(core.replay_committed()).unwrap();
+        application
+            .apply_batch(&core.replay_committed().contiguous())
+            .unwrap();
         let mut snapshots = support::snapshot::HostSnapshots::new();
         snapshots.identity.store = identity(2);
         snapshots.binding = log.binding();
@@ -1806,7 +1817,9 @@ mod joint_repair {
         .unwrap()
         .with_committed_snapshot_repair();
         let mut application = Counter::new(100).unwrap();
-        application.apply_batch(core.replay_committed()).unwrap();
+        application
+            .apply_batch(&core.replay_committed().contiguous())
+            .unwrap();
         let mut images = support::snapshot::HostSnapshots::new();
         images.identity.store = identity(2);
         images.binding = log.binding();
@@ -1851,7 +1864,8 @@ mod joint_repair {
             images.identity.store = identity(4);
             images.binding = log.binding();
             let mut app = Counter::new(100).unwrap();
-            app.apply_batch(receiver.replay_committed()).unwrap();
+            app.apply_batch(&receiver.replay_committed().contiguous())
+                .unwrap();
             let effects = receiver.step(Event::Receive(request)).unwrap();
             let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
                 panic!("stage")
@@ -2014,7 +2028,7 @@ mod joint_repair {
                 commit_index: 1,
                 suffix: Some(Suffix {
                     from: 2,
-                    entries: abandoned.clone(),
+                    entries: abandoned.clone().into(),
                 }),
                 snapshot: None,
                 snapshot_membership: None,
@@ -2043,7 +2057,7 @@ mod joint_repair {
         destination_images.binding = destination_log.binding();
         let mut destination_app = Counter::new(100).unwrap();
         destination_app
-            .apply_batch(receiver.replay_committed())
+            .apply_batch(&receiver.replay_committed().contiguous())
             .unwrap();
         (
             destination_log,
@@ -2065,7 +2079,8 @@ mod joint_repair {
         .unwrap()
         .with_committed_snapshot_repair();
         let mut app = Counter::new(100).unwrap();
-        app.apply_batch(core.replay_committed()).unwrap();
+        app.apply_batch(&core.replay_committed().contiguous())
+            .unwrap();
         let mut images = support::snapshot::HostSnapshots::new();
         images.identity.store = identity(2);
         images.binding = log.binding();
@@ -2202,7 +2217,7 @@ mod joint_repair {
         images.binding = log.binding();
         let mut application = Counter::new(100).unwrap();
         application
-            .apply_batch(receiver.replay_committed())
+            .apply_batch(&receiver.replay_committed().contiguous())
             .unwrap();
         let effects = receiver.step(Event::Receive(request)).unwrap();
         let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
@@ -2246,7 +2261,7 @@ mod joint_repair {
                 snapshots.binding = log.binding();
                 let mut application = Counter::new(100).unwrap();
                 application
-                    .apply_batch(receiver.replay_committed())
+                    .apply_batch(&receiver.replay_committed().contiguous())
                     .unwrap();
                 let effects = receiver.step(Event::Receive(request.clone())).unwrap();
                 let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
@@ -2539,7 +2554,7 @@ mod joint_repair {
         snapshots.binding = log.binding();
         let mut application = Counter::new(100).unwrap();
         application
-            .apply_batch(receiver.replay_committed())
+            .apply_batch(&receiver.replay_committed().contiguous())
             .unwrap();
         let effects = receiver.step(Event::Receive(request.clone())).unwrap();
         let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
@@ -2615,7 +2630,7 @@ fn unauthorized_append_probe() -> Message {
         rpc: Rpc::Append {
             previous_index: 2,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 2,
         },
     }
