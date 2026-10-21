@@ -1,0 +1,1236 @@
+diff --git a/benchmarks/tools/cluster.py b/benchmarks/tools/cluster.py
+index b019cfbc8516805cc5924e513cd21351e4edfb48..c3d2b1be04e8638e03ece280cee1f717186c81ec 100755
+--- a/benchmarks/tools/cluster.py
++++ b/benchmarks/tools/cluster.py
+@@ -84,10 +84,16 @@ import threading
+ import time
+ 
+ COUNTERS = ("poll_rounds", "host_waits", "host_waits_immediate", "host_waits_ready",
+-            "host_waits_timeout", "sends", "received", "persistence_batches")
++            "host_waits_timeout", "sends", "received", "persistence_batches",
++            "log_persists", "commit_only_persists", "entryless_frames")
+ SHORT = {"poll_rounds": "rounds", "host_waits": "waits", "host_waits_immediate": "imm",
+          "host_waits_ready": "rdy", "host_waits_timeout": "tmo", "sends": "sends",
+-         "received": "recv", "persistence_batches": "pb"}
++         "received": "recv", "persistence_batches": "pb", "log_persists": "lp",
++         "commit_only_persists": "cop", "entryless_frames": "ef"}
++# Per-write medians in the summary; a counter is skipped for a cell when any of
++# its runs lacks it (a binary built before the N1b diagnostic counters).
++PER_WRITE = ("poll_rounds", "sends", "received", "persistence_batches",
++             "log_persists", "commit_only_persists", "entryless_frames")
+ NODES = (1, 2, 3)
+ # |sum of per-child wait4 CPU - RUSAGE_CHILDREN delta| above this invalidates a
+ # run. Both come from the same kernel accounting at microsecond resolution.
+@@ -494,7 +500,9 @@ def report(runs, bins, offers, out=None):
+                 line += " n%d_cpu_us_per_write=%.1f n%d_busy=%.3f" % (
+                     n, median([r["node"][n]["cpu"] * 1e6 / o for r in ok]),
+                     n, median([busy(r["node"][n]["cpu"], r["wall"]) for r in ok]))
+-                for k in ("poll_rounds", "sends", "received", "persistence_batches"):
++                for k in PER_WRITE:
++                    if any(k not in r["node"][n]["counters"] for r in ok):
++                        continue
+                     line += " n%d_%s_per_write=%.3f" % (n, SHORT[k], median(
+                         [int(r["node"][n]["counters"][k]) / o for r in ok]))
+             line += " rate=%.1f p99_us=%.1f" % (
+diff --git a/benchmarks/tools/cluster_test.py b/benchmarks/tools/cluster_test.py
+index 7e8b1e37dfaaac990dac694ee086080364797d88..feb5318ffcbca08b66d4367f44f6888f455f1ef4 100644
+--- a/benchmarks/tools/cluster_test.py
++++ b/benchmarks/tools/cluster_test.py
+@@ -192,6 +192,10 @@ os.makedirs(root)
+ print("ready node=%d" % n, flush=True)
+ counters = "node_counters node=%d poll_rounds=2 host_waits=1 host_waits_immediate=1 host_waits_ready=0 host_waits_timeout=0 sends=1 received=1 persistence_batches=1" % n
+ fail = os.environ["FIXTURE"]
++if fail == "counters":
++    counters = counters.replace("received=1", "received=5").replace(
++        "persistence_batches=1", "persistence_batches=4")
++    counters += " log_persists=2 commit_only_persists=1 entryless_frames=3"
+ wal = os.path.dirname(os.path.dirname(root))
+ marker = os.path.join(wal, "failed-once")
+ if fail == "linger":
+@@ -281,6 +285,46 @@ class Processes(unittest.TestCase):
+             self.assertIn("n%d_exit_s=" % n, line)
+         self.assert_no_children()
+ 
++    def test_optional_counters_are_forwarded_with_per_write_medians(self):
++        _, r = self.run_fixture("counters")
++        self.assertEqual(r["invalid"], "", r)
++        line = cluster.describe("run round=0", "A", 100, r)
++        out = io.StringIO()
++        cluster.report([(0, "A", 100, r)], ["A"], [100], out)
++        for n in (1, 2, 3):
++            for short, value in (("lp", 2), ("cop", 1), ("ef", 3)):
++                self.assertIn("n%d_%s=%d" % (n, short, value), line.split())
++                self.assertIn("n%d_%s_per_write=%.3f" % (n, short, value / 100),
++                              out.getvalue().split())
++        self.assert_no_children()
++
++    def test_older_binary_omits_optional_per_write_medians(self):
++        _, r = self.run_fixture("ok")
++        self.assertEqual(r["invalid"], "", r)
++        line = cluster.describe("run round=0", "A", 100, r)
++        out = io.StringIO()
++        cluster.report([(0, "A", 100, r)], ["A"], [100], out)
++        for n in (1, 2, 3):
++            for short in ("lp", "cop", "ef"):
++                self.assertIn("n%d_%s=NA" % (n, short), line.split())
++                self.assertNotIn("n%d_%s_per_write=" % (n, short), out.getvalue())
++        self.assert_no_children()
++
++    def test_any_missing_run_skips_only_that_node_counter_summary(self):
++        complete = fake_result(100, 1.0, False)
++        missing = fake_result(100, 1.0, False)
++        del missing["node"][2]["counters"]["commit_only_persists"]
++        out = io.StringIO()
++        cluster.report([(0, "A", 100, complete), (1, "A", 100, missing)],
++                       ["A"], [100], out)
++        for n in (1, 2, 3):
++            for short in ("lp", "cop", "ef"):
++                key = "n%d_%s_per_write=" % (n, short)
++                if (n, short) == (2, "cop"):
++                    self.assertNotIn(key, out.getvalue())
++                else:
++                    self.assertIn(key + "0.010", out.getvalue())
++
+     def test_a_leader_failure_after_start_is_a_retained_invalid_run(self):
+         wrapper, r = self.run_fixture("leader-once")
+         self.assertIn("n1_exit=7", r["invalid"].split(","))
+diff --git a/docs/IMPLEMENTATION.md b/docs/IMPLEMENTATION.md
+index f0dc70431b449f4ec1abd5b77f7fedc47f665fd8..9b129eb0dafc038ab144c061719d951d99331082 100644
+--- a/docs/IMPLEMENTATION.md
++++ b/docs/IMPLEMENTATION.md
+@@ -12,8 +12,8 @@ design pack is unchanged.
+ 
+ The active scope is to keep or reject existing PRs 14, 15, 19, 22, 23 and 24.
+ The lifetime-bounds macro goal below remains incomplete; new roadmap slices and
+-research are paused. N1d is permitted only as the already-authorized bounded
+-work needed to decide PR19.
++research are paused. PR19 has been decided and closed as parked; its previously
++authorized N1d work was not built and is not a new wind-down dependency.
+ 
+ | Candidate | Disposition | Evidence or remaining gate |
+ | --- | --- | --- |
+@@ -170,8 +170,14 @@ must exclude both parked production trees before final qualification.
+ | --- | --- | --- | --- | --- |
+ | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+ | Done EO1: effect-owner continuations keep the released effect's position (split from PR 19; merged 20 October 2026 in PR 20, head 364b45f9) | Remove a pre-existing availability loss: a loaded snapshot's Send queued behind a same-step Persist fenced the owner during snapshot catch-up under write load | — (on main) | Owner unit tests below fail on main and pass with the rule; mutation reverts fail both; witness test ×10 all-features; fmt, four strict Clippy builds, matched fmt/Clippy; effect_owner, runtime, native_member_startup, snapshot, snapshot_worker, counter_service in default and all-features | NW1 (unblocks N1) |
+-| Then N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline; EO1 (PR 19 rebases on it) | Plan §5.3 tests and §5.4 gate | NW1 |
+-| Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
++| Current PR22 source reconciliation/publication | Retain the original N1b diagnostics and correct their interpretation | Qualified main `20a8d08f` (production `bd714771`); original `463c50d4` and existing reviews; no parked production | Focused default/all example and cluster/Python compatibility tests, seven strict checks, enabled actual push hook, production/fixture blob audit; checked non-force publication | NW1 |
++| Next PR22 fresh reviews and final validation | Decide whether the final diagnostic candidate satisfies the existing acceptance gate | Exact published head; two fresh independent reviews; parent's exclusive full-suite slot after PR23 cleanup | Parent-owned complete final-head gate, explicit failures/omissions audit; focused tests do not qualify full suites | NW1 |
++| Then PR22 disposition and final cleanup | Record keep/merge or reject/close and finish the existing wind-down | Fresh reviews and full-gate outcome; parent integration authority | Durable decision/evidence; no open candidate, owned build/worktree/process residue or detached job | NW1 |
++
++Historical N1b option F stopped at step0; only counters were built. N1 and N1c
++are closed as parked, not shipped. N2 frame coalescing and the remaining network
++roadmap are paused, not dependencies for these three deliverables. NW1 remains
++incomplete; this macro-plan review adds no prerequisite or research slice.
+ 
+ ### EO1 merge record (20 October 2026, PR 20 → main)
+ 
+@@ -295,6 +301,283 @@ native-only 1,918 / 0; matched 75 / 0.
+ - **Not measured.** No CPU measurement: per-write releases (`Send`,
+   `Committed`) have empty continuations, so the per-write path is unchanged.
+ 
++### PR22 reconciliation schema plan (before edits, 21 October 2026)
++
++- **Data/API:** merge original `463c50d4` with qualified main `20a8d08f`, preserving
++  both histories and main's dispositions. Original diagnostic fields and the
++  appended storage.csv column stay; no revision counter or new instrument.
++- **Transitions:** DurableWatch samples completed durable log/commit rises per
++  poll; Python preserves raw absent counters as NA and skips each per-write
++  median if any valid node/cell run lacks it. No protocol state changes.
++- **Ownership/failure:** one benchmark host owns the watch; restart resets its
++  baseline. Exact existing cluster assertions stay; leader applied=100 requires
++  the final separate durable commit, so assert commit_only_persists>=1. Stop
++  bounded work on failure unless a minimal counter-caused fix is established.
++- **Smallest necessary exception for the parent full gate:** main's transfer
++  fixture still has u16 offset overflow and base-derived storage identity. Copy
++  exactly five already-reviewed test blobs from `66fcf3e0`: tests/support/ports.rs,
++  tests/fixture_isolation.rs, tests/transfer_service.rs and its root.rs/root_tests.rs.
++  No DR1/ST2 production or benchmark socket/clock changes; no reliability redesign.
++- **Acceptance/cleanup:** optional-counter fake runs with/without/mixed fields;
++  default/all native_benchmark and cluster checks, bounded fixture controls,
++  root fmt/four strict Clippy and matched fmt/Clippy, enabled actual push hook,
++  qualified src/Cargo/hooks identical and exact exception blobs. Parent owns
++  fresh reviews/full suites/integration. Cores0-3, absolute nice19, max4 jobs,
++  own target<=10GiB; guard launches, audit every rc, retain compact evidence,
++  sweep owned target/worktree/processes immediately after checked publication.
++
++### N1b schema plan (before editing, 20 October 2026)
++
++Outcome: stopped at step 0 by the stop rule (evidence below). Only the step-0
++counters were built; the library parts of this plan were not.
++
++Research: `target/claude/research-r4/n1b-batching.md` (main checkout,
++untracked), option F; GPT-6.1-Sol's PR 19 review, "Batching recommendation".
++Originally built on main `12fb21de` as its own PR. The intended later N1
++dependency is historical: PR19 is now closed as parked without merging.
++
++- **Step 0, diagnostic first (example code only, no library change).** Two
++  benchmark-only counters, both in `examples/` and both off the library's
++  per-write path:
++  - Single-process mode (`nat.sh`, shared assembly): the existing
++    `ObservedLog` wrapper counts `zero_command_units`, WAL update units that
++    carry no `Command` entry (no suffix, or only no-op/configuration entries).
++    It already sees every `append_batch`; the count is one more add under the
++    lock it already takes. It counts attempted update units, including failed
++    appends, excludes Create units and is broader than commit-only barriers.
++    Printed as a new last column of `storage.csv`.
++  - Cluster mode (`node_counters`): after every poll, node N reads its own
++    core's durable `(last_index, commit_index)` through an owner/core group-map
++    lookup, cached tail read, commit read, comparisons and counter updates.
++    A poll where `last_index` rose counts one `log_persists`; otherwise a rise
++    in `commit_index` counts one `commit_only_persists`. These diagnose completed
++    durable rises per poll, not exact completed-write counts. The first sample
++    establishes a baseline; two completions in one poll undercount. Truncation
++    or rewrite at the same/lower index is unclassified and a concurrent commit
++    rise can look commit-only outside the steady single-term append-only case.
++    `entryless_frames = received.saturating_sub(log_persists)` is a follower
++    proxy only with `groups=1` and one message per frame. It includes vote,
++    timeout, snapshot and retry frames; merged log completions overcount it and
++    saturation hides a negative difference. Leader local log growth has no
++    received-frame correspondence. `cluster.py` passes the three through as
++    `nN_lp`, `nN_cop`, `nN_ef` (`NA` for absent raw values); each per-write
++    median is omitted if any valid run in that node/cell lacks that counter.
++  - Run once: the N0 TCP 15,000/s cell (2,000 and 16,000 offers) on the quiet
++    Mac and `nat.sh` (2 pairs) on Linux, main + diagnostic (A) against PR 19
++    head `ff9faec8` + diagnostic (B).
++  - **Stop rule.** If B − A in follower zero-command units explains less than
++    half of B − A in follower barriers (≈ 307 per follower per 16,000 writes in
++    the research run), stop: write the finding and the fallback brief (L, a
++    bounded ≤ 1 ms linger before the next Append, with its latency cost), push
++    the diagnostic alone, and report.
++- **Data/API.** No public type, wire, WAL, runtime or transport change. One
++  private leader flag in the core, `configuration_notice: bool`. No new
++  per-peer state: the owed commit is implicit (`durable.commit_index` against
++  what the next Append or heartbeat carries).
++- **The rule (decides only whether to send; never order).** In *quiet mode*
++  the leader does not send an Append whose only news for a peer is a newer
++  `leader_commit`. Quiet mode for peer P holds when all of:
++  `progress_sends_enabled()` (no transfer, no joint configuration, last
++  configuration committed), `!configuration_notice`, and P is a voter.
++  - `broadcast_ready_peers_into` (after `After::LeaderAppend` and
++    `After::Commit`): skip a ready peer with no request outstanding when
++    `next_index[P] > durable.last_index()` (`append_for` would send no
++    entries). A peer with a snapshot request keeps today's re-emission.
++  - `receive_appended_into`: after a successful ack, send at once only if
++    `prefix < durable.last_index()`; the `commit_at_start < commit_index`
++    clause applies only outside quiet mode (today it already applies only
++    when `progress_sends_enabled()`).
++- **Modes and why each keeps or drops the immediate notice.**
++  - Normal operation, voter peer: drops it. Every later data Append carries the
++    current `leader_commit` with a range that covers it; the heartbeat
++    (`Event::Heartbeat` → `broadcast_into`, every `TimerConfig::heartbeat_ms`,
++    50 ms by default, also in the benchmark and services) reaches every peer.
++  - Joint configuration, uncommitted final configuration, leadership transfer:
++    keep (today's eager `broadcast_into` on `After::Commit`; unchanged code).
++  - The commit that covers the last configuration entry (final, or any
++    configuration committed by a new leader's no-op): keeps. Today it already
++    goes out through the normal-mode path, because `progress_sends_enabled()`
++    is evaluated after the commit advanced. `install_pending_into` sets
++    `configuration_notice` when `previous_commit < last_configuration_index <=
++    commit_index` on a leader; while set, both send sites behave exactly as
++    today. The leader's next heartbeat clears it after its `broadcast_into`
++    (that broadcast tells every peer the commit). Cleared also on any role
++    change.
++  - Learners (non-voters, including learner catch-up and readiness): keep.
++    `begin_learner_readiness` asks the learner to hold the leader's current
++    commit; a delayed commit would turn readiness into a spurious `ready:
++    false`. Learners carry no quorum load, so this costs nothing on the write
++    path.
++  - Snapshot catch-up: keeps (snapshot requests, their acks and the post-install
++    `append_for` paths are unchanged).
++  - Retirement announcements (`retirement_announcements`) are a separate path:
++    unchanged.
++- **Bound.** A voter that holds the entries learns a commit no later than the
++  leader's first heartbeat after that commit became durable at the leader
++  (≤ `heartbeat_ms`, 50 ms at defaults), plus delivery and its own persist: at
++  that tick it gets either a fresh empty Append (`previous_index` = leader
++  last ≥ commit) or a retry of its outstanding request. A retry delivers
++  `min(commit, end)`; if `end < commit` the follower is behind, its ack gets a
++  data Append at once (unchanged path), and that Append carries the commit.
++- **Readers and client completion.** Leader-only: `begin_read` returns
++  `NotLeader` on a follower (`raft.rs`), `Committed` effects and client
++  completion follow the leader's own commit persist. No follower-side read
++  path exists. Follower apply and follower checkpoints lag by at most the bound
++  above: finite, not lifetime-bounded growth.
++- **Guarantees.** Commit index monotone (the follower still takes
++  `max(own, min(leader_commit, matching))`); never ahead of what the follower
++  can verify (the same `matching` cap); log matching and leader completeness
++  untouched (no entry, term or vote path changes); the durability gate, the
++  one-Append-in-flight rule and per-peer FIFO hold by construction because only
++  the decision to emit a commit-only Append changes.
++- **Restart/partial progress.** A follower that restarts before it learns a
++  commit re-learns it from the next Append or heartbeat, as after any crash
++  today. A leader that restarts loses the flag with its role.
++- **Acceptance (deterministic core tests, explicit steps, no clock).**
++  (a) caught-up voter gets no commit-only Append after `After::Commit` or after
++  its ack; the next proposal's Append carries the new commit;
++  (b) with no further data, one `Event::Heartbeat` delivers the commit to every
++  voter (exact: one heartbeat step);
++  (c) one test per kept mode: joint, uncommitted final, committed-final
++  crossing (until the next heartbeat), transfer, learner, snapshot;
++  (d) existing commit oracles unchanged (follower commit capped by matching and
++  monotone; reference-host and fault-schedule suites);
++  existing tests that pinned the old notices move to the new contract (deliver
++  by heartbeat) without loosening their assertions.
++  Mutations: drop the mode exemption ((c) fails); drop the heartbeat carriage
++  ((b) fails).
++- **Measurement.** Base = main + the step-0 diagnostic (same library as main,
++  so both binaries carry the same counters), candidate = this branch. Five N0
++  cells × 5 ABBA rounds on the quiet Mac, `nat.sh` 5 pairs on Linux (cores
++  10–15). Then N1b + PR 19's code (local throwaway branch, not pushed) against
++  the same base for the gate.
++
++### N1b step 0 evidence: stop rule tripped (20 October 2026)
++
++Binaries: A = main `12fb21de` + the step-0 counters (`e9ad393b`, example code
++only, so its library is main's); B = PR 19 head `ff9faec8` + the same counter
++files (local measurement branch, not pushed). Release, `--all-features`.
++
++**Linux `nat.sh` loop** (single process, WAL on tmpfs, 15,000/s, 2 pairs,
++`taskset -c 10-15 nice -n 19`; host load average 10.4 from other users on cores
++0–9, so the CPU figures are noisy; the counts are not). Per 16,000 offers
++(16,064 commands with warmup); r1 is the leader, r2 and r3 the followers.
++
++| Pair | Build | Follower barriers r2 / r3 | Follower zero-command units r2 / r3 | Follower commands per barrier | Leader barriers | Leader zero-command units | Leader commands per data unit | Marginal µs/write | p99 ms |
++| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
++| 1 | A | 306 / 305 | 7 / 6 | 52.5 | 1,053 | 345 | 22.7 | 12.23 | 15.0 |
++| 1 | B | 613 / 610 | 7 / 7 | 26.2 | 1,273 | 632 | 25.1 | 14.32 | 7.4 |
++| 2 | A | 360 / 361 | 4 / 7 | 44.6 | 1,189 | 396 | 20.3 | 12.47 | 9.5 |
++| 2 | B | 637 / 639 | 5 / 11 | 25.2 | 1,307 | 651 | 24.5 | 14.09 | 6.3 |
++
++- Extra follower barriers (B − A, per follower): +306 and +278. Extra follower
++  zero-command units: +0.5 and +2.5, i.e. **0.2% and 0.9%** of the extra
++  barriers. The stop rule needs at least 50%: **stop**.
++- What did change: each follower Append carries half the commands (52 → 26).
++  The leader's own append batches did not shrink (22.7 → 25.1 commands per
++  leader data persist). On main a follower Append covered ~2.3 leader append
++  batches (306 follower barriers against 708 leader data persists); under N1
++  it covers ~1.0 (613 against 641). The aggregate counts suggest the follower
++  is ready at almost every leader batch, making each leader batch cost a follower cycle; readiness
++  itself was not directly observed. The leader's
++  commit persists rise with it (345 → 632, about one per follower ack that
++  advances the commit). This is the research's H′ (smaller data Appends), not H
++  (commit-only cycles).
++- CPU, same direction as the research run: marginal 12.23 → 14.32 and
++  12.47 → 14.09 µs/write (×1.17, ×1.13, loaded host).
++
++**Mac cluster, N0 harness** (quiet M2 Max, `/Volumes/vbram`, load < 1.0 before
++each cell). The original raw lines (both hosts, including Linux
++`step0-linux-nat.txt`) were at Mac
++`/tmp/voteboat-claude-loop/n1b-diag-main-e9ad393b/results/`. That scratch was
++subsequently swept; the retained tables here and original PR22 body/reviews
++are historical evidence, not a claim that raw files remain available.
++Per run, followers n2 / n3; `pb` persistence batches, `cop` commit-only
++persists.
++
++| Cell | Round | A follower pb | B follower pb | A follower cop | B follower cop |
++| --- | --- | --- | --- | --- | --- |
++| TCP 15,000/s, 16,000 offers | 0 | 235 / 232 | 240 / 237 | 4 / 4 | 7 / 5 |
++| TCP 15,000/s, 16,000 offers | 1 | 157 / 158 | 203 / 200 | 5 / 4 | 5 / 4 |
++| TCP 15,000/s, 2,000 offers | 0 | 41 / 40 | 48 / 46 | 4 / 2 | 3 / 2 |
++| TCP 15,000/s, 2,000 offers | 1 | 29 / 30 | 47 / 45 | 3 / 3 | 3 / 2 |
++| TCP 1,000/s, 16,000 offers (1 round) | 0 | 3,107 / 3,109 | 3,228 / 3,235 | 19 / 20 | 35 / 42 |
++| Idle TCP 20/s, 600 offers (1 round) | 0 | 1,205 / 1,204 | 1,205 / 1,204 | 602 / 601 | 602 / 601 |
++
++- TCP 15k: B − A follower persists +5 to +46 per run; commit-only persists
++  −1 to +3 per follower. Across both followers the first 16k row is +4
++  commit-only / +10 persists (40%; n2 alone 3/5 = 60%), the second is 0/88,
++  and all four 15k rows have signed sums 2/144 ≈ 1.39%. The absolute counts
++  are small, but individual relative shares are not all near zero. These
++  limited historical cells do not overturn the Linux under-1% stop result.
++  (Marginal CPU in these 2 rounds: A 35.72, B 27.41 µs/write, ×0.77; the
++  15k regime is bimodal on this Mac, see the N1 record.)
++- TCP 1,000/s: commit-only persists explain 16 of +121 and 22 of +126 extra
++  follower persists (13–17%), also under half.
++- Idle 20/s: each follower has approximately one sampled commit-only persist
++  per offered write (602/601 per 600 offers, including startup/warmup) and
++  about two proxy entryless frames per write (1,194, consistent with commit-only
++  Appends and heartbeats in this workload), in A and B alike. Option F would
++  save one follower Append
++  cycle per write here, and almost nothing at 1,000/s or above.
++- `entryless_frames` is the restricted follower proxy defined above, not a
++  wire empty-Append count. It cannot attribute traffic on leaders, multiple
++  groups or coalesced frames; it also includes control/snapshot/retry traffic,
++  can overcount merged completions, and saturates negative differences.
++
++**Decision.** Per the brief's stop rule, the library change (F) was not built.
++F alone is an idle-only saving (one follower cycle per write at 20/s, ≤ 0.003
++per write at 1,000/s) and does not address N1's durable-save regression; it is
++parked, not rejected for idle.
++
++### N1c fallback brief: historical input to closed, parked PR23 (option L)
++
++This preserves the original proposal below as historical input. PR23 built and
++reviewed its own bounded held-Append candidate, then closed as parked without
++merging (`1c259536`; disposition above). This brief neither ships that mechanism
++nor supplies a current implementation plan. The original latency and quorum-first
++claims below were hypotheses: preference gives no latency guarantee, a count-only
++50 ms heartbeat cannot enforce a 1 ms deadline, and holding must precede
++`append_for` rather than delay its immutable in-flight Send. The PR23 record and
++original Sol review retain those conditions; no further implementation is planned.
++
++- **Problem (measured above).** Under N1 a follower is ready at almost every
++  leader append batch, so follower Appends halve in size and follower cycles
++  (two frames, one follower WAL barrier, one leader commit persist) double. On
++  Linux tmpfs a follower cycle costs ~25 µs of CPU across the three replicas
++  (research §1.1).
++- **Mechanism.** When a peer is ready and the next data Append would carry
++  fewer entries than a batch target (the previous Append's size to that peer,
++  or a fixed target), hold it until the first of: the next leader append
++  persist completes (more entries to carry), a deadline of at most 1 ms, or a
++  heartbeat. Ordering, the durability gate and one Append in flight are
++  unchanged: the linger only decides when to emit.
++- **Latency cost.** Commit needs the leader plus one follower ack, so lingering
++  both followers adds up to the linger to every commit. Restoring ~37
++  commands per Append at 15,000/s needs the follower round trip to rise from
++  ~1.5 ms to ~2.5 ms: about +1 ms on client p50 and p99 (N1's `nat.sh` p99
++  ~5–7 ms → ~6–8 ms, about main's; cluster p99 12–25 ms → +4–8%, which can
++  breach "p99 ≤ main + 5%").
++  At 1,000/s a fixed linger adds latency for little saving, so the target must
++  follow the load.
++- **Variant to try first: quorum-aware linger.** With three voters only one
++  follower ack is needed to commit. Send eagerly to the follower that acked
++  most recently and linger only the other. Commit latency stays as it is while
++  the eager follower is healthy; the lingering follower batches about twice as
++  much, which removes roughly half of the extra follower cycles at no latency
++  cost. The deadline bounds the case where the eager follower stalls.
++- **Needs.** A deadline in the core: either a new timer kind through
++  `TimedShard`, or a count-based rule bounded by the heartbeat. No wire, WAL or
++  transport change. Deterministic simulated-time tests: a small Append is held
++  and released by the next leader batch; released by the deadline with no more
++  data; never held past the heartbeat; the eager follower is never held.
++- **Gate.** The N1b gate (five N0 cells per-round median ≤ 1.02 against main;
++  `nat.sh` per-pair median ≤ 1.00 with ≥ 3 of 5 ≤ 1.00; follower barriers per
++  write ≤ main's; TCP 1,000/s ≤ 0.93 × main; QUIC 15k ≤ 0.88 × main; busy
++  cores ≤ main + 2%; p99 ≤ main + 5%), reported with p50 as well. Stop rule: if
++  `nat.sh` follower commands per barrier do not return to ≥ 40 within a 1 ms
++  linger, or p99 exceeds main + 5%, reject L and keep N1 as measured.
++
+ ### N0 schema plan (before editing, 19 October 2026)
+ 
+ - **Library change: one pure move.** `HostWait`, `HOST_GATHER` and
+diff --git a/examples/benchmark/cluster.rs b/examples/benchmark/cluster.rs
+index a4760b9b855b914bba55fd450b068cfd5924670a..a697454de7eed2861087e705be5e82c33e74ab20 100644
+--- a/examples/benchmark/cluster.rs
++++ b/examples/benchmark/cluster.rs
+@@ -180,6 +180,7 @@ fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<(), Failure
+         nodes: vec![replica],
+         wait: HostWait::new(wake.clone()),
+         totals: PollTotals::default(),
++        watch: DurableWatch::default(),
+         clock,
+         control: control.clone(),
+         armed: None,
+@@ -196,7 +197,7 @@ fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<(), Failure
+             // Abandon the run before any output: a graceful drain would wait
+             // for pending writes that cannot commit without the followers.
+             host.nodes[0].abort();
+-            let counters = Counters::of(&host.totals);
++            let counters = Counters::of(&host.totals, &host.watch);
+             note(format_args!("node {} failed: {error}\n", args.n));
+             say(format_args!(
+                 "stdin_closed node={} phase={} rounds_to_notice={}\n",
+@@ -317,6 +318,7 @@ struct Host {
+     nodes: Vec<Replica>,
+     wait: HostWait,
+     totals: PollTotals,
++    watch: DurableWatch,
+     clock: Instant,
+     control: Control,
+     /// The node-1 phase that stops on closed stdin; `None` for followers and
+@@ -326,6 +328,7 @@ struct Host {
+ impl Host {
+     fn round(&mut self) -> Result<(), Failure> {
+         poll(&mut self.nodes, &self.clock, &mut self.totals)?;
++        self.watch.observe(&self.nodes[0]);
+         let Some(phase) = self.armed else {
+             return Ok(());
+         };
+@@ -375,12 +378,41 @@ impl Host {
+         self.armed = None;
+         self.nodes[0].begin_shutdown();
+         self.until(Some(PHASE_LIMIT), |ns| Ok(ns[0].is_drained()))?;
+-        let counters = Counters::of(&self.totals);
++        let counters = Counters::of(&self.totals, &self.watch);
+         join(self.nodes)?;
+         Ok(counters)
+     }
+ }
+ 
++/// Benchmark-only poll-level diagnostic of completed durable log/commit rises,
++/// not an exact completed-write count. Each observation uses an owner/core
++/// group-map lookup, cached log-tail/commit reads, comparisons and counters.
++/// The first sample sets the baseline; two completions in one poll undercount.
++/// Truncation/rewrite at the same or lower index is unclassified; a commit rise
++/// then looks commit-only outside the steady single-term append-only workload.
++#[derive(Clone, Copy, Default)]
++struct DurableWatch {
++    last: Option<(u64, u64)>,
++    log_persists: usize,
++    commit_only_persists: usize,
++}
++impl DurableWatch {
++    fn observe(&mut self, node: &Replica) {
++        let Some(core) = node.local().owner.core(group()) else {
++            return;
++        };
++        let now = (core.state().last_index(), core.state().commit_index);
++        if let Some((last, commit)) = self.last {
++            if now.0 > last {
++                self.log_persists += 1;
++            } else if now.1 > commit {
++                self.commit_only_persists += 1;
++            }
++        }
++        self.last = Some(now);
++    }
++}
++
+ /// Whole-process (or phase) counters, in the order they are printed.
+ #[derive(Clone, Copy, Default)]
+ struct Counters {
+@@ -392,9 +424,11 @@ struct Counters {
+     sends: usize,
+     received: usize,
+     persistence_batches: usize,
++    log_persists: usize,
++    commit_only_persists: usize,
+ }
+ impl Counters {
+-    fn of(t: &PollTotals) -> Self {
++    fn of(t: &PollTotals, watch: &DurableWatch) -> Self {
+         Self {
+             poll_rounds: t.rounds,
+             host_waits: t.waits,
+@@ -404,6 +438,8 @@ impl Counters {
+             sends: t.peer_sends,
+             received: t.peer_received,
+             persistence_batches: t.persistence_batches,
++            log_persists: watch.log_persists,
++            commit_only_persists: watch.commit_only_persists,
+         }
+     }
+     fn since(self, before: Self) -> Self {
+@@ -416,11 +452,13 @@ impl Counters {
+             sends: self.sends - before.sends,
+             received: self.received - before.received,
+             persistence_batches: self.persistence_batches - before.persistence_batches,
++            log_persists: self.log_persists - before.log_persists,
++            commit_only_persists: self.commit_only_persists - before.commit_only_persists,
+         }
+     }
+     fn line(self) -> String {
+         format!(
+-            "poll_rounds={} host_waits={} host_waits_immediate={} host_waits_ready={} host_waits_timeout={} sends={} received={} persistence_batches={}",
++            "poll_rounds={} host_waits={} host_waits_immediate={} host_waits_ready={} host_waits_timeout={} sends={} received={} persistence_batches={} log_persists={} commit_only_persists={} entryless_frames={}",
+             self.poll_rounds,
+             self.host_waits,
+             self.host_waits_immediate,
+@@ -428,7 +466,14 @@ impl Counters {
+             self.host_waits_timeout,
+             self.sends,
+             self.received,
+-            self.persistence_batches
++            self.persistence_batches,
++            self.log_persists,
++            self.commit_only_persists,
++            // Follower proxy only for groups=1, one message/frame. Includes
++            // vote/timeout/snapshot/retry frames; merged log completions
++            // overcount it, saturation hides negatives. Leader local log
++            // growth has no received-frame correspondence.
++            self.received.saturating_sub(self.log_persists)
+         )
+     }
+ }
+@@ -478,7 +523,7 @@ fn lead(host: &mut Host, args: &NodeArgs, wake: Arc<HostWake>) -> Result<(), Fai
+     let warmup = warm_up(host, args.window)?;
+     let term_start = term(&host.nodes);
+     let mut ledger = Ledger::new(args.count, args.rate, args.window, 1, None);
+-    let before = Counters::of(&host.totals);
++    let before = Counters::of(&host.totals, &host.watch);
+     let (host_ns, max_host_ns) = (host.totals.host_ns, host.totals.max_host_ns);
+     host.armed = Some("offering");
+     note(format_args!(
+@@ -487,7 +532,7 @@ fn lead(host: &mut Host, args: &NodeArgs, wake: Arc<HostWake>) -> Result<(), Fai
+     ));
+     say(format_args!("offering node=1\n"));
+     let elapsed = offer(host, &mut ledger, wake)?;
+-    let phase = Counters::of(&host.totals).since(before);
++    let phase = Counters::of(&host.totals, &host.watch).since(before);
+     let host_ms = (host.totals.host_ns - host_ns) as f64 / 1e6;
+     let max_host_ms = host.totals.max_host_ns.max(max_host_ns) as f64 / 1e6;
+     let term_end = term(&host.nodes);
+@@ -1025,9 +1070,24 @@ mod tests {
+             for key in ["sends", "received", "persistence_batches"] {
+                 assert!(number(&c, key) >= 1, "node {n} {key}");
+             }
++            // Every node's durable log grew (campaign no-op, warmup, offers),
++            // and the diagnostic split never exceeds the persists made.
++            assert!(number(&c, "log_persists") >= 1, "node {n}");
++            assert!(
++                number(&c, "log_persists") + number(&c, "commit_only_persists")
++                    <= number(&c, "persistence_batches"),
++                "node {n}"
++            );
++            assert_eq!(
++                number(&c, "entryless_frames"),
++                number(&c, "received").saturating_sub(number(&c, "log_persists"))
++            );
+             sends += number(&c, "sends");
+             received += number(&c, "received");
+             if n == 1 {
++                // applied=100 includes the final entry's later commit persist,
++                // after its own log persist and a follower's durable ack.
++                assert!(number(&c, "commit_only_persists") >= 1);
+                 // The offered phase is part of node 1's lifetime.
+                 for key in ["poll_rounds", "host_waits", "sends", "persistence_batches"] {
+                     assert!(number(&summary, key) <= number(&c, key), "{key}");
+diff --git a/examples/benchmark/observe.rs b/examples/benchmark/observe.rs
+index aa1f072101b952bffd7ce8c7ee0766b77b341b7b..4db107db3bcd6fd0ea5f2d70f59018ff4c9bf4b0 100644
+--- a/examples/benchmark/observe.rs
++++ b/examples/benchmark/observe.rs
+@@ -22,6 +22,9 @@ pub(super) struct Totals {
+     append_calls: u64,
+     append_units: u64,
+     append_commands: u64,
++    /// Update units carrying no command entry: commit-only or hard-state-only
++    /// persists, plus no-op/configuration-only appends (N1b diagnostic).
++    zero_command_units: u64,
+     append_ns: u128,
+     append_max_ns: u128,
+     barrier_calls: u64,
+@@ -165,17 +168,20 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
+     ) -> Result<Vec<LogTicket>, StorageError> {
+         let units = mutations.len();
+         let mut commands = 0;
++        let mut zero_command_units = 0;
+         let mut groups = Vec::with_capacity(units);
+         for mutation in &mutations {
+             groups.push(match mutation {
+                 LogMutation::Create(b) => b.group.id.get(),
+                 LogMutation::Update(u) => {
+-                    commands += u.suffix.as_ref().map_or(0, |s| {
++                    let unit = u.suffix.as_ref().map_or(0, |s| {
+                         s.entries
+                             .iter()
+                             .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
+                             .count()
+                     });
++                    commands += unit;
++                    zero_command_units += u64::from(unit == 0);
+                     u.group.id.get()
+                 }
+             });
+@@ -187,6 +193,7 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
+             t.append_calls += 1;
+             t.append_units += units as u64;
+             t.append_commands += commands as u64;
++            t.zero_command_units += zero_command_units;
+             t.append_ns += ns;
+             t.append_max_ns = t.append_max_ns.max(ns);
+             t.errors += u64::from(result.is_err());
+@@ -232,7 +239,7 @@ pub(super) fn write_csv(
+     file: &mut File,
+     snapshots: &[(String, usize, Totals)],
+ ) -> Result<(), Failure> {
+-    writeln!(file, "stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units")?;
++    writeln!(file, "stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units,zero_command_units")?;
+     for (stage, replica, t) in snapshots {
+         let histogram = t
+             .histogram
+@@ -246,8 +253,8 @@ pub(super) fn write_csv(
+             .map(|(g, c)| format!("{g}:{c}"))
+             .collect::<Vec<_>>()
+             .join("|");
+-        writeln!(file, "{stage},{replica},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{histogram},{groups}",
+-            t.append_calls,t.append_units,t.append_commands,t.append_ns,t.append_max_ns,t.barrier_calls,t.barrier_tickets,t.barrier_ns,t.barrier_max_ns,t.errors,t.encoded_bytes,t.io_append_calls,t.io_append_ns,t.sync_calls,t.sync_ns,t.publish_calls,t.publish_ns)?;
++        writeln!(file, "{stage},{replica},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{histogram},{groups},{}",
++            t.append_calls,t.append_units,t.append_commands,t.append_ns,t.append_max_ns,t.barrier_calls,t.barrier_tickets,t.barrier_ns,t.barrier_max_ns,t.errors,t.encoded_bytes,t.io_append_calls,t.io_append_ns,t.sync_calls,t.sync_ns,t.publish_calls,t.publish_ns,t.zero_command_units)?;
+     }
+     file.sync_all()?;
+     Ok(())
+diff --git a/tests/fixture_isolation.rs b/tests/fixture_isolation.rs
+index 07c2ac15ea6e6cc4ada998ea54f5c436cddd68c3..f77fb2a73920905659b386d54bca3a9cebcfba7a 100644
+--- a/tests/fixture_isolation.rs
++++ b/tests/fixture_isolation.rs
+@@ -102,6 +102,7 @@ fn lease_holds_across_handoff_and_processes() {
+ 
+ #[test]
+ fn adoption_keeps_the_unused_half_and_reclaim_proves_release() {
++    let _spawn = serial::serial(&SPAWN);
+     fn check<T>(adopt: fn(&mut ports::PortLease) -> T, unused_held: fn(SocketAddr) -> bool) {
+         let mut lease = ports::PortLease::acquire(1);
+         let [address] = lease.addresses();
+@@ -125,6 +126,31 @@ fn adoption_keeps_the_unused_half_and_reclaim_proves_release() {
+     check(|l| l.adopt_udp(0), |a| TcpListener::bind(a).is_err());
+ }
+ 
++#[test]
++fn offset_layouts_keep_every_listener_pair_leased_through_handoff() {
++    let _spawn = serial::serial(&SPAWN);
++    let offsets = [1, 2, 101, 102];
++    let (base, mut lease) = ports::PortLease::acquire_offsets(&offsets);
++    let addresses = lease.address_list();
++    assert_eq!(
++        addresses.iter().map(|a| a.port()).collect::<Vec<_>>(),
++        ports::offset_ports(base, &offsets).unwrap()
++    );
++    for address in &addresses {
++        assert!(TcpListener::bind(address).is_err());
++        assert!(UdpSocket::bind(address).is_err());
++    }
++    lease.handoff();
++    let (_, other) = ports::PortLease::acquire_offsets(&offsets);
++    assert!(other.address_list().iter().all(|a| !addresses.contains(a)));
++    for address in addresses {
++        drop((
++            TcpListener::bind(address).unwrap(),
++            UdpSocket::bind(address).unwrap(),
++        ));
++    }
++}
++
+ #[test]
+ fn panic_releases_port_lease_and_serial_guard_without_cascades() {
+     let _spawn = serial::serial(&SPAWN);
+diff --git a/tests/support/ports.rs b/tests/support/ports.rs
+index 9665c71d5aa0dd5a8a6ba74d6ee2c41a0cfcc3db..c7f4a34223392eb632a0bd2849b2bf3a10f6dac0 100644
+--- a/tests/support/ports.rs
++++ b/tests/support/ports.rs
+@@ -41,19 +41,82 @@ pub struct PortLease {
+ 
+ impl PortLease {
+     pub fn acquire(count: usize) -> Self {
++        Self::with_directory(|directory| Self::acquire_in(count, directory))
++    }
++
++    /// Reserve a service's fixed listener layout with the same locks and safe
++    /// pool as individual ports. Every addition is checked before any bind.
++    pub fn acquire_offsets(offsets: &[u16]) -> (u16, Self) {
++        assert!(!offsets.is_empty());
++        assert_eq!(offsets.iter().collect::<BTreeSet<_>>().len(), offsets.len());
++        let lease = Self::with_directory(|directory| Self::acquire_offsets_in(offsets, directory));
++        let base = lease.held[0].address.port() - offsets[0];
++        (base, lease)
++    }
++
++    fn with_directory(acquire: impl Fn(&Path) -> io::Result<Self>) -> Self {
+         let directory = shared_directory();
+-        let result =
+-            prepare_directory(&directory).and_then(|()| Self::acquire_in(count, &directory));
++        let result = prepare_directory(&directory).and_then(|()| acquire(&directory));
+         match result {
+             Ok(lease) => lease,
++            Err(error) if error.kind() == io::ErrorKind::AddrNotAvailable => panic!("{error}"),
+             Err(error) => {
+                 let fallback = fallback_directory(&directory, &error);
+                 prepare_directory(&fallback).unwrap();
+-                Self::acquire_in(count, &fallback).unwrap()
++                acquire(&fallback).unwrap()
+             }
+         }
+     }
+ 
++    fn acquire_offsets_in(offsets: &[u16], directory: &Path) -> io::Result<Self> {
++        let ephemeral = ephemeral_range();
++        let permitted = candidates(&ephemeral).collect::<BTreeSet<_>>();
++        let mut namespace_error = None;
++        let mut namespace_usable = false;
++        for base in candidates(&ephemeral).filter_map(|port| port.checked_sub(offsets[0])) {
++            let Some(ports) = offset_ports(base, offsets) else {
++                continue;
++            };
++            if !ports.iter().all(|port| permitted.contains(port)) {
++                continue;
++            }
++            let mut held = Vec::new();
++            for port in ports {
++                match reserve(port, directory) {
++                    Ok(Some(reservation)) => {
++                        namespace_usable = true;
++                        held.push(reservation);
++                    }
++                    Ok(None) => {
++                        namespace_usable = true;
++                        break;
++                    }
++                    Err(error) if error.kind() == io::ErrorKind::ReadOnlyFilesystem => {
++                        return Err(error)
++                    }
++                    Err(error) => {
++                        namespace_error = namespace_error.or(Some(error));
++                        break;
++                    }
++                }
++            }
++            if held.len() == offsets.len() {
++                return Ok(Self {
++                    held,
++                    directory: directory.to_owned(),
++                });
++            }
++            // A collision releases this partial layout before the next base.
++        }
++        if let (false, Some(error)) = (namespace_usable, namespace_error) {
++            return Err(error);
++        }
++        Err(io::Error::new(
++            io::ErrorKind::AddrNotAvailable,
++            "no available TCP/UDP service port layout",
++        ))
++    }
++
+     fn acquire_in(count: usize, directory: &Path) -> io::Result<Self> {
+         assert!(count != 0, "a port lease must reserve at least one pair");
+         let ephemeral = ephemeral_range();
+@@ -61,15 +124,12 @@ impl PortLease {
+         let mut namespace_error = None;
+         let mut namespace_usable = false;
+         for port in candidates(&ephemeral) {
+-            let mut local = PORTS.lock().unwrap_or_else(PoisonError::into_inner);
+-            if local.contains(&port) {
+-                continue;
+-            }
+-            // Never unlink lock files: every process must lock the same inode.
+-            let lock = match open_lock(&directory.join(format!("{port}.lock"))) {
+-                Ok(lock) => {
++            match reserve(port, directory) {
++                Ok(reservation) => {
+                     namespace_usable = true;
+-                    lock
++                    if let Some(reservation) = reservation {
++                        held.push(reservation);
++                    }
+                 }
+                 Err(error) if error.kind() == io::ErrorKind::ReadOnlyFilesystem => {
+                     return Err(error)
+@@ -78,32 +138,7 @@ impl PortLease {
+                     namespace_error = namespace_error.or(Some(error));
+                     continue;
+                 }
+-            };
+-            match lock.try_lock() {
+-                Ok(()) => (),
+-                Err(std::fs::TryLockError::WouldBlock) => continue,
+-                Err(error) => panic!("port lease {port}: {error}"),
+             }
+-            let (tcp, udp) = match bind_pair(port) {
+-                Ok(sockets) => sockets,
+-                Err(error)
+-                    if matches!(
+-                        error.kind(),
+-                        io::ErrorKind::AddrInUse | io::ErrorKind::PermissionDenied
+-                    ) =>
+-                {
+-                    continue
+-                }
+-                Err(error) => panic!("port reservation {port}: {error}"),
+-            };
+-            let address = tcp.local_addr().unwrap();
+-            local.insert(port);
+-            held.push(Reservation {
+-                address,
+-                tcp: Some(tcp),
+-                udp: Some(udp),
+-                _lock: lock,
+-            });
+             if held.len() == count {
+                 return Ok(Self {
+                     held,
+@@ -189,6 +224,47 @@ impl PortLease {
+     }
+ }
+ 
++pub fn offset_ports(base: u16, offsets: &[u16]) -> Option<Vec<u16>> {
++    offsets
++        .iter()
++        .map(|offset| base.checked_add(*offset))
++        .collect()
++}
++
++fn reserve(port: u16, directory: &Path) -> io::Result<Option<Reservation>> {
++    let mut local = PORTS.lock().unwrap_or_else(PoisonError::into_inner);
++    if local.contains(&port) {
++        return Ok(None);
++    }
++    // Never unlink lock files: every process must lock the same inode.
++    let lock = open_lock(&directory.join(format!("{port}.lock")))?;
++    match lock.try_lock() {
++        Ok(()) => (),
++        Err(std::fs::TryLockError::WouldBlock) => return Ok(None),
++        Err(error) => panic!("port lease {port}: {error}"),
++    }
++    let (tcp, udp) = match bind_pair(port) {
++        Ok(sockets) => sockets,
++        Err(error)
++            if matches!(
++                error.kind(),
++                io::ErrorKind::AddrInUse | io::ErrorKind::PermissionDenied
++            ) =>
++        {
++            return Ok(None)
++        }
++        Err(error) => panic!("port reservation {port}: {error}"),
++    };
++    let address = tcp.local_addr().unwrap();
++    local.insert(port);
++    Ok(Some(Reservation {
++        address,
++        tcp: Some(tcp),
++        udp: Some(udp),
++        _lock: lock,
++    }))
++}
++
+ fn released<T>(address: SocketAddr, bound: io::Result<T>) -> T {
+     bound.unwrap_or_else(|error| panic!("{address} not released by its owner: {error}"))
+ }
+diff --git a/tests/transfer_service.rs b/tests/transfer_service.rs
+index 961c0ff64fb697fdb56966628b7956f0bc953fbe..512296bf1c63849f9190b9b3b85b9d0ae474c77b 100644
+--- a/tests/transfer_service.rs
++++ b/tests/transfer_service.rs
+@@ -1,17 +1,16 @@
+ // SPDX-License-Identifier: RPL-1.5
+ // Copyright (c) 2026 Karl Livesey
+ #![cfg(feature = "tls")]
++#[path = "support/ports.rs"]
++#[allow(dead_code)] // This service uses the shared fixture's offset layout.
++mod ports;
+ #[path = "transfer_source/fixtures.rs"]
+ mod source_fixture;
+ use std::{
+     fs,
+-    net::{TcpListener, UdpSocket},
+     path::PathBuf,
+     process::{Child, Command, Output, Stdio},
+-    sync::{
+-        atomic::{AtomicU16, Ordering},
+-        Mutex, MutexGuard,
+-    },
++    sync::{Mutex, MutexGuard},
+     time::{Duration, Instant},
+ };
+ #[path = "transfer_service/cuts.rs"]
+@@ -32,6 +31,8 @@ mod retirement;
+ mod retirement_retry;
+ #[path = "transfer_service/revocation.rs"]
+ mod revocation;
++#[path = "transfer_service/root.rs"]
++mod root;
+ #[path = "transfer_service/startup_data.rs"]
+ mod startup_data;
+ #[path = "transfer_service/startup_discovery.rs"]
+@@ -40,7 +41,6 @@ mod startup_discovery;
+ #[path = "transfer_service/startup_recovery.rs"]
+ mod startup_recovery;
+ const BIN: &str = env!("CARGO_BIN_EXE_voteboat-transfer");
+-static NEXT: AtomicU16 = AtomicU16::new(14000);
+ // A concurrent fork can briefly inherit another fixture's reserved listeners.
+ // Coordinate reservations and process creation, never child execution/waiting.
+ static RESERVATION_SPAWN: Mutex<()> = Mutex::new(());
+@@ -59,13 +59,31 @@ fn run(command: &mut Command) -> Output {
+ }
+ const GROUPS: [u128; 4] = [1, 20, 21, 22];
+ struct Cluster {
+-    root: PathBuf,
++    root: root::Directory,
+     base: u16,
+     quic: bool,
+     admin: u64,
+     peer_credentials: bool,
+     retirement: bool,
+     children: Vec<(u128, u16, Child)>,
++    _ports: ports::PortLease,
++}
++fn listener_offsets() -> Vec<u16> {
++    (0..4)
++        .flat_map(|slot| (1..=3).flat_map(move |node| [slot * 128 + node, slot * 128 + 100 + node]))
++        .collect()
++}
++
++#[test]
++fn listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping() {
++    let offsets = listener_offsets();
++    assert_eq!(offsets.len(), 24);
++    let max_base = u16::MAX - offsets.iter().max().unwrap();
++    let last = ports::offset_ports(max_base, &offsets).unwrap();
++    assert_eq!(last.iter().max(), Some(&u16::MAX));
++    assert!(ports::offset_ports(max_base + 1, &offsets).is_none());
++    // The old NEXT ladder reaches this base after fifty 1024-port advances.
++    assert!(ports::offset_ports(65200, &offsets).is_none());
+ }
+ impl Cluster {
+     fn new(quic: bool) -> Self {
+@@ -79,36 +97,8 @@ impl Cluster {
+     }
+     fn with_options(quic: bool, retirement: bool, merge: bool, peer_credentials: bool) -> Self {
+         let reservation = fixture_gate();
+-        let (base, held, udp) = loop {
+-            let base = NEXT.fetch_add(1024, Ordering::Relaxed);
+-            let mut held = Vec::new();
+-            let mut udp = Vec::new();
+-            let mut valid = true;
+-            for slot in 0..4 {
+-                for node in 1..=3 {
+-                    for port in [base + slot * 128 + node, base + slot * 128 + 100 + node] {
+-                        match (
+-                            TcpListener::bind(("127.0.0.1", port)),
+-                            UdpSocket::bind(("127.0.0.1", port)),
+-                        ) {
+-                            (Ok(t), Ok(u)) => {
+-                                held.push(t);
+-                                udp.push(u);
+-                            }
+-                            _ => valid = false,
+-                        }
+-                    }
+-                }
+-            }
+-            if valid {
+-                break (base, held, udp);
+-            }
+-        };
+-        let root = std::env::temp_dir().join(format!(
+-            "voteboat-transfer-service-{}-{base}",
+-            std::process::id()
+-        ));
+-        fs::create_dir_all(&root).unwrap();
++        let (base, mut ports) = ports::PortLease::acquire_offsets(&listener_offsets());
++        let root = root::Directory::new();
+         for group in GROUPS {
+             fs::create_dir_all(root.join(group.to_string())).unwrap();
+         }
+@@ -156,8 +146,7 @@ impl Cluster {
+             }
+             fs::write(root.join(format!("endpoints{select}")), endpoints).unwrap();
+         }
+-        drop(held);
+-        drop(udp);
++        ports.handoff();
+         drop(reservation);
+         let mut rig = Self {
+             root,
+@@ -167,6 +156,7 @@ impl Cluster {
+             peer_credentials,
+             retirement,
+             children: Vec::new(),
++            _ports: ports,
+         };
+         if peer_credentials {
+             peer_credentials::select(&rig, 1, &rig.tls());
+diff --git a/tests/transfer_service/root.rs b/tests/transfer_service/root.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..f0dd418489d2a4e9bce640be518a77d7789a736b
+--- /dev/null
++++ b/tests/transfer_service/root.rs
+@@ -0,0 +1,70 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use std::{
++    fs, io,
++    ops::Deref,
++    path::{Path, PathBuf},
++    sync::atomic::{AtomicU64, Ordering},
++};
++
++static NEXT: AtomicU64 = AtomicU64::new(0);
++
++#[derive(Debug)]
++pub(super) struct Directory(PathBuf);
++
++fn candidate(parent: &Path, sequence: u64) -> PathBuf {
++    parent.join(format!(
++        "voteboat-transfer-service-{}-root-{sequence}",
++        std::process::id()
++    ))
++}
++
++impl Directory {
++    // Called under fixture_gate, including by the filesystem-only controls.
++    // Port leases are recyclable; storage identities must be independent.
++    pub(super) fn new() -> Self {
++        Self::create(&std::env::temp_dir())
++    }
++
++    fn create(parent: &Path) -> Self {
++        loop {
++            let sequence = NEXT
++                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
++                .expect("transfer fixture root sequence exhausted");
++            let root = candidate(parent, sequence);
++            match fs::create_dir(&root) {
++                Ok(()) => return Self(root),
++                Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
++                Err(error) => panic!("create transfer fixture root {}: {error}", root.display()),
++            }
++        }
++    }
++}
++
++impl Deref for Directory {
++    type Target = PathBuf;
++
++    fn deref(&self) -> &Self::Target {
++        &self.0
++    }
++}
++
++impl Drop for Directory {
++    fn drop(&mut self) {
++        // Normal callers retain their explicit post-child-shutdown removal
++        // assertions. Unwind also covers partially prepared/started fixtures;
++        // Cluster::drop kills and waits children before this field is dropped.
++        if std::thread::panicking() {
++            if let Err(error) = fs::remove_dir_all(&self.0) {
++                eprintln!(
++                    "unwind cleanup of transfer root {}: {error}",
++                    self.0.display()
++                );
++            }
++        }
++    }
++}
++
++#[cfg(test)]
++#[path = "root_tests.rs"]
++mod tests;
+diff --git a/tests/transfer_service/root_tests.rs b/tests/transfer_service/root_tests.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..2cad5141a0bbdbd7e528f1b8db27d264fb5536a3
+--- /dev/null
++++ b/tests/transfer_service/root_tests.rs
+@@ -0,0 +1,133 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++// A normally dropped fixture intentionally leaves its root for the external
++// cleanup. Own that retained scratch even if a control assertion unwinds.
++struct RetainedRoot(PathBuf);
++impl Drop for RetainedRoot {
++    fn drop(&mut self) {
++        if self.0.exists() {
++            fs::remove_dir_all(&self.0).unwrap();
++        }
++    }
++}
++
++// Use the real Cluster/PortLease Drop paths, with an unstarted cluster and a
++// private lock-only reservation (as fixture_isolation does for unwind). No
++// sockets or shared port-namespace entries are changed by this control.
++fn unstarted_fixture(base: u16, namespace: &std::path::Path) -> super::super::Cluster {
++    use super::super::{ports, Cluster};
++    let lock = ports::open_lock(&namespace.join(format!("{base}.lock"))).unwrap();
++    lock.try_lock()
++        .expect("the previous fixture released its lease");
++    Cluster {
++        root: Directory::new(),
++        base,
++        quic: false,
++        admin: 3,
++        peer_credentials: false,
++        retirement: false,
++        children: Vec::new(),
++        _ports: ports::PortLease {
++            directory: namespace.to_path_buf(),
++            held: vec![ports::Reservation {
++                address: "127.0.0.1:0".parse().unwrap(),
++                tcp: None,
++                udp: None,
++                _lock: lock,
++            }],
++        },
++    }
++}
++
++#[test]
++fn fresh_identity_survives_delayed_cleanup_at_recycled_base() {
++    let _gate = super::super::fixture_gate();
++    let namespace = Directory::new();
++    let namespace_path = RetainedRoot(namespace.0.clone());
++    drop(namespace);
++    let base = 65048;
++    let first = unstarted_fixture(base, &namespace_path.0);
++    let old = RetainedRoot(first.root.0.clone());
++    fs::write(first.root.join("old-store"), b"A").unwrap();
++    drop(first); // Real Cluster shutdown/lease release, before external removal.
++    assert!(old.0.join("old-store").exists());
++
++    let next = unstarted_fixture(base, &namespace_path.0);
++    assert_eq!(next.base, base);
++    assert_ne!(
++        next.root.0, old.0,
++        "recycled base must get a fresh root identity"
++    );
++    assert!(
++        !next.root.join("old-store").exists(),
++        "must not reopen A's stores"
++    );
++    fs::write(next.root.join("owner-marker"), b"B").unwrap();
++    fs::create_dir(next.root.join("store")).unwrap();
++    fs::write(next.root.join("store/manifest"), b"B store").unwrap();
++    fs::remove_dir_all(&old.0).unwrap(); // A cleans up after B prepared stores.
++    assert_eq!(fs::read(next.root.join("owner-marker")).unwrap(), b"B");
++    assert_eq!(
++        fs::read(next.root.join("store/manifest")).unwrap(),
++        b"B store"
++    );
++    let path = next.root.0.clone();
++    drop(next);
++    fs::remove_dir_all(path).unwrap();
++}
++
++#[test]
++fn stale_collisions_and_partial_setup_unwind_keep_other_roots_untouched() {
++    let _gate = super::super::fixture_gate();
++    let control = Directory::new();
++    let parent = RetainedRoot(control.0.clone());
++    drop(control);
++    let sequence = NEXT.load(Ordering::Relaxed);
++    let stale = candidate(&parent.0, sequence);
++    fs::create_dir(&stale).unwrap();
++    let stale = RetainedRoot(stale);
++    fs::write(stale.0.join("old-store"), b"crashed fixture").unwrap();
++    let collision = candidate(&parent.0, sequence.checked_add(1).unwrap());
++    // A file at a candidate name is also somebody else's entry, never a root.
++    use std::io::Write;
++    let mut file = fs::OpenOptions::new()
++        .write(true)
++        .create_new(true)
++        .open(&collision)
++        .unwrap();
++    file.write_all(b"occupied name").unwrap();
++    drop(file);
++    let result = std::panic::catch_unwind(|| {
++        let partial = Directory::create(&parent.0);
++        assert_ne!(partial.0, stale.0);
++        assert_ne!(partial.0, collision);
++        assert!(!partial.join("old-store").exists());
++        fs::create_dir(partial.join("partially-prepared-store")).unwrap();
++        let path = partial.0.clone();
++        let unwind = std::panic::catch_unwind(|| {
++            let _owner = partial;
++            panic!("intentional transfer fixture setup failure");
++        });
++        assert!(unwind.is_err());
++        assert!(
++            !path.exists(),
++            "unwind must remove its owned failed scratch"
++        );
++        let next = Directory::create(&parent.0);
++        assert!(!next.join("old-store").exists());
++        assert!(!next.join("partially-prepared-store").exists());
++        let path = next.0.clone();
++        drop(next);
++        fs::remove_dir_all(path).unwrap();
++    });
++    assert_eq!(
++        fs::read(stale.0.join("old-store")).unwrap(),
++        b"crashed fixture"
++    );
++    assert_eq!(fs::read(&collision).unwrap(), b"occupied name");
++    fs::remove_file(collision).unwrap();
++    drop(stale);
++    result.unwrap();
++}

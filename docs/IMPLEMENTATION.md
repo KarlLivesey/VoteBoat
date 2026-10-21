@@ -21,14 +21,17 @@ work needed to decide PR19.
 | PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
 | PR15 DR1 | Rejected for this wind-down; closed as parked, not merged | Independent source `66fcf3e0` has both fresh source approvals and strict checks, but its complete final default failed: 2686 passed / 2 failed / 1 ignored |
 | PR23 N1c | Rejected for this wind-down; closed as parked, not merged | Independent source `1c259536` has both source approvals and strict checks, but fair performance qualification is incomplete: 0/70 measurements launched because the quiet-host prerequisite never held. Current Linux default is being completed and audited before cleanup |
-| PR22 N1b | Current: finish the existing diagnostic-counter candidate | Reconcile qualified main; record N1c and N1 as parked, document counter limits, then obtain fresh reviews and the full final-head validation gate |
+| PR22 N1b | Rejected for this wind-down; closed as parked, not merged | Dirty reconciled input passed Python 15 and default example 56, but all-feature example failed 63 passed / 1 failed. No source publication, fresh review or full qualification followed |
 | PR19 N1 | Rejected for this wind-down; closed as parked, not merged | Unchanged `ff9faec8` retains its failed durable-save CPU gate and unresolved source-review P2 obligations. N1d was not built |
 
-PR22 is the only remaining open candidate. Its purpose is to retain useful
-benchmark diagnostics if the established gates pass; its dependency is qualified
-main, not a parked candidate. Next comes recording its keep/reject decision,
-then the final ownership/process/build cleanup audit. These steps advance the
-existing network milestone and close the wind-down; they add no roadmap scope.
+All six candidates now have explicit decisions: keep PR24; reject and close
+PR14, PR15, PR19, PR22 and PR23 as parked. No candidate remains open. The current
+mini plan is to preserve the PR22 patch and failure evidence, complete PR23’s
+already-running default audit, then verify ownership/process/build cleanup.
+Their dependency is the existing evidence, and completion requires durable
+records, joined jobs and removed owned build checkouts. They close the existing
+network wind-down without adding roadmap scope; the macro release and lifetime
+goals remain incomplete.
 
 #### PR23 rejection record
 
@@ -64,6 +67,36 @@ Adding history-only b959 gives 2,628 paths: 2,607 present and 21 absent, with al
 seven additional ST2-only paths absent. Two-voter commit notices can be held;
 a byte-limit split can re-hold a spare. Historical TCP4k p99 notes remain
 historical evidence, not clearance of the final candidate.
+
+#### PR22 rejection record
+
+[PR22 was closed as parked](https://github.com/KarlLivesey/VoteBoat/pull/22#issuecomment-6309613305),
+with remote source `463c50d4ec06b5e87d435c41427ccb63c60a9dfd` unchanged.
+The bounded reconciliation onto qualified-main history through `20a8d08f`
+remained uncommitted. It preserved the benchmark-only diagnostic mechanism,
+corrected sampling/proxy and parked-candidate documentation, added optional
+counter compatibility tests and carried only five authorized exact reviewed
+transfer/port/root test blobs. Library, Cargo and hooks matched qualified
+`bd714771`; rejected ST2 and DR1 production were excluded.
+
+Python checks passed 15/15 and the default native benchmark example passed
+56/56. The all-feature example failed: 63 passed, one failed, actual rc101 in
+38.22 seconds. `shared::drain::quic_mixed_voter_and_learner_assignments_resume_together`
+reported `Unknown(LeadershipChanged)` at `examples/benchmark/shared_drain.rs:304`.
+Both TCP and QUIC cluster-counter tests passed, including leader commit-only
+at least one. The failure cause is unproven; it is not attributed to the new
+counters. No unchanged retry, diagnostic or reliability repair was launched.
+
+Seven strict checks, hook publication, fresh source reviews and the full matrix
+were not run on that input. The unmet gate supports this rejection. The owner
+must preserve the full tracked/untracked patch and exact input identities,
+then remove its build checkout, scratch and helpers. Corrected accepted runs
+were audited at absolute nice19 on cores0–3/max4jobs; an earlier priority-reset
+abort before compilation and initially unsuitable helper resources remain
+disclosed, so all-attempt resource compliance is not claimed. No PR22 source
+patch is applied to main. [Retained patch and evidence](../validation/winddown/pr22/ARCHIVE.md)
+include an independent private-index reconstruction of tree `f7cd5716` from
+exact main `20a8d08f`; patch SHA256 `b28e7ac211b25fb4d10a8ba5fa1f1eddc1e40ec5c95ce1a8c8c6b377184ec764`.
 
 #### PR19 rejection record
 

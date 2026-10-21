@@ -1,0 +1,82 @@
+{
+  "base": "20a8d08fb85f43c5496aefaa295753324f9b3b37",
+  "candidate_commit": null,
+  "candidate_src_tree": "38744d1b474cb97abd2d1e579ac8d93e44ef68b7",
+  "candidate_tree": "f7cd571692a82c80bbd8b3aa12c6329c043ca634",
+  "changed_blobs": {
+    "benchmarks/tools/cluster.py": {
+      "git_blob": "c3d2b1be04e8638e03ece280cee1f717186c81ec",
+      "mode": "100755",
+      "sha256": "fbfd2009be7d74272d91745673659353c018cc6dc41f1d3fc02912efda2d2229",
+      "size": 26951
+    },
+    "benchmarks/tools/cluster_test.py": {
+      "git_blob": "feb5318ffcbca08b66d4367f44f6888f455f1ef4",
+      "mode": "100644",
+      "sha256": "6bde62ad4bac4af3e4d1d7c80a3bcce9458103334b7922ada5df94b8dcf15282",
+      "size": 20943
+    },
+    "docs/IMPLEMENTATION.md": {
+      "git_blob": "9b129eb0dafc038ab144c061719d951d99331082",
+      "mode": "100644",
+      "sha256": "73ee32aa227060cf4d9c551d84532b8eb082aa35b50a9832ce9f0349fc41dd43",
+      "size": 3115968
+    },
+    "examples/benchmark/cluster.rs": {
+      "git_blob": "a697454de7eed2861087e705be5e82c33e74ab20",
+      "mode": "100644",
+      "sha256": "b7908bc2a0b0d3edfa1b6fa116bffdee547f4b28cefec8cab70291df8f0c1a88",
+      "size": 51451
+    },
+    "examples/benchmark/observe.rs": {
+      "git_blob": "4db107db3bcd6fd0ea5f2d70f59018ff4c9bf4b0",
+      "mode": "100644",
+      "sha256": "ea5796f7876fb78ab92453c8abec0a18c6d92ed10c204e973f38c430886fd10b",
+      "size": 14707
+    },
+    "tests/fixture_isolation.rs": {
+      "git_blob": "f77fb2a73920905659b386d54bca3a9cebcfba7a",
+      "mode": "100644",
+      "sha256": "c9a957d2799299f901b9e439e598523d598f54b4c91b2420f5a5c0005fa550b8",
+      "size": 13888
+    },
+    "tests/support/ports.rs": {
+      "git_blob": "c7f4a34223392eb632a0bd2849b2bf3a10f6dac0",
+      "mode": "100644",
+      "sha256": "ca7ea4d0f95a67d2acd9ff294e7efe641e2fc47a4242d1b73c9fc10059a029d1",
+      "size": 16016
+    },
+    "tests/transfer_service.rs": {
+      "git_blob": "512296bf1c63849f9190b9b3b85b9d0ae474c77b",
+      "mode": "100644",
+      "sha256": "74548c43e28bb738ca3cb6133a4e3dff1108f1f6dcef1a7d42116957c378ac1b",
+      "size": 12588
+    },
+    "tests/transfer_service/root.rs": {
+      "git_blob": "f0dd418489d2a4e9bce640be518a77d7789a736b",
+      "mode": "100644",
+      "sha256": "969605fa3968e74c4825f505038485e1913cb24751a68d9a97d756e2e18dcd4e",
+      "size": 2052
+    },
+    "tests/transfer_service/root_tests.rs": {
+      "git_blob": "2cad5141a0bbdbd7e528f1b8db27d264fb5536a3",
+      "mode": "100644",
+      "sha256": "36ec9c5992c5bc3f86631476889b774a081317bff1838eca2ef1d5c6ca841a37",
+      "size": 4862
+    }
+  },
+  "disposition": "parent REJECT/CLOSE as parked; no publication authorized",
+  "exact_fixture_blob_count": 5,
+  "fixture_source": "66fcf3e000441c7fae0bb1fed231bdc28e146c9f",
+  "merge_head": "20a8d08fb85f43c5496aefaa295753324f9b3b37",
+  "original_pr22_head": "463c50d4ec06b5e87d435c41427ccb63c60a9dfd",
+  "patch_apply_rc": 0,
+  "patch_check_rc": 0,
+  "production_cargo_hooks_build_clippy_identical": true,
+  "production_src_tree": "38744d1b474cb97abd2d1e579ac8d93e44ef68b7",
+  "qualified_production": "bd714771e181d59c2cfaece3fc93dc411ce41ddb",
+  "reconstructed_tree": "f7cd571692a82c80bbd8b3aa12c6329c043ca634",
+  "stable_input_count": 2605,
+  "tree_identical": true,
+  "working_tree_limitation": "Tests ran uncommitted merged working-tree inputs, including two then-untracked root fixture files; no committed or pushed candidate was qualified. Input manifest captured after the default pass; comparison after all-feature failure found no changed build/test/script inputs. Docs changed outside that manifest."
+}

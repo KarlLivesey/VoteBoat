@@ -1,0 +1,25 @@
+{
+  "checked_inputs": 2605,
+  "changed": [],
+  "default": {
+    "passed": 56,
+    "failed": 0,
+    "rc": 0
+  },
+  "all_features": {
+    "passed": 63,
+    "failed": 1,
+    "rc": 101,
+    "failure": "shared::drain::quic_mixed_voter_and_learner_assignments_resume_together",
+    "at": "examples/benchmark/shared_drain.rs:304",
+    "error": "Unknown(LeadershipChanged)"
+  },
+  "python": {
+    "passed": 15,
+    "failed": 0,
+    "rc": 0
+  },
+  "further_tests": "not launched: stop rule",
+  "strict_checks": "not yet launched",
+  "production_diff": ""
+}

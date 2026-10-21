@@ -1,0 +1,60 @@
+{
+  "label": "example-default",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--example",
+    "native_benchmark",
+    "--",
+    "--test-threads=4"
+  ],
+  "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-414c7c5a",
+  "env": {
+    "CARGO_BUILD_JOBS": "4",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_TARGET_DIR": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-414c7c5a/target",
+    "RUST_TEST_THREADS": "4"
+  },
+  "controller_pid": 785252,
+  "controller_nice": -4,
+  "controller_affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "samples": 1,
+  "task_records": 2,
+  "violations": [
+    {
+      "pid": 785323,
+      "tid": 785323,
+      "nice": -4,
+      "cpus": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "pid": 785252,
+      "tid": 785252,
+      "nice": -4,
+      "cpus": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "max_target_bytes": 3013,
+  "seconds": 0.018,
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

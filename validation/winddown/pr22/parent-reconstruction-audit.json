@@ -1,0 +1,8 @@
+{
+  "base": "20a8d08fb85f43c5496aefaa295753324f9b3b37",
+  "expectedAndReconstructedTree": "f7cd571692a82c80bbd8b3aa12c6329c043ca634",
+  "patchSha256": "b28e7ac211b25fb4d10a8ba5fa1f1eddc1e40ec5c95ce1a8c8c6b377184ec764",
+  "method": "private Git index read-tree/apply --cached/write-tree; no source checkout/build/test",
+  "appliedToMain": false,
+  "remoteHeadUnchanged": "463c50d4ec06b5e87d435c41427ccb63c60a9dfd"
+}
