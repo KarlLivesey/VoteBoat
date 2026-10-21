@@ -1,5 +1,41 @@
 # Implementation record
 
+## PR15 known transfer gate repair (21 October 2026)
+
+The before-edit schema/ownership/failure/acceptance and current/next-two plan is
+recorded in `validation/pr15-transfer-gate/PLAN.md`. This is a test-only repair
+of the established port-layout overflow on exact `558643b3`; production inputs
+remain pinned. Fresh reviews and the whole final-head gate remain parent-owned.
+The LB/network macro scope and rejected ST2 disposition are unchanged.
+
+**Implemented bounded repair; full qualification remains pending.** Only the
+approved three-file fixture diff from 3fa6435b was extracted. Protected src/
+examples/Cargo/locks/hooks/matched inputs are exactly 558643b3 (1,850 files);
+the prior 2,611-file input audit changes only the three authorized test files.
+The known 65200+487 overflow is rejected by checked layout arithmetic; finite
+shared leases hold all 24 listeners through cluster lifetime and child joins.
+The approved isolation SPAWN guard and layout handoff regression are retained.
+
+Actual local validation: boundary1, isolation default9/all9, transfer default26/
+all34, existing native reconnect helper caller1: **80 passed /0 failed /0 ignored
+test executions**. All seven strict checks pass with zero diagnostics through
+the unchanged qualification hook. Actual nonforce publication invokes the
+enabled hook again; exact final source/publication/cleanup receipts are in
+`validation/pr15-transfer-gate/REPORT.md` and raw main `pr15-transfer-gate/`.
+No full matrix, exhaustive relay, new performance gate or macOS validation.
+The original failed all-feature full gate is retained as failed history.
+
+| Mini item | Purpose | Dependencies | Completion checks | Macro advanced |
+| --- | --- | --- | --- | --- |
+| Current PR15 | Remove the known fixture gate failure and judge independent DR1 | Exact558 plus approved three-file fixture hunks; repaired source is checked here | Targeted80/0 and strict7 pass; enabled push hook, then parent fresh reviews and whole final-head five-config gate | Incomplete LB: bounded application sessions |
+| Next PR23 N1c | Judge existing source without rejected ST2 | Independently qualified DR1 and main | Parent fresh reviews/full suites and existing fair performance gate | Existing network milestone |
+| Then PR22 N1b | Finish the existing candidate after PR23 | Reconciled final main | Recorded documentation caveats, reviews and validation gates | Existing network milestone |
+
+The linked macro was reviewed: no milestone is complete, no new prerequisite
+is introduced, and rejected ST2/default automatic lifetime maintenance stay
+excluded. Current targeted evidence is separate from the parent-owned planned
+qualification. No main source or memory edits, new PR, merge or closure.
+
 ## DR1 independent reconciliation (21 October 2026, PR15)
 
 # Bounded DR1 reconciliation schema plan (before conflict/production edits)
@@ -94,7 +130,7 @@ work needed to decide PR19.
 | --- | --- | --- |
 | PR24 V3f | Kept and merged | Merge `1e56e9f5`; recorded final-main head `bd714771`; default 2603, all-features 2915, no-default 1346, native-only 1924 and matched 75 passed, zero failures; both reviews, strict checks and enabled hook passed |
 | PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
-| PR15 DR1 | Current: reconcile the independent ledger candidate without ST2 | Original reviewed `79829e87` did not depend on ST2. Remove the rejected cumulative ST2 tree, preserve all eight review rounds and published history, correct the 16-byte benchmark metadata, then obtain fresh source reviews and the full final-head gate |
+| PR15 DR1 | Current: qualify the independent ledger candidate without ST2 | Reconciled558 preserves original798, main, all eight rounds/published history and 16-byte metadata. The bounded known transfer-fixture repair passes targeted80/0 and strict7; fresh source reviews and the whole final-head gate remain required |
 | PR23 N1c | Next: judge on the qualified dependency tree | Exclude rejected ST2 through the replacement DR1 reconciliation; fresh reviews, full final-head suites and the established fair performance gate remain required |
 | PR22 N1b | Then: resolve after PR23 | Reconcile the final main, fold the superseded-N1c and entryless-frame documentation caveats, and complete the established review and validation gates |
 | PR19 N1 | Pending bounded keep/reject decision after PR23 | Only the previously authorized N1d work, two existing review P2 fixes and the recorded performance gate are permitted; park/close if that gate still fails |
