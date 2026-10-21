@@ -1,0 +1,1890 @@
+{
+  "head": "66fcf3e000441c7fae0bb1fed231bdc28e146c9f",
+  "config": "default",
+  "audited": true,
+  "build_rc": 0,
+  "build_finished": [
+    true
+  ],
+  "inventory": 130,
+  "executed_exactly_once": 130,
+  "every_raw_named_outcome_matches_result": true,
+  "results": [
+    {
+      "label": "test-default-000-activation_model",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/activation_model-e93704cf79835a04"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23553991317749023,
+      "raw_log_sha256": "e760f693074048ad185f7aefdca27f2b09e1e3e1bad99ea440f03eaf95708224",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-001-program_transaction_model",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/program_transaction_model-4ae2c6be5b90155e"
+      ],
+      "rc": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22027182579040527,
+      "raw_log_sha256": "fb31ed101059e66f6deda1ecba4da5c5219a10ac71ac429f6d018254114d8096",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-002-service_profiles",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/service_profiles-7761b52a3a128ab8"
+      ],
+      "rc": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2198951244354248,
+      "raw_log_sha256": "437de9e2098a20e087a50d7bf164cb8a8f92f68ff4f444f13c7719682cb34425",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-003-replication_scope",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/replication_scope-fe4e039b84788380"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2436540126800537,
+      "raw_log_sha256": "30c4c76578a1c0f30f59c403be5ee5b9d0bc59efa6bdda8c6ba17ee6b7104d64",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-004-connect",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/connect-3069dae895288140"
+      ],
+      "rc": 0,
+      "passed": 21,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2297649383544922,
+      "raw_log_sha256": "2895eef7f755aae2f9fa4e0b1845c6075723ff9980083db9d4de4e8c718ef020",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-005-striped_log_store",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/striped_log_store-6101ee15ed022a6f"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.6288232803344727,
+      "raw_log_sha256": "17681f40db1b3e832f1470ee0b58169865edd932c7f5ad77155082b45eb3b96c",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-006-group_creation",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/group_creation-c374515f1d4c64cd"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22596454620361328,
+      "raw_log_sha256": "118e986c042c8c7e4f8aebe8eada9114467c7f728953a10cc4ea8e2d39f52343",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-007-manifest_mapping",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/manifest_mapping-8005885eb355749d"
+      ],
+      "rc": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.21933984756469727,
+      "raw_log_sha256": "4f0e37d7a3d7529ad978b60e82bed31494af81d5b12ecd429bdf5e6a30612bef",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-008-remote_discovery",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/remote_discovery-787805962022549c"
+      ],
+      "rc": 0,
+      "passed": 29,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22924113273620605,
+      "raw_log_sha256": "2f9446bdfd2edc0332e35c1e62b322d06e83f09fc3a361838468b189fa2abc3a",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-009-striped_wal_model",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/striped_wal_model-03b92930d8b7126d"
+      ],
+      "rc": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2221086025238037,
+      "raw_log_sha256": "ed2a0339a51adcc3b90e1122c02f895928c72b97823e0729c2ca417bfe7be46e",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-010-transfer_activation",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_activation-d26ef7b2f7671a10"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22286462783813477,
+      "raw_log_sha256": "ec518b6a2dd9348b185d633818a4bdc51b0fb298a32a3b077ca9ab704ee38ce7",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-011-logical_configuration_history",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_configuration_history-00f916a59a34fcd3"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22591638565063477,
+      "raw_log_sha256": "ea4e746ee7c9fb755bda6d7cc046e7f811e6f2f4773030ab22bfda23c0439262",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-012-child_slots",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/child_slots-a5baf3e7fa033bb8"
+      ],
+      "rc": 0,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22255253791809082,
+      "raw_log_sha256": "0f05be4e74228320d48e273ff91d7684943bfbe9214d5c4083c22d8c29acb2f1",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-013-imported_parent",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/imported_parent-d4efcc18ce9145ca"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.2300515174865723,
+      "raw_log_sha256": "f802c674a6beaf2731370608e24ab395be04adfe0914d61f84781dd20ccf5686",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-014-startup",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/startup-d667aaa7d934dd31"
+      ],
+      "rc": 0,
+      "passed": 48,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 12.083816051483154,
+      "raw_log_sha256": "26a8254616d152db50f9969198222c5bc6b6ccebac9a4a234dc516274fae1a98",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-015-quic_connect",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/quic_connect-6b7070a98e66aeed"
+      ],
+      "rc": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22988533973693848,
+      "raw_log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-016-transfer_publication",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_publication-7708fbf3ac180276"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2236783504486084,
+      "raw_log_sha256": "1fe2f84b9f3b3cafd943d6e17887117f9351812d7217834514a0ed0dda4e7ebb",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-017-transfer_source",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_source-495a1b251d7f311f"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.6244978904724121,
+      "raw_log_sha256": "63aef73655c6b6cf07be90bb7381bad4c9e2b728a9eef46c94d6dcbeae66858c",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-018-scoped_source",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/scoped_source-4ad130bb1a811779"
+      ],
+      "rc": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.43036794662475586,
+      "raw_log_sha256": "637c1246a459edbfcfe9befefa05c4d97c3ea2719b4616ef7c178d943389247c",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-019-remote_manifest",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/remote_manifest-96a9df6c65057eeb"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22499704360961914,
+      "raw_log_sha256": "5d199828154b9f5d0adf9a3462710baf4b4853a3dae84ad0ce38f0a4594b6555",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-020-volatile",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/volatile-66682859d6ec85ca"
+      ],
+      "rc": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22707676887512207,
+      "raw_log_sha256": "7307b1f28d2365a0c5c9f69c86a4e2db28e88c62639b90e4fa4c3d7e24a13fe1",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-021-durable_vote",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/durable_vote-ec68f073c6c48e7f"
+      ],
+      "rc": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.21881961822509766,
+      "raw_log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-022-effect_owner",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/effect_owner-1a56b3e77d840106"
+      ],
+      "rc": 0,
+      "passed": 211,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 130.24086117744446,
+      "raw_log_sha256": "5240f6451b28b647d228a3c8f08320aa50dc7f8e432fc1c2907aad2f8edecc09",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-023-logical_activation_driver",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_activation_driver-787874e99de18441"
+      ],
+      "rc": 0,
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 21.81508994102478,
+      "raw_log_sha256": "067c2b15050c4c27fd019b4665b6e1e91e1314602bdd2b5bf02986c0b17b7939",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-024-log_staging_benchmark",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/log_staging_benchmark-4de22333ee8edd16"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22290396690368652,
+      "raw_log_sha256": "5461f4041cc03b9cadd9c02c722b8313ce9cc3d630a9de47c675d5b3c625068f",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-025-directory",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/directory-58e50ecda80e07e6"
+      ],
+      "rc": 0,
+      "passed": 31,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.6337478160858154,
+      "raw_log_sha256": "bfcb5ecbca384cf845186609d133eb56d00d214a11424ddb8c767cc0a332d1b9",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-026-logical_formats",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_formats-538b2ee1b69c89dc"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22744154930114746,
+      "raw_log_sha256": "abdb09a05971224c9914c5467522fd93db4358257d7cf85a04759ee0d4710040",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-027-peers",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/peers-7c5951b37ec70713"
+      ],
+      "rc": 0,
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.0307109355926514,
+      "raw_log_sha256": "b1ee83f418675c91ee4579ea113f69cc506fdbb81f8d295b131550fdba5ac6f3",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-028-placement",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/placement-956eda0c6fb81ef4"
+      ],
+      "rc": 0,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2263033390045166,
+      "raw_log_sha256": "1bcc4bf5ea78b4912b3064cd1ebb3d12fefa45d90cc4f456dd7faaf3b4dda27b",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-029-native_relay",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/native_relay-6be3a9cd6122d7e3"
+      ],
+      "rc": 101,
+      "passed": 12,
+      "failed": 1,
+      "ignored": 0,
+      "result_status": "FAILED",
+      "elapsed": 2.4608466625213623,
+      "raw_log_sha256": "03b56e98579842c40553b9d18c6c9b499c5c95f547c294a91288491001dfebc9",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-030-observability",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/observability-11091d2d2822cf08"
+      ],
+      "rc": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2282571792602539,
+      "raw_log_sha256": "e68779ce12429e26b863402d899230c47b9ed2a970fe6ffc7fd2dccb8129f35a",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-031-voteboat",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/voteboat-4c5dca527dec7d39"
+      ],
+      "rc": 0,
+      "passed": 587,
+      "failed": 0,
+      "ignored": 1,
+      "result_status": "ok",
+      "elapsed": 67.81273794174194,
+      "raw_log_sha256": "228355d1b21651b8606c93d8990040f7c63873bb8e8b1f5bfba70729c24ef573",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-032-transfer_operation",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_operation-fbd1681a90223af6"
+      ],
+      "rc": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.25005650520324707,
+      "raw_log_sha256": "bbfb5c4951daa811631fdae8714bdec7c6087c2ff4928e2b6c4d91a9f55c7112",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-033-embedded_counter",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/embedded_counter-e61abf58856c017d"
+      ],
+      "rc": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2205488681793213,
+      "raw_log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-034-credential_journal",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/credential_journal-5e7fd5bf80eda01c"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22707700729370117,
+      "raw_log_sha256": "a2bfb5b63281c26031cd850a67a7ed973d88972277227f71e3b0fc65927cddf0",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-035-lifetime_apply_never_errs",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/lifetime_apply_never_errs-747a07792afae53b"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.9034781455993652,
+      "raw_log_sha256": "8f2363cb84571a2a88ca49956d116c93c9a6acc0c48d493c944c8568ad40986e",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-036-counter_service",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/counter_service-fee6a661a41aa2d4"
+      ],
+      "rc": 0,
+      "passed": 146,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 219.05068135261536,
+      "raw_log_sha256": "80c782f799cef073c87bce248ee5702b0469a28f87b3645408f241cc2a37f1e8",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-037-provider_conformance",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/provider_conformance-331765eecc8d86d3"
+      ],
+      "rc": 0,
+      "passed": 42,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.46140503883361816,
+      "raw_log_sha256": "7fea6711aa6de465f781ea756fa0f3498d9e2a2f49045eaa171170af8591ed0f",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-038-transfer_service",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_service-f7b7b6618fe11802"
+      ],
+      "rc": 0,
+      "passed": 28,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 61.02848291397095,
+      "raw_log_sha256": "43d0b51ac867a5c38161aee51eee4d4afcb163ec0c4a68699d96db3e21b0ee8d",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-039-snapshot_exports",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/snapshot_exports-82781d9afcd7681d"
+      ],
+      "rc": 0,
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2346043586730957,
+      "raw_log_sha256": "a89d1cd1830932846f7e37623d324d5ef1bdbd6b1aae8b26e9e09dc9ed30151c",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-040-ballots",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/ballots-d9e48a652ec8ee94"
+      ],
+      "rc": 0,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22718071937561035,
+      "raw_log_sha256": "0ddbb9a378b20ceb7da3cf54413d5af235c7c61b083412c962e44462fc170aa3",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-041-membership",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/membership-fb08f628a539b80f"
+      ],
+      "rc": 0,
+      "passed": 32,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22601079940795898,
+      "raw_log_sha256": "4d8b7beff82381c4bc6dca0df82f290161aca59a77bac42f77165aafbbc04536",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-042-admission",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/admission-230f1420e1a29a52"
+      ],
+      "rc": 0,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2285175323486328,
+      "raw_log_sha256": "25f58a85d17f7af851985a00f6c6f5629e8fdec2ddcba6c8d4cc5c1ca2e43963",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-043-drain_membership",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/drain_membership-518804366b9eb667"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22245240211486816,
+      "raw_log_sha256": "e188de2bfb3f1c322f87ff417e524b618646394c7b9a0eb3380c23481a45531f",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-044-logical_voter_activation",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_voter_activation-6cdbf6b5d60b8107"
+      ],
+      "rc": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 13.460371017456055,
+      "raw_log_sha256": "ff89bd572002f1c11d7fea477440c4571f34e6ac9bd36f7395045e97a27f4148",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-045-logical_voter_promises",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_voter_promises-37b4be47786fb53d"
+      ],
+      "rc": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 62.377742290496826,
+      "raw_log_sha256": "0e04b79c25a97d946afc58026ba7fff633a857577dd648603773eda730533126",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-046-shared_barrier",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/shared_barrier-c6ae0fb69cc07899"
+      ],
+      "rc": 0,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.6331877708435059,
+      "raw_log_sha256": "bb032395a15129154caccacb472fb0d24557c32917db930decc9cf28572f9e50",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-047-learners",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/learners-1a54c75b28ec28c1"
+      ],
+      "rc": 0,
+      "passed": 41,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.45694422721862793,
+      "raw_log_sha256": "d5c1ea24d23d85a9bc6c98cf84d10e7bd2632b92e41b423e86010abbad547924",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-048-transfer_repeat",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_repeat-0de2972c8f902547"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.4226093292236328,
+      "raw_log_sha256": "d5b50bbf9099b69ba39f7cad4b4df2db28f8c6ecabe7b96ae4d0724539d9c5e2",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-049-fixture_isolation",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/fixture_isolation-d3fde1a88cc889ca"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22753429412841797,
+      "raw_log_sha256": "0bda08666516936e82aa76561dcf59d7c750b695d06b7ce8f7b58f5f98ca166a",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-050-learner_enrollment",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/learner_enrollment-a1ec1ce34755d954"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22491836547851562,
+      "raw_log_sha256": "8d180670a0682ac55ffd50396ba533229a65b3d51cb2d80afc6138cc331f6420",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-051-log_staging",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/log_staging-824c9eed9d53a916"
+      ],
+      "rc": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22363066673278809,
+      "raw_log_sha256": "28fa3ade224e471f30d60faf2fc4233d2a2d3e63bd7f9b74609f1ade20aaedba",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-052-witness_log_store",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/witness_log_store-051f5f982f407b3d"
+      ],
+      "rc": 0,
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22695040702819824,
+      "raw_log_sha256": "5d2c41fcbc21796b6cb6d27c269c572452ff4c1e839c6ebc308b98f69be8eece",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-053-voteboat-transfer",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/voteboat_transfer-d5e0e7e3ed59ecd6"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22985124588012695,
+      "raw_log_sha256": "76f9d8f9afb35da1a2a365bad55857d8a8e069144f57ba169ed28ffbfecfe8aa",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-054-transaction_model",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transaction_model-8bcb1bd61375c071"
+      ],
+      "rc": 0,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 2.831817388534546,
+      "raw_log_sha256": "76b6338f7efdb392118fd5f2599114a7965bac6bbec949e9afb16da918fc95d4",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-055-logical_network",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_network-d070567573fc12ac"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.6454665660858154,
+      "raw_log_sha256": "8e7ffbe3b14cfc45777b9de87d9d753f9fe8a9c57281aaf3a915cf4bee616276",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-056-transport",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transport-84ab2dfe88e3dc1a"
+      ],
+      "rc": 0,
+      "passed": 37,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23295950889587402,
+      "raw_log_sha256": "3d591d246cf98e3e658e66a1eb1ba7757ace58d6e09452351d29843edb8804b2",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-057-reparent_guards",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/reparent_guards-45d0dd6faed6c4b7"
+      ],
+      "rc": 0,
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.0334558486938477,
+      "raw_log_sha256": "ea8b72934dcf920eb8a15efaca45fea8c0c9f550440e344eff8c620010d0dc43",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-058-snapshot_worker",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/snapshot_worker-8ed0ee43776163b2"
+      ],
+      "rc": 0,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 2.6700456142425537,
+      "raw_log_sha256": "bee9fc48bf0425b18c81061fcad38f0fc3784f9ca13952ec46f93cb95a51d2a2",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-059-logical_voter_application",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_voter_application-8a016db474424e20"
+      ],
+      "rc": 0,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23214268684387207,
+      "raw_log_sha256": "910adfe95005d593512dab1b1cc5c36dfaa28f83741e02b7684d7fcdb3d138bb",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-060-lookup_discovery",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/lookup_discovery-99ee967c0981753d"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2336139678955078,
+      "raw_log_sha256": "3f9781efe3a88a148c218a5df84d93aebe40bffe6c9d793c4e8abcbe9ab13605",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-061-secure",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/secure-55b7de54ba58990a"
+      ],
+      "rc": 0,
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22684049606323242,
+      "raw_log_sha256": "5a1574dda62c4c70c0cfafa9fb3a3b40326d337aa090eab774a8df975878280c",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-062-buffer",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/buffer-2953b3ea75ecf181"
+      ],
+      "rc": 0,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22786617279052734,
+      "raw_log_sha256": "653496c366c0b8e02563e99dec17a7554fe12b4bcccb5c0795cdf9c0e606c6c8",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-063-journal_barrier",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/journal_barrier-cf834bc4c7360493"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22360730171203613,
+      "raw_log_sha256": "1cac90f8421efa21a0c35df20b627dab472e6cbcf61e0f3ab27cfa597b0f3841",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-064-replicated_counter",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/replicated_counter-4e07f43f7529fcb0"
+      ],
+      "rc": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.21997380256652832,
+      "raw_log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-065-transaction_driver",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transaction_driver-aedbb25877267c78"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 6.655937194824219,
+      "raw_log_sha256": "f29a8285a7c84925a2925848e0a122b0ef2c64a3eb5953705600b46464cd20c3",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-066-wire",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/wire-c878f3ae1f3a0adc"
+      ],
+      "rc": 0,
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22343158721923828,
+      "raw_log_sha256": "d7a0864a8336c6f779017b4d5a03feceb82eb23b832a4903f24e0f0a783d5ed5",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-067-discovery",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/discovery-c7aca7221eb3d2ad"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22454094886779785,
+      "raw_log_sha256": "65cb1dc133455e23c3ca1dc1d2760634b3f34c55caad0bf87922fdd2298f0d19",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-068-placement_planning",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/placement_planning-eef734937d3e25a2"
+      ],
+      "rc": 0,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22282147407531738,
+      "raw_log_sha256": "3cbcc19f5b08c1d516f5b09ab66b1f71f893f206b496068c9681a1e74d07be50",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-069-credential_refresh",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/credential_refresh-3443097157c52ae9"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23348116874694824,
+      "raw_log_sha256": "f31d91c2627a0db1b6123c6538bb855ddf9ac2f8c5b19c33fa7bccd12135dadd",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-070-deletion",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/deletion-ad3d6ec2cb1be693"
+      ],
+      "rc": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2257547378540039,
+      "raw_log_sha256": "4ee7c73fbfbd8e82969beb90f8d6dd8973075bd1be023de65cc96b370bdf8a2f",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-071-namespace_creation",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/namespace_creation-d6ccbacd2c21c333"
+      ],
+      "rc": 0,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.6341762542724609,
+      "raw_log_sha256": "3053bbebbc9ff2a90720a632c990fd3404d240f99a9d2bf392bcc711aef9d337",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-072-worker",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/worker-f48d736a258ba7dd"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 2.4624385833740234,
+      "raw_log_sha256": "c2a8c3f15de1df66b197c6df99b7519032bba1e0d3b977e49b32799c66e338b3",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-073-transaction_application",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transaction_application-a191c83556b37729"
+      ],
+      "rc": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23943805694580078,
+      "raw_log_sha256": "9f54e939a3478d7d9a3b23e6997365e211cb9088225de7327cb6946acfac2b0b",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-074-journal_timings",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/journal_timings-162570f629391248"
+      ],
+      "rc": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23025250434875488,
+      "raw_log_sha256": "97fafff1e571da75ed10f4d8cbd37c4945c86eb36db4d0d6be91950083ac6c96",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-075-application",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/application-5f7374c0b9183989"
+      ],
+      "rc": 0,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 5.034950017929077,
+      "raw_log_sha256": "8476340879897665dbb569e97e419e61232c661a3d024b73b82047f2006b83c7",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-076-maintenance",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/maintenance-4dfbadd665ff09c9"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22262859344482422,
+      "raw_log_sha256": "09a36f1f1e9278ed4f08d04490651c85a8aaa373ff85371d2bda2500aef8497e",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-077-logical_relay_native",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_relay_native-c1736a1db873ba63"
+      ],
+      "rc": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 2.0526516437530518,
+      "raw_log_sha256": "6b5643f9b3b076e261da72342d39608b8c33e2306403d889d4aca2ee759e7aca",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-078-member_recovery",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/member_recovery-bb1bbca89ef59c6c"
+      ],
+      "rc": 0,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.0306732654571533,
+      "raw_log_sha256": "545528f3b97aee2cc37ff9dd0800526bbb12fa225446e49cf04ec4790e5465a4",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-079-logical_voter_network",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_voter_network-a84849edbc1955e5"
+      ],
+      "rc": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 2.875702381134033,
+      "raw_log_sha256": "1c6b6fc9e33c4b787852a215985901638a4ccad4370583abe809651379c76756",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-080-quic",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/quic-6534ba07f831b1ef"
+      ],
+      "rc": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22692060470581055,
+      "raw_log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-081-leadership_maintenance",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/leadership_maintenance-c1b59485b08434f3"
+      ],
+      "rc": 0,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23039937019348145,
+      "raw_log_sha256": "f6e8efd7013cdaa55ad804561ee7f4ba72bb472abfdb3ba36ec5fa5196d78ea5",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-082-native_benchmark",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/native_benchmark-e480d7f4eb11c147"
+      ],
+      "rc": 101,
+      "passed": 55,
+      "failed": 1,
+      "ignored": 0,
+      "result_status": "FAILED",
+      "elapsed": 23.415440797805786,
+      "raw_log_sha256": "94bc787b7613962120f4e8dd81a68a00193753349335d1b7623b2367342d8da3",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-083-transfer_preview_cli",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_preview_cli-4d8b041df9140d9c"
+      ],
+      "rc": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2265481948852539,
+      "raw_log_sha256": "92e244d082d6361a68c209aba87f20f8afffd0fce271336db51dd9241d0d4423",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-084-logical_activation_nested",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_activation_nested-8c9663ab71e9a499"
+      ],
+      "rc": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 55.469797134399414,
+      "raw_log_sha256": "676875fa054c5d7cd2316c681014b652e99c28b965ced2ab268c7eadba0e6436",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-085-routed",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/routed-ee18a611f2cb5bd0"
+      ],
+      "rc": 0,
+      "passed": 112,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 2077.2752768993378,
+      "raw_log_sha256": "e6474681604eb3bc8bea9eb703e4b997a0a1881003f795a6f908f863b778147a",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-086-quorum",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/quorum-48c1d038f29940f9"
+      ],
+      "rc": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.29276466369628906,
+      "raw_log_sha256": "fa858bce3dd9820895265bb528e5975cb15e44c61613b9fb8c56bf2fa9dc9dbc",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-087-raft",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/raft-56dd50927f4890a8"
+      ],
+      "rc": 0,
+      "passed": 81,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 3.0508861541748047,
+      "raw_log_sha256": "662b76526d8983fa06fd3b7d2f4f0bc5c24ff2aacfa71d485603538d58aeb306",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-088-journal_attribution",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/journal_attribution-5e628ba01d930766"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22305607795715332,
+      "raw_log_sha256": "52c15e33b668114991a4451e3a3e2d663d7365fea48162ef1472d3414c3a0501",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-089-dial",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/dial-a0cb124f2c884390"
+      ],
+      "rc": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22855162620544434,
+      "raw_log_sha256": "817dacfa896ff288d52bc944fca8548b92df4d94a4bacd3036765b392d3c66ec",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-090-reparenting",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/reparenting-7df3ba229701e5df"
+      ],
+      "rc": 0,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.43143773078918457,
+      "raw_log_sha256": "99dcf340adf8ebe5d6c408ef6d790f4bb180e9f3c8aa481f6c60f3a883c14d17",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-091-retirement",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/retirement-233d8cda158c387d"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.6294183731079102,
+      "raw_log_sha256": "ddf6fcbe9d8fe613e282fa183d299bd512348f8b12dba74fc0a0b080f63824e2",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-092-native_member_startup",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/native_member_startup-bf381637f339b60c"
+      ],
+      "rc": 0,
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 8.303089141845703,
+      "raw_log_sha256": "3f5993bb1bad63ea8ac44c103869a3002e8b074c47cac5c29a215900253a15c1",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-093-ballot_model",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/ballot_model-9b34bfc23e37b9c2"
+      ],
+      "rc": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.0396771430969238,
+      "raw_log_sha256": "e9a264215cfc8136f80d3898db9a143fc6b2058c28b494fe8b063ab004bb2d64",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-094-delegation",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/delegation-ac1b8b3e571ff02d"
+      ],
+      "rc": 0,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23520135879516602,
+      "raw_log_sha256": "b9df47789e56b64daf8c9c1b21b9d621e26288dd9e73025717b03cef88c5cda7",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-095-voteboat-counter",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/voteboat_counter-f06d2e34902c1478"
+      ],
+      "rc": 0,
+      "passed": 52,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 12.883721351623535,
+      "raw_log_sha256": "7ca4494821a04bebfab272dd4d9b02a3db8f53238f48b7c86707c7635ced56c1",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-096-vote",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/vote-87fa2cadce4c2578"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22248625755310059,
+      "raw_log_sha256": "42d5f4a2e92e61a9fcb13e683db4cdb0fd204588d0dc52e11d18cb537c840d20",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-097-peer_rotation",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/peer_rotation-9b57d85ab039c6de"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23509597778320312,
+      "raw_log_sha256": "b9cf91e4ff57a50ac212fc9a28bf4b74fd0032490e17379759545e1a564e5010",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-relay",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/representative_relay_model-aaf695fc0fc3d871"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 3303.9395246505737,
+      "raw_log_sha256": "693828288fec80e6f0de1847a3706b47b2b351b4523b202909c0a77befe44b2e",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-098-native_vote_store",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/native_vote_store-c5b6b5d7f6f61ac2"
+      ],
+      "rc": 0,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.42885804176330566,
+      "raw_log_sha256": "985dfcf415d0ef82eca12952a60799b5bb6ddfa82221fbb857dba8759da32c13",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-099-routing",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/routing-955df0e040ddc1c9"
+      ],
+      "rc": 0,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23219084739685059,
+      "raw_log_sha256": "79d44baff284c9fc79872d339cc67b8991db109534d6d288a984a35db77bff8f",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-100-framework_benchmark",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/framework_benchmark-88681b2c5413104b"
+      ],
+      "rc": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23271965980529785,
+      "raw_log_sha256": "5ff13587965a4d1b1b255b89b34561e764de513c2d9b1ec1733ea794fb8177cb",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-101-log_reclaim",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/log_reclaim-df84d6b4ad9b244c"
+      ],
+      "rc": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.6307101249694824,
+      "raw_log_sha256": "a440e758424b50995f8069734d77114e1d241ba1a98300a1f16514b8ee878d8c",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-102-drain_journal",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/drain_journal-c78d9f3c01a57b11"
+      ],
+      "rc": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23155689239501953,
+      "raw_log_sha256": "993c5df1bccf1a9c0286f01821f6296450c642760946dd4b11730e5b09c5270a",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-103-scopes",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/scopes-3e29b0b4c6359893"
+      ],
+      "rc": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2327425479888916,
+      "raw_log_sha256": "c4294d362f464deb944f938d25aaebd7eaacf36632595e8f2eb70ad0e2a3c3d5",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-104-parser_campaign",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/parser_campaign-c892a823b6f11777"
+      ],
+      "rc": 0,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23087310791015625,
+      "raw_log_sha256": "7e7888cce9ccc04696e7560085573706f99c3960e05b3a907f181931c072d92d",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-105-log_store",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/log_store-38d89b3c1da01ac8"
+      ],
+      "rc": 0,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.42888689041137695,
+      "raw_log_sha256": "03f0053570ce54b4d9354f24ca56d62f43f77735c0e2ddd28aa7ab38be952beb",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-106-program_transaction_application",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/program_transaction_application-6b29b604464025cb"
+      ],
+      "rc": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23168420791625977,
+      "raw_log_sha256": "b923c1849072cfb9b826f0af49dbf6377fe6d332d10f107118a993968d6effa9",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-107-history",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/history-05e0ed35099d5e36"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22064876556396484,
+      "raw_log_sha256": "c0deedef7edf92f1169392ea4e0825ae2f3162fb57d455fc4e0915fc36c9de5e",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-108-configuration_capacity",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/configuration_capacity-5142bbe36a919f5c"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22446298599243164,
+      "raw_log_sha256": "186d97cc7de869098f6b22c04b31479fd87f389a88f2c2ee4b505308d1348c10",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-109-logical_activation_application",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_activation_application-8ad8cefd1ed1d38b"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22607064247131348,
+      "raw_log_sha256": "eab43a33eafd9de6d1b524b25421975c1e6c7a1c851e4af7dcd5f28ec711c16a",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-110-striped_node",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/striped_node-ecfff52001e780a2"
+      ],
+      "rc": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.4499719142913818,
+      "raw_log_sha256": "510ffdfa5f2dd2d2337fd661face8db50e8e1ab3c41dc1536689243299f2361e",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-111-snapshot",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/snapshot-a19c1c73a60ef4bb"
+      ],
+      "rc": 0,
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.8297479152679443,
+      "raw_log_sha256": "9835341341e611d6096bb4ee62003fd299bcb3f05d9d7091e98f7b885ac45143",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-112-voteboat-directory",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/voteboat_directory-e3d556a4a2f3a17d"
+      ],
+      "rc": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 2.0414116382598877,
+      "raw_log_sha256": "216ae1bbc4ca2a03b429caf65fbb73d9a5c565db08ae318a93ec599fdb31d3e4",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-113-transfer_merge",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_merge-3064fcd833b7276d"
+      ],
+      "rc": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22744059562683105,
+      "raw_log_sha256": "b0d90a9099dc660ca5a7b6057d0c320e4aeef25f78135d0393fa5e9cd29559a8",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-114-authorization",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/authorization-8b2e721e12553f0d"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22400403022766113,
+      "raw_log_sha256": "5729eaaca10464d0455fca71ce95b8b80e4d1742cf57a1043f58c43eeca8cc77",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-115-program_transaction_driver",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/program_transaction_driver-1e280eb5ae0e1d78"
+      ],
+      "rc": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 15.700833559036255,
+      "raw_log_sha256": "095332fa9d58d66ee46532b51eed1c3e7d1bcd9126fe71c381260e6912663987",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-116-insertion",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/insertion-78cb49cbc3f47c14"
+      ],
+      "rc": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 2.644839286804199,
+      "raw_log_sha256": "6eaf920bd7f2b22a09f3f7b8f963ef3b4d5b52b34d692c5103914e6b1a0d02aa",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-117-directory_service",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/directory_service-9309fa4461c85a75"
+      ],
+      "rc": 0,
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 47.70896577835083,
+      "raw_log_sha256": "c39ecac4ce9a6a8d347d7a599ab16ba1febac4b880588f159ea091f73c95836e",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-118-log_owned",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/log_owned-5d0d1d5403cf072e"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.23153328895568848,
+      "raw_log_sha256": "6c012ed8aa7ec61ace1019afbba120874415f1ef80e0807746fa73a7a5dd7422",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-119-logical_voter_payload",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_voter_payload-4d0d499b03462bb5"
+      ],
+      "rc": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 38.70672845840454,
+      "raw_log_sha256": "ba525df02ee771fd5a6614ea74a74b12753f12800e52204367e77f2537ae58c1",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-120-retained_insertion",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/retained_insertion-6d784a79f0796dae"
+      ],
+      "rc": 0,
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 7.049546241760254,
+      "raw_log_sha256": "39d71413c8ffbc2378bca1f1e2e67f640b489da28d99be111b1c2b73ffec363c",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-121-outbound",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/outbound-6339158f1e6c5e9f"
+      ],
+      "rc": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.2265644073486328,
+      "raw_log_sha256": "188865be971445b559f8886c12fa11f723920bf84e51c7cb9a364d195fa93dbd",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-122-transfer_target",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/transfer_target-11c34d3b687976fa"
+      ],
+      "rc": 0,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.4275188446044922,
+      "raw_log_sha256": "dcf1c27a296c74c0c181dd6868fe5512007e3876cc233b7df18bafa630f07df7",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-123-metadata_transfer",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/metadata_transfer-f9cfa5bf4a2357ee"
+      ],
+      "rc": 0,
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 5.851247549057007,
+      "raw_log_sha256": "31a113ca7762d8ea8a8d360155c80a6629288db9a444578324cbe23cb333f3e3",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-124-wal_benchmark",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/wal_benchmark-26efcf5b8d8e141b"
+      ],
+      "rc": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22648000717163086,
+      "raw_log_sha256": "df166913f47ff1f04202cae9b31df67ed272d692d99a0023a8117dc3029100dd",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-125-logical_nested_native",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_nested_native-89016bc823b2f4c0"
+      ],
+      "rc": 0,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 39.520508766174316,
+      "raw_log_sha256": "3d20d88b25594780e6a099815f0f22d37fcadcea561502e74df40cf5fbbf9178",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-126-embedded_transfer",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/embedded_transfer-f055741c8abe69c8"
+      ],
+      "rc": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 0.22965645790100098,
+      "raw_log_sha256": "6402f8aa54edde76300cad6a886194f4bb893589a18baf53cdd977d588ce11e4",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-127-runtime",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/runtime-cedaff21a1e2ea2c"
+      ],
+      "rc": 0,
+      "passed": 58,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.0331218242645264,
+      "raw_log_sha256": "77d0f9a545614bdeae8e1334dd60e1d0afa007614908978630ad1c9743772df3",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-128-logical_voter_native",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/logical_voter_native-b7af557afb4f191f"
+      ],
+      "rc": 0,
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 10.890750646591187,
+      "raw_log_sha256": "17f8db0205c4260c7f0527673f4272cec8a8559850e23df2493a3cd0642605db",
+      "kind": "harness"
+    },
+    {
+      "label": "doc-default",
+      "argv": [
+        "/usr/bin/cargo",
+        "+stable",
+        "test",
+        "--doc",
+        "--locked",
+        "--offline"
+      ],
+      "rc": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "result_status": "ok",
+      "elapsed": 1.2225804328918457,
+      "raw_log_sha256": "9e9a88dc83d7e6f2906531db9592b91a1a74f4c903bf935dffaa09d57f47c3f2",
+      "kind": "doctests"
+    }
+  ],
+  "failures": [
+    {
+      "label": "test-default-029-native_relay",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/native_relay-6be3a9cd6122d7e3"
+      ],
+      "rc": 101,
+      "passed": 12,
+      "failed": 1,
+      "ignored": 0,
+      "result_status": "FAILED",
+      "elapsed": 2.4608466625213623,
+      "raw_log_sha256": "03b56e98579842c40553b9d18c6c9b499c5c95f547c294a91288491001dfebc9",
+      "kind": "harness"
+    },
+    {
+      "label": "test-default-082-native_benchmark",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/examples/native_benchmark-e480d7f4eb11c147"
+      ],
+      "rc": 101,
+      "passed": 55,
+      "failed": 1,
+      "ignored": 0,
+      "result_status": "FAILED",
+      "elapsed": 23.415440797805786,
+      "raw_log_sha256": "94bc787b7613962120f4e8dd81a68a00193753349335d1b7623b2367342d8da3",
+      "kind": "harness"
+    }
+  ],
+  "resource_audits": 133,
+  "observed_pid_tid_records": 39116,
+  "violations": [],
+  "owned_live": [],
+  "source_inputs_unchanged": 2615,
+  "overall_rc": 1,
+  "later_configs": "HELD, not launched"
+}

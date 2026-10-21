@@ -19,16 +19,15 @@ work needed to decide PR19.
 | --- | --- | --- |
 | PR24 V3f | Kept and merged | Merge `1e56e9f5`; recorded final-main head `bd714771`; default 2603, all-features 2915, no-default 1346, native-only 1924 and matched 75 passed, zero failures; both reviews, strict checks and enabled hook passed |
 | PR14 ST2 | Rejected for this wind-down; closed as parked, not merged | Exact `3aed5d67` full default failed: 2667 passed / 1 failed / 1 ignored. Both source reviews and strict checks passed, but the full merge gate did not |
-| PR15 DR1 | Current: reconcile the independent ledger candidate without ST2 | Original reviewed `79829e87` did not depend on ST2. Remove the rejected cumulative ST2 tree, preserve all eight review rounds and published history, correct the 16-byte benchmark metadata, then obtain fresh source reviews and the full final-head gate |
-| PR23 N1c | Next: judge on the qualified dependency tree | Exclude rejected ST2 through the replacement DR1 reconciliation; fresh reviews, full final-head suites and the established fair performance gate remain required |
-| PR22 N1b | Then: resolve after PR23 | Reconcile the final main, fold the superseded-N1c and entryless-frame documentation caveats, and complete the established review and validation gates |
+| PR15 DR1 | Rejected for this wind-down; closed as parked, not merged | Independent source `66fcf3e0` has both fresh source approvals and strict checks, but its complete final default failed: 2686 passed / 2 failed / 1 ignored |
+| PR23 N1c | Current: reconcile the original network candidate onto qualified main | Exclude both rejected ST2 and DR1 production trees while preserving published history; fresh reviews, full final-head suites and the established fair performance gate remain required |
+| PR22 N1b | Next: resolve after PR23 | Reconcile the final main, make the N1c disposition and entryless-frame documentation accurate, and complete the established review and validation gates |
 | PR19 N1 | Pending bounded keep/reject decision after PR23 | Only the previously authorized N1d work, two existing review P2 fixes and the recorded performance gate are permitted; park/close if that gate still fails |
 
-The current DR1 item advances LB by retaining bounded application-session state;
-its dependency is qualified main, not automatic maintenance from rejected ST2.
-N1c and N1b advance the existing network milestone through the gates above. No
-unfinished lifetime or network roadmap item is made a prerequisite for this
-wind-down.
+N1c and N1b advance the existing network milestone through the gates above.
+PR19 is the following bounded decision item. Their dependency is qualified main,
+not either parked lifetime-bounds candidate. No unfinished lifetime or network
+roadmap item is made a prerequisite for this wind-down.
 
 #### PR14 rejection record
 
@@ -63,6 +62,46 @@ limits are both exhausted, the WAL high-water gate returns first, so one
 submission need not increment both cause counters. This is not a shipped ST2
 behavior claim. PR15 and PR23 must exclude the rejected ST2 tree before final
 qualification; DR1 does not imply automatic-maintenance or complete LB coverage.
+
+#### PR15 rejection record
+
+[PR15 was closed as parked](https://github.com/KarlLivesey/VoteBoat/pull/15#issuecomment-6308647961)
+without merging DR1. Exact source `66fcf3e000441c7fae0bb1fed231bdc28e146c9f`
+preserves the independently reviewed DR1/main tree, excludes ST2 production,
+retains published history and resolves the port-layout, directory-ownership and
+comment findings. Fresh Sol source approvals
+[A](https://github.com/KarlLivesey/VoteBoat/pull/15#pullrequestreview-5594849864)
+and [B](https://github.com/KarlLivesey/VoteBoat/pull/15#pullrequestreview-5594850693),
+seven strict checks and the enabled push hook passed. These do not clear its
+failed full acceptance gate.
+
+The complete final default failed: 2686 passed / 2 failed / 1 ignored, actual
+outer rc1. Build rc0/build-finished true; all 130 Cargo all-target test
+executables ran exactly once, with raw named outcomes, result totals and exits
+independently audited and no omission, duplicate or abort. Eligible doctests
+passed (0/0); the exhaustive normal-debug relay completed 9/9 in 3303.94 seconds
+and routed completed 112/112 in 2077.28 seconds.
+
+The actual failures remain unclassified. Native relay (12/1) reported
+`Session(Io(BrokenPipe)), nodes [Draining, Draining]` at
+`tests/native_relay/cluster.rs:130`. Native benchmark (55/1) received
+`lock acquisition failed because the operation would block` from the unwrap of
+`execute(&root, config, NativePeerProtocol::TcpTls)` at
+`examples/benchmark/lanes/tests.rs:167`. The originating open/recovery phase
+and competing owner were not emitted or established; no WAL/fork cause is
+inferred. This is distinct from the earlier ST2 `AddrInUse` failure. Matching
+historical text does not establish either current cause or host noise.
+
+All 2615 inputs stayed unchanged; 133 resource audits / 39,116 sampled task
+records reported zero violations. Later configurations were held and not
+launched. There were no source edits, rebuilds, diagnostics or isolated reruns
+after these failures. The outcome is rejection for merge under the agreed full
+gate, not a claim of an identified DR1 production defect. No unchanged retry
+series or broader reliability investigation is started. Compact original
+failure logs, all executable result/exit hashes and the completeness record are
+preserved in [the disposition evidence](../validation/winddown/pr15/REPORT.md).
+The owner must complete its mandatory checkout/build/process cleanup. PR23
+must exclude both parked production trees before final qualification.
 
 ### Macro plan (this track)
 
@@ -701,7 +740,7 @@ maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-life
 | --- | --- | --- | --- | --- |
 | Done NT1: connection generations and listener (merged 19 October 2026 in PR 13) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
 | Deferred NT2: roster, budget and cache reclaim (outside wind-down) | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors; also the NT1 leftover: a test for the completion-branch `generations_exhausted` flag at `runtime/peers.rs` (reviewer P3 on PR 13) | NT1 (same files) | U6 probe as fail@main; churn soak; completion-branch flag test | LB |
-| Current DR1: Counter session ledger (existing PR15) | Audit S1, RT2 for Counter through the generic `SessionLedger`; retain the independently reviewed application contract without rejected ST2 | Qualified main; reconcile original DR1 and preserve its review fixes, without the cumulative ST2 tree | Existing ledger soak, restart and exactly-once checks; fresh independent source approvals, strict root/matched checks and full final-head default/all/no-default/native/matched suites before merge | LB |
+| Parked DR1: Counter session ledger (PR15 closed without merge) | Audit S1, RT2 for Counter through the generic `SessionLedger`; independently reviewed source retained, not shipped | The qualified main does not include this candidate or ST2 | Final exact `66fcf3e0` default failed 2686/2/1 despite fresh source approvals and strict checks; see rejection record above. Remaining feature configurations were not launched | LB remains incomplete |
 
 ### Inventory (rows owned by NT1, and the leftovers it hands on)
 

@@ -1,0 +1,127 @@
+{
+  "head": "66fcf3e000441c7fae0bb1fed231bdc28e146c9f",
+  "config": "default",
+  "overall_rc": 1,
+  "errors": [
+    "test-default-029-native_relay",
+    "test-default-082-native_benchmark"
+  ],
+  "build_rc": 0,
+  "build_finished": [
+    true
+  ],
+  "inventory": 130,
+  "executed": 130,
+  "inventory_exactly_once": true,
+  "totals": {
+    "passed": 2686,
+    "failed": 2,
+    "ignored": 1
+  },
+  "zero_test_harnesses": [
+    "test-default-015-quic_connect",
+    "test-default-021-durable_vote",
+    "test-default-033-embedded_counter",
+    "test-default-064-replicated_counter",
+    "test-default-080-quic",
+    "test-default-124-wal_benchmark"
+  ],
+  "doctests": {
+    "label": "doc-default",
+    "kind": "doctests",
+    "argv": [
+      "/usr/bin/cargo",
+      "+stable",
+      "test",
+      "--doc",
+      "--locked",
+      "--offline"
+    ],
+    "cores": [
+      1,
+      2,
+      3
+    ],
+    "rc": 0,
+    "elapsed": 1.2225804328918457,
+    "results": [
+      {
+        "status": "ok",
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "line": "ok"
+      }
+    ],
+    "resource_violations": [],
+    "observed_tasks": 6,
+    "own_target_bytes": 1393139712,
+    "preexec_nice": 19,
+    "preexec_cores": [
+      1,
+      2,
+      3
+    ],
+    "head": "66fcf3e000441c7fae0bb1fed231bdc28e146c9f",
+    "config": "default",
+    "controller_pid": 587210,
+    "controller_nice": 19,
+    "controller_thread_nice": 19,
+    "controller_cores": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "eligible_libraries": [
+    {
+      "package": "voteboat",
+      "target": "voteboat"
+    }
+  ],
+  "relay": {
+    "label": "test-default-relay",
+    "kind": "harness",
+    "argv": [
+      "/home/karllivesey/.t3/worktrees/VoteBoat/t3-8484fa7a/target/debug/deps/representative_relay_model-aaf695fc0fc3d871"
+    ],
+    "cores": [
+      0
+    ],
+    "rc": 0,
+    "elapsed": 3303.9395246505737,
+    "results": [
+      {
+        "status": "ok",
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "line": "ok"
+      }
+    ],
+    "resource_violations": [],
+    "observed_tasks": 5,
+    "own_target_bytes": 1387823104,
+    "preexec_nice": 19,
+    "preexec_cores": [
+      0
+    ],
+    "head": "66fcf3e000441c7fae0bb1fed231bdc28e146c9f",
+    "config": "default",
+    "controller_pid": 587210,
+    "controller_nice": 19,
+    "controller_thread_nice": 19,
+    "controller_cores": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "resource_violations": 0,
+  "observed_task_records": 39116,
+  "source_unchanged": true,
+  "max_guarded_target_bytes": 1393139712,
+  "configurations_later_held": true
+}
