@@ -1,0 +1,68 @@
+{
+  "own_worktree": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-414c7c5a",
+  "temporary_branch": "t3/reconcile-pr22-publication",
+  "before_guard_rc": 0,
+  "helpers": [
+    {
+      "pid": 782151,
+      "starttime": "20496707",
+      "identity_verified": true,
+      "same_identity_remaining": false
+    },
+    {
+      "pid": 782062,
+      "starttime": "20496637",
+      "identity_verified": true,
+      "same_identity_remaining": false
+    },
+    {
+      "pid": 782059,
+      "starttime": "20496636",
+      "identity_verified": true,
+      "same_identity_remaining": false
+    }
+  ],
+  "deleted_scratch": [
+    "/tmp/voteboat-multi-drain-789018-Quic-1-1792564011232375020"
+  ],
+  "commands": [
+    {
+      "command": [
+        "git",
+        "worktree",
+        "remove",
+        "--force",
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-414c7c5a"
+      ],
+      "rc": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "git",
+        "worktree",
+        "prune"
+      ],
+      "rc": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "-D",
+        "t3/reconcile-pr22-publication"
+      ],
+      "rc": 0,
+      "output": "Deleted branch t3/reconcile-pr22-publication (was 463c50d4).\n"
+    }
+  ],
+  "target_removed": true,
+  "remaining_worktrees": "worktree /home/karllivesey/Documents/ChatGPT/VoteBoat\nHEAD 323670aaf46c59f5d95e9911001ff30b3401b378\nbranch refs/heads/main\n\nworktree /home/karllivesey/.codex/worktrees/application-conformance/VoteBoat\nHEAD d6adc44d79e3bf22910532dc4f1c6cebfdc9c0cd\nbranch refs/heads/codex/application-conformance\n\nworktree /home/karllivesey/.t3/worktrees/VoteBoat/t3-b440d255\nHEAD 1c2595364cbe405922695ce9c8728316ecf05741\ndetached\n\n",
+  "worktree_removed": true,
+  "registration_removed": true,
+  "temporary_branch_removed": true,
+  "owned_or_deleted_cwd_processes": [],
+  "original_remote_tracking_head": "463c50d4ec06b5e87d435c41427ccb63c60a9dfd",
+  "final_guard_rc": 0
+}

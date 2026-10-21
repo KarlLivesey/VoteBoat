@@ -88,9 +88,9 @@ at least one. The failure cause is unproven; it is not attributed to the new
 counters. No unchanged retry, diagnostic or reliability repair was launched.
 
 Seven strict checks, hook publication, fresh source reviews and the full matrix
-were not run on that input. The unmet gate supports this rejection. The owner
-must preserve the full tracked/untracked patch and exact input identities,
-then remove its build checkout, scratch and helpers. Corrected accepted runs
+were not run on that input. The unmet gate supports this rejection. The owner preserved the full tracked/untracked patch and exact input identities,
+then removed its build checkout, scratch, registration, temporary branch and
+three helpers. No owned/deleted-cwd jobs remained; the final stock guard passed. Corrected accepted runs
 were audited at absolute nice19 on cores0–3/max4jobs; an earlier priority-reset
 abort before compilation and initially unsuitable helper resources remain
 disclosed, so all-attempt resource compliance is not claimed. No PR22 source
