@@ -24,7 +24,7 @@ are; LB references them for the audit's L1–L3 rows.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current ST2 (PR 14; rounds 1–6 implemented; round 7 implemented, in review: the nested logical fixture's physical WAL is sized for the I5 headroom rule; both suites passed on bbb81f33; the rebase results, including full-run failures and isolated reruns, are recorded below): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Parked/rejected ST2 (PR 14; wind-down 21 October 2026; final source `3aed5d67`, not Done): checkpoints and WAL reclaim defaults / retryable full-WAL backpressure (C3, C4, RT4; U1, U5; ST2b) | Intended bounded maintenance and typed recoverable refusal remain preserved branch work; rejected because final cumulative acceptance failed, with no justified cause-specific repair | Cumulative PR24 main `bd714771` included in branch | NOT met: full final default 2667 passed / 1 failed / 1 ignored, all129 executables; two bounded diagnostics inconclusive. Source approvals, strict checks and accepted CPU history do not clear that gate. See [wind-down disposition](../validation/st2-final-gate/WINDDOWN-DISPOSITION.md) | LB (not completed by this rejected PR) |
 | Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
 | Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
 
@@ -2134,6 +2134,30 @@ results are recorded in the PR and main safe-report directory. A fresh independe
 Sol source confirmation and the complete final published-head matrix remain
 required. ST2 stays in review; macro/next-two items stay unchanged; no main-writer
 lease is implied. The original full `219ad7bb` default remains FAILED.
+
+##### ST2 wind-down disposition — Parked/rejected (21 October 2026)
+
+Parent exercised delegated keep/reject authority: reject/close PR14 as parked,
+not Done. Published source `3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7`
+has a complete FAILED cumulative default:2667/1/1 ignored,129/129 executables,
+outer rc1; absent-follower startup hit the600s wall guard at8576 protocol ms.
+The one isolated diagnostic passed1/0 and one normal-concurrency startup context
+passed56/0; both are inconclusive for that original failure. No cause-specific
+repair, full-gate clearance or further implementation/run is authorized.
+
+The source approvals and accepted serving CPU+2% (allowance+4%), singleton+0.9%
+remain historical evidence; no new performance or protocol claim is made.
+The nonblocking simultaneous WAL/entry-counter wording P3 is recorded, not
+folded as an integration fix. Diagnostics-only build-input edits were restored;
+their exact shared input patch and compact raw results are preserved as nonbuild
+validation artifacts. See [WINDDOWN-DISPOSITION.md](../validation/st2-final-gate/WINDDOWN-DISPOSITION.md).
+
+This branch-only record changes no build input relative to `3aed5d67`.
+The enabled hook must check the evidence commit before its nonforce push.
+Parent owns PR closure and the main disposition record; this runner has no
+main-writer, merge or close grant. Historical implemented sections and both
+documentation tracks remain intact. Existing macro/next-two plans are retained
+as history; no new roadmap work or next slice is started.
 
 #### Design-pack amendment realised by ST2 (pack preserved)
 

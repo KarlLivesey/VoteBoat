@@ -1,0 +1,183 @@
+{
+  "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+  "controller_rc": 1,
+  "audit_step": {
+    "step_rc": 1,
+    "failures": [
+      "/home/karllivesey/.t3/worktrees/VoteBoat/t3-f84ab001/target/debug/deps/startup-d667aaa7d934dd31"
+    ],
+    "executables": 129,
+    "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+    "config": "default",
+    "controller_pid": 371240,
+    "controller_nice": 19,
+    "controller_cores": [
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "build": {
+    "label": "build-default",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--no-run",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "--message-format=json"
+    ],
+    "rc": 0,
+    "build_finished": [
+      true
+    ],
+    "executables": 129,
+    "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+    "config": "default",
+    "controller_pid": 371240,
+    "controller_nice": 19,
+    "controller_cores": [
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  "inventory_count": 129,
+  "executed_count": 129,
+  "missing": [],
+  "extra": [],
+  "duplicate_exits": 0,
+  "passed_failed_ignored": [
+    2667,
+    1,
+    1
+  ],
+  "binary_failures": [
+    {
+      "label": "test-default-029-startup",
+      "argv": [
+        "/home/karllivesey/.t3/worktrees/VoteBoat/t3-f84ab001/target/debug/deps/startup-d667aaa7d934dd31"
+      ],
+      "cores": "13-15",
+      "rc": 101,
+      "elapsed": 817.2715277671814,
+      "results": [
+        [
+          "FAILED",
+          "55",
+          "1",
+          "0"
+        ]
+      ],
+      "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+      "config": "default",
+      "controller_pid": 371240,
+      "controller_nice": 19,
+      "controller_cores": [
+        12,
+        13,
+        14,
+        15
+      ]
+    }
+  ],
+  "docs": [
+    {
+      "label": "doc-default",
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--doc",
+        "--locked",
+        "--offline"
+      ],
+      "cores": "12-15",
+      "rc": 0,
+      "elapsed": 6.256814479827881,
+      "results": [
+        [
+          "ok",
+          "0",
+          "0",
+          "0"
+        ]
+      ],
+      "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+      "config": "default",
+      "controller_pid": 371240,
+      "controller_nice": 19,
+      "controller_cores": [
+        12,
+        13,
+        14,
+        15
+      ]
+    }
+  ],
+  "cargo_commands": [
+    {
+      "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+      "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-f84ab001",
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--no-run",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--message-format=json"
+      ],
+      "rc": 0,
+      "started": "2026-10-21T01:42:44.297229+00:00",
+      "elapsed": 33.423978090286255,
+      "guard": "cargo-1792546964297229993.guard",
+      "config": "default",
+      "nice": 19,
+      "cores": [
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+      "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-f84ab001",
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--doc",
+        "--locked",
+        "--offline"
+      ],
+      "rc": 0,
+      "started": "2026-10-21T02:49:51.936552+00:00",
+      "elapsed": 6.001726388931274,
+      "guard": "cargo-1792550991936552259.guard",
+      "config": "default",
+      "nice": 19,
+      "cores": [
+        12,
+        13,
+        14,
+        15
+      ]
+    }
+  ],
+  "resource_audits": 132,
+  "sampled_task_entries": 38549,
+  "resource_violations": 0,
+  "all_audit_heads_exact": true,
+  "all_controller_nice19": true,
+  "all_controller_affinity_exact": true,
+  "all_launch_guards_pass": true,
+  "maximum_guarded_target_bytes": 2003824640,
+  "aborted": false
+}

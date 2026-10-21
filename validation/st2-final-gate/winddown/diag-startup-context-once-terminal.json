@@ -1,0 +1,28 @@
+{
+  "base_head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+  "patch_sha256_current": "7bfa83cb786169884304c8203fc3d06c265d4fe17f65fa57dc3b9c9819817c8d",
+  "captured_patch_unchanged": true,
+  "binary_sha256_unchanged": true,
+  "binary_rc": 0,
+  "aggregate_rc": 0,
+  "results": [
+    [
+      "ok",
+      "56",
+      "0",
+      "0"
+    ]
+  ],
+  "test_count": 56,
+  "missing": [],
+  "extra": [],
+  "duplicates": 0,
+  "resource_audits": 1,
+  "sampled_task_entries": 331,
+  "resource_violations": 0,
+  "all_observed_resources_nice19_affinity13_15": true,
+  "owned_remaining": [],
+  "includes_deleted_cwd_scan": true,
+  "own_target_bytes": 2003886080,
+  "source_status": " M docs/IMPLEMENTATION.md\n M tests/startup/backpressure.rs\n"
+}

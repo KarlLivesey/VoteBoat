@@ -1,0 +1,242 @@
+diff --git a/docs/IMPLEMENTATION.md b/docs/IMPLEMENTATION.md
+index 9554ff18..1822ed3b 100644
+--- a/docs/IMPLEMENTATION.md
++++ b/docs/IMPLEMENTATION.md
+@@ -2135,6 +2135,40 @@ Sol source confirmation and the complete final published-head matrix remain
+ required. ST2 stays in review; macro/next-two items stay unchanged; no main-writer
+ lease is implied. The original full `219ad7bb` default remains FAILED.
+ 
++##### Bounded absent-follower diagnostic schema (21 October 2026, before edits)
++
++Published `3aed5d67` remains immutable failed evidence: complete default
++2667/1/1 ignored, 129/129 executables, outer rc1; startup55/1 rc101 with
++`hang at 8576 ms` from the unchanged600s wall guard. Both source reviews
++A5593950615/B5593951317 approved source, not that failed acceptance gate.
++Later feature configurations remain held; ST2 remains in review.
++
++Parent released ONE diagnostics-only absent-follower run, not a clock repair.
++Data shape: optional fixture-owned diagnostic metadata on the existing Clock:
++election/write/drain phase, issued/applied/last protocol progress, host elapsed
++of the last real Applied receipt, and aggregate total/gated poll counts. Reuse
++existing node dump plus authoritative persistence/snapshot/connector usage.
++Emit only election/quarter/drain receipts and the existing hang failure; no
++per-poll logging, new public/library seam or duplicate job ownership tracking.
++
++Transitions: only actual Applied outcomes update last real host progress.
++Accepted offers update issued metadata before polling; entry to shutdown marks
++drain. Counters observe the EXISTING native-pending predicate without changing
++its evaluation, clock admission, polling/yields, timeouts or work admission.
++Failure output includes host age since the last real Applied receipt, distinguishing
++slow continuing work from a stuck predicate if the unchanged bound fires.
++Metadata owns no sockets/jobs/credits/threads; existing stop/drain/worker joins,
++restart/partial-progress semantics and reclaim paths stay unchanged.
++
++Acceptance: exactly ONE finite diagnostic case on cores12–15, actual nice19,
++max4 Cargo jobs, own target with guard first. Preserve all49,152 exact Applied
++writes,64 window,5000ms protocol progress bound,600s wall bound, term, entry
++budget, checkpoint/cap assertions and cleanup. A pass is inconclusive for the
++original failure; no causal claim, retry, matrix clearance or main integration.
++After its one result report phase/progress/state/usage and a bounded next proposal;
++hold all further edits/runs for parent direction. Macro/current+next-two scope
++remains unchanged. This subsection is planned diagnostics, not implemented proof.
++
+ #### Design-pack amendment realised by ST2 (pack preserved)
+ 
+ | Pack text | Amendment |
+diff --git a/tests/startup/backpressure.rs b/tests/startup/backpressure.rs
+index 18e326a5..268d5d54 100644
+--- a/tests/startup/backpressure.rs
++++ b/tests/startup/backpressure.rs
+@@ -178,7 +178,7 @@ fn dump(nodes: &[Held]) -> String {
+             let c = core(n);
+             let w = n.wal_maintenance();
+             format!(
+-                "\nnode {}: {:?} term={} last={} commit={} base={} applied={} pending_dependency={} wal={:?} high_water={} reclaim_pending={} failures={} last_reclaim={:?} checkpoints_pending={} checkpoint_last={:?} worker={:?}",
++                "\nnode {}: {:?} term={} last={} commit={} base={} applied={} pending_dependency={} wal={:?} high_water={} reclaim_pending={} failures={} last_reclaim={:?} checkpoints_pending={} checkpoint_last={:?} worker={:?} snapshot_worker={:?} connector={:?}",
+                 i + 1,
+                 c.role(),
+                 c.state().hard_state.term,
+@@ -195,6 +195,8 @@ fn dump(nodes: &[Held]) -> String {
+                 n.checkpoints().pending.len(),
+                 n.checkpoints().last_result,
+                 n.local().persistence.usage(),
++                n.local().snapshots.as_ref().map(|s| s.worker.usage()),
++                n.peers().map(|p| p.connector_usage()),
+             )
+         })
+         .collect()
+@@ -203,12 +205,56 @@ fn dump(nodes: &[Held]) -> String {
+ /// dial latency adds polls, not protocol time. Refused rewrite admission and
+ /// absent peers are protocol work, so they do not hold this clock.
+ const POLLS_PER_MS: u64 = 10;
++/// Observation only: no request ownership or protocol scheduling decisions.
++struct Diagnostic {
++    started: Instant,
++    phase: &'static str,
++    issued: u64,
++    applied: u64,
++    progress_ms: u64,
++    last_applied_host: Option<Duration>,
++    polls: u64,
++    gated_polls: u64,
++    last_pre_poll_gated: bool,
++}
++impl Diagnostic {
++    fn new(started: Instant) -> Self {
++        Self {
++            started,
++            phase: "election",
++            issued: 0,
++            applied: 0,
++            progress_ms: 0,
++            last_applied_host: None,
++            polls: 0,
++            gated_polls: 0,
++            last_pre_poll_gated: false,
++        }
++    }
++    fn report(&self, now: u64) -> String {
++        let elapsed = self.started.elapsed();
++        format!(
++            "\nST2 diagnostic: phase={} issued={} applied={} protocol_ms={now} last_applied_protocol_ms={} host_elapsed_ms={} last_applied_host_ms={:?} since_last_applied_host_ms={:?} polls={} gated_polls={} last_pre_poll_gated={}",
++            self.phase,
++            self.issued,
++            self.applied,
++            self.progress_ms,
++            elapsed.as_millis(),
++            self.last_applied_host.map(|t| t.as_millis()),
++            self.last_applied_host.map(|t| elapsed.saturating_sub(t).as_millis()),
++            self.polls,
++            self.gated_polls,
++            self.last_pre_poll_gated,
++        )
++    }
++}
+ struct Clock {
+     now: u64,
+     rounds: u64,
+     hang: Instant,
+     /// Every node must stay `Running` until the test begins shutdown.
+     serving: bool,
++    diagnostic: Option<Diagnostic>,
+ }
+ impl Clock {
+     fn new() -> Self {
+@@ -217,6 +263,7 @@ impl Clock {
+             rounds: 0,
+             hang: Instant::now() + Duration::from_secs(600),
+             serving: true,
++            diagnostic: None,
+         }
+     }
+     /// One round over every node. Any node error (the node-fatal WAL refusal
+@@ -231,6 +278,11 @@ impl Clock {
+                     .is_some_and(|s| s.worker.usage().requests != 0)
+                 || n.peers().is_some_and(|p| p.connector_usage().dialing != 0)
+         });
++        if let Some(d) = &mut self.diagnostic {
++            d.polls += 1;
++            d.gated_polls += u64::from(native_pending);
++            d.last_pre_poll_gated = native_pending;
++        }
+         if !native_pending {
+             self.rounds += 1;
+             if self.rounds.is_multiple_of(POLLS_PER_MS) {
+@@ -250,7 +302,18 @@ impl Clock {
+         if !progress {
+             std::thread::park_timeout(Duration::from_micros(200));
+         }
+-        assert!(Instant::now() < self.hang, "hang at {} ms", self.now);
++        assert!(
++            Instant::now() < self.hang,
++            "hang at {} ms{}{}",
++            self.now,
++            self.diagnostic_report(),
++            dump(nodes)
++        );
++    }
++    fn diagnostic_report(&self) -> String {
++        self.diagnostic
++            .as_ref()
++            .map_or_else(String::new, |d| d.report(self.now))
+     }
+ }
+ fn stop(nodes: Vec<Held>, clock: &mut Clock) {
+@@ -712,6 +775,7 @@ fn absent_follower_does_not_stop_the_leader_checkpointing() {
+         })
+         .collect::<Vec<_>>();
+     let mut clock = Clock::new();
++    clock.diagnostic = Some(Diagnostic::new(clock.hang - Duration::from_secs(600)));
+     nodes[0].control(group(), NodeControl::Campaign).unwrap();
+     while !(core(&nodes[0]).role() == Role::Leader
+         && core(&nodes[1]).state().commit_index == core(&nodes[0]).state().last_index())
+@@ -719,6 +783,12 @@ fn absent_follower_does_not_stop_the_leader_checkpointing() {
+         clock.poll(&mut nodes);
+     }
+     let term = core(&nodes[0]).state().hard_state.term;
++    eprintln!(
++        "ST2 absent follower elected:{}{}",
++        clock.diagnostic_report(),
++        dump(&nodes)
++    );
++    clock.diagnostic.as_mut().unwrap().phase = "write";
+     let budget = core(&nodes[0]).log_limits().max_entries_per_group;
+     let small = |k: u64| ClientRequest {
+         group: group(),
+@@ -728,6 +798,7 @@ fn absent_follower_does_not_stop_the_leader_checkpointing() {
+     let (mut issued, mut applied, mut refused, mut max_retained) = (0u64, 0u64, 0u64, 0usize);
+     let mut bases = vec![core(&nodes[0]).state().base_index()];
+     let mut progress_ms = 0;
++    let mut reported_quarters = 0;
+     while applied < TOTAL {
+         while issued < TOTAL && issued - applied < WINDOW {
+             match nodes[0].propose(small(issued)) {
+@@ -743,12 +814,17 @@ fn absent_follower_does_not_stop_the_leader_checkpointing() {
+                 }
+             }
+         }
++        clock.diagnostic.as_mut().unwrap().issued = issued;
+         clock.poll(&mut nodes);
+         while let Some(output) = nodes[0].poll_client() {
+             match nodes[0].complete_client(output).unwrap() {
+                 ClientOutcome::Applied { .. } => {
+                     applied += 1;
+                     progress_ms = clock.now;
++                    let d = clock.diagnostic.as_mut().unwrap();
++                    d.applied = applied;
++                    d.progress_ms = progress_ms;
++                    d.last_applied_host = Some(d.started.elapsed());
+                 }
+                 ClientOutcome::NotProposed(RaftError::StoragePressure) => {
+                     issued -= 1;
+@@ -757,6 +833,15 @@ fn absent_follower_does_not_stop_the_leader_checkpointing() {
+                 other => panic!("write {applied} not applied: {other:?}{}", dump(&nodes)),
+             }
+         }
++        clock.diagnostic.as_mut().unwrap().issued = issued;
++        while reported_quarters < 4 && applied >= (reported_quarters + 1) * (TOTAL / 4) {
++            reported_quarters += 1;
++            eprintln!(
++                "ST2 absent follower quarter={reported_quarters}:{}{}",
++                clock.diagnostic_report(),
++                dump(&nodes)
++            );
++        }
+         let leader = core(&nodes[0]);
+         max_retained = max_retained.max(leader.state().entries.len());
+         if leader.state().base_index() > *bases.last().unwrap() {
+@@ -781,7 +866,14 @@ fn absent_follower_does_not_stop_the_leader_checkpointing() {
+         leader.replica_stall(),
+         clock.now
+     );
++    clock.diagnostic.as_mut().unwrap().phase = "drain";
++    eprintln!(
++        "ST2 absent follower drain:{}{}",
++        clock.diagnostic_report(),
++        dump(&nodes)
++    );
+     stop(nodes, &mut clock);
++    eprintln!("ST2 absent follower joined:{}", clock.diagnostic_report());
+     std::fs::remove_dir_all(directory).unwrap();
+ }
+ 

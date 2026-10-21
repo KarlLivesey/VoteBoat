@@ -1,0 +1,43 @@
+{
+  "compiled_input_base": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+  "diagnostic_patch_sha256": "7bfa83cb786169884304c8203fc3d06c265d4fe17f65fa57dc3b9c9819817c8d",
+  "commands": [
+    {
+      "head": "3aed5d671e735f7cd622b4ae4441a54ca5b3d5e7",
+      "cwd": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-f84ab001",
+      "argv": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "startup",
+        "backpressure::absent_follower_does_not_stop_the_leader_checkpointing",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "rc": 0,
+      "started": "2026-10-21T02:54:18.921066+00:00",
+      "elapsed": 297.99363374710083,
+      "guard": "cargo-1792551258921066707.guard",
+      "config": "diag-absent-once",
+      "nice": 19,
+      "cores": [
+        12,
+        13,
+        14,
+        15
+      ]
+    }
+  ],
+  "resource_audits": 1,
+  "sampled_task_entries": 39,
+  "resource_violations": 0,
+  "all_resources_actual_nice19_cores12_15": true,
+  "owned_remaining": [],
+  "includes_deleted_cwd_scan": true,
+  "own_target_bytes": 2003836928,
+  "source_status": " M docs/IMPLEMENTATION.md\n M tests/startup/backpressure.rs\n"
+}
