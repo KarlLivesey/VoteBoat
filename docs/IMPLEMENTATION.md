@@ -43,6 +43,83 @@ the primary workload or relax membership fences to obtain a score. Current
 head has no established CPU-1 result.
 
 
+### CPU1 builder schema and acceptance plan (22 October 2026, before source edits)
+
+Work starts at docs-only `0a752089`, production baseline
+`0bf9271ecb5a34c4089c6bb10381303232624170`, on
+`cpu/p1-commit-notices`. Parent alone integrates. Original design pack/brief
+remain unchanged. Implementation evidence belongs in
+[CPU1 receipts](../validation/performance/pillar1-cpu1/IMPLEMENTED.md).
+
+Data/API: explicit `Rpc::CommitNotice { index, log_term }`, opt-in startup
+`Raft::enable_commit_notices()`, and one scalar exact emission stamp per peer.
+Wire9/tag19 is explicit consumer support; defaults/formats1–8 remain unchanged.
+Matched changes only construction. Logical authorization explicitly refuses.
+
+State/ownership: commit-purpose sends alone may select a notice after exact
+durable data ACK retirement, with installed current-term tip commitment,
+bootstrap physical membership, no pending dependency/transfer/permit/request/
+admitted range/empty alias. Emit a fresh context and stamp only the actual
+output; a counter is never provenance. Stamps do not collect replies or advance
+progress, reads, readiness or quorum. Bound retained stamp capacity with checked
+arithmetic; invalidate at leadership/configuration/fence/compaction/snapshot
+boundaries. Ordinary request retirement preserves stamps.
+
+Receive: authenticate exact current configuration/voter/store and
+sender-origin context before changing state. Reject malformed fields and
+capability-off/configured ingress. Ignore old terms. Valid same/higher terms
+retain follower/contact/election behavior even when the boundary is missing.
+Only matching local (index,term) can advance the contiguous commit prefix.
+Changed hard state/commit uses existing persistence completion before application;
+no reply is constructed. Failed persistence fences; stale completion grants no
+release. Dropped/superseded/rejected sends retire normally, with acknowledged
+heartbeat repair and no notice ACK drain obligation.
+
+Refinement from actual contracts: `LogSummary::is_plain()` means no retained
+configuration record AND no snapshot membership. The core's
+`checkpoint_membership` returns None for a plain static log; ordinary compaction
+keeps that summary plain. Therefore the approved predicate survives default
+5000-entry maintenance, rather than excluding all snapshots. Test this directly
+before any long matrix. Recovery resets stamps/capability and needs explicit
+startup selection again. Do not broaden eligibility to configured checkpoints.
+
+Focused checks: compare off/on pinned completed cycle using the borrowed
+completion helper's semantics: messages8→6, ordinary events9→7, effects14→12,
+persist6→6 and identical committed/applied originals; volatile and durable
+release; failed/stale/higher-term completion; loss/duplicate/reorder plus
+heartbeat repair; exact provenance/bounds/invalidation and fake ACK; invalid
+versus valid-contact split; transfer/configuration/learner/retirement/logical
+fallback; public API, wire version/refusal and native relay kind/admission.
+Use causal negative controls, including forged contexts/boundaries and
+unacknowledged ordinary Append. Run focused default then all-features sequentially,
+matched separately, then seven strict checks and actual enabled push hook.
+Stop dependent launches on unexpected focused failure and retain exact evidence.
+Performance qualification, full suites, exhaustive relay and native/Mac work
+belong to parent; no CPU gain is claimed by publication.
+
+
+CPU1 builder progress (23 October): the typed notice candidate is implemented
+on its own branch, with exact bounded emission provenance and existing follower
+persistence/application release. Pinned volatile/durable controls achieve
+messages8→6/events9→7/effects14→12/persist6→6. Static5000-original compaction and
+actual matched default-retention maintenance keep the path usable. Focused
+default/all-feature core/public/wire/logical/relay controls, matched75-case
+checks, four causal mutations and seven strict checks are recorded in
+[the compact implementation receipts](../validation/performance/pillar1-cpu1/IMPLEMENTED.md).
+A malformed new Final fixture used Learners operation100; the original193/1
+failure/source was retained, and explicit parent release allowed correction to
+the active Joint operation101 with all fallback coverage retained. Later
+new-fixture/API/lint corrections and actual rcs are retained as well.
+
+This is checked candidate progress, not full qualification or a measured CPU
+gain. Macro P1 remains open; the current mini-plan now needs the parent's
+independent source review and equal-core default-retention performance gate
+before keep/reject. CPU2 depends on that decision/residual, and CPU3 still
+depends on the kept CPU composition. Network/storage optimisation and unrelated
+roadmap work remain paused. The original design pack and CPU1 build brief are
+preserved; only the static-summary refinement above was needed.
+
+
 ## Networked CPU track (pillar 2, opened 19 October 2026)
 
 Score: CPU (user+sys) per completed write, summed over every node process, at

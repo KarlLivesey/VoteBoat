@@ -60,7 +60,7 @@ impl Raft {
         if !self.progress_sends_enabled() {
             return self.broadcast_after_admission_into(out);
         }
-        self.broadcast_ready_peers_into(out)
+        self.broadcast_ready_peers_into(false, out)
     }
 
     #[cfg(test)]
@@ -77,10 +77,14 @@ impl Raft {
         if !self.progress_sends_enabled() {
             return self.broadcast_into(out);
         }
-        self.broadcast_ready_peers_into(out)
+        self.broadcast_ready_peers_into(true, out)
     }
 
-    fn broadcast_ready_peers_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+    fn broadcast_ready_peers_into(
+        &mut self,
+        commit: bool,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         self.refresh_peer_order();
         for at in 0..self.peer_order.len() {
             let peer = self.peer_order[at];
@@ -93,7 +97,11 @@ impl Raft {
             {
                 continue;
             }
-            out.push_back(self.append_for(peer)?);
+            out.push_back(if commit {
+                self.commit_notice_or_append(peer)?
+            } else {
+                self.append_for(peer)?
+            });
         }
         Ok(())
     }

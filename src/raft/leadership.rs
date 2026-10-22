@@ -55,6 +55,7 @@ impl Raft {
         {
             return Err(RaftError::WrongIdentity);
         }
+        self.commit_notice_emissions.clear();
         let context = self.context()?;
         let effects = self.broadcast()?;
         self.transfer = Some(LeadershipTransfer {

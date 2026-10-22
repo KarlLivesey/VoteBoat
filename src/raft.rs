@@ -33,6 +33,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 mod admitted_replication;
 mod batch_limits;
 pub use batch_limits::BatchLimits;
+mod commit_notice;
 mod completion;
 use completion::PreparedCompletion;
 pub use completion::{
@@ -74,6 +75,11 @@ pub struct RequestContext {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Rpc {
+    /// Wire9: installed contiguous commitment; deliberately has no reply.
+    CommitNotice {
+        index: u64,
+        log_term: u64,
+    },
     /// Wire8: request a normal election after exact durable catch-up.
     TimeoutNow {
         operation: OperationId,
@@ -402,6 +408,8 @@ pub struct Raft {
     // Leader slots per peer: retired in place, cleared with every
     // configuration or leadership change (see `peer_slots`).
     requests: PeerSlots<Replication>,
+    commit_notices: bool,
+    commit_notice_emissions: PeerSlots<commit_notice::CommitNoticeEmission>,
     admitted_ranges: PeerSlots<AdmittedRange>,
     empty_append_aliases: PeerSlots<EmptyAppendAlias>,
     // Hot broadcasts' peer order for one accepted configuration id.
@@ -533,6 +541,8 @@ impl Raft {
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
             requests: PeerSlots::new(),
+            commit_notices: false,
+            commit_notice_emissions: PeerSlots::new(),
             admitted_ranges: PeerSlots::new(),
             empty_append_aliases: PeerSlots::new(),
             peer_order: Vec::new(),
@@ -899,7 +909,8 @@ impl Raft {
             .max_batch_bytes
             .checked_add(self.batch_limits.max_replication_entries.max(64) * size_of::<LogEntry>())?
             .checked_add(size_of::<Message>() + 4 * size_of::<Effect>())?;
-        log.checked_add(input_bytes.checked_mul(4)?)?
+        log.checked_add(self.commit_notice_emissions.retained_bytes()?)?
+            .checked_add(input_bytes.checked_mul(4)?)?
             .checked_add(peers.checked_add(2)?.checked_mul(2)?.checked_mul(message)?)?
             .checked_add(65536)
     }
@@ -2038,7 +2049,10 @@ impl Raft {
             && m.term >= self.durable.hard_state.term
             && matches!(
                 &m.rpc,
-                Rpc::Append { .. } | Rpc::ReadProbe | Rpc::Snapshot { .. }
+                Rpc::Append { .. }
+                    | Rpc::CommitNotice { .. }
+                    | Rpc::ReadProbe
+                    | Rpc::Snapshot { .. }
             );
         let leader = (m.sender, m.from, m.term);
         let mark = out.len();

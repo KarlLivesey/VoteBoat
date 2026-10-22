@@ -123,6 +123,8 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             return false;
         }
         match &m.rpc {
+            // Requires child-committed captured emission, unsupported by CPU1.
+            Rpc::CommitNotice { .. } => false,
             Rpc::Vote {
                 last_index,
                 last_term,

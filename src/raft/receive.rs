@@ -100,6 +100,9 @@ impl Raft {
                 last_term,
             } => self.receive_vote(&m, hard, *last_index, *last_term),
             Rpc::Voted { granted } => self.receive_voted(&m, hard, *granted),
+            Rpc::CommitNotice { index, log_term } => {
+                return self.receive_commit_notice_into(&m, hard, *index, *log_term, out)
+            }
             Rpc::Append { .. } => return self.receive_append_into(m, hard, out),
             Rpc::Appended {
                 success,
@@ -150,6 +153,7 @@ impl Raft {
         let request = matches!(
             &m.rpc,
             Rpc::Vote { .. }
+                | Rpc::CommitNotice { .. }
                 | Rpc::Append { .. }
                 | Rpc::ReadProbe
                 | Rpc::Snapshot { .. }
@@ -427,7 +431,11 @@ impl Raft {
                     || (self.progress_sends_enabled()
                         && sent.commit_at_start < self.durable.commit_index))
             {
-                out.push_back(self.append_for(m.from)?);
+                out.push_back(if prefix < self.durable.last_index() {
+                    self.append_for(m.from)?
+                } else {
+                    self.commit_notice_or_append(m.from)?
+                });
             }
             Ok(())
         } else {

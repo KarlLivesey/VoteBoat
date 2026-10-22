@@ -158,7 +158,9 @@ impl<S: SecureSession, W: WireCodec> NativeRelayNetwork<S, W> {
                     && m.context.sequence > 0
                     && !matches!(
                         m.rpc,
-                        Rpc::TimeoutNow { .. } | Rpc::CommittedLearnerRepairSnapshot { .. }
+                        Rpc::TimeoutNow { .. }
+                            | Rpc::CommitNotice { .. }
+                            | Rpc::CommittedLearnerRepairSnapshot { .. }
                     )
             }
             RecordKind::OneWay => {
@@ -166,6 +168,7 @@ impl<S: SecureSession, W: WireCodec> NativeRelayNetwork<S, W> {
                     && matches!(
                         m.rpc,
                         Rpc::TimeoutNow { .. }
+                            | Rpc::CommitNotice { .. }
                             | Rpc::Append { .. }
                             | Rpc::CommittedLearnerRepairSnapshot { .. }
                     )

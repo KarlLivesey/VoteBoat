@@ -228,6 +228,7 @@ impl Raft {
         self.empty_append_aliases.remove(&peer);
     }
     pub(super) fn clear_replication_requests(&mut self) {
+        self.commit_notice_emissions.clear();
         self.requests.clear();
         self.admitted_ranges.clear();
         self.empty_append_aliases.clear();

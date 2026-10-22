@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 #[path = "raft/campaigning.rs"]
 mod campaigning;
+#[path = "raft/commit_notices.rs"]
+mod commit_notices;
 #[path = "raft/drain_coordinator.rs"]
 mod drain_coordinator;
 #[cfg(feature = "native")]

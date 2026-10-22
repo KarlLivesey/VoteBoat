@@ -14,6 +14,9 @@ impl Raft {
                 return Err(RaftError::WrongIdentity);
             }
         }
+        if matches!(m.rpc, Rpc::CommitNotice { .. }) {
+            return self.validate_commit_notice(m);
+        }
         match &m.rpc {
             Rpc::LearnerReadinessRequest(_) | Rpc::LearnerReadinessReply { .. } => {
                 self.readiness_message_source(m)

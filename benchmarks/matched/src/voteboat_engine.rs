@@ -95,6 +95,7 @@ impl Cluster {
             let store = VolatileStore::<TRACE>::new(binding, limits)?;
             let state = store.log.bootstrap(&bootstrap)?;
             let mut core = Raft::recover_volatile(node, &store.log, state).map_err(debug_error)?;
+            core.enable_commit_notices().map_err(debug_error)?;
             core.configure_batch_limits(batch_limits)
                 .map_err(debug_error)?;
             if core.batch_limits() != batch_limits {

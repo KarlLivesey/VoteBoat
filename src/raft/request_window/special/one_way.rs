@@ -5,6 +5,9 @@ use super::*;
 
 impl Raft {
     pub(in crate::raft::request_window) fn original_one_way(&self, m: &Message) -> bool {
+        if matches!(m.rpc, Rpc::CommitNotice { .. }) {
+            return self.original_commit_notice(m);
+        }
         if let Rpc::TimeoutNow {
             operation,
             index,

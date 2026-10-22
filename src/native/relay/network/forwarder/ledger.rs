@@ -131,12 +131,15 @@ fn valid_kind(m: &Message, k: RecordKind) -> bool {
             !reply
                 && !matches!(
                     m.rpc,
-                    Rpc::TimeoutNow { .. } | Rpc::CommittedLearnerRepairSnapshot { .. }
+                    Rpc::TimeoutNow { .. }
+                        | Rpc::CommitNotice { .. }
+                        | Rpc::CommittedLearnerRepairSnapshot { .. }
                 )
         }
         RecordKind::OneWay => matches!(
             m.rpc,
             Rpc::TimeoutNow { .. }
+                | Rpc::CommitNotice { .. }
                 | Rpc::Append { .. }
                 | Rpc::CommittedLearnerRepairSnapshot { .. }
         ),
@@ -174,5 +177,51 @@ impl RequestRecord {
         self.original.ticket == original.ticket
             && self.original.kinds == original.kinds
             && self.original.wire == original.wire
+    }
+}
+
+#[cfg(test)]
+mod commit_notice_tests {
+    use super::*;
+    #[test]
+    fn notice_cannot_be_relabelled_as_request_reply_or_capture_a_reply_family() {
+        let node = |n| NodeId::new(n).unwrap();
+        let binding = StoreBinding {
+            identity: StoreIdentity {
+                id: StoreId::new(1).unwrap(),
+                incarnation: StoreIncarnation::new(1).unwrap(),
+            },
+            session: StoreSession::new(1).unwrap(),
+        };
+        let m = Message {
+            group: GroupIdentity {
+                id: GroupId::new(1).unwrap(),
+                incarnation: GroupIncarnation::new(1).unwrap(),
+            },
+            configuration: ConfigurationId::new(1).unwrap(),
+            from: node(1),
+            sender: binding,
+            to: node(2),
+            term: 1,
+            context: RequestContext {
+                origin: binding,
+                sequence: 1,
+            },
+            rpc: Rpc::CommitNotice {
+                index: 1,
+                log_term: 1,
+            },
+        };
+        assert!(valid_kind(&m, RecordKind::OneWay));
+        assert!(!valid_kind(&m, RecordKind::Request));
+        assert!(!valid_kind(&m, RecordKind::Reply));
+        assert!(ReplyScope::capture(
+            &m,
+            PeerIdentity {
+                node: m.to,
+                store: binding.identity
+            }
+        )
+        .is_err());
     }
 }

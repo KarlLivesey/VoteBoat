@@ -246,3 +246,72 @@ fn authority_exception_does_not_relax_normal_promise_or_original_request_scope()
 mod promotion;
 
 mod snapshot_ack;
+
+#[test]
+fn commit_notice_is_explicitly_refused_even_against_a_committed_parent_image() {
+    let mut a = fixture();
+    a.wire_codec = NativeWireCodec::with_commit_notices(WireLimits::default()).unwrap();
+    let p = a.state.parent.as_ref().unwrap();
+    let group = p.bootstrap.group;
+    let update = LogUpdate {
+        group,
+        expected_revision: p.revision,
+        hard_state: HardState {
+            term: 1,
+            voted_for: None,
+        },
+        commit_index: 1,
+        suffix: Some(Suffix {
+            from: 1,
+            entries: vec![LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Noop,
+            }]
+            .into(),
+        }),
+        snapshot: None,
+        snapshot_membership: None,
+    };
+    let mut states = BTreeMap::from([(group, p.clone())]);
+    crate::log::apply_batch(
+        &mut states,
+        &[LogMutation::Update(update)],
+        a.limits.parent_log,
+    )
+    .unwrap();
+    a.state.parent = states.remove(&group);
+    let p = a.state.parent.as_ref().unwrap();
+    let m = Message {
+        group: p.bootstrap.group,
+        configuration: p.bootstrap.configuration,
+        from: node(1),
+        sender: owner().store,
+        to: node(3),
+        term: p.hard_state.term,
+        context: RequestContext {
+            origin: owner().store,
+            sequence: 1,
+        },
+        rpc: Rpc::CommitNotice {
+            index: p.commit_index,
+            log_term: p.last_term(),
+        },
+    };
+    // A real wire9 message, not a failure caused by the old codec.
+    let scope = crate::wire::WireScope {
+        from: m.from,
+        sender: m.sender,
+        to: m.to,
+    };
+    a.wire_codec
+        .encode_batch(scope, std::slice::from_ref(&m))
+        .unwrap();
+    let CommandBody::Authorize(capsule) = authorize(&a, 2, m).body else {
+        panic!()
+    };
+    assert_eq!(
+        a.authorize(&capsule, representative(1)).unwrap(),
+        LogicalOutcome::Refused(LogicalRefusal::InvalidResponse)
+    );
+}

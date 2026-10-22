@@ -11,6 +11,25 @@
   ],
   "contracts": [
     {
+      "design_id": "C01/C07/C10",
+      "public_contract": "Raft::enable_commit_notices / Rpc::CommitNotice",
+      "operations": [
+        "enable_commit_notices",
+        "step",
+        "step_into"
+      ],
+      "native": "Explicit in-process physical bootstrap-voter composition; native wire9 consumer support only; native defaults and logical assemblies stay capability-off.",
+      "conformance": [
+        "src/raft/commit_notice/tests.rs",
+        "src/raft/commit_notice/histories.rs",
+        "src/raft/commit_notice/provenance.rs",
+        "src/raft/commit_notice/native.rs",
+        "tests/raft/commit_notices.rs",
+        "tests/wire/leadership.rs"
+      ],
+      "scope": "Exact scalar per-peer emitted stamp, no reply collector/alias/progress upgrade. Commit-purpose emission only, correlated durable data evidence, exact current identity/configuration/term/local boundary. Existing persistence completes before apply. Ordinary heartbeat/probe/retry/catch-up remain acknowledged and repair notice loss. Checked retained Vec capacity accounting; role/configuration/fence/compaction/snapshot invalidation. Static checkpoints remain plain. Logical authorization explicitly refuses. No persistent-format or network policy change. See CPU1 design and implementation receipts; performance gate pending."
+    },
+    {
       "design_id": "C01/C08/C14",
       "public_contract": "CommandBytes",
       "operations": [

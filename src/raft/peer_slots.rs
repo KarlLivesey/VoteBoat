@@ -36,6 +36,12 @@ impl<T: Copy + PartialEq + Debug> PeerSlots<T> {
             oracle: BTreeMap::new(),
         }
     }
+    /// Actual retained Vec allocation, including vacant slots.
+    pub(super) fn retained_bytes(&self) -> Option<usize> {
+        self.slots
+            .capacity()
+            .checked_mul(std::mem::size_of::<(NodeId, Option<T>)>())
+    }
     fn position(&self, peer: NodeId) -> Result<usize, usize> {
         self.slots.binary_search_by_key(&peer, |(node, _)| *node)
     }

@@ -76,6 +76,10 @@ impl NativeWireCodec {
     pub fn with_leadership_transfer(limits: WireLimits) -> Result<Self, WireError> {
         Self::versioned(limits, 8)
     }
+    /// Explicit format9 adds one-way commit notices; sessions still default to1.
+    pub fn with_commit_notices(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 9)
+    }
     fn versioned(limits: WireLimits, version: u16) -> Result<Self, WireError> {
         if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
             return Err(WireError::InvalidLimits);
@@ -125,6 +129,14 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
         return Err(WireError::InvalidMessage("message scope/term/context"));
     }
     match &m.rpc {
+        Rpc::CommitNotice { index, log_term } => {
+            if version < 9 {
+                return Err(WireError::UnsupportedVersion(version));
+            }
+            if *index == 0 || *log_term == 0 || *log_term > m.term || m.context.origin != m.sender {
+                return Err(WireError::InvalidMessage("commit notice scope/boundary"));
+            }
+        }
         Rpc::TimeoutNow {
             index, log_term, ..
         } => {
@@ -586,6 +598,11 @@ impl<'a> Encoder<'a> {
     }
     fn rpc(&mut self, m: &Message) -> Result<(), WireError> {
         match &m.rpc {
+            Rpc::CommitNotice { index, log_term } => {
+                self.u8(19)?;
+                self.u64(*index)?;
+                self.u64(*log_term)
+            }
             Rpc::TimeoutNow {
                 operation,
                 index,
@@ -1219,6 +1236,10 @@ impl<'a> Decoder<'a> {
             },
             4 => Rpc::ReadProbe,
             5 => Rpc::ReadAck,
+            19 if version >= 9 => Rpc::CommitNotice {
+                index: self.u64()?,
+                log_term: self.u64()?,
+            },
             18 if version >= 8 => Rpc::TimeoutNow {
                 operation: self.operation()?,
                 index: self.u64()?,

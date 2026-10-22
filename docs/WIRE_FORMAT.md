@@ -1,4 +1,4 @@
-# Native wire formats 1–5
+# Native wire formats 1–9
 
 `NativeWireCodec::new` selects wire version 1 for existing static-configuration
 assemblies. `NativeWireCodec::with_membership` explicitly selects version 2,
@@ -30,7 +30,7 @@ choose that trusted scope. This codec does not authenticate a connection.
 | Offset | Bytes | Meaning |
 | --- | --- | --- |
 | 0 | 8 | ASCII `VBWIRE01` |
-| 8 | 2 | Wire version, 1–5 as explicitly selected |
+| 8 | 2 | Wire version, 1–9 as explicitly selected |
 | 10 | 2 | Flags, 0 |
 | 12 | 4 | Total frame bytes, including prefix and final checksum |
 | 16 | 4 | Message count, positive |
@@ -299,3 +299,23 @@ selects an owned BufferPool lease. Existing encode_batch callers retain the same
 canonical wire bytes. Short/long destinations fail; destination contents may be
 modified on error and must not be transmitted. Host codec compatibility defaults
 use separately bounded temporary encoding storage. See [buffer ownership](BUFFERS.md).
+
+## Explicit wire9 commit notices
+
+`NativeWireCodec::with_commit_notices` selects version9. Tag19 carries
+`u64 index, u64 log_term` after the ordinary envelope. Both are positive,
+log_term≤message.term, and context.origin must equal sender. Formats1–8 refuse
+this variant; each decoder still accepts only its exact selected version.
+Native TLS/QUIC HELLO accepts explicit version9 with existing ALPN and exact
+version refusal; defaults remain unchanged. WAL/snapshot formats do not change.
+
+`Raft::enable_commit_notices()` selects an equal-guarantee physical composition
+at idle follower startup. Every endpoint/delivery path must support the variant.
+Only exact durable-ACKed bootstrap voters at an installed current-term committed
+tip may receive commit-purpose notices. A notice has no response collector or
+reply. It never establishes progress, quorum, readiness, transfer or read evidence.
+Matching follower commitment/hard state still completes persistence before apply.
+Valid nonmatching notices provide leader contact; ordinary acknowledged heartbeats
+repair loss. Static checkpoints retain plain membership and keep eligibility.
+Configured, learner, transfer, retirement and logical assemblies use acknowledged
+paths; logical capsule authorization explicitly refuses notices.
