@@ -115,7 +115,8 @@ threshold, production journal validation or pre-push check was weakened.
 
 No CPU gain, allocation reduction, power-loss proof, full source approval or
 complete release is claimed. No long matrix, full suite, exhaustive relay,
-native performance, Mac work, unrelated reliability repair or other agent ran.
+native performance, Mac work or unrelated reliability repair ran; the builder
+spawned no child agents.
 Known historical native relay BrokenPipe, benchmark filesystem lock and QUIC
 drain failures remain unproven. Parent owns source reviews, equal-core primary
 default-retention CPU measurements, keep/reject and integration. Macro P1 and
@@ -140,3 +141,69 @@ target/claude/pillar1-20261022/cpu1-builder (reports only). Own target, checkout
 registration, seed branch and exact identified automatic hosts are swept after
 checked publication; final stock guard/zero-owned-process receipts are recorded
 there by cleanup, not inferred from test success.
+
+
+## Semantic preservation follow-up plan (before test edits)
+
+The feature gate preserves VoteBoat capabilities above the OpenRaft comparison
+baseline. Cargo all-features compilation alone is not semantic qualification.
+Add one bounded off/on volatile/durable control using initially validated weighted
+and recursive bootstrap policies: an ordinary flat majority must not commit when
+the actual policy is unsatisfied, and real data ACKs must still converge through
+the existing policy. Test fixture policy is selected before recovery, never hot
+swapped. No production API/state/ownership change is planned. Existing logical
+application and release controls retain child evidence; select the missing
+release-focused controls without launching exhaustive native/network suites.
+Record source consumers, actual evidence and remaining parent qualification in
+a feature matrix. No new production feature or roadmap completion is implied.
+
+Chapter06 responsibility/execution-group decomposition is an architectural
+boundary: fleet→ship→department can mean independently owned per-department
+logs, each with its own ordered prefix and no global order. CPU1 remains local
+to one explicit group/incarnation/configuration/context. Parent metadata/routing
+must not become a per-write sequencer, commit/global-lock dependency or hot path.
+Existing responsibility ownership/migration/lifecycle fences remain in force;
+CPU1 adds no splitting, department or routing implementation. Existing fallback
+and identity/fence controls suffice for this scope; no invented decomposition
+test is planned.
+
+
+## Semantic feature matrix
+
+This is a preservation audit of implemented consumers, not a claim that the
+whole design-pack roadmap is complete. OpenRaft is only the comparison baseline.
+Excluded notice states keep their functional acknowledged path. All-feature
+compilation is listed separately from actual executed semantic controls.
+
+| Capability | Source consumer | CPU1 path | Actual regression evidence / boundary |
+| --- | --- | --- | --- |
+| Recursive and weighted quorum trees; joint old-and-new policy | quorum.rs; raft.rs::maybe_commit_into; raft/configuration.rs | Notice only after the unchanged durable policy commits; joint uses acknowledged fallback | New enabled_notices_preserve_weighted_and_recursive_quorum_commit_rules: off/on × volatile/durable × two policies; flat majority refused, exact ACKs converge, six persists, identical state. Existing core202 includes joint_commit_uses_old_and_new_and_never_counts_a_learner and recursive_joint_recovery controls, default/all-features |
+| Logical-voter composition and child durable evidence | logical_voter/application/authorize.rs; bridge/release.rs; runtime/logical_release; logical_voter/persistence | Logical assemblies remain supported through existing acknowledged composition; explicit notice authorization refusal, capability off | Logical application66 per configuration includes original retry, term/vote/prefix checkpoint, stale read capsule and joint→Final import controls; new wire9 notice refusal. Additional release capacity/classification11 and exact written→durable correlation2 per configuration. Correlation controls do not independently prove child consensus or whole native lifecycle |
+| Hierarchical responsibility, routing, independently owned/migratable execution groups | routing.rs; routed.rs; reparenting.rs; transfer.rs; scope.rs | CPU1 stays within one group/context; lifecycle/configuration/fence transitions invalidate stamps or use fallback | Strict source group/incarnation/configuration/store/context controls and role/config/fence/snapshot invalidation executed. Existing hierarchical routing/ownership sources unchanged; all-target strict builds pass. Full routed migration/lifecycle suites not rerun in this slice |
+| Chapter06 fleet→ship→department decomposition | Original design chapter06; same responsibility/routing consumers | One ordered prefix per concrete group; no global order or parent per-write sequence/commit/global lock dependency added | Architectural source boundary above plus existing identity/fence/fallback controls. No splitting/department/routing implementation or new feature completion claimed |
+| Membership, learners, retirement and leadership transfer | raft/configuration.rs; raft/leadership.rs; raft/progress_broadcast.rs | Notice excluded; normal acknowledged requests and original lifecycle effects continue | New configured learner/joint/accepted Final/completed retirement assertions; exact bridge fallback; transfer stamp invalidation; existing learner/joint/read/election/retirement/transfer core controls, default/all-features |
+| Reads and authority/readiness | raft.rs::begin_read/maybe_read_ready; raft/source.rs; logical_voter/application | Notices never create read, quorum, readiness or reply evidence | Fake Appended/read contexts cannot upgrade progress/read proof; invalid/contact split; source preflight learner read refusal and same-voter joint election/read controls; logical stale read capsule control |
+| Operation identities, deduplication, client outcomes | raft/proposals; application.rs; logical_voter/application; matched actor/client | Original append/application/outcome path retained | Fixed off/on identical committed/applied originals, matched75 original receipt/failure/shutdown controls, logical exact-retry/replacement/original-outcome controls. No client/oneshot/reply/accounting edits |
+| Snapshots, recovery and persistence completion | raft.rs::checkpoint_stored/snapshot_applied; raft/receive.rs; log_store; public recovery APIs | Static checkpoint remains eligible after new data ACKs; configured snapshots use fallback; restart explicitly selects capability again | 5000-original compaction→six-message cycle; matched default-retention12000 originals and lagging-follower snapshot recovery; public durable/volatile/no-early-apply/failure controls; stale/higher-term completion; no storage-format change |
+| Multi-group identity, bounded resources, public host/native composition | runtime; native/relay; outbound; wire; public Raft startup | Exact per-group provenance; bounded peer stamps; explicit wire9/tag19; generic host ownership preserved | Public83+volatile11+wire21 per configuration; real one-way capture/frame/local Sent/Failed/Cancelled drain and reserve/refusal controls;1000 cycles bounded two peer keys; strict all-target builds across four configurations. Whole multi-group/native qualification remains parent-owned |
+
+The semantic follow-up changes only the test fixture/control and documentation.
+Production/runtime, matched source, Cargo/locks, build scripts/configuration and
+tracked hooks are identical to the first checked published eb32cbef head. That
+allows the parent to identify its pinned source/performance results precisely;
+performance approval is still PENDING. Supplemental checks are reported as
+separate controls, not added to the earlier core202 run count.
+
+
+Supplemental receipts: semantic-quorum-default and semantic-quorum-all-features
+ran1 each, rc0; semantic-logical-release-{default,all-features} ran11 each,
+rc0; semantic-logical-persistence-{default,all-features} ran2 each, rc0.
+No production weakening, dependency or additional roadmap code was needed.
+
+The final notice-module regression after the fixture refactor ran18 cases in
+both default and all-feature configurations, rc0 each (semantic-final-notice-*).
+All seven strict follow-up checks also passed, rc0/zero diagnostics
+(semantic-strict-*). The actual enabled hook is repeated on the follow-up push;
+a temporary own-target Cargo proxy runs the unchanged stock guard before each
+hook configuration and execs the original /usr/bin/cargo under absolute nice19
+and affinity0–3. The proxy is removed with the own target during cleanup.

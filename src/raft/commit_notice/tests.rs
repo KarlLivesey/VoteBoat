@@ -30,7 +30,12 @@ struct Cluster {
 }
 impl Cluster {
     fn new(enabled: bool, volatile: bool) -> Self {
-        let state = core().state().clone();
+        Self::with_policy(enabled, volatile, core().state().bootstrap.policy.clone())
+    }
+    fn with_policy(enabled: bool, volatile: bool, policy: crate::quorum::Policy) -> Self {
+        let mut state = core().state().clone();
+        // Select the bootstrap policy before any recovery/election, not live.
+        state.bootstrap.policy = policy;
         let mut cores = Vec::new();
         let mut logs = Vec::new();
         let mut apps = Vec::new();
@@ -296,4 +301,62 @@ fn static_checkpoint_after_5000_originals_keeps_the_notice_path_reachable() {
             persists: 6
         }
     );
+}
+
+#[test]
+fn enabled_notices_preserve_weighted_and_recursive_quorum_commit_rules() {
+    use crate::quorum::{Limits, Policy, Tree, WeightedChild};
+    let weighted = Tree::Weighted(
+        [(1, 1), (2, 3), (3, 1)]
+            .into_iter()
+            .map(|(id, weight)| WeightedChild {
+                weight,
+                node: Tree::Voter(node(id)),
+            })
+            .collect(),
+    );
+    let recursive = Tree::Majority(vec![
+        Tree::Majority(vec![Tree::Voter(node(1)), Tree::Voter(node(2))]),
+        Tree::Voter(node(3)),
+    ]);
+    for (tree, insufficient_peer) in [(weighted, 3), (recursive, 2)] {
+        let policy = Policy::new(tree, Limits::default()).unwrap();
+        for volatile in [true, false] {
+            let mut outcomes = Vec::new();
+            for enabled in [false, true] {
+                let mut c = Cluster::with_policy(enabled, volatile, policy.clone());
+                let before = c.cores[0].state().commit_index;
+                c.propose(1);
+                let pos = c
+                    .queue
+                    .iter()
+                    .position(|m| m.to == node(insufficient_peer))
+                    .unwrap();
+                let data = c.queue.remove(pos).unwrap();
+                assert!(matches!(&data.rpc, Rpc::Append { entries, .. } if !entries.is_empty()));
+                c.deliver(data);
+                let ack = c.queue.pop_back().unwrap();
+                assert!(matches!(ack.rpc, Rpc::Appended { .. }));
+                c.deliver(ack);
+                // Leader plus one follower is a flat majority, but not this policy.
+                assert_eq!(c.cores[0].state().commit_index, before);
+                assert!(!c.cores[0].has_pending_dependency());
+                assert!(c
+                    .sent
+                    .iter()
+                    .all(|m| !matches!(m.rpc, Rpc::CommitNotice { .. })));
+                c.drain();
+                c.assert_converged(1);
+                assert_eq!(c.counts.persists, 6);
+                assert_eq!(c.counts.messages, if enabled { 6 } else { 8 });
+                outcomes.push(
+                    c.cores
+                        .iter()
+                        .map(|r| r.state().clone())
+                        .collect::<Vec<_>>(),
+                );
+            }
+            assert_eq!(outcomes[0], outcomes[1]);
+        }
+    }
 }

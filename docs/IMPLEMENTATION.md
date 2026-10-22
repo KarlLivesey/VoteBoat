@@ -120,6 +120,22 @@ roadmap work remain paused. The original design pack and CPU1 build brief are
 preserved; only the static-summary refinement above was needed.
 
 
+CPU1 semantic feature preservation (23 October follow-up): OpenRaft remains a
+comparison baseline, never a feature ceiling. The receipts now map implemented
+quorum/weighted/joint, logical child evidence, hierarchy/ownership, membership,
+reads/identities, snapshots/recovery and bounded public/native consumers to
+actual controls and remaining qualification. The additional test compares
+weighted/recursive policies off/on in volatile and durable modes, refusing a
+flat majority insufficient for the actual policy. Existing fallback capabilities
+remain functional. Chapter06 fleet→ship→department decomposition keeps one
+ordered prefix per concrete independently owned/migratable group, no implied
+global order and no parent per-write sequence/commit/global lock dependency.
+CPU1 adds no decomposition/routing feature or roadmap claim. This follow-up
+changes tests/docs only; production, matched and build/hook inputs stay at the
+first checked candidate. Parent source review/performance/integration remain the
+current mini-plan gate; CPU2/CPU3 dependencies and paused pillars are unchanged.
+
+
 ## Networked CPU track (pillar 2, opened 19 October 2026)
 
 Score: CPU (user+sys) per completed write, summed over every node process, at
