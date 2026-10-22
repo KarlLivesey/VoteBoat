@@ -11,6 +11,18 @@ current shapes are not requirements. The design pack remains the original
 source. Any changed design is recorded here, with real committed/applied
 outcomes, quorum evidence, bounds and ownership verified by tests.
 
+**Feature preservation is a hard acceptance gate (user reaffirmed 23 October).**
+OpenRaft is the performance comparator, not the feature ceiling. Preserve all
+currently implemented VoteBoat capabilities above that baseline: quorum trees,
+logical-voter composition, hierarchical responsibilities and ownership/lifecycle,
+membership/learner/retirement/transfer behavior, reads, identities/deduplication,
+snapshots/recovery, bounded multi-group operation and public host composition.
+API/representation changes may retain these semantics through a cheaper shape;
+feature deletion is not a CPU optimisation. An ineligible fast path uses the
+fully functioning existing path. Each candidate records a semantic feature
+matrix with consumer and actual regression evidence; Cargo all-features alone
+is not that proof. Unimplemented roadmap features are not claimed complete.
+
 Macro milestone P1: minimise CPU per completed original write at equal cores,
 with both singleton and batched paths measured. Rate and p99 are guards, not
 substitutes for lower CPU. Report deterministic core/driver and full embedding
