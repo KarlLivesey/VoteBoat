@@ -19,7 +19,7 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 
 | Mini-plan item | Purpose and dependencies | Completion checks | Advances |
 | --- | --- | --- | --- |
-| Current CPU-1: reduce complete protocol/host work per write | Audit the existing V3e+V3f profile against main `0bf9271e`; choose the largest bounded removal of messages, dispatches or completion rounds. Compatibility changes are authorised; no networking or storage tuning prerequisite | Before code: schema/API/state/ownership/failure plan and exact source map. Candidate: focused causal controls, stable/joint/learner/transfer/recovery boundaries as touched, equal-core paired driver and framework CPU/write, instruction/allocation/effect counts, strict checks and independent reviews | P1 |
+| Current CPU-1: explicit commit notices without replies | Design audit on main `0bf9271e` selected a typed commit notice for eligible static physical voters, with exact emission provenance and acknowledged fallback. Remove two steady-cycle replies; preserve commit persistence and application. Compatibility changes authorised; no networking/storage tuning prerequisite | Before code: schema/API/state/ownership/failure plan and exact source map. Candidate: focused causal controls, stable/joint/learner/transfer/recovery boundaries as touched, equal-core paired driver and framework CPU/write, instruction/allocation/effect counts, strict checks and independent reviews | P1 |
 | Next CPU-2: remove the next structural cost from the measured residual | Depends on CPU-1 measurements and keep/reject decision. Consider direct volatile completion or a cheaper public embedding flow if it removes real work; do not resurrect parked networking/storage candidates | Concrete measured cost class and smallest usable implementation; unchanged client-work accounting; focused correctness, paired equal-core performance and normal merge checks | P1 |
 | Then CPU-3: optimise remaining per-original data movement and lookups | Depends on a profile of the kept CPU composition; membership/peer lookups, staging copies and batch admission are candidates, not predetermined extra helpers | Remove a measured whole class or reject it promptly; show singleton and bulk CPU/write, instructions and allocations; keep actual evidence separate from plans | P1 |
 
@@ -28,6 +28,19 @@ The 20 October V3g scratch report is input, not current-head qualification:
 removed two messages and measured about 15% driver / 7% singleton full-path CPU.
 A new candidate must establish its own source identities, correctness and paired
 results. No new performance result or production change is claimed here.
+
+CPU-1 build brief: [schema, ownership, consumer audit and causal controls](../validation/performance/pillar1-cpu1/CPU1-DESIGN.md).
+The public startup capability is equal-guarantee composition, not a weaker
+commit mode. An explicit notice uses a distinct RPC; ordinary Append heartbeats,
+probes and catch-up remain acknowledged. Exact sender emission stamps classify
+one-way outputs without manufacturing replica progress. Valid matching follower
+commit/hard-state changes still require their existing completion before apply.
+Primary CPU qualification uses unchanged **default-retention** workloads, all
+original outcomes/frontiers and normal owned shutdown. Retain-all is secondary.
+The builder must prove fast-path reachability through ordinary maintenance and
+snapshot/compaction before spending a full measurement matrix; do not replace
+the primary workload or relax membership fences to obtain a score. Current
+head has no established CPU-1 result.
 
 
 ## Networked CPU track (pillar 2, opened 19 October 2026)
