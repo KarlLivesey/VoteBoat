@@ -1,5 +1,35 @@
 # Implementation record
 
+## Active priority: pillar 1 CPU only (22 October 2026)
+
+The user has resumed implementation after the completed wind-down and explicitly
+restricted active optimisation to pure CPU for the in-process Rust library and
+its embedding. Pillars 2 (TCP/QUIC/network performance) and 3 (WAL/storage
+performance), plus unrelated roadmap and reliability work, are paused. Public
+API compatibility, wire shape and internal flow may change to remove CPU work;
+current shapes are not requirements. The design pack remains the original
+source. Any changed design is recorded here, with real committed/applied
+outcomes, quorum evidence, bounds and ownership verified by tests.
+
+Macro milestone P1: minimise CPU per completed original write at equal cores,
+with both singleton and batched paths measured. Rate and p99 are guards, not
+substitutes for lower CPU. Report deterministic core/driver and full embedding
+cost separately. No claimed gain from extra cores, skipped application,
+weaker evidence, changed command counts or benchmark-only shortcuts.
+
+| Mini-plan item | Purpose and dependencies | Completion checks | Advances |
+| --- | --- | --- | --- |
+| Current CPU-1: reduce complete protocol/host work per write | Audit the existing V3e+V3f profile against main `0bf9271e`; choose the largest bounded removal of messages, dispatches or completion rounds. Compatibility changes are authorised; no networking or storage tuning prerequisite | Before code: schema/API/state/ownership/failure plan and exact source map. Candidate: focused causal controls, stable/joint/learner/transfer/recovery boundaries as touched, equal-core paired driver and framework CPU/write, instruction/allocation/effect counts, strict checks and independent reviews | P1 |
+| Next CPU-2: remove the next structural cost from the measured residual | Depends on CPU-1 measurements and keep/reject decision. Consider direct volatile completion or a cheaper public embedding flow if it removes real work; do not resurrect parked networking/storage candidates | Concrete measured cost class and smallest usable implementation; unchanged client-work accounting; focused correctness, paired equal-core performance and normal merge checks | P1 |
+| Then CPU-3: optimise remaining per-original data movement and lookups | Depends on a profile of the kept CPU composition; membership/peer lookups, staging copies and batch admission are candidates, not predetermined extra helpers | Remove a measured whole class or reject it promptly; show singleton and bulk CPU/write, instructions and allocations; keep actual evidence separate from plans | P1 |
+
+The 20 October V3g scratch report is input, not current-head qualification:
+`target/claude/research-r4/v3g-profile.md`. Its unqualified commit-notice prototype
+removed two messages and measured about 15% driver / 7% singleton full-path CPU.
+A new candidate must establish its own source identities, correctness and paired
+results. No new performance result or production change is claimed here.
+
+
 ## Networked CPU track (pillar 2, opened 19 October 2026)
 
 Score: CPU (user+sys) per completed write, summed over every node process, at
