@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/bin/sh",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/tools/diskguard.sh"
+  ],
+  "started": 1792769639.995855,
+  "mono_start": 106843.250302165,
+  "parent_threads": 1,
+  "timeout": false,
+  "pid": 2834285,
+  "start": "10684325",
+  "rc": 0,
+  "joined": true,
+  "ended": 1792769644.7797067,
+  "mono_end": 106848.034154045,
+  "stdout": "free_gb=2864 (min 500)\ntarget_gb=7 (cap 150) cargo_build_dirs=0\nlive_worktrees=1 (cap 5) prunable=0 worktree_target_gb=0 (cap 120)\nlinux_tmp_voteboat_dirs=0 (cap 300) linux_tmp_gb=0 (cap 10)\nmac_loop_gb=10 (cap 40) mac_voteboat_dirs=2 (cap 3)\nOK: disk within budget\n",
+  "stderr": ""
+}

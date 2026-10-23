@@ -1,0 +1,341 @@
+{
+  "verdict": "GO",
+  "scope": "normal exact81 Apple ordinary summarized append machine gate only; full Stage0 pending six original controls",
+  "B": "81d2cfe6b953e9a268c6444d571fed5f21263652",
+  "A": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "control_sha256": "a75803ade22c78bbbd6e32364aa54fedaad2d9fa0bddd2fd45bef4be04281449",
+  "canonical_B_sha256": "36ad89f682f1d21ce09cf7b68405e9dd8111064d842107e4414bb093432bac4a",
+  "memcpy_stub_B": "0x100210b44",
+  "control_memcpy_lengths": {
+    "264": 2,
+    "304": 5,
+    "640": 2,
+    "672": 2,
+    "408": 2
+  },
+  "candidate_memcpy_lengths": {
+    "264": 2,
+    "304": 2,
+    "640": 2,
+    "672": 2,
+    "408": 2
+  },
+  "control_memcpy_calls": [
+    {
+      "address": "0x100091178",
+      "bytes": 264,
+      "context": [
+        "100091164: 912783e8    \tadd\tx8, sp, #0x9e0",
+        "100091168: 911bc3e9    \tadd\tx9, sp, #0x6f0",
+        "10009116c: 9100a120    \tadd\tx0, x9, #0x28",
+        "100091170: 9100a101    \tadd\tx1, x8, #0x28",
+        "100091174: 52802102    \tmov\tw2, #0x108              ; =264",
+        "100091178: 9405fe76    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x1000911b0",
+      "bytes": 304,
+      "context": [
+        "10009119c: 3d8277e1    \tstr\tq1, [sp, #0x9d0]",
+        "1000911a0: 914007e0    \tadd\tx0, sp, #0x1, lsl #12   ; =0x1000",
+        "1000911a4: 91008000    \tadd\tx0, x0, #0x20",
+        "1000911a8: 91004301    \tadd\tx1, x24, #0x10",
+        "1000911ac: 52802602    \tmov\tw2, #0x130              ; =304",
+        "1000911b0: 9405fe68    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x1000911f4",
+      "bytes": 304,
+      "context": [
+        "1000911e0: 912083e8    \tadd\tx8, sp, #0x820",
+        "1000911e4: 9101a100    \tadd\tx0, x8, #0x68",
+        "1000911e8: 914007e1    \tadd\tx1, sp, #0x1, lsl #12   ; =0x1000",
+        "1000911ec: 91008021    \tadd\tx1, x1, #0x20",
+        "1000911f0: 52802602    \tmov\tw2, #0x130              ; =304",
+        "1000911f4: 9405fe57    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x10009134c",
+      "bytes": 264,
+      "context": [
+        "100091338: 912783e8    \tadd\tx8, sp, #0x9e0",
+        "10009133c: 911bc3e9    \tadd\tx9, sp, #0x6f0",
+        "100091340: 9100a120    \tadd\tx0, x9, #0x28",
+        "100091344: 9100a101    \tadd\tx1, x8, #0x28",
+        "100091348: 52802102    \tmov\tw2, #0x108              ; =264",
+        "10009134c: 9405fe01    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x10009138c",
+      "bytes": 304,
+      "context": [
+        "100091378: f900b3e8    \tstr\tx8, [sp, #0x160]",
+        "10009137c: 914007e0    \tadd\tx0, sp, #0x1, lsl #12   ; =0x1000",
+        "100091380: 91008000    \tadd\tx0, x0, #0x20",
+        "100091384: 91004301    \tadd\tx1, x24, #0x10",
+        "100091388: 52802602    \tmov\tw2, #0x130              ; =304",
+        "10009138c: 9405fdf1    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x1000913e8",
+      "bytes": 640,
+      "context": [
+        "1000913d4: 912783e8    \tadd\tx8, sp, #0x9e0",
+        "1000913d8: 913203e9    \tadd\tx9, sp, #0xc80",
+        "1000913dc: 91008120    \tadd\tx0, x9, #0x20",
+        "1000913e0: 91008101    \tadd\tx1, x8, #0x20",
+        "1000913e4: 52805002    \tmov\tw2, #0x280              ; =640",
+        "1000913e8: 9405fdda    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x100091420",
+      "bytes": 672,
+      "context": [
+        "10009140c: b40031c0    \tcbz\tx0, 0x100091a44 <<voteboat::raft::Raft>::persist_update_into+0xb30>",
+        "100091410: aa0003fc    \tmov\tx28, x0",
+        "100091414: 913c83f3    \tadd\tx19, sp, #0xf20",
+        "100091418: 913203e1    \tadd\tx1, sp, #0xc80",
+        "10009141c: 52805402    \tmov\tw2, #0x2a0              ; =672",
+        "100091420: 9405fdcc    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x100091580",
+      "bytes": 408,
+      "context": [
+        "10009156c: 913203e8    \tadd\tx8, sp, #0xc80",
+        "100091570: f906c3fc    \tstr\tx28, [sp, #0xd80]",
+        "100091574: 91042100    \tadd\tx0, x8, #0x108",
+        "100091578: 912083e1    \tadd\tx1, sp, #0x820",
+        "10009157c: 52803302    \tmov\tw2, #0x198              ; =408",
+        "100091580: 9405fd74    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x100091610",
+      "bytes": 640,
+      "context": [
+        "1000915fc: 912783e8    \tadd\tx8, sp, #0x9e0",
+        "100091600: 913203e9    \tadd\tx9, sp, #0xc80",
+        "100091604: 91008120    \tadd\tx0, x9, #0x20",
+        "100091608: 91008101    \tadd\tx1, x8, #0x20",
+        "10009160c: 52805002    \tmov\tw2, #0x280              ; =640",
+        "100091610: 9405fd50    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x100091644",
+      "bytes": 672,
+      "context": [
+        "100091630: 9405fd42    \tbl\t0x100210b38 <dyld_stub_binder+0x100210b38>",
+        "100091634: b4002120    \tcbz\tx0, 0x100091a58 <<voteboat::raft::Raft>::persist_update_into+0xb44>",
+        "100091638: aa0003fc    \tmov\tx28, x0",
+        "10009163c: 913203e1    \tadd\tx1, sp, #0xc80",
+        "100091640: 52805402    \tmov\tw2, #0x2a0              ; =672",
+        "100091644: 9405fd43    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x100091848",
+      "bytes": 304,
+      "context": [
+        "100091834: a91723e1    \tstp\tx1, x8, [sp, #0x170]",
+        "100091838: 914007e0    \tadd\tx0, sp, #0x1, lsl #12   ; =0x1000",
+        "10009183c: 91008000    \tadd\tx0, x0, #0x20",
+        "100091840: 91004301    \tadd\tx1, x24, #0x10",
+        "100091844: 52802602    \tmov\tw2, #0x130              ; =304",
+        "100091848: 9405fcc2    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x100091884",
+      "bytes": 304,
+      "context": [
+        "100091870: 911003e8    \tadd\tx8, sp, #0x400",
+        "100091874: 9101a100    \tadd\tx0, x8, #0x68",
+        "100091878: 914007e1    \tadd\tx1, sp, #0x1, lsl #12   ; =0x1000",
+        "10009187c: 91008021    \tadd\tx1, x1, #0x20",
+        "100091880: 52802602    \tmov\tw2, #0x130              ; =304",
+        "100091884: 9405fcb3    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    },
+    {
+      "address": "0x1000919d0",
+      "bytes": 408,
+      "context": [
+        "1000919bc: 3d832be0    \tstr\tq0, [sp, #0xca0]",
+        "1000919c0: 3d832fe1    \tstr\tq1, [sp, #0xcb0]",
+        "1000919c4: 91042100    \tadd\tx0, x8, #0x108",
+        "1000919c8: 911003e1    \tadd\tx1, sp, #0x400",
+        "1000919cc: 52803302    \tmov\tw2, #0x198              ; =408",
+        "1000919d0: 9405fc60    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+      ]
+    }
+  ],
+  "candidate_memcpy_calls": [
+    {
+      "address": "0x1000911f0",
+      "bytes": 264,
+      "context": [
+        "1000911dc: 912843e8    \tadd\tx8, sp, #0xa10",
+        "1000911e0: 911d03e9    \tadd\tx9, sp, #0x740",
+        "1000911e4: 9100a120    \tadd\tx0, x9, #0x28",
+        "1000911e8: 9100a101    \tadd\tx1, x8, #0x28",
+        "1000911ec: 52802102    \tmov\tw2, #0x108              ; =264",
+        "1000911f0: 9405fe55    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x100091254",
+      "bytes": 304,
+      "context": [
+        "100091240: 9121c3f5    \tadd\tx21, sp, #0x870",
+        "100091244: 9121c3e8    \tadd\tx8, sp, #0x870",
+        "100091248: 9101a100    \tadd\tx0, x8, #0x68",
+        "10009124c: 91004301    \tadd\tx1, x24, #0x10",
+        "100091250: 52802602    \tmov\tw2, #0x130              ; =304",
+        "100091254: 9405fe3c    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x1000913a8",
+      "bytes": 264,
+      "context": [
+        "100091394: 912843e8    \tadd\tx8, sp, #0xa10",
+        "100091398: 911d03e9    \tadd\tx9, sp, #0x740",
+        "10009139c: 9100a120    \tadd\tx0, x9, #0x28",
+        "1000913a0: 9100a101    \tadd\tx1, x8, #0x28",
+        "1000913a4: 52802102    \tmov\tw2, #0x108              ; =264",
+        "1000913a8: 9405fde7    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x100091430",
+      "bytes": 640,
+      "context": [
+        "10009141c: 912843e8    \tadd\tx8, sp, #0xa10",
+        "100091420: 9132c3e9    \tadd\tx9, sp, #0xcb0",
+        "100091424: 91008120    \tadd\tx0, x9, #0x20",
+        "100091428: 91008101    \tadd\tx1, x8, #0x20",
+        "10009142c: 52805002    \tmov\tw2, #0x280              ; =640",
+        "100091430: 9405fdc5    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x100091468",
+      "bytes": 672,
+      "context": [
+        "100091454: b4002f20    \tcbz\tx0, 0x100091a38 <<voteboat::raft::Raft>::persist_update_into+0xb24>",
+        "100091458: aa0003fc    \tmov\tx28, x0",
+        "10009145c: 913d43f3    \tadd\tx19, sp, #0xf50",
+        "100091460: 9132c3e1    \tadd\tx1, sp, #0xcb0",
+        "100091464: 52805402    \tmov\tw2, #0x2a0              ; =672",
+        "100091468: 9405fdb7    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x1000915cc",
+      "bytes": 408,
+      "context": [
+        "1000915b8: 9132c3e8    \tadd\tx8, sp, #0xcb0",
+        "1000915bc: f906dbfc    \tstr\tx28, [sp, #0xdb0]",
+        "1000915c0: 91042100    \tadd\tx0, x8, #0x108",
+        "1000915c4: 9121c3e1    \tadd\tx1, sp, #0x870",
+        "1000915c8: 52803302    \tmov\tw2, #0x198              ; =408",
+        "1000915cc: 9405fd5e    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x10009165c",
+      "bytes": 640,
+      "context": [
+        "100091648: 912843e8    \tadd\tx8, sp, #0xa10",
+        "10009164c: 9132c3e9    \tadd\tx9, sp, #0xcb0",
+        "100091650: 91008120    \tadd\tx0, x9, #0x20",
+        "100091654: 91008101    \tadd\tx1, x8, #0x20",
+        "100091658: 52805002    \tmov\tw2, #0x280              ; =640",
+        "10009165c: 9405fd3a    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x100091690",
+      "bytes": 672,
+      "context": [
+        "10009167c: 9405fd2c    \tbl\t0x100210b2c <dyld_stub_binder+0x100210b2c>",
+        "100091680: b4001e60    \tcbz\tx0, 0x100091a4c <<voteboat::raft::Raft>::persist_update_into+0xb38>",
+        "100091684: aa0003fc    \tmov\tx28, x0",
+        "100091688: 9132c3e1    \tadd\tx1, sp, #0xcb0",
+        "10009168c: 52805402    \tmov\tw2, #0x2a0              ; =672",
+        "100091690: 9405fd2d    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x100091850",
+      "bytes": 304,
+      "context": [
+        "10009183c: 94003b23    \tbl\t0x1000a04c8 <voteboat::log::transition::append_summary>",
+        "100091840: 911003e8    \tadd\tx8, sp, #0x400",
+        "100091844: 9101a100    \tadd\tx0, x8, #0x68",
+        "100091848: 91004301    \tadd\tx1, x24, #0x10",
+        "10009184c: 52802602    \tmov\tw2, #0x130              ; =304",
+        "100091850: 9405fcbd    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    },
+    {
+      "address": "0x100091998",
+      "bytes": 408,
+      "context": [
+        "100091984: 3d8337e0    \tstr\tq0, [sp, #0xcd0]",
+        "100091988: 3d833be1    \tstr\tq1, [sp, #0xce0]",
+        "10009198c: 91042100    \tadd\tx0, x8, #0x108",
+        "100091990: 911003e1    \tadd\tx1, sp, #0x400",
+        "100091994: 52803302    \tmov\tw2, #0x198              ; =408",
+        "100091998: 9405fc6b    \tbl\t0x100210b44 <dyld_stub_binder+0x100210b44>"
+      ]
+    }
+  ],
+  "append_summary_normalized_instructions_equal": true,
+  "helper_instructions": 79,
+  "helper_owned_next_metadata_copy": "normal1000a0554..0560: next-metadata argument x3 saved in x20 -> result x19+0x10,304 bytes; same existing owned-summary construction as control",
+  "volatile_append": {
+    "summary_call": "0x10009123c",
+    "predecessor_copy": "0x100091254",
+    "source": "x24+0x10",
+    "destination": "sp+0x8d8",
+    "bytes": 304
+  },
+  "durable_append": {
+    "summary_call": "0x10009183c",
+    "predecessor_copy": "0x100091850",
+    "source": "x24+0x10",
+    "destination": "sp+0x468",
+    "bytes": 304
+  },
+  "retained": {
+    "staging_672": "0x100090bc8",
+    "effect_272": "0x100090c98",
+    "install_append_ref": "0x100091e18",
+    "canonical_summary_336": "0x100091e28",
+    "stamp_advance": "0x100091e40..0x100091e44"
+  },
+  "no_replacement": "Complete persist function inspected: only two304 copies remain, both direct required predecessor copies after summary. Other memcpy-length counts unchanged. Existing summary return-buffer and inline field movements retained, not an added336 replacement; helper semantic instruction stream equal. None/view association is scalar stores, no full-view movement or304 zero fill on eligible append arms; no bzero/memset/memmove calls in persist. Cold full/fallback ownership remains.",
+  "tests": "five direct actual-Mac view tests PASS,0failed/ignored; normal artifact unchanged",
+  "attribution_limit": "Register/stack/length/control flow are machine facts. Rust object/field names are correlated with pinned source and order-only control, not a stable ABI/DWARF assertion. No allocation, dynamic frequency, per-original dynamic count or net CPU claim.",
+  "primary_pairs": 0,
+  "canonical_children": 0,
+  "full5": "NOT RELEASED",
+  "historical_holds": "UNCHANGED",
+  "preserved_audit_failure": {
+    "file": "machine-count-assertion-raw.json",
+    "original_expectation": "control304sites4",
+    "actual_control304sites": 5,
+    "cause": "three mutually exclusive pre-helper spill sites at1b0/138c/1848 plus two owned predecessor sites at1f4/1884; initial counter assumed only two spill sites",
+    "resolution": "existing frozen raw CFG inspected; no source/build/test/control/measurement rerun; acceptance remains per-path elimination without replacement"
+  }
+}

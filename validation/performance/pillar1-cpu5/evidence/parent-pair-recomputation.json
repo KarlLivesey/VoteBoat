@@ -1,0 +1,101 @@
+{
+  "valid_children": 18,
+  "valid_pairs": 9,
+  "pairs": [
+    {
+      "width": 1,
+      "pair": 1,
+      "order": "AB",
+      "A_cpu_ns": 2586.9399999999996,
+      "B_cpu_ns": 2607.395,
+      "B_over_A": 1.007907025288565
+    },
+    {
+      "width": 231,
+      "pair": 1,
+      "order": "AB",
+      "A_cpu_ns": 111.91125541125541,
+      "B_cpu_ns": 115.16305916305915,
+      "B_over_A": 1.0290569857326137
+    },
+    {
+      "width": 515,
+      "pair": 1,
+      "order": "AB",
+      "A_cpu_ns": 121.35857605177993,
+      "B_cpu_ns": 121.357928802589,
+      "B_over_A": 0.9999946666382221
+    },
+    {
+      "width": 1,
+      "pair": 2,
+      "order": "BA",
+      "A_cpu_ns": 2571.775,
+      "B_cpu_ns": 2631.445,
+      "B_over_A": 1.023201874191949
+    },
+    {
+      "width": 231,
+      "pair": 2,
+      "order": "BA",
+      "A_cpu_ns": 112.79725829725828,
+      "B_cpu_ns": 113.1212121212121,
+      "B_over_A": 1.0028720008699155
+    },
+    {
+      "width": 515,
+      "pair": 2,
+      "order": "BA",
+      "A_cpu_ns": 120.43948220064725,
+      "B_cpu_ns": 120.22588996763754,
+      "B_over_A": 0.9982265596870147
+    },
+    {
+      "width": 1,
+      "pair": 3,
+      "order": "AB",
+      "A_cpu_ns": 2590.1749999999997,
+      "B_cpu_ns": 2611.61,
+      "B_over_A": 1.0082755026204795
+    },
+    {
+      "width": 231,
+      "pair": 3,
+      "order": "AB",
+      "A_cpu_ns": 112.32467532467533,
+      "B_cpu_ns": 112.07287157287158,
+      "B_over_A": 0.9977582507932837
+    },
+    {
+      "width": 515,
+      "pair": 3,
+      "order": "AB",
+      "A_cpu_ns": 121.15016181229771,
+      "B_cpu_ns": 122.10485436893204,
+      "B_over_A": 1.0078802416963624
+    }
+  ],
+  "widths": {
+    "1": {
+      "median_B_over_A": 1.0082755026204795,
+      "cpu_change_percent": 0.8275502620479491,
+      "wins": 0,
+      "pass_gate": false
+    },
+    "231": {
+      "median_B_over_A": 1.0028720008699155,
+      "cpu_change_percent": 0.28720008699154587,
+      "wins": 1,
+      "pass_gate": false
+    },
+    "515": {
+      "median_B_over_A": 0.9999946666382221,
+      "cpu_change_percent": -0.0005333361777881684,
+      "wins": 2,
+      "pass_gate": true
+    }
+  },
+  "all_widths_pass": false,
+  "source": "primary-summary.json raw actual wait4 fields; independently recomputed by parent",
+  "functional_scope": "parent checked saved primary checks/completed counts/status/binary hashes; native observer evidence retained separately"
+}

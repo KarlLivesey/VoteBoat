@@ -1,0 +1,50 @@
+{
+  "target/claude/pillar1-20261022/cpu5-perf-r5/REPORT.md": {
+    "bytes": 11975,
+    "sha256": "e8fd5ae92abcb72de45890971a6c4bb0a725077377727a462d2be79a58f16b26"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/CPU-pairs.csv": {
+    "bytes": 1155,
+    "sha256": "d11beddfcd4c4c044e37817591e91e14bd5d8f5880cbfb3c86d0a8307bdaf46e"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/functional-and-identities.csv": {
+    "bytes": 6499,
+    "sha256": "5115ad98d2707aecbbc56aec80674746e8b4802981da740a4c2634f0c4c4e884"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/independent-results-verification.json": {
+    "bytes": 607,
+    "sha256": "203878f9071977270ead99a03b6373d7cf3e3460ede178c7165af3ad633d09a8"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/metadata-controls-pass.json": {
+    "bytes": 11417,
+    "sha256": "3cebb48af9c079cb6cd4959e6249dd7d5746f928c74fb77c3bf5660b880d241f"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/terminal-final-guard.json": {
+    "bytes": 665,
+    "sha256": "3d89eb5c0e4238a1211195d86c312b982e5041cef85e6c91528afe9b860be6cc"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r4/machine-gate.json": {
+    "bytes": 14245,
+    "sha256": "86c1caba02063c1b0bbcb93953ab74a36ffe87f011fb32ced90e89a20e227c21"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r4/control-machine-gate.json": {
+    "bytes": 1862,
+    "sha256": "4407f67fb935e4b1845c25be474dcc47991fe95c8c7c4e693e989ae0b4679a6c"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/primary-summary.json": {
+    "bytes": 103964,
+    "sha256": "29431467cb6a516faf7780700c8f8c4afbbe20d5e11407ed6a8f0e37af8fdefd"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/cleanup-verified.json": {
+    "bytes": 1460,
+    "sha256": "b2b7ab04e83e5d2a2a93408ae4930d118b7afb9a6c4330bb3c3feef0fe45a773"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/final-seal.json": {
+    "bytes": 213884,
+    "sha256": "9eb190b95025af17d612f168903fdd27e74a27fa97defa618bdc71fe43da98a4"
+  },
+  "target/claude/pillar1-20261022/cpu5-perf-r5/SHA256SUMS": {
+    "bytes": 133613,
+    "sha256": "8438919051330b4fb3c0f1cb7048d632d069b0a57c4c20fb5334acfc3c953888"
+  }
+}

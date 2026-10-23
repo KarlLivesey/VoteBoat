@@ -1,0 +1,28 @@
+{
+  "valid_primary_children": 18,
+  "valid_pairs": 9,
+  "controls": 6,
+  "metadata_controls": 2,
+  "widths": {
+    "1": {
+      "median_B_over_A": 1.0082755026204795,
+      "wins": 0,
+      "pass_gate": false
+    },
+    "231": {
+      "median_B_over_A": 1.0028720008699155,
+      "wins": 1,
+      "pass_gate": false
+    },
+    "515": {
+      "median_B_over_A": 0.9999946666382221,
+      "wins": 2,
+      "pass_gate": true
+    }
+  },
+  "all_widths_pass": false,
+  "whole_wait4_recomputed": true,
+  "all_native_PID_parent_nice_start_checks": true,
+  "control_CPU_discarded": true,
+  "full5": "NOT RELEASED"
+}

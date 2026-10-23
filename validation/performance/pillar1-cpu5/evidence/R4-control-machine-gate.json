@@ -1,0 +1,42 @@
+{
+  "verdict": "PASS_EXPECTED_EXTRA_304",
+  "artifact_sha256": "a75803ade22c78bbbd6e32364aa54fedaad2d9fa0bddd2fd45bef4be04281449",
+  "patch_sha256": "d9304f4e54b102b1926661eb483ec0e6d1da14409bc410e706d813b4d287392c",
+  "source_state": "only incoming.rs old-order; other1531 exact81",
+  "memcpy_stub": "0x100210b50",
+  "first_copy": {
+    "source": "x24+0x10",
+    "destination": "sp+0x1020",
+    "bytes": 304,
+    "setup": "0x1000911a0..0x1000911ac",
+    "call": "0x1000911b0"
+  },
+  "helper_call": "0x1000911d8 append_summary",
+  "required_owned_predecessor": {
+    "source": "sp+0x1020",
+    "destination": "sp+0x888",
+    "bytes": 304,
+    "setup": "0x1000911dc..0x1000911f0",
+    "call": "0x1000911f4"
+  },
+  "actual_instructions": [
+    "1000911a0: 914007e0    \tadd\tx0, sp, #0x1, lsl #12   ; =0x1000",
+    "1000911a4: 91008000    \tadd\tx0, x0, #0x20",
+    "1000911a8: 91004301    \tadd\tx1, x24, #0x10",
+    "1000911ac: 52802602    \tmov\tw2, #0x130              ; =304",
+    "1000911b0: 9405fe68    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>",
+    "1000911d8: 94003cbf    \tbl\t0x1000a04d4 <voteboat::log::transition::append_summary>",
+    "1000911dc: 912083f4    \tadd\tx20, sp, #0x820",
+    "1000911e4: 9101a100    \tadd\tx0, x8, #0x68",
+    "1000911e8: 914007e1    \tadd\tx1, sp, #0x1, lsl #12   ; =0x1000",
+    "1000911ec: 91008021    \tadd\tx1, x1, #0x20",
+    "1000911f0: 52802602    \tmov\tw2, #0x130              ; =304",
+    "1000911f4: 9405fe57    \tbl\t0x100210b50 <dyld_stub_binder+0x100210b50>"
+  ],
+  "attribution": "Source-correlated field identity, not DWARF-confirmed Rust ABI. Exact register/stack/length/call flow is observed; no CPU/dynamic-frequency/allocation claim.",
+  "Rust_semantic_failure_expected": false,
+  "Rust_benchmark_children": 0,
+  "candidate_gate": "PENDING",
+  "primary_pairs": 0,
+  "canonical_children": 0
+}
