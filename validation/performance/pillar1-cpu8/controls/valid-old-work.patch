@@ -1,0 +1,404 @@
+--- a/src/log/transition.rs
++++ b/src/log/transition.rs
+@@ -314,39 +313,0 @@
+-    Ok(validate_append_delta(view, update, limits)?.materialize(view.metadata()))
+-}
+-/// Only fields an eligible append can change, checked before owning its suffix.
+-struct AppendDelta {
+-    revision: LogRevision,
+-    hard_state: HardState,
+-    ballot_origin: Option<BallotOrigin>,
+-    commit_index: u64,
+-    last_index: u64,
+-    last_term: u64,
+-    entries_len: usize,
+-}
+-impl AppendDelta {
+-    fn write_metadata(&self, to: &mut LogMetadata) {
+-        to.revision = self.revision;
+-        to.hard_state = self.hard_state;
+-        to.ballot_origin = self.ballot_origin;
+-        to.commit_index = self.commit_index;
+-        to.last_index = self.last_index;
+-        to.last_term = self.last_term;
+-        to.entries_len = self.entries_len;
+-    }
+-    fn materialize(&self, predecessor: &LogMetadata) -> LogMetadata {
+-        let mut next = *predecessor;
+-        self.write_metadata(&mut next);
+-        next
+-    }
+-    fn install(&self, current: &mut GroupLog) {
+-        current.revision = self.revision;
+-        current.hard_state = self.hard_state;
+-        current.ballot_origin = self.ballot_origin;
+-        current.commit_index = self.commit_index;
+-    }
+-}
+-fn validate_append_delta(
+-    view: &LogView<'_>,
+-    update: &LogUpdate,
+-    limits: LogLimits,
+-) -> Result<AppendDelta, StorageError> {
+@@ -375,3 +336 @@
+-    let mut last_index = current.last_index;
+-    let mut last_term = current.last_term;
+-    let mut entries_len = current.entries_len;
++    let mut next = *current;
+@@ -394,4 +353,4 @@
+-            last_index = last.index;
+-            last_term = last.term;
+-        }
+-        entries_len += suffix.entries.len();
++            next.last_index = last.index;
++            next.last_term = last.term;
++        }
++        next.entries_len += suffix.entries.len();
+@@ -400,2 +359,2 @@
+-        || update.commit_index > last_index
+-        || last_term > update.hard_state.term
++        || update.commit_index > next.last_index
++        || next.last_term > update.hard_state.term
+@@ -407 +366 @@
+-    let revision = current
++    next.revision = current
+@@ -413,42 +372,4 @@
+-    Ok(AppendDelta {
+-        revision,
+-        hard_state: update.hard_state,
+-        ballot_origin,
+-        commit_index: update.commit_index,
+-        last_index,
+-        last_term,
+-        entries_len,
+-    })
+-}
+-struct SummaryFacts {
+-    plain: bool,
+-    retained: Option<usize>,
+-    clone_stable: bool,
+-}
+-impl SummaryFacts {
+-    fn appended(view: &LogView<'_>, summary: &LogSummary, append: Option<&Suffix>) -> Self {
+-        let retained = match append {
+-            None => summary.retained,
+-            Some(suffix) => summary
+-                .retained
+-                .and_then(|bytes| view.appended_charge(bytes, &suffix.entries)),
+-        };
+-        Self {
+-            plain: summary.plain,
+-            retained,
+-            clone_stable: summary.clone_stable,
+-        }
+-    }
+-    fn write(&self, to: &mut LogSummary) {
+-        to.plain = self.plain;
+-        to.retained = self.retained;
+-        to.clone_stable = self.clone_stable;
+-    }
+-    fn materialize(&self, metadata: LogMetadata) -> LogSummary {
+-        LogSummary {
+-            metadata,
+-            plain: self.plain,
+-            retained: self.retained,
+-            clone_stable: self.clone_stable,
+-        }
+-    }
++    next.hard_state = update.hard_state;
++    next.ballot_origin = ballot_origin;
++    next.commit_index = update.commit_index;
++    Ok(next)
+@@ -465 +386,12 @@
+-    SummaryFacts::appended(view, summary, append).materialize(next)
++    let retained = match append {
++        None => summary.retained,
++        Some(suffix) => summary
++            .retained
++            .and_then(|bytes| view.appended_charge(bytes, &suffix.entries)),
++    };
++    LogSummary {
++        metadata: next,
++        plain: summary.plain,
++        retained,
++        clone_stable: summary.clone_stable,
++    }
+--- a/src/log/transition/incoming.rs
++++ b/src/log/transition/incoming.rs
+@@ -7 +7 @@
+-/// predecessor's or its checked outcomes; no full next summary is staged.
++/// predecessor's or the next summary's, so only the suffix is retained.
+@@ -10,2 +10 @@
+-    delta: AppendDelta,
+-    facts: SummaryFacts,
++    summary: LogSummary,
+@@ -18,3 +17 @@
+-    revision: LogRevision,
+-    commit_index: u64,
+-    facts: SummaryFacts,
++    summary: LogSummary,
+@@ -36,83 +32,0 @@
+-}
+-/// Borrowed scalar access to a checked plan. Hot reads never rebuild metadata.
+-pub(crate) enum PlannedMetadata<'a> {
+-    Append(&'a OwnedAppend),
+-    Commit(&'a CommitAdvance),
+-    Other(&'a NextLog),
+-}
+-impl PlannedMetadata<'_> {
+-    pub(crate) fn group(&self) -> GroupIdentity {
+-        match self {
+-            Self::Append(append) => append.predecessor.group,
+-            Self::Commit(commit) => commit.predecessor.group,
+-            Self::Other(next) => next.metadata().group,
+-        }
+-    }
+-    pub(crate) fn revision(&self) -> LogRevision {
+-        match self {
+-            Self::Append(append) => append.delta.revision,
+-            Self::Commit(commit) => commit.revision,
+-            Self::Other(next) => next.metadata().revision,
+-        }
+-    }
+-    pub(crate) fn generation(&self) -> LogGeneration {
+-        match self {
+-            Self::Append(append) => append.predecessor.generation,
+-            Self::Commit(commit) => commit.predecessor.generation,
+-            Self::Other(next) => next.metadata().generation,
+-        }
+-    }
+-    pub(crate) fn hard_state(&self) -> HardState {
+-        match self {
+-            Self::Append(append) => append.delta.hard_state,
+-            Self::Commit(commit) => commit.predecessor.hard_state,
+-            Self::Other(next) => next.metadata().hard_state,
+-        }
+-    }
+-    pub(crate) fn ballot_origin(&self) -> Option<BallotOrigin> {
+-        match self {
+-            Self::Append(append) => append.delta.ballot_origin,
+-            Self::Commit(commit) => commit.predecessor.ballot_origin,
+-            Self::Other(next) => next.metadata().ballot_origin,
+-        }
+-    }
+-    pub(crate) fn commit_index(&self) -> u64 {
+-        match self {
+-            Self::Append(append) => append.delta.commit_index,
+-            Self::Commit(commit) => commit.commit_index,
+-            Self::Other(next) => next.metadata().commit_index,
+-        }
+-    }
+-    pub(crate) fn last_index(&self) -> u64 {
+-        match self {
+-            Self::Append(append) => append.delta.last_index,
+-            Self::Commit(commit) => commit.predecessor.last_index,
+-            Self::Other(next) => next.metadata().last_index,
+-        }
+-    }
+-}
+-impl CommitAdvance {
+-    #[cfg(any(test, feature = "native"))]
+-    fn metadata(&self) -> LogMetadata {
+-        LogMetadata {
+-            revision: self.revision,
+-            commit_index: self.commit_index,
+-            ..self.predecessor
+-        }
+-    }
+-    fn into_append(self) -> OwnedAppend {
+-        OwnedAppend {
+-            delta: AppendDelta {
+-                revision: self.revision,
+-                hard_state: self.predecessor.hard_state,
+-                ballot_origin: self.predecessor.ballot_origin,
+-                commit_index: self.commit_index,
+-                last_index: self.predecessor.last_index,
+-                last_term: self.predecessor.last_term,
+-                entries_len: self.predecessor.entries_len,
+-            },
+-            predecessor: self.predecessor,
+-            facts: self.facts,
+-            suffix: None,
+-        }
+-    }
+@@ -139 +53 @@
+-            let delta = validate_append_delta(view, update, limits)?;
++            let metadata = validate_append_metadata(view, update, limits)?;
+@@ -143 +57 @@
+-                delta,
++                metadata,
+@@ -163 +77 @@
+-            let delta = validate_append_delta(view, &update, limits)?;
++            let metadata = validate_append_metadata(view, &update, limits)?;
+@@ -167 +81 @@
+-                delta,
++                metadata,
+@@ -208,0 +123,5 @@
++        let next = LogMetadata {
++            revision,
++            commit_index,
++            ..*current
++        };
+@@ -211,3 +130 @@
+-            revision,
+-            commit_index,
+-            facts: SummaryFacts::appended(view, summary, None),
++            summary: append_summary(view, summary, next, None),
+@@ -230 +147 @@
+-                &append.metadata(),
++                &append.summary.metadata,
+@@ -234 +151 @@
+-                plain_update(&commit.predecessor, &commit.metadata(), None)
++                plain_update(&commit.predecessor, &commit.summary.metadata, None)
+@@ -249,2 +166 @@
+-                    append.delta.hard_state,
+-                    append.delta.commit_index,
++                    &append.summary.metadata,
+@@ -258,2 +174 @@
+-                    commit.predecessor.hard_state,
+-                    commit.commit_index,
++                    &commit.summary.metadata,
+@@ -282,2 +196,0 @@
+-    /// Materialize only for consumers that require a full owned boundary value.
+-    #[cfg(any(test, feature = "native"))]
+@@ -287 +200 @@
+-            OwnedChange::Commit(commit) => commit.metadata(),
++            OwnedChange::Commit(commit) => commit.summary.metadata,
+@@ -289,7 +201,0 @@
+-        }
+-    }
+-    pub(crate) fn planned_metadata(&self) -> PlannedMetadata<'_> {
+-        match &self.0 {
+-            OwnedChange::Append(append) => PlannedMetadata::Append(append),
+-            OwnedChange::Commit(commit) => PlannedMetadata::Commit(commit),
+-            OwnedChange::Other { next, .. } => PlannedMetadata::Other(next),
+@@ -335,2 +241,9 @@
+-            OwnedChange::Commit(commit) => {
+-                let append = commit.into_append();
++            OwnedChange::Commit(CommitAdvance {
++                predecessor,
++                summary,
++            }) => {
++                let append = OwnedAppend {
++                    predecessor,
++                    summary,
++                    suffix: None,
++                };
+@@ -374,6 +287,2 @@
+-                if let Some(suffix) = append.suffix.take() {
+-                    current.entries.append(suffix.entries);
+-                }
+-                append.delta.install(current);
+-                append.delta.write_metadata(&mut summary.metadata);
+-                append.facts.write(summary);
++                install_append_ref(current, append.suffix.take(), &append.summary);
++                *summary = append.summary;
+@@ -387,5 +296,2 @@
+-                current.revision = commit.revision;
+-                current.commit_index = commit.commit_index;
+-                summary.metadata.revision = commit.revision;
+-                summary.metadata.commit_index = commit.commit_index;
+-                commit.facts.write(summary);
++                install_append_ref(current, None, &commit.summary);
++                *summary = commit.summary;
+@@ -425 +331 @@
+-        delta: AppendDelta,
++        metadata: LogMetadata,
+@@ -430,2 +336 @@
+-            delta,
+-            facts: SummaryFacts::appended(view, summary, suffix.as_ref()),
++            summary: append_summary(view, summary, metadata, suffix.as_ref()),
+@@ -436,2 +341,3 @@
+-        self.delta.materialize(&self.predecessor)
+-    }
++        self.summary.metadata
++    }
++    #[cfg(feature = "native")]
+@@ -439 +345 @@
+-        self.facts.materialize(self.metadata())
++        self.summary
+@@ -455,2 +361 @@
+-        let summary = self.summary();
+-        install_append(current, self.suffix, summary)
++        install_append(current, self.suffix, self.summary)
+@@ -468,4 +373 @@
+-            Self::Append(append) => {
+-                let summary = append.summary();
+-                install_append(current, append.suffix, summary)
+-            }
++            Self::Append(append) => install_append(current, append.suffix, append.summary),
+@@ -483,2 +385 @@
+-    next_hard_state: HardState,
+-    next_commit_index: u64,
++    next: &LogMetadata,
+@@ -498,2 +399,2 @@
+-        && *hard_state == next_hard_state
+-        && *commit_index == next_commit_index
++        && *hard_state == next.hard_state
++        && *commit_index == next.commit_index
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -1239 +1239 @@
+-        let next = p.next.planned_metadata();
++        let next = p.next.metadata();
+@@ -1243,5 +1243,5 @@
+-            || ticket.group != next.group()
+-            || ticket.revision != next.revision()
+-            || ticket.generation != next.generation()
+-            || ticket.last_index != next.last_index()
+-            || ticket.term != next.hard_state().term
++            || ticket.group != next.group
++            || ticket.revision != next.revision
++            || ticket.generation != next.generation
++            || ticket.last_index != next.last_index
++            || ticket.term != next.hard_state.term
+@@ -1298 +1298 @@
+-            let next = p.next.planned_metadata();
++            let next = p.next.metadata();
+@@ -1301,2 +1301,2 @@
+-                || next.revision() != persist.revision
+-                || next.generation() != persist.generation
++                || next.revision != persist.revision
++                || next.generation != persist.generation
+@@ -1596 +1596 @@
+-        let metadata = next.planned_metadata();
++        let metadata = next.metadata();
+@@ -1601,2 +1601,2 @@
+-                revision: metadata.revision(),
+-                generation: metadata.generation(),
++                revision: metadata.revision,
++                generation: metadata.generation,
+@@ -1611 +1611 @@
+-                r.term != metadata.hard_state().term
++                r.term != metadata.hard_state.term
+@@ -1613 +1613 @@
+-                    || r.index < metadata.commit_index()
++                    || r.index < metadata.commit_index
+--- a/src/raft/admitted_replication.rs
++++ b/src/raft/admitted_replication.rs
+@@ -105 +105 @@
+-        let next = pending.next.planned_metadata();
++        let next = pending.next.metadata();
+@@ -116,4 +116,4 @@
+-            || next.hard_state() != self.durable.hard_state
+-            || next.ballot_origin() != self.durable.ballot_origin
+-            || next.generation() != self.durable.generation
+-            || next.commit_index() != self.durable.commit_index
++            || next.hard_state != self.durable.hard_state
++            || next.ballot_origin != self.durable.ballot_origin
++            || next.generation != self.durable.generation
++            || next.commit_index != self.durable.commit_index
+@@ -187 +187 @@
+-        let metadata = pending.next.planned_metadata();
++        let metadata = pending.next.metadata();
+@@ -190,5 +190,5 @@
+-            || metadata.group() != range.ticket.group
+-            || metadata.revision() != range.ticket.revision
+-            || metadata.generation() != range.ticket.generation
+-            || metadata.last_index() != range.ticket.last_index
+-            || metadata.hard_state().term != range.ticket.term
++            || metadata.group != range.ticket.group
++            || metadata.revision != range.ticket.revision
++            || metadata.generation != range.ticket.generation
++            || metadata.last_index != range.ticket.last_index
++            || metadata.hard_state.term != range.ticket.term

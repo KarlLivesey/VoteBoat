@@ -317,6 +317,7 @@ fn pending_and_plan_sizes() {
     // bound it by at most one aligned tag word rather than equality.
     assert!(size_of::<Option<Pending>>() <= PENDING_BYTES + align_of::<Pending>());
     let plan = size_of::<OwnedNextLog>();
+    println!("Pending={pending} OptionPending={} OwnedNextLog={plan} pending_budget={PENDING_BYTES} plan_budget={PLAN_BYTES}", size_of::<Option<Pending>>());
     assert!(
         pending <= PENDING_BYTES && plan <= PLAN_BYTES,
         "Pending is {pending} B, OwnedNextLog is {plan} B"

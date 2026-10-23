@@ -1,0 +1,5 @@
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -1271 +1271 @@
+-        if !completion.tickets.contains(&ticket) {
++        if completion.tickets.is_empty() && !completion.tickets.contains(&ticket) {

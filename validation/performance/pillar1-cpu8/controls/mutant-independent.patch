@@ -1,0 +1,5 @@
+--- a/src/log/entries.rs
++++ b/src/log/entries.rs
+@@ -43 +43 @@
+-pub(crate) const SHARE_MIN: usize = 16;
++pub(crate) const SHARE_MIN: usize = 1;

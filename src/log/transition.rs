@@ -311,6 +311,45 @@ fn validate_append_metadata(
     update: &LogUpdate,
     limits: LogLimits,
 ) -> Result<LogMetadata, StorageError> {
+    Ok(validate_append_delta(view, update, limits)?.materialize(view.metadata()))
+}
+/// Only fields an eligible append can change, checked before owning its suffix.
+struct AppendDelta {
+    revision: LogRevision,
+    hard_state: HardState,
+    ballot_origin: Option<BallotOrigin>,
+    commit_index: u64,
+    last_index: u64,
+    last_term: u64,
+    entries_len: usize,
+}
+impl AppendDelta {
+    fn write_metadata(&self, to: &mut LogMetadata) {
+        to.revision = self.revision;
+        to.hard_state = self.hard_state;
+        to.ballot_origin = self.ballot_origin;
+        to.commit_index = self.commit_index;
+        to.last_index = self.last_index;
+        to.last_term = self.last_term;
+        to.entries_len = self.entries_len;
+    }
+    fn materialize(&self, predecessor: &LogMetadata) -> LogMetadata {
+        let mut next = *predecessor;
+        self.write_metadata(&mut next);
+        next
+    }
+    fn install(&self, current: &mut GroupLog) {
+        current.revision = self.revision;
+        current.hard_state = self.hard_state;
+        current.ballot_origin = self.ballot_origin;
+        current.commit_index = self.commit_index;
+    }
+}
+fn validate_append_delta(
+    view: &LogView<'_>,
+    update: &LogUpdate,
+    limits: LogLimits,
+) -> Result<AppendDelta, StorageError> {
     let current = view.metadata();
     if update.expected_revision != current.revision
         || !update.hard_state.follows(current.hard_state)
@@ -333,7 +372,9 @@ fn validate_append_metadata(
             })
         },
     )?;
-    let mut next = *current;
+    let mut last_index = current.last_index;
+    let mut last_term = current.last_term;
+    let mut entries_len = current.entries_len;
     if let Some(suffix) = &update.suffix {
         if suffix.entries.len()
             > limits
@@ -350,29 +391,67 @@ fn validate_append_metadata(
             limits,
         )?;
         if let Some(last) = suffix.entries.last() {
-            next.last_index = last.index;
-            next.last_term = last.term;
+            last_index = last.index;
+            last_term = last.term;
         }
-        next.entries_len += suffix.entries.len();
+        entries_len += suffix.entries.len();
     }
     if update.commit_index < current.commit_index
-        || update.commit_index > next.last_index
-        || next.last_term > update.hard_state.term
+        || update.commit_index > last_index
+        || last_term > update.hard_state.term
     {
         return Err(StorageError::Rejected(
             "commit regression/gap or hard term behind log",
         ));
     }
-    next.revision = current
+    let revision = current
         .revision
         .get()
         .checked_add(1)
         .and_then(LogRevision::new)
         .ok_or(StorageError::Rejected("revision exhausted"))?;
-    next.hard_state = update.hard_state;
-    next.ballot_origin = ballot_origin;
-    next.commit_index = update.commit_index;
-    Ok(next)
+    Ok(AppendDelta {
+        revision,
+        hard_state: update.hard_state,
+        ballot_origin,
+        commit_index: update.commit_index,
+        last_index,
+        last_term,
+        entries_len,
+    })
+}
+struct SummaryFacts {
+    plain: bool,
+    retained: Option<usize>,
+    clone_stable: bool,
+}
+impl SummaryFacts {
+    fn appended(view: &LogView<'_>, summary: &LogSummary, append: Option<&Suffix>) -> Self {
+        let retained = match append {
+            None => summary.retained,
+            Some(suffix) => summary
+                .retained
+                .and_then(|bytes| view.appended_charge(bytes, &suffix.entries)),
+        };
+        Self {
+            plain: summary.plain,
+            retained,
+            clone_stable: summary.clone_stable,
+        }
+    }
+    fn write(&self, to: &mut LogSummary) {
+        to.plain = self.plain;
+        to.retained = self.retained;
+        to.clone_stable = self.clone_stable;
+    }
+    fn materialize(&self, metadata: LogMetadata) -> LogSummary {
+        LogSummary {
+            metadata,
+            plain: self.plain,
+            retained: self.retained,
+            clone_stable: self.clone_stable,
+        }
+    }
 }
 /// Summary after appending `append` to the view's canonical log, charged
 /// exactly as the install will hold it: a piece that adjoins the log's last
@@ -383,18 +462,7 @@ fn append_summary(
     next: LogMetadata,
     append: Option<&Suffix>,
 ) -> LogSummary {
-    let retained = match append {
-        None => summary.retained,
-        Some(suffix) => summary
-            .retained
-            .and_then(|bytes| view.appended_charge(bytes, &suffix.entries)),
-    };
-    LogSummary {
-        metadata: next,
-        plain: summary.plain,
-        retained,
-        clone_stable: summary.clone_stable,
-    }
+    SummaryFacts::appended(view, summary, append).materialize(next)
 }
 
 #[cfg(test)]

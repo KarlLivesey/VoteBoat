@@ -37,9 +37,67 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-4: measured and rejected | PR28 reusable public write ports preserved tested semantics but increased CPU in every original driver pair; no source merged | Both final Sol source approvals and adapter GO, Stage0 tests12/Counter/driver controls14 and all18 primary children passed. CPU +9.352%/+153.994%/+167.467%, zero wins at every width. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu4/CPU4-RESULT.md) | P1 evidence |
 | CPU-5: measured and rejected | PR29 borrowed summarized metadata and reordered append construction; the targeted extra304-byte copy was eliminated on Apple, but the CPU gate failed at widths1 and231; no source merged | Both fresh exact-head Sol source approvals; builder1036 test events/strict7/actual hook green; compiled old-order negative/exact restoration/five Mac view tests passed; final identity2/Rust6 controls and all18 primary children passed. CPU +0.82755%/+0.28720%/-0.00053%, wins0/3,1/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu5/CPU5-RESULT.md) | P1 evidence |
 | CPU-6: measured and rejected | PR30 inline singleton batches and fused wide assignment/facts removed their intended work on Apple, but singleton CPU rose; no source merged | Both exact-head Sol source approvals; builder1377 focused events/2existing ignored/strict7/actual hook green; Apple34 tests/two valid work controls/restoration, metadata2/Rust6 and all18 primary children passed. CPU +7.781924%/-0.267725%/-0.677237%, wins0/3,3/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu6/CPU6-RESULT.md) | P1 evidence |
-| Current P1 residual structural design, conditional | Depends on unchanged production0bf and all six rejected candidates; identify a material remaining cost before another implementation | One coherent ownership/API design may specialize singleton and wide paths. Ground it in actual source/compiled/profile evidence, preserve every implemented feature, and name one precise missing fact if unsupported. No speedup or implementation is authorized by this plan row alone | P1 |
-| Then a checked CPU candidate, conditional | Depends on one justified bounded design and parent implementation release; rejected source and performance claims stay excluded | Schema/ownership/failure plan, focused semantic and causal controls, actual strict/enabled-hook publication, fresh dual Sol source reviews and original paired CPU/rate/p99 gates; preserve failures without replacement/tolerance | P1 |
-| Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
+| Current CPU-8: compact checked hot plans | Remove redundant next metadata/summary from append/commit construction, staging and core installation. Depends on the complete CPU8 design (SHA256 `2bd007a6293f1ad8c1591086370b2ef164e006a27aaac955ba0986f1557d53f5`), parent release and unchanged production0bf; rejected PR25–30 source stays excluded | Independent full-transition/application/summary oracles; predecessor, stamp, correlation, ownership and accounting controls; valid old-work restoration; all3 applications B1/231/515 through default checkpoints/catch-up; strict7 and actual enabled hook, one draft PR and immediate owned cleanup | P1 |
+| Next: CPU-8 source and compiled-work qualification (parent) | Establish that the selected work disappeared without replacement hot materialization. Depends on checked exact candidate inputs and fresh independent source approvals | Dual exact-head Sol approvals, Apple append/commit machine witnesses at1/231/515, valid old-work control and exact restoration, public/native controls. No timing before this gate; gain UNKNOWN | P1 |
+| Then: CPU-8 performance and kept-composition qualification (parent) | Qualify actual CPU per completed original at equal cores while preserving every implemented feature. Depends on source/compiled-work gates | Original9 pairs with each width median B/A<1 and at least2/3 wins; only all-pass permits original64 canonical and then exclusive full5, no--ff integration/API/hook verification and cleanup. No tolerance, replacement runs or cross-width offset | P1 |
+
+### CPU-8 schema plan (before production edits, 23 October 2026)
+
+R2 continuation reconstructs the exact untested R1 patch (SHA256
+`4cb624e45cc93e29ec9547c393bdc103498bb0a8e0d456f196473c763c0bacd6`)
+on `423966e8`; all 2,603 frozen file hashes/sizes/modes and archival tree
+`2904f2c43b67d3f3a13a678a872706e24c4c6668` match before refinement.
+The same schema and current/next-two P1 mini plan below apply. R1 remains
+untested; its guessed Cargo path and observation gaps are preserved. R2 uses
+the verified `/usr/bin/cargo` and `/usr/bin/rustc` proxies, without toolchain
+changes. Before any checked publication, independent semantic/restoration/mutant
+controls, all affected feature paths and strict7 plus the enabled hook remain
+required. Evidence lives only in ignored `cpu8-builder-r2` and this checkout.
+
+Retain one complete `LogMetadata` predecessor in each hot plan. Append owns an
+`AppendDelta` (revision, hard state, ballot origin, commit, tail index/term and
+entry count), three small `SummaryFacts`, and the original normalized suffix.
+Commit owns only predecessor, checked revision/commit and those facts. Borrowed
+`PlannedMetadata` scalar getters combine predecessor and outcomes without a full
+hot next value. Cold `NextLog` and native acceptance's required owned metadata
+and summary remain materialized and retain their existing ownership charges.
+
+Validation preserves the existing base/eligibility/ballot/suffix/commit/revision
+order and errors. Validated plans move into the same sole Pending. The existing
+in-place installer checks the exact stamp or complete predecessor before taking
+the suffix; actual canonical entries determine tail and length. It writes checked
+scalars to log and summary together, copies the small facts, advances the stamp
+once, and clears Pending only after success. There is no new fallible work after
+suffix transfer. A raw refusal leaves plan/log/summary/stamp untouched; public
+failure retains existing fencing and completed-prefix behavior. Restart has no
+persisted compact plan and rejects old completion incarnations as before.
+
+Ownership remains one core plan/suffix plus independent durable provider input;
+no new per-write heap owner, effect representation, queue, lock or capacity is
+introduced. Native overlays still materialize their required boundary values;
+this retained work is not credited as removed. Cold membership, configured
+ballots, snapshot/compaction and recovery retain the full fallback. Acceptance
+uses existing full-transition and actual application oracles, independently
+rebuilt canonical summaries, exact128 IDs/content, FIFO/correlation, refusal and
+retained-backing controls; Linux sizes alone establish no compiled saving.
+
+The schema above records the pre-edit plan. R2's bounded Linux implementation
+and validation are recorded in
+[CPU8 implemented evidence](../validation/performance/pillar1-cpu8/IMPLEMENTATION.md),
+with exact source inputs, command/configuration results and reviewable control
+patches. The restored candidate passed38 transition,184 Raft,23 native accepted,
+11 public helper,229 affected-feature,42 native logical-voter,47 matched-consumer
+tests and the stopped-ancestor/two-child routed history. Ten compileable semantic
+mutants failed independent assertions; the valid old-work restoration passed
+and restored the exact candidate. Strict7 completed with zero diagnostics.
+The actual enabled push-hook receipt and exact published head are recorded by
+the publication packet/PR after this commit; they are not inferred from strict7.
+
+Macro-plan review: P1 remains active. This completes only its bounded builder
+slice; the existing next two parent qualification items remain necessary.
+This slice has no Apple build, profile, timing, full5 or integration authority.
+CPU7 owner fraction and CPU8 gain remain UNKNOWN; historical resource HOLDs remain
+unresolved.
 
 The 20 October V3g scratch report is input, not current-head qualification:
 `target/claude/research-r4/v3g-profile.md`. Its unqualified commit-notice prototype

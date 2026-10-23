@@ -17,6 +17,7 @@ use super::*;
 use crate::quorum::{Limits, Tree};
 
 mod compact;
+mod compact_plans;
 mod configured;
 mod incoming;
 mod oracle;

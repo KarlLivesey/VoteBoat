@@ -1,0 +1,5 @@
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -424 +424 @@
+-                    effects.insert(queued, Effect::Committed(entries.to_vec()));
++                    effects.insert(0, Effect::Committed(entries.to_vec()));

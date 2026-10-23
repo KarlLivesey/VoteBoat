@@ -1,0 +1,5 @@
+--- a/src/log/transition.rs
++++ b/src/log/transition.rs
+@@ -334 +334 @@
+-        to.entries_len = self.entries_len;
++        to.entries_len = self.entries_len.saturating_sub(1);

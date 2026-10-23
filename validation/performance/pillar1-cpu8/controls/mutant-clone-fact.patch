@@ -1,0 +1,5 @@
+--- a/src/log/transition.rs
++++ b/src/log/transition.rs
+@@ -445 +445 @@
+-        to.clone_stable = self.clone_stable;
++        to.clone_stable = false;

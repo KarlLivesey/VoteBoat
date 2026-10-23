@@ -1236,15 +1236,15 @@ impl Raft {
             return Err(RaftError::WrongCompletion);
         }
         let p = self.pending.as_mut().ok_or(RaftError::WrongCompletion)?;
-        let next = p.next.metadata();
+        let next = p.next.planned_metadata();
         if p.ticket.is_some()
             || ticket.binding != self.binding
             || ticket.batch <= self.last_batch
-            || ticket.group != next.group
-            || ticket.revision != next.revision
-            || ticket.generation != next.generation
-            || ticket.last_index != next.last_index
-            || ticket.term != next.hard_state.term
+            || ticket.group != next.group()
+            || ticket.revision != next.revision()
+            || ticket.generation != next.generation()
+            || ticket.last_index != next.last_index()
+            || ticket.term != next.hard_state().term
         {
             return Err(RaftError::WrongCompletion);
         }
@@ -1295,11 +1295,11 @@ impl Raft {
             return Err(RaftError::WrongCompletion);
         }
         if self.pending.as_ref().is_none_or(|p| {
-            let next = p.next.metadata();
+            let next = p.next.planned_metadata();
             p.ticket.is_some()
                 || persist.incarnation != self.incarnation
-                || next.revision != persist.revision
-                || next.generation != persist.generation
+                || next.revision() != persist.revision
+                || next.generation() != persist.generation
         }) {
             return Err(RaftError::WrongCompletion);
         }
@@ -1593,13 +1593,13 @@ impl Raft {
             .map(|full| full.membership().map(Box::new))
             .transpose()
             .map_err(|_| RaftError::InvalidRecovery)?;
-        let metadata = next.metadata();
+        let metadata = next.planned_metadata();
         let effect = match update {
             Some(update) => Effect::Persist(update),
             None => Effect::PersistVolatile(VolatilePersist {
                 incarnation: self.incarnation,
-                revision: metadata.revision,
-                generation: metadata.generation,
+                revision: metadata.revision(),
+                generation: metadata.generation(),
             }),
         };
         let accepted_membership = membership.as_deref().unwrap_or(&self.membership);
@@ -1608,9 +1608,9 @@ impl Raft {
             .as_ref()
             .or_else(|| self.ready_learner.as_ref().map(|r| r.request()))
             .is_some_and(|r| {
-                r.term != metadata.hard_state.term
+                r.term != metadata.hard_state().term
                     || r.configuration != accepted_membership.id()
-                    || r.index < metadata.commit_index
+                    || r.index < metadata.commit_index()
             })
         {
             self.cancel_learner_readiness();

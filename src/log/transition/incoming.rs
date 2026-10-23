@@ -4,17 +4,20 @@
 use super::*;
 
 /// An admitted plain append. Every other field of its update is the
-/// predecessor's or the next summary's, so only the suffix is retained.
+/// predecessor's or its checked outcomes; no full next summary is staged.
 pub(crate) struct OwnedAppend {
     predecessor: LogMetadata,
-    summary: LogSummary,
+    delta: AppendDelta,
+    facts: SummaryFacts,
     suffix: Option<Suffix>,
 }
 /// The core's own commit-only round: an empty append planned without an
 /// update. Providers never receive one.
 pub(crate) struct CommitAdvance {
     predecessor: LogMetadata,
-    summary: LogSummary,
+    revision: LogRevision,
+    commit_index: u64,
+    facts: SummaryFacts,
 }
 pub(crate) enum OwnedChange {
     Append(OwnedAppend),
@@ -30,6 +33,89 @@ pub(crate) enum PreparedOwnedLog {
     /// Checked against its predecessor; a commit advance has no suffix.
     Append(OwnedAppend),
     Other(PreparedLog),
+}
+/// Borrowed scalar access to a checked plan. Hot reads never rebuild metadata.
+pub(crate) enum PlannedMetadata<'a> {
+    Append(&'a OwnedAppend),
+    Commit(&'a CommitAdvance),
+    Other(&'a NextLog),
+}
+impl PlannedMetadata<'_> {
+    pub(crate) fn group(&self) -> GroupIdentity {
+        match self {
+            Self::Append(append) => append.predecessor.group,
+            Self::Commit(commit) => commit.predecessor.group,
+            Self::Other(next) => next.metadata().group,
+        }
+    }
+    pub(crate) fn revision(&self) -> LogRevision {
+        match self {
+            Self::Append(append) => append.delta.revision,
+            Self::Commit(commit) => commit.revision,
+            Self::Other(next) => next.metadata().revision,
+        }
+    }
+    pub(crate) fn generation(&self) -> LogGeneration {
+        match self {
+            Self::Append(append) => append.predecessor.generation,
+            Self::Commit(commit) => commit.predecessor.generation,
+            Self::Other(next) => next.metadata().generation,
+        }
+    }
+    pub(crate) fn hard_state(&self) -> HardState {
+        match self {
+            Self::Append(append) => append.delta.hard_state,
+            Self::Commit(commit) => commit.predecessor.hard_state,
+            Self::Other(next) => next.metadata().hard_state,
+        }
+    }
+    pub(crate) fn ballot_origin(&self) -> Option<BallotOrigin> {
+        match self {
+            Self::Append(append) => append.delta.ballot_origin,
+            Self::Commit(commit) => commit.predecessor.ballot_origin,
+            Self::Other(next) => next.metadata().ballot_origin,
+        }
+    }
+    pub(crate) fn commit_index(&self) -> u64 {
+        match self {
+            Self::Append(append) => append.delta.commit_index,
+            Self::Commit(commit) => commit.commit_index,
+            Self::Other(next) => next.metadata().commit_index,
+        }
+    }
+    pub(crate) fn last_index(&self) -> u64 {
+        match self {
+            Self::Append(append) => append.delta.last_index,
+            Self::Commit(commit) => commit.predecessor.last_index,
+            Self::Other(next) => next.metadata().last_index,
+        }
+    }
+}
+impl CommitAdvance {
+    #[cfg(any(test, feature = "native"))]
+    fn metadata(&self) -> LogMetadata {
+        LogMetadata {
+            revision: self.revision,
+            commit_index: self.commit_index,
+            ..self.predecessor
+        }
+    }
+    fn into_append(self) -> OwnedAppend {
+        OwnedAppend {
+            delta: AppendDelta {
+                revision: self.revision,
+                hard_state: self.predecessor.hard_state,
+                ballot_origin: self.predecessor.ballot_origin,
+                commit_index: self.commit_index,
+                last_index: self.predecessor.last_index,
+                last_term: self.predecessor.last_term,
+                entries_len: self.predecessor.entries_len,
+            },
+            predecessor: self.predecessor,
+            facts: self.facts,
+            suffix: None,
+        }
+    }
 }
 impl OwnedNextLog {
     pub(crate) fn preserves_checkpoint_prefix(&self) -> bool {
@@ -50,11 +136,11 @@ impl OwnedNextLog {
     ) -> Result<Self, StorageError> {
         let limits = validate_base(view, summary, update, limits)?;
         if append_eligible(view, summary, update) {
-            let metadata = validate_append_metadata(view, update, limits)?;
+            let delta = validate_append_delta(view, update, limits)?;
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
                 view,
                 summary,
-                metadata,
+                delta,
                 update.suffix.clone(),
             ))))
         } else {
@@ -74,11 +160,11 @@ impl OwnedNextLog {
     ) -> Result<Self, StorageError> {
         let limits = validate_base(view, summary, &update, limits)?;
         if append_eligible(view, summary, &update) {
-            let metadata = validate_append_metadata(view, &update, limits)?;
+            let delta = validate_append_delta(view, &update, limits)?;
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
                 view,
                 summary,
-                metadata,
+                delta,
                 update.suffix,
             ))))
         } else {
@@ -120,14 +206,11 @@ impl OwnedNextLog {
             .checked_add(1)
             .and_then(LogRevision::new)
             .ok_or(StorageError::Rejected("revision exhausted"))?;
-        let next = LogMetadata {
-            revision,
-            commit_index,
-            ..*current
-        };
         Ok(Self(OwnedChange::Commit(CommitAdvance {
             predecessor: *current,
-            summary: append_summary(view, summary, next, None),
+            revision,
+            commit_index,
+            facts: SummaryFacts::appended(view, summary, None),
         })))
     }
     /// The planned suffix, borrowed; a commit advance has none.
@@ -144,11 +227,11 @@ impl OwnedNextLog {
         match &self.0 {
             OwnedChange::Append(append) => plain_update(
                 &append.predecessor,
-                &append.summary.metadata,
+                &append.metadata(),
                 append.suffix.clone(),
             ),
             OwnedChange::Commit(commit) => {
-                plain_update(&commit.predecessor, &commit.summary.metadata, None)
+                plain_update(&commit.predecessor, &commit.metadata(), None)
             }
             OwnedChange::Other { update, .. } => update.clone(),
         }
@@ -163,7 +246,8 @@ impl OwnedNextLog {
                 return matches_plain(
                     original,
                     &append.predecessor,
-                    &append.summary.metadata,
+                    append.delta.hard_state,
+                    append.delta.commit_index,
                     append.suffix.as_ref(),
                 );
             }
@@ -171,7 +255,8 @@ impl OwnedNextLog {
                 return matches_plain(
                     original,
                     &commit.predecessor,
-                    &commit.summary.metadata,
+                    commit.predecessor.hard_state,
+                    commit.commit_index,
                     None,
                 );
             }
@@ -194,11 +279,20 @@ impl OwnedNextLog {
             && *snapshot == owned.snapshot
             && *snapshot_membership == owned.snapshot_membership
     }
+    /// Materialize only for consumers that require a full owned boundary value.
+    #[cfg(any(test, feature = "native"))]
     pub(crate) fn metadata(&self) -> LogMetadata {
         match &self.0 {
             OwnedChange::Append(append) => append.metadata(),
-            OwnedChange::Commit(commit) => commit.summary.metadata,
+            OwnedChange::Commit(commit) => commit.metadata(),
             OwnedChange::Other { next, .. } => next.metadata(),
+        }
+    }
+    pub(crate) fn planned_metadata(&self) -> PlannedMetadata<'_> {
+        match &self.0 {
+            OwnedChange::Append(append) => PlannedMetadata::Append(append),
+            OwnedChange::Commit(commit) => PlannedMetadata::Commit(commit),
+            OwnedChange::Other { next, .. } => PlannedMetadata::Other(next),
         }
     }
     pub(crate) fn full(&self) -> Option<&GroupLog> {
@@ -238,15 +332,8 @@ impl OwnedNextLog {
                 append.check_install(LogMetadata::from_log(current))?;
                 Ok(PreparedOwnedLog::Append(append))
             }
-            OwnedChange::Commit(CommitAdvance {
-                predecessor,
-                summary,
-            }) => {
-                let append = OwnedAppend {
-                    predecessor,
-                    summary,
-                    suffix: None,
-                };
+            OwnedChange::Commit(commit) => {
+                let append = commit.into_append();
                 append.check_install(LogMetadata::from_log(current))?;
                 Ok(PreparedOwnedLog::Append(append))
             }
@@ -284,8 +371,12 @@ impl OwnedNextLog {
                 } else {
                     append.check_install(LogMetadata::from_log(current))?;
                 }
-                install_append_ref(current, append.suffix.take(), &append.summary);
-                *summary = append.summary;
+                if let Some(suffix) = append.suffix.take() {
+                    current.entries.append(suffix.entries);
+                }
+                append.delta.install(current);
+                append.delta.write_metadata(&mut summary.metadata);
+                append.facts.write(summary);
             }
             OwnedChange::Commit(commit) => {
                 if unchanged {
@@ -293,8 +384,11 @@ impl OwnedNextLog {
                 } else {
                     check_predecessor(&commit.predecessor, LogMetadata::from_log(current))?;
                 }
-                install_append_ref(current, None, &commit.summary);
-                *summary = commit.summary;
+                current.revision = commit.revision;
+                current.commit_index = commit.commit_index;
+                summary.metadata.revision = commit.revision;
+                summary.metadata.commit_index = commit.commit_index;
+                commit.facts.write(summary);
             }
             OwnedChange::Other { next, update } => {
                 *summary = next.install_in_place(current, update)?;
@@ -328,21 +422,21 @@ impl OwnedAppend {
     fn new(
         view: &LogView<'_>,
         summary: &LogSummary,
-        metadata: LogMetadata,
+        delta: AppendDelta,
         suffix: Option<Suffix>,
     ) -> Self {
         Self {
             predecessor: *view.metadata(),
-            summary: append_summary(view, summary, metadata, suffix.as_ref()),
+            delta,
+            facts: SummaryFacts::appended(view, summary, suffix.as_ref()),
             suffix,
         }
     }
     pub(crate) fn metadata(&self) -> LogMetadata {
-        self.summary.metadata
+        self.delta.materialize(&self.predecessor)
     }
-    #[cfg(feature = "native")]
     pub(crate) fn summary(&self) -> LogSummary {
-        self.summary
+        self.facts.materialize(self.metadata())
     }
     pub(crate) fn check_install(&self, current: LogMetadata) -> Result<(), StorageError> {
         // The original is immutable and bound to this plan before sealing.
@@ -358,7 +452,8 @@ impl OwnedAppend {
     }
     #[cfg(feature = "native")]
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
-        install_append(current, self.suffix, self.summary)
+        let summary = self.summary();
+        install_append(current, self.suffix, summary)
     }
 }
 impl PreparedOwnedLog {
@@ -370,7 +465,10 @@ impl PreparedOwnedLog {
     }
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
         match self {
-            Self::Append(append) => install_append(current, append.suffix, append.summary),
+            Self::Append(append) => {
+                let summary = append.summary();
+                install_append(current, append.suffix, summary)
+            }
             Self::Other(prepared) => prepared.install(current),
         }
     }
@@ -382,7 +480,8 @@ impl PreparedOwnedLog {
 fn matches_plain(
     original: &LogUpdate,
     predecessor: &LogMetadata,
-    next: &LogMetadata,
+    next_hard_state: HardState,
+    next_commit_index: u64,
     planned: Option<&Suffix>,
 ) -> bool {
     let LogUpdate {
@@ -396,8 +495,8 @@ fn matches_plain(
     } = original;
     *group == predecessor.group
         && *expected_revision == predecessor.revision
-        && *hard_state == next.hard_state
-        && *commit_index == next.commit_index
+        && *hard_state == next_hard_state
+        && *commit_index == next_commit_index
         && suffix.as_ref() == planned
         && snapshot.is_none()
         && snapshot_membership.is_none()

@@ -1,0 +1,5 @@
+--- a/src/log/transition/incoming.rs
++++ b/src/log/transition/incoming.rs
+@@ -500 +500 @@
+-        && suffix.as_ref() == planned
++        && suffix.as_ref().map(|s| s.from) == planned.map(|s| s.from)

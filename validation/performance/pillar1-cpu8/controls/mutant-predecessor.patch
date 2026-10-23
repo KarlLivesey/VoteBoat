@@ -1,0 +1,5 @@
+--- a/src/log/transition/incoming.rs
++++ b/src/log/transition/incoming.rs
+@@ -521 +521 @@
+-    if current != *predecessor {
++    if current.revision != predecessor.revision {

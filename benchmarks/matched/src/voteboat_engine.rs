@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 mod actor;
+#[cfg(test)]
+mod compact_plan_tests;
 mod stats;
 use super::{
     application::Noop, snapshots::MemorySnapshots, store::VolatileStore, Failure, Settings,

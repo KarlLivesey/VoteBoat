@@ -102,7 +102,7 @@ impl Raft {
     }
     fn early_suffix(&self) -> Option<&Suffix> {
         let pending = self.pending.as_ref()?;
-        let next = pending.next.metadata();
+        let next = pending.next.planned_metadata();
         if self.fenced
             || self.role != Role::Leader
             || !self.local_voter()
@@ -113,10 +113,10 @@ impl Raft {
             || !matches!(pending.after, After::LeaderAppend)
             || self.durable.last_index() != self.durable.commit_index
             || self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term)
-            || next.hard_state != self.durable.hard_state
-            || next.ballot_origin != self.durable.ballot_origin
-            || next.generation != self.durable.generation
-            || next.commit_index != self.durable.commit_index
+            || next.hard_state() != self.durable.hard_state
+            || next.ballot_origin() != self.durable.ballot_origin
+            || next.generation() != self.durable.generation
+            || next.commit_index() != self.durable.commit_index
         {
             return None;
         }
@@ -184,14 +184,14 @@ impl Raft {
     ) -> Option<&LogEntry> {
         let range = self.admitted_ranges.get(&peer)?;
         let pending = self.pending.as_ref()?;
-        let metadata = pending.next.metadata();
+        let metadata = pending.next.planned_metadata();
         if range.context != sent.context
             || pending.ticket != Some(range.ticket)
-            || metadata.group != range.ticket.group
-            || metadata.revision != range.ticket.revision
-            || metadata.generation != range.ticket.generation
-            || metadata.last_index != range.ticket.last_index
-            || metadata.hard_state.term != range.ticket.term
+            || metadata.group() != range.ticket.group
+            || metadata.revision() != range.ticket.revision
+            || metadata.generation() != range.ticket.generation
+            || metadata.last_index() != range.ticket.last_index
+            || metadata.hard_state().term != range.ticket.term
         {
             return None;
         }

@@ -1,0 +1,149 @@
+[
+  {
+    "path": "valid-old-work.patch",
+    "raw_executed_patch_sha256": "4459f59a1a72df00182b59b914b761e034f412d8b8b29018adfafd56be7ed016",
+    "tracked_zero_context_patch_sha256": "2bb10dc03173306a0db29b20ffcb7d80eb0b7521aa6e425aabace9750ab54809",
+    "identical_changed_source": [
+      {
+        "path": "src/log/transition.rs",
+        "normal_sha256": "c463a2f0ca261b866192a528d0608e8d5432a9c9c3f06fb751420dd1357168c5",
+        "changed_sha256": "aa6b4a3765013fa3f5c5cd20cd5f0435ba4104bbf4767ae3f55778d4b0ed0922"
+      },
+      {
+        "path": "src/log/transition/incoming.rs",
+        "normal_sha256": "b4357bd067fd6ef232143c96b33df10f376f10694d050457cc292632ee177b97",
+        "changed_sha256": "c90c4499ad8f8d8c35f58c60a8ddf3139d24ddc3fc20ac5245db9334b9763aad"
+      },
+      {
+        "path": "src/raft.rs",
+        "normal_sha256": "de406533880ea27a9e7eaa944cc171dd9fa05526bf341ef39954522ca63535a6",
+        "changed_sha256": "bb29499ef5442a443ab3b2083bd1f4cf9182b70e50e529cf8a8c03f8ec52a45e"
+      },
+      {
+        "path": "src/raft/admitted_replication.rs",
+        "normal_sha256": "3fcf5f53852c21edcca15213d2efb2d874dc92599da678035b6ef6c7e802bdef",
+        "changed_sha256": "29f5974bfb285ff563d2b80417a546c7fc603ea75aaaed2b5b64eb1e196f66fb"
+      }
+    ]
+  },
+  {
+    "path": "mutant-ballot.patch",
+    "raw_executed_patch_sha256": "05785ec8bc601089a32b5106946db853bf55252286a316b0a0dbd28b27a1dd26",
+    "tracked_zero_context_patch_sha256": "225d6b0f831ddc85c2d09d6b1cd6328b6135824c20f0d63a8a9d29a6040115ea",
+    "identical_changed_source": [
+      {
+        "path": "src/log/transition.rs",
+        "normal_sha256": "c463a2f0ca261b866192a528d0608e8d5432a9c9c3f06fb751420dd1357168c5",
+        "changed_sha256": "fe5ba2aa12f2c22676afdc7dec92870b4137008618835337b3260da3e88fd74e"
+      }
+    ]
+  },
+  {
+    "path": "mutant-charge.patch",
+    "raw_executed_patch_sha256": "41cf03595e2b5ec344ef1a559975dac01be48029f794c585553954363d18d3fc",
+    "tracked_zero_context_patch_sha256": "fd93a2c58b4fb0ff709153bba964141031f7262142ad83e2341ec0e0b50135b1",
+    "identical_changed_source": [
+      {
+        "path": "src/log/transition.rs",
+        "normal_sha256": "c463a2f0ca261b866192a528d0608e8d5432a9c9c3f06fb751420dd1357168c5",
+        "changed_sha256": "e50e6bfc7ee924336e27e5f681e153a920070bcf1d2c94158b6b1ab8fb140748"
+      }
+    ]
+  },
+  {
+    "path": "mutant-clone-fact.patch",
+    "raw_executed_patch_sha256": "f2743ce562edd60c9d5b4b5069f88d2c8cbe0a6500eb20596a7e890ec6975557",
+    "tracked_zero_context_patch_sha256": "15350599076dc8e79a006a7a9a8c5e9612851483dc4f4632c20229c0cbe39703",
+    "identical_changed_source": [
+      {
+        "path": "src/log/transition.rs",
+        "normal_sha256": "c463a2f0ca261b866192a528d0608e8d5432a9c9c3f06fb751420dd1357168c5",
+        "changed_sha256": "63e814eb19fce9644947d06eecabe9039991c97914817a88a87d9e2981e850cb"
+      }
+    ]
+  },
+  {
+    "path": "mutant-correlation.patch",
+    "raw_executed_patch_sha256": "705ff270e1d349fd7f8e549d7dbf461d1c4c106b30d78120e1989d7d1e2fe339",
+    "tracked_zero_context_patch_sha256": "7cf10fb8e386c60d1f83e40d1d32dd8e3b8c542797f0538062994e57d73ff18d",
+    "identical_changed_source": [
+      {
+        "path": "src/raft.rs",
+        "normal_sha256": "de406533880ea27a9e7eaa944cc171dd9fa05526bf341ef39954522ca63535a6",
+        "changed_sha256": "8bcfcddce05586a3592cb79d84296ad36c7cd6202b0702fea53334797610c8fb"
+      }
+    ]
+  },
+  {
+    "path": "mutant-delta.patch",
+    "raw_executed_patch_sha256": "8aa71b575399f9290e3504e068dfb004f67febd279153014248766b99be34ed0",
+    "tracked_zero_context_patch_sha256": "c2d1d17bc00f1235c01640cb04554eb3c7c89a5b0f3c067ceecd0ca605dce9a9",
+    "identical_changed_source": [
+      {
+        "path": "src/log/transition.rs",
+        "normal_sha256": "c463a2f0ca261b866192a528d0608e8d5432a9c9c3f06fb751420dd1357168c5",
+        "changed_sha256": "3c6d817b22d316c2bcef00fb3a0b8442e841bccb42ede216530e1434af55361b"
+      }
+    ]
+  },
+  {
+    "path": "mutant-fifo.patch",
+    "raw_executed_patch_sha256": "d375a26c9d777db5bd3059ae5873b6fe710a7c50b63957b92ac074a8bf534bc1",
+    "tracked_zero_context_patch_sha256": "da212d84abfd8062c7c787e058a3f0f2c372f3a8aad1de14294e4b6e2773c885",
+    "identical_changed_source": [
+      {
+        "path": "benchmarks/matched/src/voteboat_engine/actor.rs",
+        "normal_sha256": "1548114c798e24baabbb3c2d16b261fbfbba05dee69c49dafbb95ddabd814a47",
+        "changed_sha256": "d5234366acedd09fa4ab23c9f205583040257d03c0cff4edb1ac64da843b9bf0"
+      }
+    ]
+  },
+  {
+    "path": "mutant-full-id.patch",
+    "raw_executed_patch_sha256": "91dcd36d6892a80bcb0c21f049696ac3f2b45d12cc42ae48fc9c289f70440a33",
+    "tracked_zero_context_patch_sha256": "c9b3d00aa365ed4709cbd19f65a6ea9bd28afbd5269feae36f45f27da9cc5015",
+    "identical_changed_source": [
+      {
+        "path": "src/log/transition/incoming.rs",
+        "normal_sha256": "b4357bd067fd6ef232143c96b33df10f376f10694d050457cc292632ee177b97",
+        "changed_sha256": "62c5b530122ed1c83e8bb66051a9d2e93ec63aebea4d8eae064e9a8675676c82"
+      }
+    ]
+  },
+  {
+    "path": "mutant-independent.patch",
+    "raw_executed_patch_sha256": "dfe2991b018bce484f6741a676d9fa02ec4615c5f3922c717738089e34537bdb",
+    "tracked_zero_context_patch_sha256": "b7215be7e47d7be81bd735bee678ca8632ac2cbbb262910c4ea80b941556f885",
+    "identical_changed_source": [
+      {
+        "path": "src/log/entries.rs",
+        "normal_sha256": "734d13c33a91ac1f9fc26cff4e9e1c97c40150434bc19c68ef964538af7b14c5",
+        "changed_sha256": "4ba0e81c95d73d8ad96b40bf1df69aca51b783cd49a7c500c30e0f12f0b1bee7"
+      }
+    ]
+  },
+  {
+    "path": "mutant-plain.patch",
+    "raw_executed_patch_sha256": "635d89ccfd1f4fae7417f7f0d8ffe5af0629b23543b678b6edb90e09c0668c73",
+    "tracked_zero_context_patch_sha256": "9472333358b02ee9a032288e62840fa4fcb4c16b88b203088dc1f64c1b19266a",
+    "identical_changed_source": [
+      {
+        "path": "src/log/transition.rs",
+        "normal_sha256": "c463a2f0ca261b866192a528d0608e8d5432a9c9c3f06fb751420dd1357168c5",
+        "changed_sha256": "d8144793849b698987cd1b297829b5815c6e662a4100396f40984398f98f3547"
+      }
+    ]
+  },
+  {
+    "path": "mutant-predecessor.patch",
+    "raw_executed_patch_sha256": "b5ec7b3dd5f5dc57b4e8e57a30beedd0202bba674f9563b3b949fc3eda019ca5",
+    "tracked_zero_context_patch_sha256": "e644e79ec94e73efc36dd62eb3480afc44f62f86f143470a3a977526ad438caa",
+    "identical_changed_source": [
+      {
+        "path": "src/log/transition/incoming.rs",
+        "normal_sha256": "b4357bd067fd6ef232143c96b33df10f376f10694d050457cc292632ee177b97",
+        "changed_sha256": "d490d418c6f038814bf81f35c1b912835c31c73b46145eb0f26e5974a4ef822a"
+      }
+    ]
+  }
+]
