@@ -9,6 +9,7 @@ mod batch_limit_tests;
 mod compact;
 mod entries;
 mod incoming;
+mod prepared;
 
 fn node(value: u64) -> NodeId {
     NodeId::new(value).unwrap()

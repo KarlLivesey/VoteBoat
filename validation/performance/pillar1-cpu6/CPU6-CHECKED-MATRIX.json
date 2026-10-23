@@ -1,0 +1,2530 @@
+{
+  "scope": "Focused test events, not unique tests/full suites/performance qualification. R1/R2 evidence remains historical.",
+  "groups": {
+    "default-and-matched": [
+      {
+        "name": "focus-default-lib-log",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib",
+          "log::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 81,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "120a19086531ece8af77d1c1946fd04eccd29682eb67661cdb0d81213ea702c3",
+        "log_sha256": "b58a76d266da9e4e651cb95b04a786534c750dfd3ae4b46326971aabeb4b1f5c"
+      },
+      {
+        "name": "focus-default-lib-raft-selector-oracle",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib",
+          "raft::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 186,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "2432287a021417d992bc52247d47c29dd3253e1cbec480fa62caf46fd2ec048e",
+        "log_sha256": "35014954b3eebb61777f82d221841f6db25a61f4314ac8bc6645f37582ca0888"
+      },
+      {
+        "name": "focus-default-lib-logical_voter-application",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib",
+          "logical_voter::application::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 67,
+            "ignored": 1
+          }
+        ],
+        "result_sha256": "e8cbfbe1e0bb00f806757ad434fee5a50217a4d3a2784d8e31a88afda1bffa4f",
+        "log_sha256": "818469a0e427bc7ca5be6802a30e1a0dd474fec6532ac05caccebbe3f87629b2"
+      },
+      {
+        "name": "focus-default-lib-runtime-logical_release",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib",
+          "runtime::logical_release::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 13,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "537e5ac12a5804789ce784e299b3c9b04e790a27c5156167abd5250d0219888e",
+        "log_sha256": "eb7607449d518082b01bbff850cde60d919a5b732cb954721f466acd30f611e7"
+      },
+      {
+        "name": "focus-default-lib-native-log_store-accepted",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib",
+          "native::log_store::accepted::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 23,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "c104e6bc3a40780fa4bb6446c3b6c46e9d53309b29919ea3636f76871c0e4be1",
+        "log_sha256": "42be480757979586bd1a7e0f7602584e48cf92f9f1481c7e0b1eb375669257bf"
+      },
+      {
+        "name": "focus-default-normal-sizes",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib",
+          "cpu6_",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 3,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "2e7fbf4acaa81f9cc0b5b5084f123362f78aa2be06f0736b13ba5126c0d11ef0",
+        "log_sha256": "73840b4066f736f7d24da74ecaaa3f070d1159fbfa0e2bb94191ec1fb31ad169"
+      },
+      {
+        "name": "focus-default-00-volatile",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "volatile",
+          "prepared::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 2,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "6a82802b9d964d0728206d8cc2bcb14e196736a554346b0c0ae3af67ee8a7965",
+        "log_sha256": "686890022680546871c7835e037be1844440c42ee43b911ed9d4eb1c55f9551d"
+      },
+      {
+        "name": "focus-default-01-log_owned",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "log_owned",
+          "plain_append_and_metadata_keep_prior_payload_allocations_and_cold_groups",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "e231af361096c34cae06d5b3533a13d25ba1cc48d8f7eab73af7b79fc7620b91",
+        "log_sha256": "a7815d523a93655c531249fe5a0ab499a797cb673f44d2fdb624b817483b1424"
+      },
+      {
+        "name": "focus-default-02-log_owned",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "log_owned",
+          "configuration_snapshot_and_generation_replacement_keep_the_exact_fallback",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "ac101d8794787128ba5794b0c5c7a91eeff1113345293951a4648121e5f12d2e",
+        "log_sha256": "57b18dacf4e93c354d3641ef59c5676b6c3b574e0c149d734c63ca0a1650d6ed"
+      },
+      {
+        "name": "focus-default-03-log_store",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "log_store",
+          "restart_recovers_policy_identity_hard_state_suffix_and_commit",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "88119f3beddba676eb8446ec1674706012bc994aa341f6074c620f32a0a6e816",
+        "log_sha256": "7207d1b689e8703c34bafc828905750cc1d0c3abdaf8d915f5454d2edc312d49"
+      },
+      {
+        "name": "focus-default-04-log_store",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "log_store",
+          "every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "2cdfe1a2ca980a562d1b77c82f8df9bba44070f6c372794f734782d555a41b74",
+        "log_sha256": "767fffc3c7e8dbcf2ad0f89ea81cd1ef7a8a489a8fe6aac9d0e6f715745be374"
+      },
+      {
+        "name": "focus-default-05-log_store",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "log_store",
+          "failed_sync_or_publication_fences_without_acknowledging_the_transition",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "1b5687fe6a813c16edcf46287275e04c58d839b1e37f8f0b5947103c3f20d0a2",
+        "log_sha256": "693646ee1d9d0ea4e340d7a208e47093cb7d1c3f31a31a8056f68bc45e0fc2c0"
+      },
+      {
+        "name": "focus-default-06-wire",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "wire",
+          "entry_encodings_are_byte_identical_for_every_partition",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "bc2f225d4e7ae28d8d274a8748b83b98c1e4509f26dc5bdceef48dd9bae313b4",
+        "log_sha256": "f122d9afd758ad9805290e7904a39abd9351c2e93a1c4e1bdc6171f07e08ed57"
+      },
+      {
+        "name": "focus-default-07-wire",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "wire",
+          "decoded_memory_budget_charges_the_index_of_the_decoded_entries_exactly",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "b81dc6b9df553aaacb7a1131ec4a81c87f483fb3bc73956ce5e2fe747bbe7fd3",
+        "log_sha256": "0899b490545183d0affabef125a34cc5e36e9c873a319d94df033595ecb9d7eb"
+      },
+      {
+        "name": "focus-default-08-wire",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "wire",
+          "native_all_rpc_multiplexing_snapshot_policy_and_canonical_frame_roundtrip",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "f4cd560bfb25789dbdd27aa9c99bc231a4089a7d274909ae03a06f258bf5e9c1",
+        "log_sha256": "59302d0423b5309e2d267e08f336ee6c04b712ed1da3e7d1371c9f6fa2eb3879"
+      },
+      {
+        "name": "focus-default-09-raft",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "raft",
+          "recursive_policy_is_used_for_both_election_and_commit",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "b59519e0df6d973cfe6c181b3089c025865e5bf4f546f0ad68ba1cd406318e6c",
+        "log_sha256": "ba65eef5606a3e5e2d2face2e88fc5c42e3968897e8cfd128d8c906eb73570ca"
+      },
+      {
+        "name": "focus-default-10-raft",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "raft",
+          "recursive_reads_require_fresh_distinct_voters_for_the_exact_context",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "4e34ba3636c103ffcc6c74580f56a9e5b483e02d6c1bcefe48bb55028074113c",
+        "log_sha256": "2a92d12551ca97fc479a9cc4757808e1673052495cfe1ad93a37b32a6d2f3cdb"
+      },
+      {
+        "name": "focus-default-11-raft",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "raft",
+          "read_authority_and_applied_prefix_history_with_host_storage",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "e540ad1ba0734847ef5824b06231da9dca3b5b79b1c6b7a8f85785060c0cf2bc",
+        "log_sha256": "9075db2aa3de8427b68a5aa9530a3532d41ab329ceac275cc55d964caa57f58f"
+      },
+      {
+        "name": "focus-default-12-membership",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "membership",
+          "arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "c38e6d7cf3a8f01e5f926a1e1fa1d418343d0b609c529bde54eea1d736ba605f",
+        "log_sha256": "fbb56c95643f2fe2689c84d1add53d0cf32c3b7ebbb7bc239f9c8c473172646b"
+      },
+      {
+        "name": "focus-default-13-membership",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "membership",
+          "every_torn_configuration_and_replacement_frame_recovers_one_complete_state",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "d52ffff2edf4b158e69028d46e9597e785e299225d9c98c23a2816f9c59a41b8",
+        "log_sha256": "d5beee49af173bd97bdc76804dfa12c80554478e9b1dab183e1658c5a4cbfad2"
+      },
+      {
+        "name": "focus-default-14-membership",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "membership",
+          "final_commit_status_requires_recovered_barrier_not_written_or_uncertain_reply",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "e4636026d8865fdcd3a72a86feaabd19205fee07fc4c4895a1c3e954ae7f1a35",
+        "log_sha256": "93f75ea480bf0711ab3f3d0c7fb585b5650259c1f27eaab76a86fb16f45b10ea"
+      },
+      {
+        "name": "focus-default-15-application",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "application",
+          "counter_envelope_covers_full_retry_history_and_survives_restore",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "ef63bc43342b8f2ad26a54c8524e617b075f6be4237af2de3dec5643c030d7e6",
+        "log_sha256": "3e0fe888cd0ba755eeb11e940ab0f822b6dbe22b48937cce31b236901c9d1c7c"
+      },
+      {
+        "name": "focus-default-16-application",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "application",
+          "checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "cfe42c0b5cd66f0ff0654d5b65e30906a1ec852c3163e9790f05081799142bf5",
+        "log_sha256": "3093149af0891ece6d53e1ed8b11fdcd8e774c597a6ce04c0c07c2e526e1c2ba"
+      },
+      {
+        "name": "focus-default-17-application",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "application",
+          "late_batch_failures_preserve_full_history_and_leave_rejected_operations_novel",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "816d514f92499164545869330988aa29098481f71896ae9d4c018adbf188729b",
+        "log_sha256": "a6b87500605826eb343f5526c7ce3a50897060e8f8482ae3f7f459f6d655df64"
+      },
+      {
+        "name": "focus-default-18-logical_network",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "logical_network",
+          "controls::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 2,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "ec56424a1a63d734c5943693ba96093014bd5527039d0aec331108d4d4f72530",
+        "log_sha256": "45c2311bab565b1915165048e58e892b5ba687fba2934078d38e734112483f80"
+      },
+      {
+        "name": "focus-default-19-logical_network",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "logical_network",
+          "refusals::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 2,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "c716dffdd1468be5adae1eec9599aa25ab144449abff790de756c8ae38119b86",
+        "log_sha256": "09aaec8ad58bd09890cb9f9ac7d06fcdf7d2c4fbe0b6217f7478fb4c1d3d2585"
+      },
+      {
+        "name": "focus-default-20-logical_voter_native",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "logical_voter_native",
+          "tcp_original_client_and_read_results_wait_for_consumed_child_capsules",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "367a5dc85c840c03d6a62445383759711dae2e2ae89ff33d3d48f7aec5bdbdd3",
+        "log_sha256": "a8e3dce3492ac3386c2e61bd3556a3400053387a0c0567f298811dcdea61cba6"
+      },
+      {
+        "name": "focus-default-21-logical_voter_native",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "logical_voter_native",
+          "tcp_original_parent_promise_and_payload_survive_child_checkpoint_suffix_restart",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "9c9c04124a4473506fa69c4669fa409b891615a3cd260ac29050499d4c253f5e",
+        "log_sha256": "cf37b172d8f9a6ac8d474db3f632c7d3e3ae27e4210eea6f588eb47946183c9b"
+      },
+      {
+        "name": "focus-default-22-logical_voter_network",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "logical_voter_network",
+          "tcp_three_logical_voters_use_nine_native_child_owners_and_real_quorum_results",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "ecfdd380c4d8519167fa7778895eff37f43534a8f761108c886704da03eb0d60",
+        "log_sha256": "4ae053a1367b39647fad7e4163f5c0a1984f7154b66e455c392e8893d7558758"
+      },
+      {
+        "name": "focus-default-23-raft",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "raft",
+          "process_crash_and_power_loss_distinguish_complete_unsynced_vote_frames",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "3de576f120e4b430f41ba6285f707698bd63dc43a93396d57bf66cdf0d1f611a",
+        "log_sha256": "bdb7100f3b9eeb9b8a160fafbfaa96db2aa0675e3d1d92c19bb4d6ef5aafb0ea"
+      },
+      {
+        "name": "focus-default-24-raft",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "raft",
+          "short_write_and_manifest_failures_share_exact_composed_replay",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "6fedf0a37bee2d0c437b184b4b47dad1841770239bfd7de7eac0b30c69699dbf",
+        "log_sha256": "85b87d615c9de91ec59b25a5ad4d3bc236a6bff603c21c23c812eb0ad5ed6211"
+      },
+      {
+        "name": "focus-default-25-snapshot",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "snapshot",
+          "native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "9ea93f73673dba18f7e9ba4d5236bc0bcfb878c0c3729fa8e595afb715d4d9fc",
+        "log_sha256": "8052f7dc6230cf80db705168fb8221c14ee703caa4685b9408a1cc6a486f4903"
+      },
+      {
+        "name": "focus-default-26-effect_owner",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "effect_owner",
+          "held_effect_stops_its_group_while_other_group_commits",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "97423c177c8d3c4bc972555f5a7c685117a2acd2b00263adf18d7368098df404",
+        "log_sha256": "c396dd4e5b2fc3477413b7453040f956ab6d65ae0136fec268a8868e9f29aa72"
+      },
+      {
+        "name": "focus-default-27-effect_owner",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "effect_owner",
+          "written_and_wrong_effect_never_apply_or_publish_and_durable_application_is_ordered",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "b123778f2666172130f1590deadddb3f5fe7edf7a8fecf26d73f23adef96e2f4",
+        "log_sha256": "024cb0ba4ba07dd835636b1e7816e2480571c9f3592e992436151011154ed8a8"
+      },
+      {
+        "name": "focus-default-28-retirement",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "retirement",
+          "activated_sources_retire_after_merge_preserving_original_activation_lineage_and_target_data",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "b2098a7b656720cde614ac7132061947a09ccf219dee34cb18a9363c4e6b40f1",
+        "log_sha256": "45410ef9eae0b6a004c6b4b41c2216d7ef1e6cecc3203313c2b334ffb6a0fa49"
+      },
+      {
+        "name": "focus-default-29-scopes",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "scopes",
+          "split_import_rebases_target_prefix_and_preserves_retry_results_and_outbox",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "b69a5df8eea1e0f1a2666b2336c46099cc817125bb02aafa61adedf65e531cc1",
+        "log_sha256": "8b20a6210784c806c5ebfbcc4414a071ed75bac08dd4cce346e8a37b9564bbf1"
+      },
+      {
+        "name": "focus-default-30-transfer_merge",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "transfer_merge",
+          "compatible_merge_combines_actual_data_original_results_and_outbox_through_recovery",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "251e8113571944d1952093893ceb5bb3a60be9cb4a9d9739e453546f770e3bac",
+        "log_sha256": "687f81f753db36b11a412a426219ad31eeb7613671fceab7d443835e6d3f5ac2"
+      },
+      {
+        "name": "focus-default-31-member_recovery",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "member_recovery",
+          "recovered_final_weighted_policy_is_used_instead_of_bootstrap_majority",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "e5888b2ac0921064b0b17df528e1c2fbdb7b92d6cdafb3ef6de92add4b222fe1",
+        "log_sha256": "6800885f3ff05e5714ce798e68779f3f1938b53e9360bd459ae0f32c26b3fe93"
+      },
+      {
+        "name": "focus-default-32-learners",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--test",
+          "learners",
+          "local_policy_change_commits_only_with_old_and_new_recursive_predicates",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "56aa6413b81528c7dea778234f7f287bebb407f2dc3712bd211b535dd12b6cf4",
+        "log_sha256": "f630d1f56b5874736ea2e5c7b0ecbab765dfda1589e17f305617df06dfd1cb1f"
+      },
+      {
+        "name": "focus-matched-actor-consumers",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--manifest-path",
+          "benchmarks/matched/Cargo.toml",
+          "voteboat_engine::actor::tests::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 26,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "bc7458684213366d2417ff39165bfb4c1beda4245835833f531a2455d54ab774",
+        "log_sha256": "da061bd37ff363ea4a3c9ac6ef775b34387a93291539417f0c1a6afca525aca6"
+      },
+      {
+        "name": "focus-matched-actual-async-snapshot",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--manifest-path",
+          "benchmarks/matched/Cargo.toml",
+          "compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "3cdee1e12f1c6d0fbf75f5bd0490468721935317b00255791930ec5924a8fa87",
+        "log_sha256": "371c6664bf63e76de470bad13246f5467f04edbf61c7ed0dd43c7782c1a7f957"
+      }
+    ],
+    "configuration-closure": [
+      {
+        "name": "focus-all-lib-log",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--lib",
+          "log::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 81,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "77843494b39660422b6b3baddba71d182ec438b5e6be4a98b38652a71d024891",
+        "log_sha256": "a6f59d79d9626a2431dcaa736cb9885ad7989ccffc0f452073a01df5158afb88"
+      },
+      {
+        "name": "focus-all-lib-raft",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--lib",
+          "raft::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 186,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "71bc930afebd7f3ec1024edc5c6bac676c34a752ba8d672e22a0a9dc0c7fa3e2",
+        "log_sha256": "c8a8e4fe4fccece3736c33899d543bcbdc6ba6a5d9c121665e313fd721f8db6d"
+      },
+      {
+        "name": "focus-all-lib-logical_voter-application",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--lib",
+          "logical_voter::application::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 68,
+            "ignored": 1
+          }
+        ],
+        "result_sha256": "2e8ea9aaaaec8b3615a1a19881f8b49309c8d91b4b87cf7b3007a040dd70c7d4",
+        "log_sha256": "6885cc2d73744a5d5c9df769e64bbba18965573ed6980098da8cec4d63cc7580"
+      },
+      {
+        "name": "focus-all-lib-runtime-logical_release",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--lib",
+          "runtime::logical_release::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 14,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "8ff82480097426ef307fd4fcc91cdb7ceb46b3dab85a6ccbf1082b6f965a882c",
+        "log_sha256": "fa7e66992d68ea626c208b3b6110362c777c13cf6facf0e5ac2cf21f192ab709"
+      },
+      {
+        "name": "focus-all-lib-native-log_store-accepted",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--lib",
+          "native::log_store::accepted::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 23,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "b85dfddb2f4f9a45b440f63cc933887044c4fde8e9dc3c1c7e7995fe5165e48e",
+        "log_sha256": "6330e86fa08ad177fd2ee73852b182a67d97d8f35031ba56f50c933d815221f1"
+      },
+      {
+        "name": "focus-all-00-volatile",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "volatile",
+          "prepared::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 2,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "64758f0f5646d66a49b9dd89ffc2e40ffc057cce3eba2a4100ec34ceba4b5e73",
+        "log_sha256": "16b8adc728c901d94a78f575a10708ac087c50b947180aa495e02f67a18147ac"
+      },
+      {
+        "name": "focus-all-01-log_owned",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "log_owned",
+          "plain_append_and_metadata_keep_prior_payload_allocations_and_cold_groups",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "f0cbaab74f237f38356bbb2482cbe29fa9088ece569789b44aee40dffc589614",
+        "log_sha256": "97c690da91be5622ec93e1bafeb475d063bdcc5a177dca23357efdd279a2f257"
+      },
+      {
+        "name": "focus-all-02-log_owned",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "log_owned",
+          "configuration_snapshot_and_generation_replacement_keep_the_exact_fallback",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "0c380722ea2acaa58b210ffad725a8e1ae2d6d505714ae2421230abf1a5756c8",
+        "log_sha256": "add0eb152187666e10187ea91943601d90609a2f681fe00b8e5df339730986ed"
+      },
+      {
+        "name": "focus-all-04-log_store",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "log_store",
+          "every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "edf0a16efd53201d41621d4538f5e6a6cf4d5ddaf3f8ec1e4b844bc65f4e4188",
+        "log_sha256": "0a5f54ea336644309f303592129d8c1383f2d4b14962aa68450380b44ad5f700"
+      },
+      {
+        "name": "focus-all-05-log_store",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "log_store",
+          "failed_sync_or_publication_fences_without_acknowledging_the_transition",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "d1df180023cc21e007bc9275b76b12916d180ebd3b8c30c4e5e9ac16ee69aa5b",
+        "log_sha256": "bdc77aebc972860cdeb72eac420d9e57a31ee6230648cbecfc2fb4c56d692eaa"
+      },
+      {
+        "name": "focus-all-06-wire",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "wire",
+          "entry_encodings_are_byte_identical_for_every_partition",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "7133f8dcc0453b0434f105261450fdeb6dc5a0f46b93cb61edc9ad1c2855e102",
+        "log_sha256": "d51882d05a0337a69443154d29f5cfb029d3e4f9d351c6223fd6df49efd0e2e7"
+      },
+      {
+        "name": "focus-all-07-wire",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "wire",
+          "decoded_memory_budget_charges_the_index_of_the_decoded_entries_exactly",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "167b4f66498e881cee8e94ab455fa03f6eb0a303bce76130c186d6e92c7a62e0",
+        "log_sha256": "fa7784fcd7da505d787d763ab1f43a77b23e77c5a7abad59de01dce16b767843"
+      },
+      {
+        "name": "focus-all-08-wire",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "wire",
+          "native_all_rpc_multiplexing_snapshot_policy_and_canonical_frame_roundtrip",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "670be86a67e780fcad0b5ecbc2b687ceeeb45ee4a98b9994f7f026144e5ea3a4",
+        "log_sha256": "5ac1a4db9eb8320c7d89e7b87e40eb192395754ae8c8b64325ad99c0ab2ba7dc"
+      },
+      {
+        "name": "focus-all-18-logical_network",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "logical_network",
+          "controls::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 2,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "e29ba9fcaf36e1ff4fa31fce38603c99069362ddaac3201797004fc8ca253a51",
+        "log_sha256": "8b5ed5a35f4f1c19e1eb62b9fe5ba50fb991e77ea913e9b50a2cdba13b4c565b"
+      },
+      {
+        "name": "focus-all-19-logical_network",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "logical_network",
+          "refusals::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 2,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "32506206eb54b8ef0e0046658078aa3612fb9e6a1f6385e14741386558140ee0",
+        "log_sha256": "757783f02d8884c496162b16eca326b7a50c2bbaba635b4b8f709149ab7b9179"
+      },
+      {
+        "name": "focus-all-20-logical_voter_native",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "logical_voter_native",
+          "tcp_original_client_and_read_results_wait_for_consumed_child_capsules",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "b8e6e30c77e2173ca23dd704165344bcb209d7f28c8b4303a2debf21ef6d3944",
+        "log_sha256": "afdb0449b641c7e3def44816d666fd561a3fc3794b56dfc22e6cba5cb687c35d"
+      },
+      {
+        "name": "focus-all-21-logical_voter_native",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "logical_voter_native",
+          "tcp_original_parent_promise_and_payload_survive_child_checkpoint_suffix_restart",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "1182d34096ba37a46ffa07465f5a09ce894c5a60e0a151fbe0d45f8c9f41523c",
+        "log_sha256": "a8387d03f729b9c0677ca9f0d533408ccfe8f4ddc7e92cc8154d8316ea2f9386"
+      },
+      {
+        "name": "focus-all-22-logical_voter_network",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "logical_voter_network",
+          "tcp_three_logical_voters_use_nine_native_child_owners_and_real_quorum_results",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "8369c046f43d6c51571d29ff45726b75b03be6dc22ddd807e3a8d4bbd38129de",
+        "log_sha256": "0b0059184453a4d12d4da6d498c3378b9139a3c15dc8546327512493a1683bfd"
+      },
+      {
+        "name": "focus-all-25-snapshot",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "snapshot",
+          "native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "19bc57c5e44bcfcc7d33710624e069fb52408baccf90177a66eca9f279e8e07b",
+        "log_sha256": "c4d03f1ef358656250a84a0dfe7c9f78b2d4edab8a65cd2dfbef927d2205b256"
+      },
+      {
+        "name": "focus-all-quic-three-replicas",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "quic",
+          "three_raft_replicas_commit_through_quic_framing_and_exact_log_completions",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "e52608d599ca9af086926a664bbbbe597962aeaa0fb44bcd964a6e5c657d507b",
+        "log_sha256": "96608c5d459164b6bebca9769d1615dd928b59ba0605fd9f2ae9182515b04d74"
+      },
+      {
+        "name": "focus-all-quic-owned-credits",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--all-features",
+          "--test",
+          "quic",
+          "native_framed_transport_retains_original_credits_until_exact_send_completion",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "7cca1e77c67b856832b3b33975ad336ab9f6fb10b46e90a3843e7445a6771b39",
+        "log_sha256": "2ffb38c23aec036f1deb040d9231845cda4d839c23b56dba9852e4b85e2c380b"
+      },
+      {
+        "name": "focus-none-lib-log",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--lib",
+          "log::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 81,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "89f627381ef5a64f56f43caef6e095a1dfcaff60ec6af089a94dd239ad1f88f8",
+        "log_sha256": "a1863bc8bc0309ed43536c61fdf96fe8c20b109d393d15f4282d97281fbf5ab5"
+      },
+      {
+        "name": "focus-none-lib-raft",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--lib",
+          "raft::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 167,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "af47f95bab9054cbdc046ddf84b5f1e4e2a6df5b3dc640b8538ac86e86b7b225",
+        "log_sha256": "e77cb2421f46f80bc364614fff21b9d17b0ec3cd643c1b93f41329e533e03e15"
+      },
+      {
+        "name": "focus-none-00-volatile",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--test",
+          "volatile",
+          "prepared::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 2,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "d0dc67dd1c10f26450166c604b195b8d0b93333626e54cef9e24a8e0e654bb44",
+        "log_sha256": "4cd4609f0e6391f210c3a9e73a331ccccd447559c4b1073a4379162b35a4671f"
+      },
+      {
+        "name": "focus-native-lib-log",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--lib",
+          "log::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 81,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "c114c14c6b0eaf7e55b27670494320d0b6c10972d19d1d0bab3754e0e14d5236",
+        "log_sha256": "767e4a01ee1ce2b89e595ec80e2639102d3030e240cf5d04a847ce0a0b49b982"
+      },
+      {
+        "name": "focus-native-lib-raft",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--lib",
+          "raft::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 186,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "e8ce166538d53d05033a5ea1aec0712ef3b9f2999e6a113199cd99256c6ce395",
+        "log_sha256": "e794b637f204742d618fd272fa98877616428cbe7871fd5fe5caa5e7d7e246ec"
+      },
+      {
+        "name": "focus-native-lib-native-log_store-accepted",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--lib",
+          "native::log_store::accepted::",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 23,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "119d8e803ef64146e139ec1e25cbec63879774738ffc28ccfde66a5a912fd679",
+        "log_sha256": "b3532ce63e34c972edfafa6c832e2a66a22a7d4148c48b7c0ab3bbd66b7551cc"
+      },
+      {
+        "name": "focus-native-01-log_owned",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--test",
+          "log_owned",
+          "plain_append_and_metadata_keep_prior_payload_allocations_and_cold_groups",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "90fcc2802696c86c6851deeeb4a9c78a0e1ccde66ed301fcc63f6d681df0ffbc",
+        "log_sha256": "6596208dd640aa0bf1d14c4f84d0cad6f9b6643126e47a54dd3a5a00766e7120"
+      },
+      {
+        "name": "focus-native-03-log_store",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--test",
+          "log_store",
+          "restart_recovers_policy_identity_hard_state_suffix_and_commit",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "36c3ffcca1680425b3b946c362a8bb6e40accf795d95cb19aead81abfc45f549",
+        "log_sha256": "a108a4e55008567d6f502f62c0e22b651685e76bb882d93658f6bebdcd81a88f"
+      },
+      {
+        "name": "focus-native-04-log_store",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--test",
+          "log_store",
+          "every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "aeb774ae1328b79f12a897a42c3248c5447316e707f7180fe88458dfc18846c3",
+        "log_sha256": "38123354bbe276764b15887bd85a9eb3ba210125a4d30c4be2b09712c4ab3959"
+      },
+      {
+        "name": "focus-native-05-log_store",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--test",
+          "log_store",
+          "failed_sync_or_publication_fences_without_acknowledging_the_transition",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "a2dbd5909cc95c0ad41eafd7619bf05dfe6ef194409cbb4e44b325d92317b0ec",
+        "log_sha256": "a312b7034f66c7e331daeee0a1ea191af195092016ee64b0aa3381889dd5a409"
+      },
+      {
+        "name": "focus-native-06-wire",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--test",
+          "wire",
+          "entry_encodings_are_byte_identical_for_every_partition",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "c799b86d0279bb84a6f9a53c4388697ef60412ae77b1b2e9ce9f7a348c9d944a",
+        "log_sha256": "27689cffd17e54ea0c43b8779bb77d1e23b065bda89e9719e41b780d7028e1f5"
+      },
+      {
+        "name": "focus-native-07-wire",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--test",
+          "wire",
+          "decoded_memory_budget_charges_the_index_of_the_decoded_entries_exactly",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "7b2eceba749c1198ea24f4edefeb651e9b5b71db98049b2d22b7eae9c9623055",
+        "log_sha256": "bb5f4fcddc492525b178a06b5f413d4030fb0b739ac9c3d67bab34b43e67cf04"
+      },
+      {
+        "name": "focus-native-25-snapshot",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--test",
+          "snapshot",
+          "native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "b81779a38bbc8a6fc7e9ffc0e6db6de93ebcb76e9301fe5c261f1e1e073af1e5",
+        "log_sha256": "d0b249754ca70a9f62af86138b30a093a86601d15b877dbff0c814068668add4"
+      }
+    ],
+    "new-boundary-and-checkpoint-controls": [
+      {
+        "name": "fmt-capsule-decode-boundary",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "fmt",
+          "--all"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "f5efbbfe0f9507898ef6c1e4a9f00764aa3af5f44f2d7d8d83ba3803c304b2ca",
+        "log_sha256": "00656244a2d26de806cae220ac306bbbd7bf3d7424b7e888041a2ad0857c9d2c"
+      },
+      {
+        "name": "fmt-matched-checkpoint-count",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "fmt",
+          "--manifest-path",
+          "benchmarks/matched/Cargo.toml",
+          "--all"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "dec4dcdf7df050cbdc57eda7f5368c9cf6c60c9fdabc65932938cf1b9c883347",
+        "log_sha256": "ecc402fd1cac47d3fc952c57f17cbecab137deda923edb32e1b9d79d0046e885"
+      },
+      {
+        "name": "capsule-decode-owner-boundary",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib",
+          "prepared_capsule_decode_charges_message_owner_at_exact_boundary",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "e4d9f54a327fae8dd215cd5f13f4d19780bf28722766339f5fe526dc5e1e793c",
+        "log_sha256": "506c2c556c752eb7000b7ac6c24f9ccec6a2acc7f422fb0880a3fa8883e904fe"
+      },
+      {
+        "name": "release-wrapper-sizes",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--lib",
+          "cpu6_release_wrapper_normal_sizes",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "cc6e8b2ae19fb14442fb8e89d2a28c3a1e9f2567a3a0b78c3a32180b7bb2920f",
+        "log_sha256": "f132c1b605a81356892479af092835f65dce0c0b591e6a3f7ceb9ef82433a290"
+      },
+      {
+        "name": "matched-actual-checkpoint-count",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "test",
+          "--locked",
+          "--offline",
+          "--manifest-path",
+          "benchmarks/matched/Cargo.toml",
+          "prepared_all_three_normal_actors_b1_b231_b515_default_checkpoints_and_snapshot",
+          "--",
+          "--test-threads=1",
+          "--nocapture"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [
+          {
+            "passed": 1,
+            "ignored": 0
+          }
+        ],
+        "result_sha256": "c10e3ed50318ea055bed9fb3ce4d06c6e915c96ffa8d453cb4a891f59e6e72f0",
+        "log_sha256": "38321c2b206b90765a35cf70b61614792162d1b545462692bff269cdcf9f1b56"
+      }
+    ],
+    "strict-seven": [
+      {
+        "name": "strict7-root-fmt",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "7c0bff29c2fda4a4d00703435561389ba6ae23540d08cdc2e59c37239a5011b5",
+        "log_sha256": "a7d54c537062e3caaaeeb3295f26095380eaae8f344642c394c071615ebb5569"
+      },
+      {
+        "name": "strict7-root-clippy-default",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--keep-going",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "480a3194ea75a9d717eea9ab315439c30f230c4b2e1ee63e981b45e9fe38a666",
+        "log_sha256": "37b4b395072630e728867d908003b17035d8cf61e8cae8af0a3e73741c5dfd66"
+      },
+      {
+        "name": "strict7-root-clippy-all",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--keep-going",
+          "--all-targets",
+          "--all-features",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "916706f765223b7960c328e6fe5f9ab327150e08d19a444f82d756e9670d70f6",
+        "log_sha256": "1803c3110c3f308cd9c495420f10217374229b0dce9ed866faf76823f9a906cc"
+      },
+      {
+        "name": "strict7-root-clippy-none",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--keep-going",
+          "--all-targets",
+          "--no-default-features",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "65a762ff9d7c869af922b08bad67269a88075337b151380d70da49f9a0201be6",
+        "log_sha256": "45bcfb52e0492f68c59b9fc71f6c7d7964439624e565694a74186b44cd4749a6"
+      },
+      {
+        "name": "strict7-root-clippy-native",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--keep-going",
+          "--all-targets",
+          "--no-default-features",
+          "--features",
+          "native",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "a4dfcbade799799b2627a26dc9c90a8200ccf177dff95595172e9b3c474f24ea",
+        "log_sha256": "74f048867d8a033fb8e91fa136e68ba8ec86feb85309342d896c01903dfb3ae4"
+      },
+      {
+        "name": "strict7-matched-fmt",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "fmt",
+          "--manifest-path",
+          "benchmarks/matched/Cargo.toml",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "aeb10f617a3005e91d93f0279e10748c1d89c33f2f1439e5958e1adc6f3fb6b6",
+        "log_sha256": "5a6d594ec7c1d9dac31954ebed424d32c40d39ea91dde148189d1ca517b8d2c3"
+      },
+      {
+        "name": "strict7-matched-clippy",
+        "command": [
+          "/usr/bin/cargo",
+          "+stable",
+          "clippy",
+          "--manifest-path",
+          "benchmarks/matched/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--keep-going",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "child_rc": 0,
+        "observer_rc": 0,
+        "outer_rc": 0,
+        "test_events": [],
+        "result_sha256": "e7e7ca8966023b91df99e2cb239374f84aad1e7a083b42f38de87af275532a2c",
+        "log_sha256": "bc91553df94a69c50960a680a68eaeb64ea9d286b6634034a8f8e4e9207b4ad4"
+      }
+    ]
+  },
+  "causal_controls": [
+    {
+      "name": "valid-old-singleton-vec",
+      "classification": "valid old representation work control",
+      "child_rc": 0,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 0,
+      "expected_rc": 0,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "valid-old-separate-wide",
+      "classification": "valid old representation work control",
+      "child_rc": 0,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 0,
+      "expected_rc": 0,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-wrong-assigned-index",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-wrong-assigned-term",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-wrong-mixed-range",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-retained-payload-charge",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 0,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 1,
+      "expected_rc": 101,
+      "intended_assertions_observed": false,
+      "exact_inputs_restored": true,
+      "exception": {
+        "type": "AssertionError",
+        "raw_error": "AssertionError(('wrong control exit', 0, 101))"
+      }
+    },
+    {
+      "name": "mutant-retained-payload-charge-independent-ledger",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-stale-seal-after-edit",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-omitted-inline-application-slice",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-omitted-inline-payload-charge",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-held-payload-released",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-omitted-boxed-message-charge",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-inline-data-classification",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-capture-fixed-message-owners",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-capsule-decoder-message-owner",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    },
+    {
+      "name": "mutant-queue-omitted-owned-proof",
+      "classification": "incorrect compiled semantic mutant",
+      "child_rc": 101,
+      "observer_rc": 0,
+      "authoritative_outer_rc": 101,
+      "expected_rc": 101,
+      "intended_assertions_observed": true,
+      "exact_inputs_restored": true,
+      "exception": null
+    }
+  ],
+  "valid_old_work_controls": 2,
+  "incorrect_compiled_mutants_killed": 13,
+  "preserved_initial_survived_mutants": 1,
+  "r2_cause": "UNKNOWN; HOLD remains",
+  "gain": "UNKNOWN",
+  "parent_pending": [
+    "fresh dual exact-head source reviews",
+    "normal Apple mechanism/lifetime proof",
+    "original nine paired CPU controls with every width median B/A <1 and >=2/3 wins",
+    "conditional original64 canonical",
+    "kept composition full5/exhaustive relay/docs"
+  ],
+  "build_target": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-dd107252/target",
+  "strict_seven_zero_diagnostics": true
+}

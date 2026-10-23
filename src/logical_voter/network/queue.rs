@@ -216,7 +216,8 @@ impl LogicalOutboundQueue for LogicalNetworkQueue {
             if send.authorization() != self.authorization
                 || send.effect().visit.owner != self.authorization.owner()
                 || p.capsule().origin != LogicalCapsuleOrigin::Protocol(send.effect())
-                || p.capsule().body != LogicalCapsuleBody::Protocol(send.message().clone())
+                || !matches!(&p.capsule().body,
+                    LogicalCapsuleBody::Protocol(message) if message.as_ref() == send.message())
                 || p.receipt().outcome != LogicalOutcome::CapsuleAuthorized
                 || send.message().from != self.binding.node
                 || send.message().sender != self.binding.store

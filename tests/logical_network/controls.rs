@@ -64,6 +64,18 @@ fn real_original_proof_short_io_flush_stale_owner_and_completion_preserve_credit
         let batch = fixture::original_send(&mut bridges[0], &mut parents[0], clocks[0]);
         let message = batch.send().message().clone();
         let credits = parents[0].outbound.usage();
+        let proof = batch.send().provenance();
+        let retained = proof.retained_bytes(usize::MAX).unwrap();
+        assert_eq!(proof.retained_bytes(retained), Ok(retained));
+        assert_eq!(
+            proof.retained_bytes(retained - 1),
+            Err(OutboundError::BatchTooLarge)
+        );
+        let (_, message_bytes) = message_cost(batch.send().message(), usize::MAX).unwrap();
+        assert_eq!(
+            credits.bytes,
+            message_bytes + retained + std::mem::size_of::<AuthorizedLogicalSend>() + 512
+        );
         let host = Host::new(fixture::binding(descriptors, 0, 1, 1));
         let mut source = session(host.clone(), fixture::plan(descriptors, 0), &parents[0]);
         source.submit(batch).map_err(|e| e.reason).unwrap();

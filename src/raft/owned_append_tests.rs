@@ -314,7 +314,8 @@ fn matching_prefix_shares_only_the_unmatched_suffix_and_replay_has_no_persist() 
     assert_eq!(suffix(&effects).from, 2);
     assert_eq!(suffix(&effects).entries, [tail]);
     assert_eq!(suffix(&effects).entries.len(), 1);
-    assert_eq!(suffix(&effects).entries.backing_count(), 1);
+    assert_eq!(suffix(&effects).entries.backing_count(), 0);
+    assert_eq!(suffix(&effects).entries.allocated_entries(), 0);
     assert_eq!(
         bytes(&suffix(&effects).entries[0]).as_ptr(),
         payload_pointer

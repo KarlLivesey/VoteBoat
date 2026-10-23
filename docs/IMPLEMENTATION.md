@@ -1,5 +1,226 @@
 # Implementation record
 
+## CPU6 R3 implemented evidence (23 October 2026)
+
+The existing prepared-entry candidate and authorized Protocol(Box<Message>)
+consumer amendment now pass the focused semantic/consumer matrix and all seven
+strict checks with zero diagnostics. The full [checked record](../validation/performance/pillar1-cpu6/CPU6-R3-CHECKED.md)
+and [exact command/result matrix](../validation/performance/pillar1-cpu6/CPU6-CHECKED-MATRIX.json)
+separate implementation from pending qualification. They record 1,377 selected
+passing test events (not unique tests/full suites), two valid old-representation
+work controls, thirteen incorrect compiled mutant kills with exact restoration,
+and the initial survived charge mutant that required an independent raw ledger.
+
+Actual public volatile/durable nonempty Counter and all three normal matched
+actors passed B1/B231/B515 through two 5000-entry checkpoint intervals, lagging
+snapshot catch-up and continued writes. The matched fixture verifies two actual
+default-maintenance checkpoints per replica and retain1000. Native recovery,
+codec, ownership/FIFO, logical consumed-DURABLE/quorum/read/lifecycle and independent
+group consumers are mapped to actual focused checks in that record.
+
+Capture now reserves the actual boxed Message/typed Command owners, provenance
+charges its full Message plus nested payload and real encoded capacity, and decode
+drops the charged message Vec before allocating its Box. Logical allocation/clone
+work, enlarged Message272/EntryBatch64 and canonical growth remain introduced or
+retained costs. No CPU gain is inferred. Wire/WAL bytes, caps, normal physical
+ownership, Cargo/hooks/lints/toolchain and the original design pack are unchanged.
+
+Macro review: the implementation/checking part of the current deliverable below
+is complete; checked publication, actual enabled hook and immediate own cleanup
+are recorded by the terminal R3 receipt. P1 remains active and unqualified, with
+P2/P3 paused. Next is the parent's fresh dual exact-head source review/Apple proof
+and original nine CPU pairs; next-two remains conditional canonical64 and full5.
+No new prerequisite or successor was added. R1/R2 HOLDs persist; R2's observer
+cause is UNKNOWN. All own corrected failures, resource observation limits and
+pending parent gates are explicit in the checked record.
+
+## CPU6 R3 completion schema and linked plan (23 October 2026)
+
+Before further Rust edits, the exact R2 full patch `fe1e92f858188d700abdca6625334750ac4a5fb4a7c37448bf444dd5a22a74f0`
+and manifest `72f7cec4abacbeb53ed23d4b045f159574b95072ced8f3e8003f94b4b089e6ca`
+were restored at pinned base `5fda857d2f827a47925c152f227bce7cbc1ced98`.
+All 27 changed/new paths and 2,608 actual build/consumer closure inputs matched;
+the complete path set matched. Unchanged archived documentation was not rehashed.
+The original R1/R2 evidence is immutable. Their historical tests and HOLDs remain
+separate from this continuation's validation, and R2's failing PID/cause is UNKNOWN.
+
+Schema and ownership remain the released prepared EntryBatch lifecycle: batch-only
+Inline owns its actual LogEntry and nested payload; canonical spans stay Owned(Vec)
+or Shared(Arc, range). The same command-origin Vec is bound using current receiving
+core authority after admission, then moves into immutable shared storage. Generic,
+mixed, edit, decoded and recovered paths inspect actual contents. The sole Pending,
+provider update, messages and committed application remain independently owned.
+
+The one authorized amendment is Protocol(Box<Message>) in the independent logical
+capsule. Audit its actual allocation, payload/backing, encoded command capacity,
+release proof, capture, queue and decode peak; borrowing authorization compares
+the full message value. Introduced logical allocation/clone work is a cost. No
+ordinary Message/Rpc/Pending boxing, caps, wire/WAL bytes, features or authority
+contracts change. Refusal/drop releases only its actual owner; accepted partial
+progress cannot become rollback or replay. Restart reconstructs actual contents
+and fresh identity using the unchanged durability and recovery contracts.
+
+The own observer now attributes PID/TID/start/operation/path/raw errno before
+propagation and verifies typed disappearance/reuse. Its two labelled finite
+metadata controls passed (joined-absent ESRCH allowed; exact-live ESRCH fatal).
+Initial local observer setup faults were preserved; these controls do not explain
+R2 or establish whole-task/global containment. No Rust check has run in R3 yet.
+
+| Mini-plan deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- | --- |
+| Finish this prepared-entry candidate, current | Complete the existing singleton/wide lifecycle and direct capsule owner accounting | Exact R2 reconstruction, repaired own observer, original design and amendments | Independent vector/charge/selector/lifetime/receiver oracles; valid old-representation work controls; incorrect compiled mutants/restoration; actual public volatile/durable Counter and all three matched replicas at B1/B231/B515 through two default5000 checkpoints, catch-up and continued writes; feature/native/crash/codec/FIFO controls; strict7, actual enabled hook, checked draft PR/frozen inputs and immediate cleanup | P1 checked CPU candidate, active |
+| Fresh dual source reviews, Apple proof and original nine CPU pairs, next (parent) | Evaluate the exact published mechanism and introduced work | Checked published head and complete actual input/consumer manifest | Both exact-head source reviews; normal Apple mechanism/lifetime proof; EACH width median CPU B/A <1 and at least2/3 wins with original settings/counts | P1 measured CPU candidate, pending |
+| Conditional original64 and full5, next-two (parent) | Qualify a kept composition with all existing features | Every primary width passes, then canonical acceptance | Equal cores, CPU/rate/p99, actual originals/all3 applications, normal owned shutdown; full default/all/no-default/native/matched and exhaustive relay/docs | P1 qualified composition, pending |
+
+Macro review: P1 remains active, P2/P3 performance work paused. This continuation
+adds no milestone or prerequisite beyond the explicitly authorized observer repair
+and direct capsule consumer. Gain UNKNOWN. Evidence below must state actual checks
+separately from this plan; none of the pending parent gates is complete.
+
+## CPU6 R2 capsule amendment and completion plan (23 October 2026)
+
+Before R2 production edits, the preserved R1 patch and all 63,328 declared
+tracked/untracked manifest records were reconstructed exactly at base
+`5fda857d2f827a47925c152f227bce7cbc1ced98`; there were zero mismatches. That
+HEAD/tree identifies the base, separately from the unpublished working changes.
+R1's initial 23 entry tests and two size probes do not qualify these inputs.
+All R1 failures, workflow limitations and historical HOLDs remain evidence.
+
+The parent explicitly amends only the affected independent logical-capsule
+owner: `LogicalCapsuleBody::Protocol(Box<crate::raft::Message>)`. Construction
+and decode allocate one full Message; cloning owns another allocation; borrow
+and exact authorization inspect the same complete value; consumption moves the
+Message out and releases its spent box. Physical Message/Rpc/Pending and Inline
+remain unboxed. No wire/persisted tags, bytes, durability evidence, limits, lint
+levels, runtime/WAL architecture or other ownership representations change.
+
+Accounting plan: charge each boxed Message allocation with its nested payload
+and retained backing, the enclosing fixed owner and real encoded-command
+capacity. Provenance can no longer subtract sizeof(Message) as inline Command
+storage. Audit capture/decode/queue peaks and checked overflow/refusal/control
+reserves. Compare borrowed full Message values in frame/queue/publication checks
+without temporary boxes or payload clones. Failed submit retains exact original
+owners; drop releases only the actual terminal owner. Restart still validates
+decoded contents and current representative/revision/generation/term/configuration.
+The logical path gains allocation and clone work: this is an introduced cost,
+not a CPU benefit. Gain remains UNKNOWN, including for logical voters.
+
+Acceptance plan: final-input vector/range/charge/lifetime oracles; Inline and
+shared-wide capsule clone/borrow/consume/drop, codec/golden/exact refusal and real
+budget-edge/overflow controls; compiled omitted-box-charge mutant killed by an
+independent boundary assertion and exact source restoration. Finish the original
+valid old-Vec/separate-wide-pass work witnesses and distinct incorrect semantic
+mutants; real public volatile/durable Counter and all three normal matched
+replicas through two 5000-entry checkpoints at B1/B231/B515, lagging snapshot
+catch-up and continued exact outcomes. Run relevant logical/DURABLE/stale/FIFO/
+native/crash/replay controls, record actual sizes and feature consumers, then
+strict seven checks and actual enabled nonforce hook before checked publication.
+
+| Mini-plan deliverable | Purpose and dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- |
+| CPU6 R2 prepared entries and amended capsule owner, current | Finish the one authorized lifecycle after exact R1 reconstruction; capsule change is required at its enlarged Message consumer | All original semantic/work/accounting/feature controls plus capsule controls, strict seven and actual hook, checked draft PR/frozen inputs, immediate own cleanup | P1 CPU candidate, active |
+| Fresh dual source reviews, Apple mechanism and original nine CPU pairs, next, parent-owned | Depends on checked exact published CPU6 inputs; independently assess both specializations and added costs | Original EACH-width CPU median B/A <1 and at least 2/3 wins at B1/B231/B515; no performance result is inferred here | P1 measured candidate, pending |
+| Conditional original 64 canonical and full five configurations, next-two, parent-owned | Depends on every primary CPU width passing and a kept composition | Equal cores/CPU/rate/p99/normal shutdown, all features/independent groups and exhaustive relay/docs | P1 qualified composition, pending |
+
+The macro plan remains P1 CPU optimization with all VoteBoat features preserved;
+P2/P3 performance work stays paused. Implemented evidence and unresolved checks
+will be recorded separately below; this plan is not qualification or completion.
+
+### R2 terminal observation hold: unpublished WIP
+
+Exact R1 reconstruction passed before additional edits. The approved Protocol
+Box owner, mechanical construction/decode/consume sites, full borrowed equality
+checks, and provenance's owned Message charge are present as unqualified WIP.
+Formatting ran; a subsequent initial default entry selection passed 25 tests,
+including the previously unrun work witness. This does not close capsule,
+consumer, accounting, feature, causal or publication acceptance.
+
+The default all-target Clippy compiler child exited 0, but its single-threaded
+controller failed with ProcessLookupError during `/proc/<pid>/stat` observation.
+The failing PID was not included in the exception; a genuine vanished-process
+race therefore cannot be independently established. The bootstrap exited 1.
+No resource offender was recorded, but the incomplete observation is not clean
+qualification. Dependent checks and publication stopped under the brief's stop
+rule. No unchanged build retry or source commit/push/PR followed.
+
+The original controller and raw failure remain in the authorized ignored main
+`cpu6-builder-r2/` evidence. Its narrowly corrected vanished-process handling is
+used only to preserve source and clean up, not to retroactively clear the failed
+run. The capsule lifecycle/budget mutant, original work/semantic controls,
+public/durable/native/matched checkpoints, remaining strict graphs and actual
+hook remain pending. Gain UNKNOWN; P1 continues under the parent's ownership.
+
+## CPU6 prepared-entry-batch implementation plan (23 October 2026)
+
+This isolated candidate starts at `5fda857d2f827a47925c152f227bce7cbc1ced98`,
+whose production is unchanged from `0bf9271e`. Parent remains the sole main
+writer. The released design is preserved verbatim at
+`validation/performance/pillar1-cpu6/CPU6-DESIGN.md` (SHA256
+`93ea1ca163bd63fd13767e9e2bb5b0e82588bae02cb6378b0f215206ad81644e`).
+CPU1–CPU5 remain rejected; their receipts are historical evidence only.
+
+Schema before source edits: EntryBatch gains batch-only Inline(LogEntry), beside
+Empty/One(Span)/Many. Canonical Span remains Owned(Vec<LogEntry>)/Shared(Arc,
+range). Borrowed access uses real entries and slices; empty selections release
+ownership. Canonical installation moves Inline into the last owned piece or
+the first necessary owned allocation. A private command-origin wrapper owns the
+same builder Vec and accepts commands only. Receiving-core admission and checked
+index/term bounds precede consuming bind. Wide binding assigns entries and folds
+intrinsic facts in one traversal; mixed prefix indexing and generic full
+inspection remain. No new completion, authority, protocol or persistent format.
+
+Owners and failure paths: builder → immutable suffix → independently owned
+provider update/sole Pending plan/messages → checked install → ordered existing
+application. Rejection drops input without publishing pending state/effects;
+failed predecessors/stale tickets cannot install. Accepted partial delivery is
+not rollback or replay. Inline owns nested payloads for its full lifetime;
+canonical log charge includes a LogEntry plus payload, while retained heap charge
+excludes the inline value. Enclosing size/reservation/decoder/lease accounting
+must use actual sizes. Restart decodes actual contents and preserves all stamps,
+barriers, snapshot, membership, deduplication and lifecycle contracts.
+
+Acceptance planned, not yet run: independent vector/range/selector/charge and
+held-owner oracles at widths 0/1/2/15/16/17/231/515/1024/max; malformed generic,
+mixed/configuration/edit, current/foreign limits and exhaustion; actual public
+volatile/durable, native/codecs/recovery, Counter and normal matched consumers;
+two default 5000-entry checkpoints and lagging snapshot catch-up at B1/B231/B515.
+Compile valid old vector/separate-pass structural controls separately from
+incorrect semantic mutants; preserve attempts, patches and exact restoration.
+Record normal compiled sizes and introduced work. Run focused configurations
+sequentially, strict seven checks and enabled nonforce hook before publication.
+No CPU, Apple, canonical or full-five qualification is claimed by this plan.
+
+| Current and next two deliverables | Purpose and dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- |
+| CPU6 prepared batches, active | One authorized owned lifecycle from the pinned base/design; smallest complete producer-to-consumer path | Focused independent semantics/ownership/accounting and causal witnesses, feature matrix, strict seven, actual hook, checked draft PR/frozen inputs, immediate owned cleanup | P1 CPU candidate |
+| Fresh source reviews and original primary CPU, parent pending | Depends on checked exact CPU6 publication; two independent Sol reviews and normal Apple mechanism proof before original nine pairs | Each width1/231/515 median whole CPU B/A <1 and at least2/3 wins, all original counts/guards, no replacement/tolerance | P1 measured candidate |
+| Conditional canonical and full-five, parent pending | Depends on every primary width passing; original64 canonical then kept composition only | Equal cores/CPU/rate/p99/normal owned shutdown, full default/all/no-default/native/matched plus exhaustive relay/docs | P1 qualified composition |
+
+### CPU6 builder terminal scope hold: no publication
+
+Initial focused default entry selection passed 23 tests; two normal-size probes
+passed. Actual sizes: EntryBatch64/Span24/Suffix80/Rpc96/Message272/LogUpdate288/
+OwnedNextLog720/Pending1168/Effect288 bytes. The old type regression bounds were
+updated from these observations without changing admission/queue byte ceilings.
+Test-only traversal observations were subsequently added but not executed.
+
+The first strict default all-target Clippy run exited101 at unchanged
+`src/logical_voter/types.rs:305`: LogicalCapsuleBody::Protocol(Message) is272 B
+versus56 B for ClientApplied/ReadResult, triggering large_enum_variant. This is
+a concrete enclosing-consumer consequence of Inline, not a performance result.
+Boxing that protocol Message adds a logical-voter-path allocation, and lint
+weakening/padding/boxing unrelated variants is outside the released design.
+No such change was made. Dependent test/control/configuration/publication
+launches stopped; the initial positives are not final candidate qualification.
+
+The unpublished patch and full input/evidence manifests are preserved at
+`target/claude/pillar1-20261022/cpu6-builder/` in the authorized ignored main
+report location. No candidate commit/push/draft PR, actual push-hook execution,
+review, Apple/CPU/canonical/full-five result exists. Parent must resolve this
+bounded representation/consumer issue before releasing further implementation.
+The remaining feature, causal, checkpoint, codec/native and recovery checks
+listed above are pending. P1 continues; this candidate is not qualified.
+
 ## Active priority: pillar 1 CPU only (22 October 2026)
 
 The user has resumed implementation after the completed wind-down and explicitly

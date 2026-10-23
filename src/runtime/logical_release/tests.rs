@@ -19,6 +19,7 @@ use crate::application::{Counter, CounterReceipt};
 mod capacity;
 mod classification;
 mod construction_capacity;
+mod prepared_capsules;
 fn group(id: u128) -> GroupIdentity {
     GroupIdentity {
         id: GroupId::new(id).unwrap(),

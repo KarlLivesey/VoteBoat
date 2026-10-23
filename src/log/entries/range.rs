@@ -127,6 +127,22 @@ pub struct Slices<'a> {
     middle: std::slice::Iter<'a, Span>,
     back: Option<&'a [LogEntry]>,
 }
+impl<'a> Slices<'a> {
+    pub(super) fn single(entries: &'a [LogEntry]) -> Self {
+        Self {
+            front: (!entries.is_empty()).then_some(entries),
+            middle: [].iter(),
+            back: None,
+        }
+    }
+    pub(super) fn pieces(spans: &'a [Span]) -> Self {
+        Self {
+            front: None,
+            middle: spans.iter(),
+            back: None,
+        }
+    }
+}
 impl<'a> Iterator for Slices<'a> {
     type Item = &'a [LogEntry];
     fn next(&mut self) -> Option<&'a [LogEntry]> {
@@ -135,7 +151,14 @@ impl<'a> Iterator for Slices<'a> {
             .or_else(|| self.middle.next().map(Span::entries))
             .or_else(|| self.back.take())
     }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let count = usize::from(self.front.is_some())
+            + self.middle.len()
+            + usize::from(self.back.is_some());
+        (count, Some(count))
+    }
 }
+impl ExactSizeIterator for Slices<'_> {}
 impl<'a> DoubleEndedIterator for Slices<'a> {
     fn next_back(&mut self) -> Option<&'a [LogEntry]> {
         self.back

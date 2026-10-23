@@ -17,20 +17,23 @@
 //! A batch of at least [`SHARE_MIN`] entries is frozen once into an immutable
 //! backing whose intrinsic facts are measured in the same step. Appends,
 //! pending plans and canonical logs share exact ranges of backings; nothing
-//! can mutate a backing afterwards. Narrower batches stay owned vectors that
-//! are copied and scanned as before. An edit is an explicit copy (`to_vec`),
+//! can mutate a backing afterwards. Prepared singletons own a real entry inline;
+//! other narrower batches stay owned vectors, copied and scanned as before.
+//! An edit is an explicit copy (`to_vec`),
 //! which is re-inspected when converted back.
 use super::{EntryPayload, LogEntry};
 use crate::identity::ConfigurationId;
 use std::{borrow::Cow, fmt, ops::Range, sync::Arc};
 
 mod canonical;
+mod commands;
 mod facts;
 mod iter;
 mod range;
 #[cfg(test)]
 mod tests;
 pub use canonical::EntryLog;
+pub(crate) use commands::CommandEntries;
 pub(crate) use facts::{activated_configuration, IndexNeed};
 use facts::{BatchData, Summary, Totals};
 use iter::Iter;
@@ -305,6 +308,7 @@ impl SpanBuilder {
 enum Spans {
     #[default]
     Empty,
+    Inline(LogEntry),
     One(Span),
     Many(Box<[Span]>),
 }
@@ -312,6 +316,7 @@ impl Spans {
     fn as_slice(&self) -> &[Span] {
         match self {
             Self::Empty => &[],
+            Self::Inline(_) => unreachable!("inline batches have real entry slices, not spans"),
             Self::One(span) => std::slice::from_ref(span),
             Self::Many(spans) => spans,
         }
@@ -320,17 +325,23 @@ impl Spans {
 
 /// An immutable ordered entry sequence sharing its backings.
 ///
-/// Cloning copies only range descriptors. Indexing, iteration and comparison
+/// Cloning owns the inline entry or copies range descriptors. Indexing, iteration and comparison
 /// are logical: two batches are equal when their visible entries are equal,
 /// however they are partitioned. There is no mutable access; edit a copy from
 /// [`Self::to_vec`] and convert it back, which inspects it again.
 ///
-/// The batch is as small as a vector: its length is read from its pieces.
+/// A singleton can own its actual entry inline; other lengths use pieces.
 #[derive(Clone, Default)]
 pub struct EntryBatch {
     spans: Spans,
 }
 impl EntryBatch {
+    /// Own one actual entry without a transient entry vector.
+    pub fn from_entry(entry: LogEntry) -> Self {
+        Self {
+            spans: Spans::Inline(entry),
+        }
+    }
     fn single(span: Span) -> Self {
         Self {
             spans: Spans::One(span),
@@ -340,6 +351,7 @@ impl EntryBatch {
     pub fn len(&self) -> usize {
         match &self.spans {
             Spans::Empty => 0,
+            Spans::Inline(_) => 1,
             Spans::One(span) => span.len(),
             Spans::Many(spans) => spans.iter().map(Span::len).sum(),
         }
@@ -351,6 +363,7 @@ impl EntryBatch {
     #[inline]
     pub fn first(&self) -> Option<&LogEntry> {
         match &self.spans {
+            Spans::Inline(entry) => Some(entry),
             Spans::One(Span::Owned(entries)) => entries.first(),
             spans => spans.as_slice().first()?.entries().first(),
         }
@@ -358,6 +371,7 @@ impl EntryBatch {
     #[inline]
     pub fn last(&self) -> Option<&LogEntry> {
         match &self.spans {
+            Spans::Inline(entry) => Some(entry),
             Spans::One(Span::Owned(entries)) => entries.last(),
             Spans::Empty => None,
             _ => self.last_shared(),
@@ -369,6 +383,7 @@ impl EntryBatch {
     #[inline]
     pub fn get(&self, offset: usize) -> Option<&LogEntry> {
         match &self.spans {
+            Spans::Inline(entry) => std::slice::from_ref(entry).get(offset),
             Spans::One(Span::Owned(entries)) => entries.get(offset),
             _ => self.get_shared(offset),
         }
@@ -388,13 +403,17 @@ impl EntryBatch {
     }
     pub fn iter(&self) -> Iter<'_> {
         match &self.spans {
+            Spans::Inline(entry) => Iter::from_parts(std::slice::from_ref(entry), &[], &[], 1),
             Spans::One(span) => Iter::from_parts(span.entries(), &[], &[], span.len()),
             spans => Iter::new(spans.as_slice(), 0, 0, self.len()),
         }
     }
     /// Contiguous pieces in order; their concatenation is this batch.
     pub fn slices(&self) -> impl DoubleEndedIterator<Item = &[LogEntry]> + ExactSizeIterator {
-        self.spans.as_slice().iter().map(Span::entries)
+        match &self.spans {
+            Spans::Inline(entry) => range::Slices::single(std::slice::from_ref(entry)),
+            spans => range::Slices::pieces(spans.as_slice()),
+        }
     }
     /// Shared subrange; `None` for a reversed or out-of-bounds range.
     pub fn slice(&self, range: Range<usize>) -> Option<Self> {
@@ -404,6 +423,9 @@ impl EntryBatch {
         // An empty range holds no piece, so it keeps no backing alive.
         if range.is_empty() {
             return Some(Self::default());
+        }
+        if range.end - range.start == 1 {
+            return Some(Self::from_entry(self[range.start].clone()));
         }
         let mut spans = SpanBuilder::default();
         let mut base = 0;
@@ -423,6 +445,7 @@ impl EntryBatch {
     pub fn contiguous(&self) -> Cow<'_, [LogEntry]> {
         match &self.spans {
             Spans::Empty => Cow::Borrowed(&[]),
+            Spans::Inline(entry) => Cow::Borrowed(std::slice::from_ref(entry)),
             Spans::One(span) => Cow::Borrowed(span.entries()),
             Spans::Many(_) => Cow::Owned(self.to_vec()),
         }
@@ -445,6 +468,9 @@ impl EntryBatch {
     /// Conservative retained charge of every backing this batch keeps alive,
     /// including entries outside its visible range; inline value excluded.
     pub fn retained_bytes(&self) -> Option<usize> {
+        if let Spans::Inline(entry) = &self.spans {
+            return Some(entry.retained_payload_bytes());
+        }
         self.spans
             .as_slice()
             .iter()
@@ -453,6 +479,9 @@ impl EntryBatch {
     /// Charge as a canonical log holds these pieces on their own: shared
     /// pieces their whole backing, owned pieces their visible entries.
     pub(crate) fn log_charge(&self) -> Option<usize> {
+        if let Spans::Inline(entry) = &self.spans {
+            return std::mem::size_of::<LogEntry>().checked_add(entry.retained_payload_bytes());
+        }
         self.spans
             .as_slice()
             .iter()
@@ -491,6 +520,9 @@ impl EntryBatch {
     /// [`RETAINED_EXTRA_MAX`]: crate::log::RETAINED_EXTRA_MAX
     /// [`batch_cost`]: crate::outbound::batch_cost
     pub(crate) fn for_message(self, max_batch_bytes: usize) -> Self {
+        if let Spans::Inline(_) = &self.spans {
+            return self;
+        }
         let spans = self.spans.as_slice();
         // An exact owned copy (every narrow selection) keeps nothing hidden.
         if let [Span::Owned(entries)] = spans {
@@ -574,7 +606,7 @@ impl EntryBatch {
             Spans::Empty => Some(Summary::EMPTY),
             // A small owned batch is validated by the original loops, which
             // do less than measuring its facts first.
-            Spans::One(Span::Owned(_)) => None,
+            Spans::Inline(_) | Spans::One(Span::Owned(_)) => None,
             Spans::One(span) => span.summary(),
             Spans::Many(spans) => spans
                 .iter()
@@ -583,11 +615,15 @@ impl EntryBatch {
     }
     /// Exact visible totals; `None` when a piece's index is unavailable.
     pub(crate) fn totals(&self) -> Option<Totals> {
+        if let Spans::Inline(entry) = &self.spans {
+            return facts::totals_of(std::slice::from_ref(entry));
+        }
         totals(self.spans.as_slice())
     }
     #[inline]
     pub(crate) fn has_configuration(&self) -> bool {
         match &self.spans {
+            Spans::Inline(entry) => matches!(entry.payload, EntryPayload::Configuration(_)),
             Spans::One(Span::Owned(entries)) => entries
                 .iter()
                 .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_))),
@@ -599,6 +635,12 @@ impl EntryBatch {
     /// of a small owned batch; `None` when the charge overflows.
     #[inline]
     pub(crate) fn retained_bytes_and_data(&self) -> Option<(usize, bool)> {
+        if let Spans::Inline(entry) = &self.spans {
+            return Some((
+                entry.retained_payload_bytes(),
+                !matches!(entry.payload, EntryPayload::Noop),
+            ));
+        }
         if let Spans::One(Span::Owned(entries)) = &self.spans {
             let mut data = false;
             let mut charge = entries
@@ -619,6 +661,7 @@ impl EntryBatch {
     pub(crate) fn has_data(&self) -> bool {
         match &self.spans {
             Spans::Empty => return false,
+            Spans::Inline(entry) => return !matches!(entry.payload, EntryPayload::Noop),
             Spans::One(Span::Owned(entries)) => {
                 return entries
                     .iter()
@@ -639,6 +682,7 @@ impl EntryBatch {
     #[inline]
     pub(crate) fn payload_bytes(&self) -> usize {
         match &self.spans {
+            Spans::Inline(entry) => entry.payload_bytes(),
             Spans::One(Span::Owned(entries)) => entries.iter().map(LogEntry::payload_bytes).sum(),
             Spans::Empty => 0,
             _ => self.payload_bytes_shared(),
@@ -777,6 +821,9 @@ impl EntryBatch {
     /// an owned piece's capacity.
     #[cfg(test)]
     pub(crate) fn allocated_entries(&self) -> usize {
+        if let Spans::Inline(_) = &self.spans {
+            return 0;
+        }
         self.spans
             .as_slice()
             .iter()
@@ -788,10 +835,16 @@ impl EntryBatch {
     }
     #[cfg(test)]
     pub(crate) fn backing_count(&self) -> usize {
+        if let Spans::Inline(_) = &self.spans {
+            return 0;
+        }
         self.spans.as_slice().len()
     }
     #[cfg(test)]
     pub(crate) fn first_backing_ptr(&self) -> Option<*const LogEntry> {
+        if let Spans::Inline(_) = &self.spans {
+            return None;
+        }
         self.spans.as_slice().first().map(|span| match span {
             Span::Shared { data, .. } => data.entries.as_ptr(),
             Span::Owned(entries) => entries.as_ptr(),
@@ -799,6 +852,9 @@ impl EntryBatch {
     }
     #[cfg(test)]
     pub(crate) fn is_shared(&self) -> bool {
+        if let Spans::Inline(_) = &self.spans {
+            return false;
+        }
         self.spans
             .as_slice()
             .iter()
@@ -869,6 +925,11 @@ impl From<Vec<LogEntry>> for EntryBatch {
         }
     }
 }
+impl From<LogEntry> for EntryBatch {
+    fn from(entry: LogEntry) -> Self {
+        Self::from_entry(entry)
+    }
+}
 impl From<&[LogEntry]> for EntryBatch {
     fn from(entries: &[LogEntry]) -> Self {
         entries.to_vec().into()
@@ -912,6 +973,9 @@ impl fmt::Debug for EntryBatch {
 }
 impl PartialEq for EntryBatch {
     fn eq(&self, other: &Self) -> bool {
+        if matches!(self.spans, Spans::Inline(_)) || matches!(other.spans, Spans::Inline(_)) {
+            return self.len() == other.len() && self.iter().eq(other.iter());
+        }
         let (left, right) = (self.spans.as_slice(), other.spans.as_slice());
         self.len() == other.len()
             && ((left.len() == right.len() && left.iter().zip(right).all(|(a, b)| a.same(b)))

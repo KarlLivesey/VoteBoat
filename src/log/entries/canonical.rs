@@ -149,6 +149,9 @@ impl EntryLog {
         if range.is_empty() {
             return Some(EntryBatch::default());
         }
+        if range.end - range.start == 1 {
+            return Some(EntryBatch::from_entry(self[range.start].clone()));
+        }
         let (first, first_start) = self.locate(range.start)?;
         if range.end <= self.ends[first] {
             // Within one piece: one descriptor, no builder.
@@ -205,6 +208,9 @@ impl EntryLog {
     /// entries add their logical charge wherever they are stored.
     #[inline]
     pub(crate) fn appended_charge(&self, retained: usize, batch: &EntryBatch) -> Option<usize> {
+        if let Spans::Inline(_) = &batch.spans {
+            return retained.checked_add(batch.log_charge()?);
+        }
         // An owned piece never adjoins: its logical charge is added.
         if let Spans::One(Span::Owned(entries)) = &batch.spans {
             return retained.checked_add(facts::charge_of(entries, entries.len())?);
@@ -247,6 +253,7 @@ impl EntryLog {
     pub fn append(&mut self, batch: EntryBatch) {
         match batch.spans {
             Spans::Empty => {}
+            Spans::Inline(entry) => self.push(entry),
             Spans::One(span) => self.append_span(span),
             Spans::Many(spans) => {
                 for span in spans.into_vec() {
@@ -323,9 +330,16 @@ impl EntryLog {
             self.tail = tail;
         }
     }
-    /// Append one entry as its own backing.
+    /// Move one entry into the last owned piece or the first necessary one.
     pub fn push(&mut self, entry: LogEntry) {
-        self.append(vec![entry].into());
+        if let Some(Span::Owned(last)) = self.spans.last_mut() {
+            self.tail = (entry.index, entry.term);
+            last.push(entry);
+            self.len += 1;
+            *self.ends.last_mut().expect("owned piece has an end") = self.len;
+        } else {
+            self.append_piece(Span::Owned(vec![entry]));
+        }
     }
     /// Remove the last entry, returning a copy of it.
     pub fn pop(&mut self) -> Option<LogEntry> {
@@ -418,6 +432,9 @@ impl EntryLog {
                     if taken == 0 {
                         return EntryBatch::default();
                     }
+                    if taken == 1 {
+                        return EntryBatch::from_entry(entries[skip].clone());
+                    }
                     return EntryBatch::single(Span::Owned(entries[skip..skip + taken].to_vec()));
                 }
             }
@@ -444,7 +461,15 @@ impl EntryLog {
             if taken == 0 {
                 return EntryBatch::default();
             }
+            if taken == 1 {
+                return EntryBatch::from_entry(first.entries()[skip].clone());
+            }
             return EntryBatch::single(first.part(skip..skip + taken)).for_message(max_batch_bytes);
+        }
+        // A one-entry first piece followed by a byte refusal is still an
+        // exact singleton. Decide before `part` could copy an owned vector.
+        if taken == 1 && select(&self.spans[position + 1], 0, 1, bytes, max_batch_bytes).0 == 0 {
+            return EntryBatch::from_entry(first.entries()[skip].clone());
         }
         let mut count = taken;
         let mut bytes = bytes;

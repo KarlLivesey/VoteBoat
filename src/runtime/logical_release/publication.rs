@@ -134,7 +134,8 @@ impl<R: ApplicationReceipt, V> LogicalReleaseCoordinator<R, V> {
         let same = capsules.len() == 1
             && capsules[0].permit.as_ref().is_some_and(|permit| {
                 permit.capsule().origin == LogicalCapsuleOrigin::Protocol(lease.ticket)
-                    && permit.capsule().body == LogicalCapsuleBody::Protocol(message.clone())
+                    && matches!(&permit.capsule().body,
+                        LogicalCapsuleBody::Protocol(captured) if captured.as_ref() == message)
             });
         if !same {
             return Err((
@@ -188,8 +189,8 @@ impl<R: ApplicationReceipt, V> LogicalReleaseCoordinator<R, V> {
                 let same = send.effect == ticket
                     && send.authorization == self.authorization
                     && send.provenance.capsule() == &capsules[0].capsule
-                    && send.provenance.capsule().body
-                        == LogicalCapsuleBody::Protocol(send.message.clone());
+                    && matches!(&send.provenance.capsule().body,
+                        LogicalCapsuleBody::Protocol(captured) if captured.as_ref() == &send.message);
                 if !same {
                     return Err((
                         LogicalReleaseError::ProviderViolation,

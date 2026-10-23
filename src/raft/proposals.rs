@@ -45,18 +45,13 @@ impl Raft {
         self.check_proposal_role()?;
         let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
         self.validate_conversion_peak(&proposals, proposals.capacity())?;
-        let entries = proposals
-            .into_iter()
-            .enumerate()
-            .map(|(offset, proposal)| LogEntry {
-                index: first + offset as u64,
-                term: self.durable.hard_state.term,
-                payload: EntryPayload::Command {
-                    operation: proposal.operation,
-                    bytes: proposal.bytes.into(),
-                },
-            })
-            .collect();
+        let mut commands = crate::log::CommandEntries::with_capacity(proposals.len());
+        for proposal in proposals {
+            commands.push(proposal.operation, proposal.bytes.into());
+        }
+        let entries = commands
+            .bind(first, self.durable.hard_state.term)
+            .ok_or(RaftError::Exhausted)?;
         let mut effects = VecDeque::new();
         self.persist_proposal_entries_into(first, entries, &mut effects)?;
         self.finish_step_into(&mut effects)?;
@@ -102,7 +97,7 @@ impl Raft {
                 bytes: bytes.into(),
             },
         };
-        self.persist_proposal_entries_into(index, vec![entry], out)
+        self.persist_proposal_entries_into(index, EntryBatch::from_entry(entry), out)
     }
 
     fn validate_proposal_batch(
@@ -187,7 +182,7 @@ impl Raft {
     fn persist_proposal_entries_into(
         &mut self,
         first: u64,
-        entries: Vec<LogEntry>,
+        entries: EntryBatch,
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
         self.persist_into(
@@ -197,7 +192,7 @@ impl Raft {
             // fan-out and every follower reuse them.
             Some(Suffix {
                 from: first,
-                entries: entries.into(),
+                entries,
             }),
             After::LeaderAppend,
             None,

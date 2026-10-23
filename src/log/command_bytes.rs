@@ -25,6 +25,10 @@ pub(crate) const RETAINED_EXTRA_MAX: usize = {
 };
 
 impl CommandBytes {
+    #[cfg(test)]
+    pub(crate) fn weak(&self) -> Option<std::sync::Weak<[u8]>> {
+        self.0.as_ref().map(Arc::downgrade)
+    }
     pub fn as_slice(&self) -> &[u8] {
         self.0.as_deref().unwrap_or(&[])
     }

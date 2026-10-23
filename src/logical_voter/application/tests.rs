@@ -482,7 +482,7 @@ fn stale_read_capsule_cannot_release_after_new_write() {
             visit: visit(),
             sequence: 1,
         }),
-        body: LogicalCapsuleBody::Protocol(crate::raft::Message {
+        body: LogicalCapsuleBody::Protocol(Box::new(crate::raft::Message {
             group: group(1),
             configuration: ConfigurationId::new(1).unwrap(),
             from: NodeId::new(1).unwrap(),
@@ -494,7 +494,7 @@ fn stale_read_capsule_cannot_release_after_new_write() {
                 sequence: 1,
             },
             rpc: crate::raft::Rpc::ReadAck,
-        }),
+        })),
     };
     let c = mutate(&a, 2, update(&a, 0, None));
     apply(&mut a, &c);
@@ -521,6 +521,7 @@ mod control_profile;
 mod eligibility;
 mod enrollment;
 mod formats;
+mod prepared_capsules;
 mod reads;
 mod retirement;
 mod snapshots;

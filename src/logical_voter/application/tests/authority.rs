@@ -140,7 +140,7 @@ fn authorize(a: &LogicalApplication, id: u128, message: Message) -> Command {
                 visit: visit(),
                 sequence: 1,
             }),
-            body: LogicalCapsuleBody::Protocol(message),
+            body: LogicalCapsuleBody::Protocol(Box::new(message)),
         }),
     )
 }

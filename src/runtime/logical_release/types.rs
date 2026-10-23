@@ -80,7 +80,14 @@ impl LogicalReleaseLimits {
             .and_then(|n| {
                 n.checked_add(count.checked_mul(
                     std::mem::size_of::<ExpectedCapsule>()
-                        + std::mem::size_of::<LogicalReleaseRequest>(),
+                        + std::mem::size_of::<LogicalReleaseRequest>()
+                        // Expected/request/child-command capsules can coexist.
+                        // Each Protocol now owns a full Message allocation.
+                        // Keep these fixed owners beside the four bounded
+                        // payload/encoding windows, including their envelope
+                        // headroom, and the child's boxed typed Command.
+                        + 3 * std::mem::size_of::<Message>()
+                        + std::mem::size_of::<Command>(),
                 )?)
             })
             .and_then(|n| n.checked_add(std::mem::size_of::<Pending<R, V>>()))
@@ -205,11 +212,20 @@ impl LogicalSendProvenance {
         let LogicalCapsuleBody::Protocol(message) = &capsule.body else {
             return Err(OutboundError::WrongBinding);
         };
+        Self::protocol_charge(message, self.permit.observation.bytes_capacity(), limit)
+    }
+    pub(super) fn protocol_charge(
+        message: &Message,
+        encoded_capacity: usize,
+        limit: usize,
+    ) -> Result<usize, OutboundError> {
         let (_, message_bytes) = crate::outbound::message_cost(message, limit)?;
         std::mem::size_of::<Self>()
             .checked_add(std::mem::size_of::<Command>())
-            .and_then(|n| n.checked_add(self.permit.observation.bytes_capacity()))
-            .and_then(|n| n.checked_add(message_bytes - std::mem::size_of::<Message>()))
+            .and_then(|n| n.checked_add(encoded_capacity))
+            // The command stores a Box pointer; the complete Message allocation
+            // and its nested payload/backing are independently retained here.
+            .and_then(|n| n.checked_add(message_bytes))
             .filter(|n| *n <= limit)
             .ok_or(OutboundError::BatchTooLarge)
     }

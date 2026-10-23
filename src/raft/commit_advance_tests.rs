@@ -326,20 +326,38 @@ fn pending_and_plan_sizes() {
 }
 // V3d round 3: 1,088 → 1,104 B for the 16-byte install stamp (`Pending` is
 // 16-byte aligned and had no padding left).
-const PENDING_BYTES: usize = 1_104;
-const PLAN_BYTES: usize = 672;
+// CPU6: actual Inline storage enlarges the owned plan by 48 B; Pending's
+// alignment rounds its increase to 64 B. These are type regression bounds,
+// not increases to any admission, queue or retained-memory budget.
+const PENDING_BYTES: usize = 1_168;
+const PLAN_BYTES: usize = 720;
+
+#[test]
+fn cpu6_normal_compiled_sizes() {
+    for (name, bytes) in [
+        ("EntryBatch", size_of::<EntryBatch>()),
+        ("Suffix", size_of::<Suffix>()),
+        ("Rpc", size_of::<Rpc>()),
+        ("Message", size_of::<Message>()),
+        ("LogUpdate", size_of::<LogUpdate>()),
+        ("OwnedNextLog", size_of::<OwnedNextLog>()),
+        ("Pending", size_of::<Pending>()),
+        ("Effect", size_of::<Effect>()),
+    ] {
+        println!("CPU6_SIZE {name} {bytes}");
+    }
+}
 
 /// Bounds the plan and log types on the composed V2 + V3 tree at their
-/// measured 64-bit sizes, as `pending_and_plan_sizes` bounds V2's: a shared
-/// batch is no larger than the vector it replaced, and `Suffix`/`LogUpdate`
-/// keep main's sizes. `GroupLog` carries the cached tail (+48 B over main).
+/// measured 64-bit sizes, including CPU6's actual inline entry. Canonical Span
+/// remains 24 B and GroupLog retains its cached-tail size.
 #[test]
 #[cfg(target_pointer_width = "64")]
 fn composed_type_sizes() {
     let sizes = [
-        ("EntryBatch", size_of::<EntryBatch>(), 24),
-        ("Suffix", size_of::<Suffix>(), 32),
-        ("LogUpdate", size_of::<LogUpdate>(), 240),
+        ("EntryBatch", size_of::<EntryBatch>(), 64),
+        ("Suffix", size_of::<Suffix>(), 80),
+        ("LogUpdate", size_of::<LogUpdate>(), 288),
         ("GroupLog", size_of::<GroupLog>(), 432),
     ];
     for (name, size, bound) in sizes {

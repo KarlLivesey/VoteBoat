@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Volatile in-process embedding against its durable twin, public API only.
+#[path = "volatile/prepared.rs"]
+mod prepared;
 mod support;
 use std::cell::Cell;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -62,6 +64,7 @@ struct Cluster {
     /// Committed intervals a sink completion returned and the host inserted
     /// behind earlier queued effects.
     inserted: usize,
+    receipts: Vec<(u64, CounterReceipt)>,
 }
 fn binding(id: u64) -> StoreBinding {
     StoreBinding {
@@ -93,6 +96,20 @@ fn take_sentinels(queue: &mut VecDeque<Effect>, from: usize) {
     let end = from + sentinels.len();
     assert!(queue.range(from..end).eq(sentinels.iter()));
     queue.drain(from..end);
+}
+fn apply_receipts(
+    r: &mut Replica,
+    receipts: &mut Vec<(u64, CounterReceipt)>,
+    id: u64,
+    entries: &[LogEntry],
+) {
+    receipts.extend(
+        r.application
+            .apply_batch(entries)
+            .unwrap()
+            .into_iter()
+            .map(|receipt| (id, receipt)),
+    );
 }
 impl Cluster {
     fn sink(api: Api) -> Self {
@@ -137,6 +154,7 @@ impl Cluster {
             installs: 0,
             api: Api::Vec,
             inserted: 0,
+            receipts: Vec::new(),
         }
     }
     fn act(&mut self, id: u64, event: Event) {
@@ -250,7 +268,7 @@ impl Cluster {
                     Vec::new()
                 }
                 (Effect::Committed(entries), _) => {
-                    r.application.apply_batch(&entries).unwrap();
+                    apply_receipts(r, &mut self.receipts, id, &entries);
                     Vec::new()
                 }
                 (Effect::ReadReady(barrier), _) => {

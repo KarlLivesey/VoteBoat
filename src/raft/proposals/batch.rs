@@ -19,7 +19,7 @@ const HEADER: usize = size_of::<Vec<LogEntry>>();
 /// and staging peak against the receiving core's current limits.
 #[derive(Debug)]
 pub struct ProposalBatch {
-    entries: Vec<LogEntry>,
+    entries: crate::log::CommandEntries,
     max_entries: usize,
     max_command_bytes: usize,
     max_batch_bytes: usize,
@@ -87,14 +87,7 @@ impl ProposalBatch {
                 return Err(StorageError::Rejected("proposal allocation count budget").into());
             }
         }
-        self.entries.push(LogEntry {
-            index: 0,
-            term: 0,
-            payload: EntryPayload::Command {
-                operation,
-                bytes: bytes.into(),
-            },
-        });
+        self.entries.push(operation, bytes.into());
         self.shared += shared;
         self.largest = self.largest.max(length);
         self.peak = peak;
@@ -113,12 +106,7 @@ impl ProposalBatch {
 
     /// Staged originals in order, read-only.
     pub fn iter(&self) -> impl Iterator<Item = (OperationId, &[u8])> + '_ {
-        self.entries
-            .iter()
-            .filter_map(|entry| match &entry.payload {
-                EntryPayload::Command { operation, bytes } => Some((*operation, bytes.as_slice())),
-                _ => None,
-            })
+        self.entries.iter()
     }
 
     /// Owned input charge to pass to `Raft::effect_reservation`: the entry Vec
@@ -130,7 +118,7 @@ impl ProposalBatch {
     /// Entry allocation and its capacity, for allocation-survival tests.
     #[cfg(test)]
     pub(crate) fn allocation(&self) -> (*const LogEntry, usize) {
-        (self.entries.as_ptr(), self.entries.capacity())
+        self.entries.allocation()
     }
 
     /// Capped doubling, clamped so a multi-entry batch's growth (old and new
@@ -175,7 +163,7 @@ impl Raft {
         if capacity > max_entries {
             return Err(StorageError::Rejected("proposal allocation count budget").into());
         }
-        let entries = Vec::with_capacity(capacity);
+        let entries = crate::log::CommandEntries::with_capacity(capacity);
         if entries.capacity() > max_entries {
             return Err(StorageError::Rejected("proposal allocation count budget").into());
         }
@@ -236,13 +224,10 @@ impl Raft {
         self.check_proposal_role()?;
         let first = self.validate_entry_batch(&batch)?;
         let term = self.durable.hard_state.term;
-        let mut entries = batch.entries;
-        // `validate_entry_batch` checked `first + (len - 1)`, so no offset
-        // here overflows, and no index past the last entry is computed.
-        for (offset, entry) in entries.iter_mut().enumerate() {
-            entry.index = first + offset as u64;
-            entry.term = term;
-        }
+        let entries = batch
+            .entries
+            .bind(first, term)
+            .ok_or(RaftError::Exhausted)?;
         self.persist_proposal_entries_into(first, entries, out)?;
         self.finish_step_into(out)
     }

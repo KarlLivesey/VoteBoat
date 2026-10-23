@@ -87,7 +87,7 @@ fn heartbeat(a: &LogicalApplication, n: u64, leader: bool) -> CommandBody {
             visit: visit_for(a),
             sequence: n,
         }),
-        body: LogicalCapsuleBody::Protocol(Message {
+        body: LogicalCapsuleBody::Protocol(Box::new(Message {
             group: group(1),
             configuration: ConfigurationId::new(1).unwrap(),
             from: NodeId::new(1).unwrap(),
@@ -99,7 +99,7 @@ fn heartbeat(a: &LogicalApplication, n: u64, leader: bool) -> CommandBody {
                 sequence: n,
             },
             rpc,
-        }),
+        })),
     })
 }
 /// A parent mutation at term 1 with no suffix: the image keeps its size.

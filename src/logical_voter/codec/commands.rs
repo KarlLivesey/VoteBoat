@@ -166,7 +166,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                             sender: m.sender,
                             to: m.to,
                         },
-                        std::slice::from_ref(m),
+                        std::slice::from_ref(m.as_ref()),
                     )
                     .map_err(|_| ApplicationError::InvalidCommand)?;
                 if bytes.len() > self.limits.max_capsule_bytes {
@@ -233,7 +233,13 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                 if messages.len() != 1 {
                     return Err(ApplicationError::InvalidCommand);
                 }
-                LogicalCapsuleBody::Protocol(messages.remove(0))
+                // The wire decoder has already charged its Message allocation.
+                // Release that vector before allocating the capsule's full
+                // Message owner, so the charged storage covers the transfer
+                // without two simultaneously live Message allocations.
+                let message = messages.pop().expect("one decoded protocol message");
+                drop(messages);
+                LogicalCapsuleBody::Protocol(Box::new(message))
             }
             1 => LogicalCapsuleBody::ClientApplied {
                 schema: d.sequence()?,

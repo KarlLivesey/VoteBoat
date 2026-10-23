@@ -18,6 +18,7 @@ use crate::identity::OperationId;
 use crate::membership::{ConfigurationChange, ConfigurationRecord};
 
 mod oracle;
+mod prepared;
 use oracle::*;
 
 /// Deterministic xorshift, so every run checks the same histories.
@@ -458,6 +459,15 @@ fn a_last_owned_piece_answers_like_every_other_piece() {
 fn plain_charge(entries: &[LogEntry]) -> usize {
     facts::charge_of(entries, entries.len()).unwrap()
 }
+/// Exact visible heap ownership: Inline lives in the enclosing value, whose
+/// actual size is charged separately. Canonical/logical charge stays unchanged.
+fn visible_heap_charge(entries: &[LogEntry]) -> usize {
+    if let [entry] = entries {
+        entry.retained_payload_bytes()
+    } else {
+        plain_charge(entries)
+    }
+}
 
 #[test]
 fn a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy() {
@@ -473,7 +483,7 @@ fn a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy() {
         assert_eq!(message, visible);
         assert_eq!(
             message.retained_bytes_and_data(),
-            Some((plain_charge(visible), true)),
+            Some((visible_heap_charge(visible), true)),
             "{offset} {count}"
         );
         // A retry of the same range is held the same way.
@@ -482,7 +492,7 @@ fn a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy() {
             .unwrap()
             .for_message(1 << 20);
         assert_eq!(retry, visible);
-        assert_eq!(retry.retained_bytes(), Some(plain_charge(visible)));
+        assert_eq!(retry.retained_bytes(), Some(visible_heap_charge(visible)));
     }
     // Whole frozen proposals are still shared: small spare capacity is kept
     // (and charged), larger spare capacity was released when they froze.
@@ -614,7 +624,7 @@ fn messages_keep_at_most_the_bounded_hidden_charge() {
                     assert_eq!(message, visible);
                     let used = message.len() * 37 + message.payload_bytes();
                     let room = (budget - 256).saturating_sub(used);
-                    let plain = plain_charge(visible);
+                    let plain = visible_heap_charge(visible);
                     let charge = message.retained_bytes().unwrap();
                     let hidden = charge - plain;
                     let allowance = room.min(MESSAGE_HIDDEN_MAX + 2 * plain);

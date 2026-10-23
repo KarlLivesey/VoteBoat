@@ -141,7 +141,7 @@ impl<R: ApplicationReceipt, V> LogicalReleaseCoordinator<R, V> {
             owner,
             lease.ticket,
             LogicalCapsuleOrigin::Protocol(lease.ticket),
-            LogicalCapsuleBody::Protocol(message.clone()),
+            LogicalCapsuleBody::Protocol(Box::new(message.clone())),
         ) {
             Ok(c) => c,
             Err(reason) => {

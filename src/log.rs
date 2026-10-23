@@ -31,9 +31,9 @@ pub use command_bytes::CommandBytes;
 pub(crate) use command_bytes::RETAINED_EXTRA_MAX;
 pub(crate) use comparison::CheckpointComparison;
 pub use comparison::{CheckpointLineage, CheckpointLog};
-pub(crate) use entries::IndexNeed;
 #[cfg(test)]
 pub(crate) use entries::SHARE_MIN;
+pub(crate) use entries::{CommandEntries, IndexNeed};
 pub use entries::{EntryBatch, EntryIter, EntryLog, EntryRange, EntrySlices};
 pub use owned::OwnedLogState;
 pub use volatile::VolatileLog;

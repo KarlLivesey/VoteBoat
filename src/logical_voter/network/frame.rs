@@ -60,7 +60,8 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         if !self.plan.authorization(send.authorization())
             || proof.mapping() != self.plan.local.mapping
             || proof.representative() != self.plan.local.representative
-            || proof.capsule().body != LogicalCapsuleBody::Protocol(send.message().clone())
+            || !matches!(&proof.capsule().body,
+                LogicalCapsuleBody::Protocol(message) if message.as_ref() == send.message())
         {
             return Err(LogicalNetworkError::WrongBinding);
         }
@@ -169,7 +170,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         message_cost(&message, self.limits.decoded_bytes)
             .map_err(|_| LogicalNetworkError::TooLarge)?;
         Ok(LogicalReceived {
-            message,
+            message: *message,
             authorization: a,
             physical: peer.physical(),
             receipt: r,

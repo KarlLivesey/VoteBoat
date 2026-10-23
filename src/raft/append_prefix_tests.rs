@@ -68,6 +68,23 @@ fn old_prefix(core: &Raft, next: u64) -> Result<Vec<LogEntry>, RaftError> {
     Ok(entries)
 }
 
+fn assert_copied_charge(entries: &EntryBatch) {
+    if entries.len() == 1 {
+        let first = entries.first().unwrap();
+        assert_eq!(entries.backing_count(), 0);
+        assert_eq!(
+            entries.retained_bytes(),
+            Some(first.retained_payload_bytes())
+        );
+        assert_eq!(
+            entries.log_charge(),
+            Some(std::mem::size_of::<LogEntry>() + first.retained_payload_bytes())
+        );
+    } else {
+        assert_eq!(entries.retained_bytes(), entries.log_charge());
+    }
+}
+
 fn differential(core: &mut Raft) -> EntryBatch {
     let next = core.next_index[&peer()]
         .min(core.state().last_index() + 1)
@@ -106,7 +123,7 @@ fn differential(core: &mut Raft) -> EntryBatch {
         let backing = core
             .state()
             .entries
-            .shared_range(ordinal..ordinal + 1)
+            .shared_range(ordinal..ordinal + entries.len())
             .unwrap()
             .first_backing_ptr();
         assert_eq!(
@@ -114,7 +131,7 @@ fn differential(core: &mut Raft) -> EntryBatch {
             entries.is_shared() && entries.first_backing_ptr() == backing
         );
         if !std::ptr::eq(first, canonical) {
-            assert_eq!(entries.retained_bytes(), entries.log_charge());
+            assert_copied_charge(&entries);
         }
     }
     assert_eq!(previous_index, next - 1);

@@ -303,7 +303,7 @@ pub enum LogicalCapsuleOrigin {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LogicalCapsuleBody {
-    Protocol(crate::raft::Message),
+    Protocol(Box<crate::raft::Message>),
     ClientApplied {
         command: Vec<u8>,
         schema: u64,

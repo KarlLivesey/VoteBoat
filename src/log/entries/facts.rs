@@ -22,6 +22,9 @@ use super::super::{EntryPayload, LogEntry};
 use crate::{identity::ConfigurationId, membership::ConfigurationChange};
 use std::{mem::size_of, ops::Range};
 
+#[cfg(test)]
+pub(crate) mod work;
+
 /// Configuration a record activates; receivers bound it by their message scope.
 pub(crate) fn activated_configuration(entry: &LogEntry) -> Option<ConfigurationId> {
     match &entry.payload {
@@ -103,6 +106,8 @@ pub(crate) struct IndexNeed {
 }
 impl IndexNeed {
     pub(crate) fn push(&mut self, entry: &LogEntry) {
+        #[cfg(test)]
+        work::visit(work::Visit::IndexNeed);
         self.add(Metrics::of(entry));
     }
     fn add(&mut self, metrics: Metrics) {
@@ -206,6 +211,40 @@ impl Summary {
 }
 
 impl BatchData {
+    /// Consume the command-origin allocation. The checked binding writes index
+    /// and term while measuring intrinsic facts; no generic inspection follows.
+    pub(super) fn commands(commands: super::CommandEntries, first: u64, term: u64) -> Self {
+        let mut entries = commands.into_vec();
+        Self::release_spare(&mut entries);
+        let mut need = IndexNeed::default();
+        let mut payloads = Some(0usize);
+        let mut max_payload = 0;
+        for (offset, entry) in entries.iter_mut().enumerate() {
+            #[cfg(test)]
+            work::visit(work::Visit::Assigned);
+            entry.index = first + offset as u64;
+            entry.term = term;
+            let metrics = Metrics {
+                payload: entry.payload_bytes(),
+                non_noop: true,
+                configuration: false,
+            };
+            need.add(metrics);
+            payloads = payloads.and_then(|sum| sum.checked_add(entry.retained_payload_bytes()));
+            max_payload = max_payload.max(metrics.payload);
+        }
+        match Self::finish(entries, need, true, payloads, max_payload, None, |_| {
+            Ok::<(), std::convert::Infallible>(())
+        }) {
+            Ok(data) => data,
+            Err(never) => match never {},
+        }
+    }
+    fn release_spare(entries: &mut Vec<LogEntry>) {
+        if (entries.capacity() - entries.len()).saturating_mul(size_of::<LogEntry>()) > SPARE_MAX {
+            entries.shrink_to_fit();
+        }
+    }
     /// Inspect every entry once. Invalid content is still frozen, unsealed.
     /// A mixed backing takes a second pass to build its prefix index.
     pub(super) fn new(entries: Vec<LogEntry>) -> Self {
@@ -222,9 +261,7 @@ impl BatchData {
     ) -> Result<Self, E> {
         // Spare capacity is released once it exceeds `SPARE_MAX`; below that
         // a reallocation costs more than the slots it would free.
-        if (entries.capacity() - entries.len()).saturating_mul(size_of::<LogEntry>()) > SPARE_MAX {
-            entries.shrink_to_fit();
-        }
+        Self::release_spare(&mut entries);
         let mut need = IndexNeed::default();
         let mut sealed = true;
         let mut payloads = Some(0usize);
@@ -232,6 +269,8 @@ impl BatchData {
         let mut max_configuration = None;
         let mut previous: Option<&LogEntry> = None;
         for entry in &entries {
+            #[cfg(test)]
+            work::visit(work::Visit::Inspected);
             sealed &= entry.term != 0
                 && previous.is_none_or(|previous| {
                     previous.index.checked_add(1) == Some(entry.index)
@@ -244,6 +283,25 @@ impl BatchData {
             max_payload = max_payload.max(metrics.payload);
             max_configuration = max_configuration.max(activated_configuration(entry));
         }
+        Self::finish(
+            entries,
+            need,
+            sealed,
+            payloads,
+            max_payload,
+            max_configuration,
+            admit_index,
+        )
+    }
+    fn finish<E>(
+        entries: Vec<LogEntry>,
+        need: IndexNeed,
+        sealed: bool,
+        payloads: Option<usize>,
+        max_payload: usize,
+        max_configuration: Option<ConfigurationId>,
+        admit_index: impl FnOnce(usize) -> Result<(), E>,
+    ) -> Result<Self, E> {
         let index = match (need.total, need.first) {
             (None, _) => MetricsIndex::Unavailable,
             (Some(_), None) => MetricsIndex::Uniform(Metrics::EMPTY),
@@ -378,6 +436,8 @@ pub(super) fn summarize(entries: &[LogEntry]) -> Option<Summary> {
     let mut totals = Totals::default();
     let (mut max_payload, mut max_configuration) = (0, None);
     for entry in entries {
+        #[cfg(test)]
+        work::visit(work::Visit::Query);
         if entry.term == 0
             || previous.is_some_and(|previous| {
                 previous.index.checked_add(1) != Some(entry.index) || previous.term > entry.term
@@ -408,6 +468,8 @@ pub(super) fn summarize(entries: &[LogEntry]) -> Option<Summary> {
 /// Totals of a small owned piece, sealed or not.
 pub(super) fn totals_of(entries: &[LogEntry]) -> Option<Totals> {
     entries.iter().try_fold(Totals::default(), |sum, entry| {
+        #[cfg(test)]
+        work::visit(work::Visit::Query);
         let metrics = Metrics::of(entry);
         sum.join(Totals {
             payload: metrics.payload,
@@ -422,6 +484,8 @@ pub(super) fn charge_of(entries: &[LogEntry], slots: usize) -> Option<usize> {
     entries
         .iter()
         .try_fold(slots.checked_mul(size_of::<LogEntry>())?, |sum, entry| {
+            #[cfg(test)]
+            work::visit(work::Visit::Query);
             sum.checked_add(entry.retained_payload_bytes())
         })
 }
@@ -430,6 +494,8 @@ fn prefixes(entries: &[LogEntry]) -> Option<Box<[Prefix]>> {
     let mut sum = Prefix::default();
     prefixes.push(sum);
     for entry in entries {
+        #[cfg(test)]
+        work::visit(work::Visit::Prefix);
         sum = sum.add(Metrics::of(entry))?;
         prefixes.push(sum);
     }
