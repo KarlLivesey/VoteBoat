@@ -1,0 +1,17 @@
+[
+  {
+    "path": "target/claude/pillar1-20261022/cpu4-perf-bb/measurement-release.json",
+    "bytes": 339771,
+    "sha256": "7ff03017b2aba533d46d97bc8d2f7c76ed0b0d4301a78306b811b4e5cefe2c95"
+  },
+  {
+    "path": "target/claude/pillar1-20261022/cpu4-perf-bb/independent-input-verification.json",
+    "bytes": 13005064,
+    "sha256": "6b811e81a711ce44cfe3411403d8d6d26d06027810c84578cfb46501875cd319"
+  },
+  {
+    "path": "target/claude/pillar1-20261022/cpu4-perf-bb/baseline-independent-provenance.json",
+    "bytes": 8722,
+    "sha256": "0376c442064af5fb46e0efe0d72f7b7e877c085098b7cecb088001b4c7f558f4"
+  }
+]

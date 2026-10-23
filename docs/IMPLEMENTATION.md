@@ -34,8 +34,9 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
 | CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
 | CPU-3: rejected after canonical observations | PR27 public receipt-capacity reuse passed driver gate but canonical singleton CPU/rate did not improve; resource reporting assertion remains unresolved | Both exact-head Sol source approvals, focused325/6mutants/strict+hook green; driver18/18 and canonical64/64 functional checks passed. No full suites. [Result](../validation/performance/pillar1-cpu3/CPU3-RESULT.md) | P1 evidence |
-| Current CPU-4: locate a larger actual embedding cost | Production remains0bf; driver improvements did not carry across all canonical cells. Bounded baseline profiles of real asynchronous in-process client/Actor/completion paths, no candidate or causal claim about CPU3 | Fixed diagnostic-only protocol, exact original/application/normal-shutdown checks, useful running-stack coverage, source/owner map and one supported removal or explicit no-go | P1 |
-| Next CPU-4 implementation and qualification | Depends on that evidence selecting one bounded production/public embedding change while preserving every implemented feature | Schema/ownership/failure plan; checked focused candidate; fresh dual Sol review and original paired CPU/rate/p99 gates. Preserve all failures and no replacement/tolerance | P1 |
+| CPU-4: measured and rejected | PR28 reusable public write ports preserved tested semantics but increased CPU in every original driver pair; no source merged | Both final Sol source approvals and adapter GO, Stage0 tests12/Counter/driver controls14 and all18 primary children passed. CPU +9.352%/+153.994%/+167.467%, zero wins at every width. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu4/CPU4-RESULT.md) | P1 evidence |
+| Current CPU-5: bounded structural design | Depends on unchanged production0bf and existing source/profile evidence; identify a different removable core/embedding cost while preserving the existing completion pipeline and all implemented features | Source-anchored schema/ownership/failure plan, concrete work removed at singleton and wide widths, semantic controls and unchanged original qualification protocol; explicit no-go if unsupported. No implementation or new measurement authorized by this row alone | P1 |
+| Next CPU-5 checked candidate, conditional | Depends on one justified bounded design and parent implementation release; no reuse of rejected performance claims | Focused semantic and causal controls, actual strict/enabled-hook publication, fresh dual Sol source reviews and original paired CPU/rate/p99 gates; preserve failures without replacement/tolerance | P1 |
 | Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
 
 The 20 October V3g scratch report is input, not current-head qualification:
@@ -124,6 +125,29 @@ and Mac measurement roots/known jobs are swept; unknown infrastructure remains
 untouched. Next diagnosis targets the actual baseline asynchronous embedding,
 preserving original qualification workloads and all implemented VoteBoat extras.
 
+
+
+
+### CPU-4 result and rejection (23 October 2026)
+
+[PR28](https://github.com/KarlLivesey/VoteBoat/pull/28) is CLOSED and rejected
+without merge at `bb311bf1`. Both final Sol source approvals and independent
+adapter GO remain source-only verdicts. Fresh Stage0 passed12 tests, the actual
+Counter example and all14 final-driver controls; all18 original paired children
+passed functional/input/default-retention guards. The paired median CPU B/A
+was1.093521/2.539936/2.674665 at widths1/231/515, with0/3 wins in each cell.
+The parent independently recomputed every pair from saved child rows.
+
+The CPU gate failed decisively. Canonical0/64 and all five full suites remained
+held; canonical rate/p99/normal owned shutdown are untested. No candidate code,
+API or new feature deletion is integrated. Resource visibility limits and all
+historical HOLDs remain unchanged; no cost cause or relaxed tolerance is inferred.
+Both owned Mac roots and known jobs were swept with a passing final stock guard.
+[Exact result, identities, source/control history and compact evidence](../validation/performance/pillar1-cpu4/CPU4-RESULT.md).
+
+Production remains0bf. Further work stays within Pillar1 and requires a different
+source-supported removal, preserving all implemented VoteBoat capabilities;
+network/storage and old parked candidates remain paused.
 
 
 ## Networked CPU track (pillar 2, opened 19 October 2026)

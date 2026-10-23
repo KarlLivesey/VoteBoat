@@ -1,0 +1,216 @@
+{
+  "at": 1792748685.96603,
+  "current_pid": 2618464,
+  "prior_bootstraps": [
+    {
+      "file": "read-01-bootstrap.json",
+      "finished": true,
+      "exit_code": 1
+    },
+    {
+      "file": "read-02-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-03-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-04-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-05-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-06-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-07-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-08-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-09-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-10-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-11-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-12-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "git-verify-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "git-read-01-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-13-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "git-read-02-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "git-read-03-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-14-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "mac-preflight-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "read-15-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "baseline-verify-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "packet-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "freeze-requests-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "overlay-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "build-initial-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "public12-bootstrap.json",
+      "finished": true,
+      "exit_code": 1
+    },
+    {
+      "file": "build-log-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "public12-inspect-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "public12-parser-fix-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "counter-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "healthy1-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "controller-refinement-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "stage0-rest-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "pre-score-freeze-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "scored-campaign-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "collection-cleanup-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "final-report-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    },
+    {
+      "file": "failed-binary-payload-bootstrap.json",
+      "finished": true,
+      "exit_code": 1
+    },
+    {
+      "file": "prepare-comment-bootstrap.json",
+      "finished": true,
+      "exit_code": 0
+    }
+  ],
+  "unfinished_prior": [],
+  "known_prior_pid_start_identities": 530,
+  "prior_owned_live": [],
+  "linux_thread_rows_through_index_guard": 106765,
+  "violations": [],
+  "own_python_cache_directories": [],
+  "index_closing_files_excluded": [
+    "index-final-bootstrap.json",
+    "indexfinal.resources.jsonl",
+    "indexfinal.closing.json",
+    "full-raw-hash-index.json"
+  ],
+  "mac_cleanup_already_hash_verified": true,
+  "comments_created": 1,
+  "watching": false
+}

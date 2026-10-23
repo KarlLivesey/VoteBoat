@@ -1,0 +1,247 @@
+{
+  "at": 1792748435.9304805,
+  "linux_thread_rows": 105270,
+  "linux_violations": [],
+  "linux_closing_violations": [],
+  "known_linux_identities": 518,
+  "prior_known_owned_live": [],
+  "current_closing_controller": [
+    {
+      "file": "final-report-bootstrap.json",
+      "pid": 2616617,
+      "start": "8563374"
+    }
+  ],
+  "bootstrap_states": [
+    {
+      "file": "read-01-bootstrap.json",
+      "finished": true,
+      "exit_code": 1,
+      "error": "[Errno 2] No such file or directory: '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu4-source-bb'"
+    },
+    {
+      "file": "read-02-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-03-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-04-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-05-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-06-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-07-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-08-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-09-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-10-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-11-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-12-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "git-verify-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "git-read-01-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-13-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "git-read-02-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "git-read-03-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-14-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "mac-preflight-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "read-15-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "baseline-verify-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "packet-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "freeze-requests-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "overlay-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "build-initial-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "public12-bootstrap.json",
+      "finished": true,
+      "exit_code": 1,
+      "error": "public12 emitted control closure failed"
+    },
+    {
+      "file": "build-log-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "public12-inspect-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "public12-parser-fix-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "counter-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "healthy1-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "controller-refinement-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "stage0-rest-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "pre-score-freeze-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "scored-campaign-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "collection-cleanup-bootstrap.json",
+      "finished": true,
+      "exit_code": 0,
+      "error": null
+    },
+    {
+      "file": "failed-binary-payload-bootstrap.json",
+      "finished": true,
+      "exit_code": 1,
+      "error": "source code string cannot contain null bytes"
+    }
+  ],
+  "unfinished_prior": [],
+  "mac_resource_events": 5722,
+  "mac_owned_process_samples": 1666,
+  "mac_all_known_pid_start_identities": 202,
+  "mac_prior_known_live_at_cleanup": [],
+  "mac_violations": [],
+  "max_owned_mac_bytes_observed": 1072451584,
+  "scope": "sampled explicit owned children/controllers only; initial and short-lived/shared infrastructure gaps not cleared"
+}

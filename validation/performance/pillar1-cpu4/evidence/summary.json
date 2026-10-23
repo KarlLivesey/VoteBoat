@@ -1,0 +1,121 @@
+{
+  "head_B": "bb311bf16ba6212a8542a4df7b82014fc3b49883",
+  "baseline_A": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "stage0_raw_driver_children": 14,
+  "stage0_pass": true,
+  "public12_pass": true,
+  "counter_children": 1,
+  "primary_children": 18,
+  "primary": {
+    "children": 18,
+    "widths": {
+      "1": {
+        "pairs": [
+          {
+            "pair": 1,
+            "A_cpu_ns": 2620.02,
+            "B_cpu_ns": 2787.05,
+            "cpu_ratio": 1.0637514217448722,
+            "internal_ratio": 1.0830843519458668
+          },
+          {
+            "pair": 2,
+            "A_cpu_ns": 2594.225,
+            "B_cpu_ns": 2836.84,
+            "cpu_ratio": 1.093521186481512,
+            "internal_ratio": 1.0947131120357991
+          },
+          {
+            "pair": 3,
+            "A_cpu_ns": 2571.87,
+            "B_cpu_ns": 2818.3,
+            "cpu_ratio": 1.0958174402283165,
+            "internal_ratio": 1.0970405528635816
+          }
+        ],
+        "qualified_pairs": 3,
+        "median_paired_cpu_ratio": 1.093521186481512,
+        "cpu_wins": 0,
+        "gate": false
+      },
+      "231": {
+        "pairs": [
+          {
+            "pair": 1,
+            "A_cpu_ns": 111.37301587301587,
+            "B_cpu_ns": 284.6962481962482,
+            "cpu_ratio": 2.556240809002157,
+            "internal_ratio": 2.6191713496181466
+          },
+          {
+            "pair": 2,
+            "A_cpu_ns": 113.2142857142857,
+            "B_cpu_ns": 287.5569985569985,
+            "cpu_ratio": 2.539935633941943,
+            "internal_ratio": 2.5877360927340978
+          },
+          {
+            "pair": 3,
+            "A_cpu_ns": 113.41702741702741,
+            "B_cpu_ns": 286.038961038961,
+            "cpu_ratio": 2.5220107381867223,
+            "internal_ratio": 2.5849094216191557
+          }
+        ],
+        "qualified_pairs": 3,
+        "median_paired_cpu_ratio": 2.539935633941943,
+        "cpu_wins": 0,
+        "gate": false
+      },
+      "515": {
+        "pairs": [
+          {
+            "pair": 1,
+            "A_cpu_ns": 121.56181229773463,
+            "B_cpu_ns": 323.9566343042071,
+            "cpu_ratio": 2.6649539701724585,
+            "internal_ratio": 2.7308449045943455
+          },
+          {
+            "pair": 2,
+            "A_cpu_ns": 120.51456310679612,
+            "B_cpu_ns": 324.3352750809061,
+            "cpu_ratio": 2.6912537930664087,
+            "internal_ratio": 2.758402122502629
+          },
+          {
+            "pair": 3,
+            "A_cpu_ns": 120.46148867313916,
+            "B_cpu_ns": 322.19417475728153,
+            "cpu_ratio": 2.6746653914557283,
+            "internal_ratio": 2.739541637816667
+          }
+        ],
+        "qualified_pairs": 3,
+        "median_paired_cpu_ratio": 2.6746653914557283,
+        "cpu_wins": 0,
+        "gate": false
+      }
+    },
+    "pass_all": false
+  },
+  "canonical_children": 0,
+  "canonical": {
+    "bulk16": {
+      "pairs": []
+    },
+    "single16": {
+      "pairs": []
+    },
+    "bulk1": {
+      "pairs": []
+    },
+    "single1": {
+      "pairs": []
+    }
+  },
+  "current_sampled_resources_valid": true,
+  "cleanup_parent_absent": true,
+  "historical_holds_cleared": false,
+  "merge_approval": false
+}
