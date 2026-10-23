@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
-fn commit_update<const TRACE: bool>(
+pub(super) fn commit_update<const TRACE: bool>(
     actor: &mut Actor<TRACE>,
     ids: &[OperationId],
     bytes: &[u8],
@@ -168,6 +168,7 @@ fn borrowed_and_fifo_owned_delivery_stop_after_same_dropped_wait() {
         assert_eq!(actor.parts.application.applied, 4);
         assert_eq!(actor.parts.core.state().commit_index, 4);
         assert_eq!(actor.pending.len(), 1);
+        assert!(actor.receipts.is_empty());
         assert_eq!(waits[0].try_recv().unwrap(), ids[0]);
         assert_eq!(
             waits[1].try_recv(),

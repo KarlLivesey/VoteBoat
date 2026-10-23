@@ -14,6 +14,9 @@
 // rights and limitations under the RPL.
 use voteboat::{application::*, identity::OperationId, log::*};
 
+#[path = "application/receipt_reuse.rs"]
+mod receipt_reuse;
+
 #[path = "application/capacity_bound.rs"]
 mod capacity_bound;
 

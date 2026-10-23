@@ -70,6 +70,8 @@ pub(super) struct Actor<const TRACE: bool = false> {
     /// calls: every drain leaves it empty, and any failure that skips the
     /// drain (such as `record_proposals` after a core call) ends the actor.
     queue: VecDeque<Effect>,
+    /// Empty receipt scratch owned by this application actor alone.
+    receipts: Vec<OperationId>,
     last_snapshot_at: u64,
     last_contact: Instant,
     #[cfg(test)]
@@ -87,6 +89,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             pending,
             deferred: None,
             queue: VecDeque::new(),
+            receipts: Vec::new(),
             last_snapshot_at: 0,
             last_contact: Instant::now(),
             #[cfg(test)]
@@ -412,9 +415,11 @@ impl<const TRACE: bool> Actor<TRACE> {
                 Self::apply_entries(
                     &mut self.parts.application,
                     &mut self.pending,
+                    &mut self.receipts,
+                    Self::receipt_capacity_limit(self.parts.settings.clients),
                     &self.attribution,
                     self.parts.slot,
-                    |application| application.apply_entries(entries),
+                    |application, output| application.apply_entries_into(entries, output),
                 )?;
             }
         } else {
@@ -454,35 +459,57 @@ impl<const TRACE: bool> Actor<TRACE> {
         Self::apply_entries(
             &mut self.parts.application,
             &mut self.pending,
+            &mut self.receipts,
+            Self::receipt_capacity_limit(self.parts.settings.clients),
             &self.attribution,
             self.parts.slot,
-            |application| application.apply_batch(&entries),
+            |application, output| application.apply_batch_into(&entries, output),
         )
+    }
+    /// Existing validated original bound; charge capacity, including geometric
+    /// spare slots, at 16 bytes per OperationId. Oversized legal output remains
+    /// valid transient work and is discarded only after consumption.
+    fn receipt_capacity_limit(clients: usize) -> usize {
+        clients
+            .saturating_mul(4)
+            .saturating_add(1)
+            .min(isize::MAX as usize / size_of::<OperationId>())
     }
     fn apply_entries(
         application: &mut Noop,
         pending: &mut PendingReplies<Reply>,
+        receipts: &mut Vec<OperationId>,
+        capacity_limit: usize,
         attribution: &Recorder<TRACE>,
         slot: usize,
-        apply: impl FnOnce(&mut Noop) -> Result<Vec<OperationId>, ApplicationError>,
+        apply: impl FnOnce(&mut Noop, &mut Vec<OperationId>) -> Result<(), ApplicationError>,
     ) -> Result<(), Failure> {
         let started = Recorder::<TRACE>::start();
-        let results = apply(application);
+        let applied = apply(application, receipts);
         attribution.finish(
             Phase::Application,
             started,
-            results.is_err(),
-            results.as_ref().map_or(0, Vec::len),
+            applied.is_err(),
+            receipts.len(),
         );
-        let results = results.map_err(debug_error)?;
-        if slot == 0 {
-            let started = Recorder::<TRACE>::start();
-            let count = results.len();
-            let result = Self::deliver_results(pending, results);
-            attribution.finish(Phase::Results, started, result.is_err(), count);
-            result?;
+        let result = applied.map_err(debug_error).and_then(|()| {
+            if slot == 0 {
+                let started = Recorder::<TRACE>::start();
+                let count = receipts.len();
+                let result = Self::deliver_results(pending, receipts.drain(..));
+                attribution.finish(Phase::Results, started, result.is_err(), count);
+                result
+            } else {
+                Ok(())
+            }
+        });
+        // Drain drops remaining receipts after partial client failure. An
+        // application error also empties scratch; actual progress is not reset.
+        receipts.clear();
+        if receipts.capacity() > capacity_limit {
+            *receipts = Vec::new();
         }
-        Ok(())
+        result
     }
     #[cfg(test)]
     fn deliver(&mut self, results: Vec<OperationId>) -> Result<(), Failure> {
@@ -490,7 +517,7 @@ impl<const TRACE: bool> Actor<TRACE> {
     }
     fn deliver_results(
         pending: &mut PendingReplies<Reply>,
-        results: Vec<OperationId>,
+        results: impl IntoIterator<Item = OperationId>,
     ) -> Result<(), Failure> {
         for operation in results {
             let reply = pending

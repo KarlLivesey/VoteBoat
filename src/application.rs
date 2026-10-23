@@ -174,6 +174,36 @@ pub trait StateMachine {
     fn applied_index(&self) -> u64;
     fn apply_batch(&mut self, entries: &[LogEntry])
         -> Result<Vec<Self::Receipt>, ApplicationError>;
+    /// Replace caller-owned output with this call's receipts, retaining reusable
+    /// capacity. Clears old contents on entry and exposes no partial receipts on
+    /// error. The default calls the owned method exactly once. Implementations
+    /// may reuse the allocation without requiring cloneable/default receipts.
+    ///
+    /// The caller must finish consuming or take previous output before reuse.
+    /// It owns and budgets the entire Vec capacity (including spare capacity
+    /// and nested allocations); this does not waive BoundedStateMachine limits.
+    /// An error does not promise rollback beyond the application's contract.
+    fn apply_batch_into(
+        &mut self,
+        entries: &[LogEntry],
+        output: &mut Vec<Self::Receipt>,
+    ) -> Result<(), ApplicationError> {
+        output.clear();
+        output.extend(self.apply_batch(entries)?);
+        Ok(())
+    }
+    /// The caller-owned counterpart of apply_entries. The default invokes that
+    /// exact owned method once, preserving custom piecewise implementations.
+    /// Output ownership, clearing and budgeting follow apply_batch_into.
+    fn apply_entries_into(
+        &mut self,
+        entries: crate::log::EntryRange<'_>,
+        output: &mut Vec<Self::Receipt>,
+    ) -> Result<(), ApplicationError> {
+        output.clear();
+        output.extend(self.apply_entries(entries)?);
+        Ok(())
+    }
     /// Apply one completion's committed interval in one call, with the same
     /// contract as [`Self::apply_batch`]. The interval may span several shared
     /// pieces; the default borrows a single piece and otherwise copies the
@@ -434,12 +464,43 @@ impl StateMachine for Counter {
         &mut self,
         entries: &[LogEntry],
     ) -> Result<Vec<Self::Receipt>, ApplicationError> {
+        let mut receipts = Vec::new();
+        self.apply_batch_into(entries, &mut receipts)?;
+        Ok(receipts)
+    }
+    fn apply_batch_into(
+        &mut self,
+        entries: &[LogEntry],
+        output: &mut Vec<Self::Receipt>,
+    ) -> Result<(), ApplicationError> {
+        output.clear();
+        let result = self.stage_batch_into(entries, output);
+        if result.is_err() {
+            output.clear();
+        }
+        result
+    }
+    fn apply_entries_into(
+        &mut self,
+        entries: crate::log::EntryRange<'_>,
+        output: &mut Vec<Self::Receipt>,
+    ) -> Result<(), ApplicationError> {
+        self.apply_batch_into(&entries.contiguous(), output)
+    }
+}
+
+impl Counter {
+    fn stage_batch_into(
+        &mut self,
+        entries: &[LogEntry],
+        receipts: &mut Vec<CounterReceipt>,
+    ) -> Result<(), ApplicationError> {
         // Stage only novel operations and scalar changes. Historical retries
         // remain immutable until every entry validates, including late errors.
         let mut value = self.value;
         let mut applied = self.applied;
         let mut novel = BTreeMap::new();
-        let mut receipts = Vec::with_capacity(
+        receipts.reserve_exact(
             entries
                 .iter()
                 .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
@@ -493,7 +554,7 @@ impl StateMachine for Counter {
         }
         self.value = value;
         self.applied = applied;
-        Ok(receipts)
+        Ok(())
     }
 }
 

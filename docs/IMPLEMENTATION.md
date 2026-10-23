@@ -33,9 +33,24 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | --- | --- | --- | --- |
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
 | CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
-| Current CPU-3: choose a larger per-original core/embedding cost | CPU-1/CPU-2 rejected; production remains `0bf9271e`. Bounded source/evidence audit of repeated data movement, scans and staging; no predetermined helper or revival of rejected candidates | One schema with actual consumer/fallback/ownership/feature audit and causal measurement plan. Implement only a bounded usable candidate; measure singleton and bulk CPU/write before full qualification | P1 |
+| Current CPU-3: caller-owned application receipt capacity | CPU-1/CPU-2 rejected; production remains `0bf9271e`. Released common receipt-buffer hypothesis from sustained baseline samples; public caller-owned seam, real Counter and matched Noop/Actor, bounded per-owner retention; no rejected candidate source | Schema recorded before edits. Focused public/fallback/Actor/all3 checkpoint controls and six compiled mutants pass; strict/publication pending. Parent measures original nine pairs and conditional canonical64 before full qualification | P1 |
 | Next CPU-3 qualification or rejection | Depends on that candidate retaining every implemented feature and passing focused correctness/strict checks | Fresh dual Sol source review and paired equal-core CPU/rate/p99 gates. Record all failures; no tolerance or replacement schedule to rescue a rejected score | P1 |
 | Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
+
+### CPU3 selected implementation schema (23 October 2026)
+
+[Pre-edit contract, budgets and released acceptance](../validation/performance/pillar1-cpu3/CPU3-DESIGN.md).
+Macro P1 remains active; network/storage/roadmap work is paused. CPU1/2 remain rejected.
+
+| Mini-plan | Purpose / dependencies | Completion checks | Macro |
+| --- | --- | --- | --- |
+| Current CPU3 receipt capacity reuse | Common sampled fresh receipt Vec growth; public seam + real Counter + actual matched consumer, preserving all features | Focused public/Actor/retention/capacity/error tests, compiled causal controls, strict7, enabled nonforce push and linked draft PR; no measured gain yet | P1 |
+| Next CPU3 review and measurement | Depends on checked exact source and semantic feature matrix | Parent fresh dual Sol reviews; original9 pairs at B1/231/515, each median CPU B/A<1 and >=2/3 wins; conditional canonical64 with CPU/rate/p99/owned shutdown | P1 |
+| Next P1 qualification/disposition | Depends on review/measurement acceptance; rejected candidate remains unmerged | Parent full5 complete suites, exhaustive normal-debug relay/docs, exact-head strict/enabled hook; retain outcomes and clean owned resources | P1 |
+
+CPU3 actual focused evidence: public application29 each in four feature configurations; matched31 Actor+4 Noop;1 quorum-frontier+85 membership,61 lifecycle/application-wrapper integration,2 logical durable,8 native application capacity,6 public owner result,4 provider application and7 retirement controls. 325 grouped final passes/zero ignored; one new cfg(test) GroupId u64/u128 setup compile failure was preserved and narrowly corrected, then31 Actor+4 Noop passed. Six compiled runtime mutants killed/restored; all1534 pre-mutant inputs matched. All3 replicas at B1/231/515 crossed two real checkpoints with exact1000 suffix/pins/reconcile and receipt/frontier equality; actual lagging snapshot install/resumed calls passed each width. Safe capacity witnesses only; no CPU/allocation gain claim. Full details and semantic matrix in the linked design. Final strict7 passed all seven checks/zero diagnostics. Actual enabled push receipt and parent review/performance/full5 follow.
+
+Evidence below is historical; CPU3 execution is recorded separately from planned checks.
 
 The 20 October V3g scratch report is input, not current-head qualification:
 `target/claude/research-r4/v3g-profile.md`. Its unqualified commit-notice prototype

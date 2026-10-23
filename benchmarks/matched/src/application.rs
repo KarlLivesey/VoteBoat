@@ -21,7 +21,9 @@ impl StateMachine for Noop {
         self.applied
     }
     fn apply_batch(&mut self, entries: &[LogEntry]) -> Result<Vec<OperationId>, ApplicationError> {
-        self.apply_pieces(std::iter::once(entries))
+        let mut output = Vec::new();
+        self.apply_batch_into(entries, &mut output)?;
+        Ok(output)
     }
     /// One call per committed interval, as `apply_batch`, visiting each
     /// shared piece in order instead of first copying the interval.
@@ -29,21 +31,49 @@ impl StateMachine for Noop {
         &mut self,
         entries: EntryRange<'_>,
     ) -> Result<Vec<OperationId>, ApplicationError> {
+        let mut output = Vec::new();
+        self.apply_entries_into(entries, &mut output)?;
+        Ok(output)
+    }
+    fn apply_batch_into(
+        &mut self,
+        entries: &[LogEntry],
+        output: &mut Vec<OperationId>,
+    ) -> Result<(), ApplicationError> {
+        self.apply_pieces_into(std::iter::once(entries), output)
+    }
+    fn apply_entries_into(
+        &mut self,
+        entries: EntryRange<'_>,
+        output: &mut Vec<OperationId>,
+    ) -> Result<(), ApplicationError> {
         match entries.as_slice() {
-            Some(entries) => self.apply_pieces(std::iter::once(entries)),
-            None => self.apply_pieces(entries.slices()),
+            Some(entries) => self.apply_pieces_into(std::iter::once(entries), output),
+            None => self.apply_pieces_into(entries.slices(), output),
         }
     }
 }
 impl Noop {
-    /// The same per-entry checks and results for every caller; state changes
-    /// only when the whole interval succeeds.
-    fn apply_pieces<'a>(
+    /// Validate the entire interval before advancing, with no exposed partial
+    /// receipts on failure. Every replica produces every original outcome.
+    fn apply_pieces_into<'a>(
         &mut self,
         pieces: impl Iterator<Item = &'a [LogEntry]>,
-    ) -> Result<Vec<OperationId>, ApplicationError> {
+        output: &mut Vec<OperationId>,
+    ) -> Result<(), ApplicationError> {
+        output.clear();
+        let result = self.stage_pieces(pieces, output);
+        if result.is_err() {
+            output.clear();
+        }
+        result
+    }
+    fn stage_pieces<'a>(
+        &mut self,
+        pieces: impl Iterator<Item = &'a [LogEntry]>,
+        results: &mut Vec<OperationId>,
+    ) -> Result<(), ApplicationError> {
         let mut applied = self.applied;
-        let mut results = Vec::new();
         for entries in pieces {
             for entry in entries {
                 if applied.checked_add(1) != Some(entry.index) {
@@ -59,9 +89,10 @@ impl Noop {
             }
         }
         self.applied = applied;
-        Ok(results)
+        Ok(())
     }
 }
+
 impl CheckpointStateMachine for Noop {
     fn schema_version(&self) -> u64 {
         1
@@ -132,5 +163,82 @@ mod tests {
         assert_eq!(restored.applied, 5001);
         restored.restore_checkpoint(1, 4001, &bytes).unwrap();
         assert_eq!(restored.applied, 4001);
+    }
+    #[test]
+    fn caller_output_matches_owned_piecewise_mixed_noop_intervals() {
+        for width in [1, 231, 515] {
+            let mut owned = app();
+            let mut reused = app();
+            let mut output = Vec::with_capacity(width);
+            let pointer = output.as_ptr();
+            for round in 0..3 {
+                let entries: Vec<_> = (0..width)
+                    .map(|offset| {
+                        let index = (round * width + offset + 1) as u64;
+                        LogEntry {
+                            index,
+                            term: 1,
+                            payload: if offset % 5 == 4 {
+                                EntryPayload::Noop
+                            } else {
+                                EntryPayload::Command {
+                                    operation: OperationId::new((1 << 127) + index as u128 * 7919)
+                                        .unwrap(),
+                                    bytes: Vec::new().into(),
+                                }
+                            },
+                        }
+                    })
+                    .collect();
+                let mut log = EntryLog::default();
+                for chunk in entries.chunks(17) {
+                    log.append(chunk.to_vec().into());
+                }
+                let expected = owned
+                    .apply_entries(log.borrowed(0..width).unwrap())
+                    .unwrap();
+                reused
+                    .apply_entries_into(log.borrowed(0..width).unwrap(), &mut output)
+                    .unwrap();
+                assert_eq!(output, expected);
+                assert_eq!(reused.applied, owned.applied);
+                assert_eq!(output.as_ptr(), pointer);
+            }
+        }
+    }
+    #[test]
+    fn caller_noop_configuration_only_interval_advances_without_receipts() {
+        use voteboat::membership::{ConfigurationChange, ConfigurationRecord};
+        for width in [1, 231, 515] {
+            let entries: Vec<_> = (1..=width)
+                .map(|index| LogEntry {
+                    index: index as u64,
+                    term: 1,
+                    payload: if index % 2 == 0 {
+                        EntryPayload::Noop
+                    } else {
+                        EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                            operation: OperationId::new(index as u128).unwrap(),
+                            expected: ConfigurationId::new(1).unwrap(),
+                            change: ConfigurationChange::Final {
+                                id: ConfigurationId::new(2).unwrap(),
+                            },
+                        }))
+                    },
+                })
+                .collect();
+            let mut log = EntryLog::default();
+            for chunk in entries.chunks(17) {
+                log.append(chunk.to_vec().into());
+            }
+            let mut output = vec![OperationId::new(u128::MAX).unwrap()];
+            let pointer = output.as_ptr();
+            let mut app = app();
+            app.apply_entries_into(log.borrowed(0..width).unwrap(), &mut output)
+                .unwrap();
+            assert!(output.is_empty());
+            assert_eq!(app.applied, width as u64);
+            assert_eq!(output.as_ptr(), pointer);
+        }
     }
 }

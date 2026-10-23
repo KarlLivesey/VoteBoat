@@ -5,6 +5,8 @@ use super::*;
 mod collection;
 mod completion;
 mod originals;
+mod receipt_retention;
+mod receipt_reuse;
 mod replies;
 
 fn staging<const TRACE: bool>(actor: &Actor<TRACE>) -> ProposalBatch {
@@ -21,8 +23,17 @@ fn ready_actor_clients<const TRACE: bool>(
     envelopes: crate::Envelopes,
     clients: usize,
 ) -> (Actor<TRACE>, mpsc::Sender<Request>) {
+    ready_actor_group(envelopes, clients, 1)
+}
+
+fn ready_actor_group<const TRACE: bool>(
+    envelopes: crate::Envelopes,
+    clients: usize,
+    group: u128,
+) -> (Actor<TRACE>, mpsc::Sender<Request>) {
     let node = NodeId::new(1).unwrap();
     let mut bootstrap = bootstrap().unwrap();
+    bootstrap.group.id = GroupId::new(group).unwrap();
     bootstrap.voter_stores.retain(|member, _| *member == node);
     bootstrap.policy = Policy::new(Tree::Voter(node), Limits::default()).unwrap();
     let group = bootstrap.group;
