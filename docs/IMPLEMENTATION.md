@@ -29,15 +29,29 @@ substitutes for lower CPU. Report deterministic core/driver and full embedding
 cost separately. No claimed gain from extra cores, skipped application,
 weaker evidence, changed command counts or benchmark-only shortcuts.
 
+CPU-5 pre-edit schema: [private view ownership, transitions, failure paths and
+acceptance checks](../validation/performance/pillar1-cpu5/CPU5-DESIGN.md).
+Summarized views select the metadata of their existing immutable summary borrow;
+new/trimmed overlays own metadata. Required predecessor, Pending, validation,
+stamps, charges and completion/application pipeline remain unchanged. This is
+an independently authorized candidate, with machine/CPU qualification pending.
+
 | Mini-plan item | Purpose and dependencies | Completion checks | Advances |
 | --- | --- | --- | --- |
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
 | CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
 | CPU-3: rejected after canonical observations | PR27 public receipt-capacity reuse passed driver gate but canonical singleton CPU/rate did not improve; resource reporting assertion remains unresolved | Both exact-head Sol source approvals, focused325/6mutants/strict+hook green; driver18/18 and canonical64/64 functional checks passed. No full suites. [Result](../validation/performance/pillar1-cpu3/CPU3-RESULT.md) | P1 evidence |
 | CPU-4: measured and rejected | PR28 reusable public write ports preserved tested semantics but increased CPU in every original driver pair; no source merged | Both final Sol source approvals and adapter GO, Stage0 tests12/Counter/driver controls14 and all18 primary children passed. CPU +9.352%/+153.994%/+167.467%, zero wins at every width. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu4/CPU4-RESULT.md) | P1 evidence |
-| Current CPU-5: bounded structural design | Depends on unchanged production0bf and existing source/profile evidence; identify a different removable core/embedding cost while preserving the existing completion pipeline and all implemented features | Source-anchored schema/ownership/failure plan, concrete work removed at singleton and wide widths, semantic controls and unchanged original qualification protocol; explicit no-go if unsupported. No implementation or new measurement authorized by this row alone | P1 |
-| Next CPU-5 checked candidate, conditional | Depends on one justified bounded design and parent implementation release; no reuse of rejected performance claims | Focused semantic and causal controls, actual strict/enabled-hook publication, fresh dual Sol source reviews and original paired CPU/rate/p99 gates; preserve failures without replacement/tolerance | P1 |
-| Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
+| Current CPU-5: checked private borrowed view candidate | Parent release depends on static canonicalA attribution of the transient304-byte metadata snapshot, after the source-only NO-GO; preserve production0bf completion/validation contracts | Borrowed/owned identity and full-oracle controls, compiled old-owned negative plus exact restoration, focused default/all-feature/public/native/matched checks, strict7 and actual enabled-hook draft publication. Machine elimination and CPU remain pending | P1 |
+| Next: parent exact-head source and codegen qualification | Depends on the frozen checked CPU-5 candidate; establish independent source approval and whether the particular summary-to-temporary copy disappears without replacement | Fresh dual source reviews; exact Apple candidate codegen against canonicalA, retaining owned predecessor/next summary/staging/effects. No source pointer test substitutes for machine evidence | P1 |
+| Then: parent original performance and conditional full qualification | Depends on source/codegen acceptance and unchanged feature contracts; establish whole-path benefit before release | Original nine driver pairs, conditional canonical64 and, only for a kept candidate, full5 including unskipped normal-debug relay/docs; exact outcomes/IDs/default maintenance and owned cleanup. No replacement runs or relaxed gates | P1 |
+
+CPU-5 implemented evidence is separate from that plan: the private view change,
+five direct borrowing/ownership tests, compiled old-owned negative and exact
+restoration, focused default/all-feature/public/native/matched results and
+semantic retention matrix are in [CPU5-CHECKED](../validation/performance/pillar1-cpu5/CPU5-CHECKED.md).
+P1 remains active; no milestone, machine-copy elimination or CPU gain is claimed.
+The parent owns fresh source/codegen/performance and conditional full qualification.
 
 The 20 October V3g scratch report is input, not current-head qualification:
 `target/claude/research-r4/v3g-profile.md`. Its unqualified commit-notice prototype

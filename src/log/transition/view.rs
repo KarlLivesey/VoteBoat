@@ -63,9 +63,11 @@ impl LogMetadata {
 pub(crate) struct LogView<'a> {
     base: &'a GroupLog,
     tail: Option<&'a EntryLog>,
-    metadata: LogMetadata,
+    // New and overlay views own a snapshot; summarized views use the exact
+    // immutable metadata in `summary` instead of taking another snapshot.
+    metadata: Option<LogMetadata>,
     removed: usize,
-    // The summary this view's metadata was copied from, and the stamp of
+    // The summary this view's metadata is borrowed from, and the stamp of
     // the summarized log it describes (`None` if that log has none).
     summary: Option<(&'a LogSummary, Option<LogStamp>)>,
 }
@@ -74,7 +76,7 @@ impl<'a> LogView<'a> {
         Self {
             base,
             tail: None,
-            metadata: LogMetadata::from_log(base),
+            metadata: Some(LogMetadata::from_log(base)),
             removed: 0,
             summary: None,
         }
@@ -89,7 +91,7 @@ impl<'a> LogView<'a> {
         Self {
             base,
             tail: None,
-            metadata: summary.metadata,
+            metadata: None,
             removed: 0,
             summary: Some((summary, stamp)),
         }
@@ -100,7 +102,7 @@ impl<'a> LogView<'a> {
     pub(crate) fn stamp(&self) -> Option<LogStamp> {
         self.summary.and_then(|(_, stamp)| stamp)
     }
-    /// Whether `summary` describes this view's metadata. A view copied from
+    /// Whether `summary` describes this view's metadata. A view borrowed from
     /// that same summary needs no comparison: it borrows the summary, which
     /// cannot change while the view exists.
     #[inline]
@@ -109,10 +111,10 @@ impl<'a> LogView<'a> {
             .summary
             .is_some_and(|(own, _)| std::ptr::eq(own, summary))
         {
-            debug_assert!(summary.matches_metadata(&self.metadata));
+            debug_assert!(summary.matches_metadata(self.metadata()));
             return true;
         }
-        summary.matches_metadata(&self.metadata)
+        summary.matches_metadata(self.metadata())
     }
     /// Prefix/tail were admitted by this owner; metadata describes their exact
     /// accepted version. This is not an unchecked public storage admission API.
@@ -130,22 +132,31 @@ impl<'a> LogView<'a> {
         Self {
             base,
             tail: Some(tail).filter(|tail| !tail.is_empty()),
-            metadata,
+            metadata: Some(metadata),
             removed,
             summary: None,
         }
     }
     pub(crate) fn metadata(&self) -> &LogMetadata {
-        &self.metadata
+        match &self.metadata {
+            Some(metadata) => metadata,
+            None => {
+                &self
+                    .summary
+                    .expect("summarized view has a summary")
+                    .0
+                    .metadata
+            }
+        }
     }
     pub(crate) fn bootstrap(&self) -> &'a Bootstrap {
         &self.base.bootstrap
     }
     pub(crate) fn term_at(&self, index: u64) -> Option<u64> {
-        if index == self.metadata.base_index {
-            return Some(self.metadata.base_term);
+        if index == self.metadata().base_index {
+            return Some(self.metadata().base_term);
         }
-        if index < self.metadata.base_index {
+        if index < self.metadata().base_index {
             return None;
         }
         if index > self.base.last_index() {
@@ -162,7 +173,7 @@ impl<'a> LogView<'a> {
         if let Some(tail) = self.tail {
             current.entries.append(tail.to_batch());
         }
-        self.metadata.install_header(&mut current);
+        self.metadata().install_header(&mut current);
         current
     }
     /// Exact charge of this view's entries after trimming `count`, as the
