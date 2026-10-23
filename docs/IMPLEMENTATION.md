@@ -36,7 +36,8 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-3: rejected after canonical observations | PR27 public receipt-capacity reuse passed driver gate but canonical singleton CPU/rate did not improve; resource reporting assertion remains unresolved | Both exact-head Sol source approvals, focused325/6mutants/strict+hook green; driver18/18 and canonical64/64 functional checks passed. No full suites. [Result](../validation/performance/pillar1-cpu3/CPU3-RESULT.md) | P1 evidence |
 | CPU-4: measured and rejected | PR28 reusable public write ports preserved tested semantics but increased CPU in every original driver pair; no source merged | Both final Sol source approvals and adapter GO, Stage0 tests12/Counter/driver controls14 and all18 primary children passed. CPU +9.352%/+153.994%/+167.467%, zero wins at every width. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu4/CPU4-RESULT.md) | P1 evidence |
 | CPU-5: measured and rejected | PR29 borrowed summarized metadata and reordered append construction; the targeted extra304-byte copy was eliminated on Apple, but the CPU gate failed at widths1 and231; no source merged | Both fresh exact-head Sol source approvals; builder1036 test events/strict7/actual hook green; compiled old-order negative/exact restoration/five Mac view tests passed; final identity2/Rust6 controls and all18 primary children passed. CPU +0.82755%/+0.28720%/-0.00053%, wins0/3,1/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu5/CPU5-RESULT.md) | P1 evidence |
-| Next P1 residual-cost attribution, conditional | Depends on unchanged production0bf and the five rejected candidates; a different common cost needs dynamic evidence before another implementation | Identify concrete source/compiled work and its importance at singleton and wide widths, preserving the existing completion pipeline and all implemented features. Explicit no-go if unsupported; this plan row alone launches no research or measurement | P1 |
+| CPU-6: measured and rejected | PR30 inline singleton batches and fused wide assignment/facts removed their intended work on Apple, but singleton CPU rose; no source merged | Both exact-head Sol source approvals; builder1377 focused events/2existing ignored/strict7/actual hook green; Apple34 tests/two valid work controls/restoration, metadata2/Rust6 and all18 primary children passed. CPU +7.781924%/-0.267725%/-0.677237%, wins0/3,3/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu6/CPU6-RESULT.md) | P1 evidence |
+| Current P1 residual structural design, conditional | Depends on unchanged production0bf and all six rejected candidates; identify a material remaining cost before another implementation | One coherent ownership/API design may specialize singleton and wide paths. Ground it in actual source/compiled/profile evidence, preserve every implemented feature, and name one precise missing fact if unsupported. No speedup or implementation is authorized by this plan row alone | P1 |
 | Then a checked CPU candidate, conditional | Depends on one justified bounded design and parent implementation release; rejected source and performance claims stay excluded | Schema/ownership/failure plan, focused semantic and causal controls, actual strict/enabled-hook publication, fresh dual Sol source reviews and original paired CPU/rate/p99 gates; preserve failures without replacement/tolerance | P1 |
 | Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
 
@@ -173,6 +174,37 @@ No candidate code or API is integrated. Prior launcher/identity failures,
 observer corrections and historical resource HOLDs remain recorded. All owned
 measurement roots and known jobs were swept with a passing final actual-Mac
 stock guard. [Decision, provenance and compact evidence](../validation/performance/pillar1-cpu5/CPU5-RESULT.md)
+
+### CPU-6 terminal disposition: work removed, singleton CPU gate failed (23 October)
+
+[PR30](https://github.com/KarlLivesey/VoteBoat/pull/30) is CLOSED, unmerged,
+at `bd579edd7ace4741f80fdcf0d44abee05db976d6`. Both independent exact-head
+Sol source reviews approved all42 paths/2609 actual inputs. Builder1377 focused
+passing events, two existing ignored selections, strict7 and the enabled push
+hook passed. Apple34 focused tests and two old VALID representation controls
+supported the static singleton transient-Vec/wide-inspection removals. Larger
+fixed values, required owned work and logical capsule allocations remained costs.
+
+After metadata2 and Rust6 controls passed, all18 original primary children/nine
+pairs passed actual functional/default-retention/identity guards. Parent
+independently recomputed CPU/original from raw wait4 rows: paired median B/A
+1.077819244 at width1 (0/3 wins),0.997322745 at width231 (3/3) and0.993227627 at
+width515 (2/3). Width1 fails the unchanged per-width CPU gate. Canonical0/64 and
+all five full suites remained unrun; wider wins cannot offset singleton loss.
+
+No candidate source/tests/API are integrated. Original transfer-mode and
+observer failures/HOLDs remain preserved, with no inferred performance cause.
+Normal source was restored, owned Mac roots/shared target removed, and known
+identity/final actual-Mac stock guard checks passed.
+[Decision, all pairs and compact evidence](../validation/performance/pillar1-cpu6/CPU6-RESULT.md).
+
+Macro review: the user has reaffirmed continuing Pillar1 CPU work, not stopping
+after rejection. The current/next-two plan above remains source-supported design,
+then a checked candidate, then qualification of a kept composition. Different
+singleton/wide specializations in one coherent design are permitted; no artificial
+same-instruction requirement is added. Feature preservation and original per-width
+CPU/canonical/full-suite gates remain intact. Pillars2/3 and unrelated roadmap
+work remain paused; no milestone or performance goal is marked complete.
 retain the source approvals, machine witness and every measured pair separately.
 
 The five new CPU candidates have therefore produced no accepted production CPU

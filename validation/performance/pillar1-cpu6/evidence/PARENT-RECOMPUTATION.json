@@ -1,0 +1,116 @@
+{
+  "verdict": "REJECT_PR30_NO_MERGE",
+  "exact_B": "bd579edd7ace4741f80fdcf0d44abee05db976d6",
+  "A": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "independent_parent_recomputed_wait4_rows": 18,
+  "pairs": [
+    {
+      "width": 1,
+      "round": 1,
+      "order": "AB",
+      "A_cpu_ns": 2620.015,
+      "B_cpu_ns": 2812.02,
+      "B_over_A": 1.0732839315805445,
+      "B_win": false
+    },
+    {
+      "width": 1,
+      "round": 2,
+      "order": "BA",
+      "A_cpu_ns": 2591.0,
+      "B_cpu_ns": 2804.325,
+      "B_over_A": 1.08233307603242,
+      "B_win": false
+    },
+    {
+      "width": 1,
+      "round": 3,
+      "order": "AB",
+      "A_cpu_ns": 2597.815,
+      "B_cpu_ns": 2799.975,
+      "B_over_A": 1.0778192442494943,
+      "B_win": false
+    },
+    {
+      "width": 231,
+      "round": 1,
+      "order": "AB",
+      "A_cpu_ns": 111.56998556998558,
+      "B_cpu_ns": 111.27128427128427,
+      "B_over_A": 0.9973227450270312,
+      "B_win": true
+    },
+    {
+      "width": 231,
+      "round": 2,
+      "order": "BA",
+      "A_cpu_ns": 111.84343434343434,
+      "B_cpu_ns": 111.63564213564212,
+      "B_over_A": 0.9981421152791664,
+      "B_win": true
+    },
+    {
+      "width": 231,
+      "round": 3,
+      "order": "AB",
+      "A_cpu_ns": 114.1038961038961,
+      "B_cpu_ns": 111.24458874458874,
+      "B_over_A": 0.9749411943243038,
+      "B_win": true
+    },
+    {
+      "width": 515,
+      "round": 1,
+      "order": "AB",
+      "A_cpu_ns": 120.42071197411003,
+      "B_cpu_ns": 119.60517799352749,
+      "B_over_A": 0.993227626981994,
+      "B_win": true
+    },
+    {
+      "width": 515,
+      "round": 2,
+      "order": "BA",
+      "A_cpu_ns": 121.68543689320387,
+      "B_cpu_ns": 119.04207119741099,
+      "B_over_A": 0.9782770579349376,
+      "B_win": true
+    },
+    {
+      "width": 515,
+      "round": 3,
+      "order": "AB",
+      "A_cpu_ns": 121.11844660194174,
+      "B_cpu_ns": 122.0653721682848,
+      "B_over_A": 1.0078181779316833,
+      "B_win": false
+    }
+  ],
+  "widths": [
+    {
+      "width": 1,
+      "median_B_over_A": 1.0778192442494943,
+      "paired_percent": 7.781924424949427,
+      "wins": 0,
+      "gate": false
+    },
+    {
+      "width": 231,
+      "median_B_over_A": 0.9973227450270312,
+      "paired_percent": -0.2677254972968779,
+      "wins": 3,
+      "gate": true
+    },
+    {
+      "width": 515,
+      "median_B_over_A": 0.993227626981994,
+      "paired_percent": -0.6772373018006039,
+      "wins": 2,
+      "gate": true
+    }
+  ],
+  "canonical_children": 0,
+  "full5": "NOT RUN",
+  "no_new_measurement": true,
+  "historical_holds": "UNCHANGED"
+}

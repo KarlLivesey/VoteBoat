@@ -1,0 +1,258 @@
+{
+  "verdict": "FAIL_PRIMARY_CPU_GATE",
+  "candidate": "bd579edd7ace4741f80fdcf0d44abee05db976d6",
+  "tree": "6c421547bfac8778cc27b1fcec479aaa7bf19a4d",
+  "main": "5fda857d2f827a47925c152f227bce7cbc1ced98",
+  "production_A": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "stage0a": "PASS_STATIC_TWO_REMOVALS_AND_FOCUSED_MAC_UNITS",
+  "focused_pass": 34,
+  "stage0b": "PASS: 2 metadata, 3 healthy Rust, 3 omitted-publication Rust",
+  "primary": {
+    "stage": 1,
+    "verdict": "FAIL_PRIMARY_CPU_GATE",
+    "pairs": [
+      {
+        "width": 1,
+        "pair": 1,
+        "order": [
+          "A",
+          "B"
+        ],
+        "A_cpu_ns": 2620.015,
+        "B_cpu_ns": 2812.02,
+        "B_over_A": 1.0732839315805445,
+        "B_win": false,
+        "actual_completed": {
+          "A": 200000,
+          "B": 200000
+        }
+      },
+      {
+        "width": 1,
+        "pair": 2,
+        "order": [
+          "B",
+          "A"
+        ],
+        "A_cpu_ns": 2591.0,
+        "B_cpu_ns": 2804.325,
+        "B_over_A": 1.08233307603242,
+        "B_win": false,
+        "actual_completed": {
+          "B": 200000,
+          "A": 200000
+        }
+      },
+      {
+        "width": 1,
+        "pair": 3,
+        "order": [
+          "A",
+          "B"
+        ],
+        "A_cpu_ns": 2597.815,
+        "B_cpu_ns": 2799.975,
+        "B_over_A": 1.0778192442494943,
+        "B_win": false,
+        "actual_completed": {
+          "A": 200000,
+          "B": 200000
+        }
+      },
+      {
+        "width": 231,
+        "pair": 1,
+        "order": [
+          "A",
+          "B"
+        ],
+        "A_cpu_ns": 111.56998556998558,
+        "B_cpu_ns": 111.27128427128427,
+        "B_over_A": 0.9973227450270312,
+        "B_win": true,
+        "actual_completed": {
+          "A": 1386000,
+          "B": 1386000
+        }
+      },
+      {
+        "width": 231,
+        "pair": 2,
+        "order": [
+          "B",
+          "A"
+        ],
+        "A_cpu_ns": 111.84343434343434,
+        "B_cpu_ns": 111.63564213564212,
+        "B_over_A": 0.9981421152791664,
+        "B_win": true,
+        "actual_completed": {
+          "B": 1386000,
+          "A": 1386000
+        }
+      },
+      {
+        "width": 231,
+        "pair": 3,
+        "order": [
+          "A",
+          "B"
+        ],
+        "A_cpu_ns": 114.1038961038961,
+        "B_cpu_ns": 111.24458874458874,
+        "B_over_A": 0.9749411943243038,
+        "B_win": true,
+        "actual_completed": {
+          "A": 1386000,
+          "B": 1386000
+        }
+      },
+      {
+        "width": 515,
+        "pair": 1,
+        "order": [
+          "A",
+          "B"
+        ],
+        "A_cpu_ns": 120.42071197411003,
+        "B_cpu_ns": 119.60517799352749,
+        "B_over_A": 0.993227626981994,
+        "B_win": true,
+        "actual_completed": {
+          "A": 1545000,
+          "B": 1545000
+        }
+      },
+      {
+        "width": 515,
+        "pair": 2,
+        "order": [
+          "B",
+          "A"
+        ],
+        "A_cpu_ns": 121.68543689320387,
+        "B_cpu_ns": 119.04207119741099,
+        "B_over_A": 0.9782770579349376,
+        "B_win": true,
+        "actual_completed": {
+          "B": 1545000,
+          "A": 1545000
+        }
+      },
+      {
+        "width": 515,
+        "pair": 3,
+        "order": [
+          "A",
+          "B"
+        ],
+        "A_cpu_ns": 121.11844660194174,
+        "B_cpu_ns": 122.0653721682848,
+        "B_over_A": 1.0078181779316833,
+        "B_win": false,
+        "actual_completed": {
+          "A": 1545000,
+          "B": 1545000
+        }
+      }
+    ],
+    "widths": [
+      {
+        "width": 1,
+        "median_paired_B_over_A": 1.0778192442494943,
+        "paired_percent": 7.781924424949427,
+        "wins": 0,
+        "pass_gate": false
+      },
+      {
+        "width": 231,
+        "median_paired_B_over_A": 0.9973227450270312,
+        "paired_percent": -0.2677254972968779,
+        "wins": 3,
+        "pass_gate": true
+      },
+      {
+        "width": 515,
+        "median_paired_B_over_A": 0.993227626981994,
+        "paired_percent": -0.6772373018006039,
+        "wins": 2,
+        "pass_gate": true
+      }
+    ],
+    "primary_pairs": 9,
+    "primary_children": 18,
+    "canonical_released": false,
+    "canonical_children": 0,
+    "full5": "NOT RELEASED",
+    "score": "whole exact-PID wait4 all target threads user+system / actual measured originals; no subtraction"
+  },
+  "canonical_children": 0,
+  "canonical_planned": 64,
+  "full5": "NOT RELEASED",
+  "source_restored_inputs": 2609,
+  "collected_files": 343,
+  "inventory_rows": 4530,
+  "cleanup": "PASS: both owned Mac roots/shared target/empty parent removed",
+  "mac_known_identities_closed": 1597,
+  "linux_known_process_identities": 470,
+  "linux_known_thread_identities": 390,
+  "binaries": {
+    "canonical-B.bin": {
+      "bytes": 4115216,
+      "sha256": "206e1a5771cee811761187ea599819749e36b6cd01a4bc1f43bd071ea32a92da"
+    },
+    "valid-old-singleton-vec.bin": {
+      "bytes": 4115216,
+      "sha256": "8ea4d027baba45d004afacdaf2856e7a1a1ccde0ae449197b15bec8a24c31664"
+    },
+    "valid-old-separate-wide.bin": {
+      "bytes": 4115200,
+      "sha256": "0e93121a38a48749ad31c523f1db57d2f4501b8c5eec1beb192199283ad8c007"
+    },
+    "mac-diagnostic-B.bin": {
+      "bytes": 4193136,
+      "sha256": "bef1c35b2944566348465607a3f941756e419363797ec84bbc27656956fed75f"
+    }
+  },
+  "observations": {
+    "mac_process_sample_rows": 3300,
+    "mac_thread_sample_events": 3300,
+    "mac_thread_output_rows": 4865,
+    "mac_failed_thread_queries": 1052,
+    "mac_typed_absence_proofs": 539,
+    "mac_early_ps_absence_proofs": 0,
+    "mac_reuse_proofs": 0,
+    "mac_sampled_nice_violations": 0,
+    "mac_joined_commands": 6838,
+    "mac_spawn_failures": [
+      {
+        "log": "symbols.command.log",
+        "receipt": {
+          "argv": [
+            "/usr/bin/llvm-objdump",
+            "--syms",
+            "/tmp/voteboat-claude-loop/pillar1-cpu6-bd-r2-20261023/base-0bf9271e/canonical-A.bin"
+          ],
+          "started": 1792783837.9197109,
+          "mono_start": 4.208348833,
+          "parent_threads": 1,
+          "timeout": false,
+          "error": "FileNotFoundError(2, 'No such file or directory')",
+          "ended": 1792783837.922053,
+          "mono_end": 4.210690666,
+          "close_errors": []
+        }
+      }
+    ],
+    "max_own_bytes": 734961664,
+    "max_loop_bytes": 11301515264
+  },
+  "final_guard": "PASS: actual Mac stock guard; child/observer/outer 0/0/0",
+  "parent_owns_disposition": true,
+  "historical_holds_unchanged": true,
+  "publication": "https://github.com/KarlLivesey/VoteBoat/pull/30#issuecomment-6373616989",
+  "PR30_linked": true,
+  "PR30_watching": false,
+  "PR30_draft": true,
+  "seal_process_identities": 482
+}

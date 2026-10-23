@@ -1,0 +1,8 @@
+{
+  "body": "CPU6 is CLOSED/rejected without merge at `bd579edd7ace4741f80fdcf0d44abee05db976d6`. Both source reviews approved the exact candidate, and focused/strict/enabled-hook checks and Apple mechanism controls passed.\n\nAll nine original CPU pairs /18 children passed their functional guards. Median paired whole CPU/original B/A: width1 **1.077819244 (+7.781924%,0/3 wins)**; width231 **0.997322745 (-0.267725%,3/3)**; width515 **0.993227627 (-0.677237%,2/3)**. Width1 fails the unchanged per-width gate; wider wins cannot offset it. Canonical **0/64** and full5 **not run**. No candidate source is integrated; production A remains unchanged.\n\nThe parent independently recomputed all18 raw wait4 CPU/original rows, nine ratios, medians and wins. Both owned Mac roots/shared target were removed and known-identity/final guard checks passed. Historical resource/visibility HOLDs remain unchanged; no performance cause or relaxed tolerance is inferred. Full evidence remains in `target/claude/pillar1-20261022/cpu6-perf-r2/`; the main docs record preserves compact results.\n\nPillar1 CPU optimization continues under the user's existing instruction; this candidate is rejected.\n",
+  "closedAt": "2026-10-23T20:04:27Z",
+  "headRefOid": "bd579edd7ace4741f80fdcf0d44abee05db976d6",
+  "mergedAt": null,
+  "state": "CLOSED",
+  "url": "https://github.com/KarlLivesey/VoteBoat/pull/30"
+}

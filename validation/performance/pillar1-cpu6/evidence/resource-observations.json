@@ -1,0 +1,33 @@
+{
+  "mac_process_sample_rows": 3300,
+  "mac_thread_sample_events": 3300,
+  "mac_thread_output_rows": 4865,
+  "mac_failed_thread_queries": 1052,
+  "mac_typed_absence_proofs": 539,
+  "mac_early_ps_absence_proofs": 0,
+  "mac_reuse_proofs": 0,
+  "mac_sampled_nice_violations": 0,
+  "mac_joined_commands": 6838,
+  "mac_spawn_failures": [
+    {
+      "log": "symbols.command.log",
+      "receipt": {
+        "argv": [
+          "/usr/bin/llvm-objdump",
+          "--syms",
+          "/tmp/voteboat-claude-loop/pillar1-cpu6-bd-r2-20261023/base-0bf9271e/canonical-A.bin"
+        ],
+        "started": 1792783837.9197109,
+        "mono_start": 4.208348833,
+        "parent_threads": 1,
+        "timeout": false,
+        "error": "FileNotFoundError(2, 'No such file or directory')",
+        "ended": 1792783837.922053,
+        "mono_end": 4.210690666,
+        "close_errors": []
+      }
+    }
+  ],
+  "max_own_bytes": 734961664,
+  "max_loop_bytes": 11301515264
+}
