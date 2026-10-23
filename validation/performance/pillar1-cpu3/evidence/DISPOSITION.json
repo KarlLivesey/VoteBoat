@@ -1,0 +1,12 @@
+{
+  "finite_experiment": "complete, no further launch authorised",
+  "A": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "B": "6c7cb6d7e535a79265b41ee8e51679616bb1b85d",
+  "driver_functional_pairs": 9,
+  "stage1_width_gates": "all pass",
+  "canonical_functional_pairs": 32,
+  "canonical_performance": "mixed: bulk CPU/rate improve; both singleton CPU/rate regress; bulk1 median p99 increases",
+  "resource_qualification": "HOLD: unexplained postcampaign reporting-current-process assertion failure, original transient not saved; campaign samples conforming; no dependent benchmarks/builds after failure",
+  "overall_ACCEPT_merge_fullqualification": false,
+  "cleanup": "both owned Mac roots and parent removed, no known prior owned jobs; visibility gaps documented"
+}

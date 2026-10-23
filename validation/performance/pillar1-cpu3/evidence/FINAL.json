@@ -1,0 +1,40 @@
+{
+  "state": "TERMINAL_FINITE_EXPERIMENT_REPORTED_RESOURCE_QUALIFICATION_HOLD",
+  "A": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "B": "6c7cb6d7e535a79265b41ee8e51679616bb1b85d",
+  "driver_functional_children": 18,
+  "driver_complete_pairs": 9,
+  "stage1_all_width_gates_pass": true,
+  "canonical_functional_children": 64,
+  "canonical_complete_pairs": 32,
+  "unpaired_children": 0,
+  "raw_verified_files": 788,
+  "known_prior_owned_jobs": [],
+  "Mac_named_roots_and_parent_absent": true,
+  "Mac_named_root_cwd_references": [],
+  "Linux_scratch_source_build_worktree_created": false,
+  "packet_archives_remaining": [],
+  "unknown_shared_harness_foreign_inaccessible_visibility_gaps_untouched": true,
+  "resource_qualification": "HOLD: unexplained failed postcampaign reporter resource assertion; original records not emitted, no cause established",
+  "measurement_resource_samples": {
+    "recorded_tasks": 2218,
+    "recorded_campaign_violations": 0
+  },
+  "full_accept_merge_qualification_claim": false,
+  "one_report_comment": "https://github.com/KarlLivesey/VoteBoat/pull/27#issuecomment-6356816510",
+  "watcher": false,
+  "final_full_actual_Mac_stock_guard": "free_gb=2867 (min 500)\ntarget_gb=3 (cap 150) cargo_build_dirs=0\nlive_worktrees=1 (cap 5) prunable=0 worktree_target_gb=0 (cap 120)\nlinux_tmp_voteboat_dirs=0 (cap 300) linux_tmp_gb=0 (cap 10)\nmac_loop_gb=10 (cap 40) mac_voteboat_dirs=2 (cap 3)\nOK: disk within budget\n",
+  "binary_sha256": {
+    "driver": {
+      "A": "c05c3c718ab6d9ac5a72f2e04cfce29fb35f6618a76b3e0debdda10ff7f5fa6a",
+      "B": "ec93670d1a45104fec07ce382455613619e55dc9198ccb918ccb77e3752d545d"
+    },
+    "canonical": {
+      "A": "0c6998bc63614f43faaba36dfff64f9291b7a14336853f4d901c4068c2c69208",
+      "B": "228bee4627a06cdb000e28c939de60c70d5f9d7c2d3976eb3b1ac622b9ab1727"
+    }
+  },
+  "parent_only_full_gate": "SOURCEA+B/ALL5/exhaustive normaldebug relay/docs/strict7+actual enabled hook/semantic features remain separate",
+  "no_further_experiment_launch_or_idle_roots": true,
+  "report_sha256": "7f732610b50e19efe985ee42f9c111c7a3d770ecdd4bbaf1c7f69fbf55f37509"
+}

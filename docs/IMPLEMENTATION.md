@@ -33,8 +33,9 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | --- | --- | --- | --- |
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
 | CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
-| Current CPU-3: choose a larger per-original core/embedding cost | CPU-1/CPU-2 rejected; production remains `0bf9271e`. Bounded source/evidence audit of repeated data movement, scans and staging; no predetermined helper or revival of rejected candidates | One schema with actual consumer/fallback/ownership/feature audit and causal measurement plan. Implement only a bounded usable candidate; measure singleton and bulk CPU/write before full qualification | P1 |
-| Next CPU-3 qualification or rejection | Depends on that candidate retaining every implemented feature and passing focused correctness/strict checks | Fresh dual Sol source review and paired equal-core CPU/rate/p99 gates. Record all failures; no tolerance or replacement schedule to rescue a rejected score | P1 |
+| CPU-3: rejected after canonical observations | PR27 public receipt-capacity reuse passed driver gate but canonical singleton CPU/rate did not improve; resource reporting assertion remains unresolved | Both exact-head Sol source approvals, focused325/6mutants/strict+hook green; driver18/18 and canonical64/64 functional checks passed. No full suites. [Result](../validation/performance/pillar1-cpu3/CPU3-RESULT.md) | P1 evidence |
+| Current CPU-4: locate a larger actual embedding cost | Production remains0bf; driver improvements did not carry across all canonical cells. Bounded baseline profiles of real asynchronous in-process client/Actor/completion paths, no candidate or causal claim about CPU3 | Fixed diagnostic-only protocol, exact original/application/normal-shutdown checks, useful running-stack coverage, source/owner map and one supported removal or explicit no-go | P1 |
+| Next CPU-4 implementation and qualification | Depends on that evidence selecting one bounded production/public embedding change while preserving every implemented feature | Schema/ownership/failure plan; checked focused candidate; fresh dual Sol review and original paired CPU/rate/p99 gates. Preserve all failures and no replacement/tolerance | P1 |
 | Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
 
 The 20 October V3g scratch report is input, not current-head qualification:
@@ -99,6 +100,29 @@ None of the candidate is integrated. Owned build/measurement roots and known
 owned jobs are swept; uncertain automatic harness hosts remain untouched and
 disclosed. Next work stays on pillar1 repeated per-original core/embedding cost
 from unchanged production; network/storage and parked PRs remain paused.
+
+
+### CPU-3 result and rejection (23 October 2026)
+
+[PR27](https://github.com/KarlLivesey/VoteBoat/pull/27) is rejected without merge.
+Exact `6c7cb6d7` has both independent source approvals,325 grouped focused
+passes/six compiled controls, and clean strict/enabled-hook publication receipts.
+All nine original driver pairs met the width gates (CPU -2.090%/-3.859%/-2.752%).
+All64 canonical children passed functional/input checks, but recorded singleton
+CPU rose0.488%/0.497% and rates fell0.632%/1.121%; bulk CPU fell1.303%/1.841%
+with bulk1 p99 rising1.146%. These do not meet the unchanged whole-path goal.
+
+Resource qualification also remains on HOLD: a post-campaign reporting auditor
+asserted a current-process envelope violation without preserving the original
+offending rows. The2218 recorded campaign observations conform; a later clean
+snapshot does not erase the unexplained failure. No cause, fully qualified
+performance result, source defect or new tolerance is inferred.
+[Complete disposition, pairs, reporting failure and cleanup](../validation/performance/pillar1-cpu3/CPU3-RESULT.md).
+
+No candidate source is integrated and no full suite was launched. Owned build
+and Mac measurement roots/known jobs are swept; unknown infrastructure remains
+untouched. Next diagnosis targets the actual baseline asynchronous embedding,
+preserving original qualification workloads and all implemented VoteBoat extras.
 
 
 

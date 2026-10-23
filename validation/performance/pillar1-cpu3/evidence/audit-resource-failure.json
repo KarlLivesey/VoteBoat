@@ -1,0 +1,20 @@
+{
+  "time": 1792726570.4780831,
+  "original_exit": 1,
+  "original_error": "audit.py line80 assertion all current R4 observer task records ok; original transient records were not emitted before assertion",
+  "measurement_and_Mac_cleanup_completed_before_this_report_audit": true,
+  "current_read_only_followup_snapshot": [
+    {
+      "pid": 2392673,
+      "tid": 2392673,
+      "nice": 19,
+      "affinity": [
+        8,
+        9
+      ],
+      "ok": true
+    }
+  ],
+  "no_further_measurements_or_builds": "all campaign launches already terminal, no replacements",
+  "resource_status": "not claimed fully qualified; cause under inspection"
+}
