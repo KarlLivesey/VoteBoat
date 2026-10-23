@@ -274,8 +274,7 @@ fn drive_round(
     while left > 0 {
         let n = left.min(per);
         left -= n;
-        pool.enqueue(*next, n).unwrap();
-        *next += n as u128;
+        pool.enqueue(next, n).unwrap();
         requests += 1;
     }
     let first = actors[0].parts.receiver.try_recv().unwrap();
@@ -603,8 +602,9 @@ fn actual_adapter_polling_carries_global_fifo_prefix_and_counts_originals() {
         super::super::r3_ports::registration(actor.parts.domain.binding(), 9, 8, 4).unwrap();
     actor.parts.domain = domain;
     let mut pool = super::super::r3_ports::Pool::new(&factory, &sender, 8, 4, maximum).unwrap();
-    pool.enqueue(1, 4).unwrap();
-    pool.enqueue(5, 4).unwrap();
+    let mut next = 1;
+    pool.enqueue(&mut next, 4).unwrap();
+    pool.enqueue(&mut next, 4).unwrap();
     assert_eq!(pool.unreplied(), 8);
     let mut entries = Vec::new();
     for _ in 0..2 {
@@ -652,7 +652,7 @@ fn actual_adapter_polling_carries_global_fifo_prefix_and_counts_originals() {
     }
     assert_eq!(pool.unreplied(), 0);
     let capacity = pool.bookkeeping_bytes();
-    pool.enqueue(9, 4).unwrap();
+    pool.enqueue(&mut next, 4).unwrap();
     assert_eq!(pool.live_ports(), 2);
     assert_eq!(pool.bookkeeping_bytes(), capacity);
 }
@@ -668,8 +668,7 @@ fn partition_round(
     while left > 0 {
         let n = left.min(per);
         left -= n;
-        pool.enqueue(*next, n).unwrap();
-        *next += n as u128;
+        pool.enqueue(next, n).unwrap();
     }
     let first_request = actors[0].parts.receiver.try_recv().unwrap();
     actors[0].requests(first_request).unwrap();

@@ -29,19 +29,19 @@
     }
   },
   "timing_executed": false,
-  "independent_old_new_audit": "parent pending",
+  "independent_old_new_audit": "e85 A1 NO-GO; corrected exact-head re-audit pending parent",
   "guards": "same ten original final conjuncts; unreplied counts remaining originals",
   "initial_unformatted_driver": {
     "size": 6260,
     "sha256": "2c780fce0964e6915aac3901fca0e414034c5ba4f6b74118042aa40ac7bcefef"
   },
   "driver": {
-    "size": 6713,
-    "sha256": "2b41b95fee184c92c92c09cb53ba8b9eb6e28c5f31bf04f69cd41eead7f1fe51"
+    "size": 6683,
+    "sha256": "279425e643c02c46be9c78d0da838d796ce64f4e4f6f8608ac97c028c701713b"
   },
   "pool": {
-    "size": 7241,
-    "sha256": "7e524c7e8728b9605bb267212cc8cae58baf5912d63d7eff4c3d01295f2908b0"
+    "size": 8261,
+    "sha256": "e10264c860ce0dd5abbaa39e09dfaaf810bda2af78255c44cd1a7a81a5d0ff9c"
   },
   "steps": {
     "size": 1093,
@@ -58,5 +58,16 @@
     "result": "adapter-functional.build-result.json",
     "restoration": "adapter-restore.json"
   },
-  "revision": "P2 whole-result prevalidation context; driver/pool/steps/reference byte-identical to ec6052 R3; no timing or old/new audit"
+  "revision": "R6 bounded A1: generated-ID count advances at owned cursor creation before unchanged try_send; P2 normal Actor remains exact e85",
+  "r6_accounting_controls": {
+    "size": 11218,
+    "sha256": "ba8cee86d8901f2ba8b6760970d82ce014b6ff617cad37cc6057e24e99a701a9"
+  },
+  "r6_acceptance_receipts": {
+    "directory": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu4-adapter-a1-fix-r6",
+    "build_inputs": "overlay-functional.build-inputs.json",
+    "result": "overlay-functional.build-result.json",
+    "restoration": "overlay-restoration.json",
+    "mutant": "mutant-restoration.json"
+  }
 }

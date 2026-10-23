@@ -97,10 +97,14 @@ impl<'a> Pool<'a> {
         });
         Ok(slot)
     }
-    pub fn enqueue(&mut self, first: u128, count: usize) -> Result<(), Failure> {
+    pub fn enqueue(&mut self, next: &mut u128, count: usize) -> Result<(), Failure> {
         if count == 0 || count > self.limits.originals || self.waits.len() == self.maximum {
             return Err("r3 bounded request shape".into());
         }
+        let first = *next;
+        let after = first
+            .checked_add(count as u128)
+            .ok_or("r3 original overflow")?;
         let slot = match self.slots.iter().position(|slot| !slot.busy) {
             Some(slot) => slot,
             None => self.open()?,
@@ -134,6 +138,8 @@ impl<'a> Pool<'a> {
             next: 0,
             stalled: false,
         });
+        // Generated observations are owned now, even if queue transfer fails.
+        *next = after;
         self.sender
             .try_send(request)
             .map_err(|_| "r3 client queue")?;
@@ -193,6 +199,26 @@ impl<'a> Pool<'a> {
             .iter()
             .map(|cursor| cursor.count - cursor.next)
             .sum()
+    }
+    #[cfg(test)]
+    pub(super) fn rejected_originals(&mut self) -> Vec<u128> {
+        let cursor = self.waits.back_mut().expect("actual rejected cursor");
+        let invocation = cursor.invocation.as_mut().unwrap();
+        (0..cursor.count)
+            .map(|ordinal| {
+                let envelope = invocation
+                    .try_take(ordinal)
+                    .unwrap()
+                    .expect("dropped unsubmitted producer");
+                assert!(invocation.matches(&envelope, ordinal));
+                let id = envelope.operation().get();
+                assert!(matches!(
+                    envelope.into_outcome(),
+                    OriginalOutcome::NotSubmitted
+                ));
+                id
+            })
+            .collect()
     }
     pub fn live_ports(&self) -> usize {
         self.slots.len()

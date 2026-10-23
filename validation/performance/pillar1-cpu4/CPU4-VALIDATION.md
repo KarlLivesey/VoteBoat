@@ -1,10 +1,96 @@
 # CPU4 focused candidate evidence
 
+### CPU-4 A1 adapter schema before edits (R6, 23 October 2026)
+
+Finding A1 on exact e85 concerns generated observations on rejected enqueue,
+not consensus or a healthy denominator failure. Old A constructs each Original
+and FIFO wait and advances next before try_send. The B cursor already owns all
+originals before send; move generated-ID accounting to that same ownership
+boundary. Keep submitted_including_warmup's original generated-observation
+meaning; it does not count accepted queue transfers.
+
+Data/API: Pool::enqueue receives &mut next, checks shape/ID arithmetic, calls
+the actual normal Client::prepare/public begin, and validates the Port observer.
+Only after the owned invocation enters the global FIFO does it advance next,
+before the unchanged try_send. Pre-cursor preparation/begin failure leaves next
+and FIFO unchanged. Failed send retains exactly those cursor originals and
+propagates the same error. Caller/test traces no longer advance separately.
+No pumping, pacing, retry, request-boundary, Actor or public API change.
+
+Ownership/failure: available-prefix carry, count-minus-next remaining ORIGINALS,
+all original outcomes, domain/port cleanup and restart contracts are unchanged.
+The failed request drops its unsubmitted producer ownership; retained observers
+are NotSubmitted rather than Applied. No recovery state or extra owner is added.
+Acceptance: real bounded-full and closed queues at1/4/final3, sparse full-u128
+IDs, real prepare/begin failures before cursor, source-anchored old-A comparison,
+and final3 failed conjuncts using actual three-Actor state. A compiled corrected-
+API old-ordering mutant must fail the generated-count assertion, then restore.
+Complete source overlay applies/compiles/runs original9 plus new untimed controls
+and reverses exactly. Normal matched default/all-feature focused tests, all3
+width/checkpoint/snapshot controls, sequential strict7 and actual enabled hook
+are required. Normal root/matched RELEASE inputs stay byte-exact e85.
+
+Current evidence only: target/claude/pillar1-20261022/cpu4-adapter-a1-fix-r6.
+Original R5 evidence/report are immutable. Report pin:28998 UTF-8 bytes,
+28960 Unicode characters, SHA2560558c758bcaa5b152a9d3cecef76cfaf8e43caebb5ad9bd44b41d00204fb9673.
+No historical pre-R5 byte hash is asserted. Parent retains exact-head source
+confirmations, independent adapter re-audit, original9pairs/conditional64/full5.
+No CPU4 timing or historical resource-HOLD clearance follows this source fix.
+
+
 23 October 2026. This is one preserved, bounded public-write-port candidate.
 It is not CPU qualification or a full-suite result. Production starts at
 `ffeaeab05dbe61848a780cad3a789d6f6a9b78f4`; CPU1/2/3 remain rejected and the
 CPU3 resource HOLD remains unresolved. R2 evidence and its limitations remain
 historical and immutable.
+
+### A1 R6 actual focused evidence
+
+Real bounded-full/closed controls pass for1/4/final3, ordinary and full-u128 IDs;
+the failed cursor yields matching real NotSubmitted envelopes, old-A oneshots
+close, counts/FIFO remaining originals and propagated errors match. Zero-ID
+Client::prepare and real public port.begin after domain close leave count/FIFO
+unchanged; an already-open idle second slot ensures the latter reaches begin.
+Final3 faults at231/515 retain generated231/515 versus old-B successful-prefix
+228/512. With actual three-Actor campaign frontiers1, both A and corrected B
+fail exactly reply_count, unreplied, commit_frontiers, applied_frontiers,
+reported_frontiers and propagated_error. Old B additionally fails expected_count.
+This is a bounded one-round/no-warmup enqueue-fault closure with a source-anchored
+old-A segment, not a full old-engine campaign or complete consensus proof.
+
+The corrected-API old-ordering mutant compiled and failed the intended
+failed-send generated-count assertion (2 versus3); exact source/full manifest
+restored. Final normal matched default59/all-feature59 pass, including original
+56; complete installed overlay12 (original9+new3) passes and reverses/checks
+byte-exact. All3 real owned applications/receipts, healthy12000/12012/12360,
+two default5000 checkpoints each, suffix/pin/lagging real snapshot and resumed
+1/231/515 delivery remain checked. Telemetry-only/skipped-count failed conjuncts
+remain reported/reply_count. No timing entrypoint ran.
+
+Frozen actual input manifest: 1555 paths, 248286 bytes,
+SHA256 ea7ed1c28273da125aeefc3fcb1597c4f4f680c732491ddd0c1f129c3d8394f2.
+Normal release source (including P2 Actor), root module/Counter/example,
+Cargo/dependencies/hooks/native/core/logical/application remain e85-equivalent.
+Unchanged root/semantic and old mutation receipts are reused by source equality,
+not claimed rerun. Parent e85 source approvals remain historical; exact new-head
+confirmations and independent adapter re-audit/performance/full5 remain pending.
+
+R6 limits: initial fixed-bootstrap intake readers were audited by the loader,
+but preceded the sampled outer observer and own stock guard. Later controlled
+checks cannot certify those early reads or short-lived/reparented/shared hosts.
+One optional .cargo/config.toml read failed; one guessed Cargo executable did
+not exist and no build started. Logs persist; actual /usr/bin/cargo was then
+observed and used. The first passing closed-domain test reached cold registration;
+it was tightened before acceptance to use an existing idle port and reach begin.
+No live resource mismatch was observed in controlled samples; original histories
+and HOLDs remain unchanged and unattributed. Strict7/actual hook follow separately.
+
+R6 final local acceptance: normal default59/all-feature59, complete overlay12,
+compiled intended old-ordering kill/exact restoration and all seven sequential
+strict checks pass with zero diagnostics on the frozen1555-input manifest.
+Actual enabled nonforce push-hook acceptance/publication is recorded separately
+in cpu4-adapter-a1-fix-r6/publication-command.log. No hook/Cargo/lint change.
+Parent confirmations/re-audit/performance/full5 and resource HOLDs remain pending.
 
 ## P2 repair acceptance (planned before source edits)
 

@@ -51,3 +51,31 @@ the nine untimed public-path controls; exact receipts are named in
 `PROVENANCE.json`. Its timing entrypoint is never invoked. The historical R3
 functional manifest is explicitly historical; the new contemporaneous R4
 manifest includes the refreshed provenance and changed Actor/test source.
+
+## A1 correction (R6)
+
+`Pool::enqueue(&mut next, count)` advances generated-ID ownership only after
+actual normal Client::prepare/public begin succeeds and its invocation cursor
+enters the global FIFO, before the unchanged try_send. A full/closed queue keeps
+those exact originals counted and unresolved, matching old A's Original/oneshot
+ordering. Pre-cursor preparation/begin failure leaves the count unchanged.
+The unchanged submitted_including_warmup label counts generated observations,
+not accepted queue transfers. The checked next-ID end is computed before any
+invocation ownership; no fallible arithmetic remains after cursor creation.
+
+The cfg(test) accounting controls construct bounded-full/closed queues for
+original1/4/final3 and full-u128 IDs, inspect real NotSubmitted envelopes, and
+compare the source-anchored old-A enqueue segment. Final3 at widths231/515 uses
+real three-Actor core/application/published fields and the original ten guard
+expressions in a bounded one-round/no-warmup fault closure. It is not a second
+baseline engine or full consensus/timing qualification. Old B's count is the
+actual successful-queue prefix; both A and corrected B still fail the same six
+other conjuncts. A targeted old-ordering mutant retains the corrected API.
+
+R6 receipts named in PROVENANCE.json cover complete overlay compilation, the
+original nine plus three accounting controls, exact reversal/restoration and
+the compiled count mutation. Normal engine/Actor release source stays exact
+e85, including P2 prevalidation. Historical R3 nine/P2 mutation receipts remain
+historical, rather than new kills. Parent exact-head source confirmations,
+independent adapter re-audit, original9pairs/conditional64/full5 and historical
+resource HOLD dispositions remain pending; CPU4 timing entrypoint is not run.

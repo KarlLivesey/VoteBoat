@@ -34,10 +34,95 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
 | CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
 | CPU-3: rejected after canonical observations | PR27 public receipt-capacity reuse passed driver gate but canonical singleton CPU/rate did not improve; resource reporting assertion remains unresolved | Both exact-head Sol source approvals, focused325/6mutants/strict+hook green; driver18/18 and canonical64/64 functional checks passed. No full suites. [Result](../validation/performance/pillar1-cpu3/CPU3-RESULT.md) | P1 evidence |
-| Current CPU-4: P2 repair checked locally, publication next | Purpose: meet the host receipt contract before exposing any current-interval result. Dependencies: published ec6052 candidate, review A finding, existing actual committed borrowed/owned contexts. [Schema](../validation/performance/pillar1-cpu4/CPU4-DESIGN.md) | Full count/u128 sequence prevalidation; malformed controls in both contexts; preserved valid prefixes/FIFO failures. Final default56/all-feature56, compiled old-behavior kill/exact restoration, updated overlay9 untimed controls, all3 width/checkpoint/snapshot checks and sequential strict7 passed. Actual enabled hook/nonforce publication is the next action; source approval/qualification remain parent gates | P1 |
+| Current CPU-4: bounded A1 checked locally; publication next | Purpose: retain old-A generated/FIFO ownership on rejected send. Dependencies: exact e85, independent A1 report and real public Client::prepare. [Schema](../validation/performance/pillar1-cpu4/CPU4-DESIGN.md) | Actual full/closed1/4/final3 and prepare/begin faults; real three-Actor failed conjuncts; compiled old-ordering kill/exact restoration; complete overlay12/reversal; default59/all-feature59; sequential strict7 zero diagnostics. Actual enabled nonforce hook is the publication gate. Execution evidence below; parent confirmations/qualification pending | P1 |
 | Next CPU-4: qualification or rejection (parent) | Purpose: determine actual equal-core CPU benefit. Dependencies: checked exact source/adapter, independent old/new schedule audit and two fresh Sol source approvals | Original9pairs, conditional64 canonical CPU/rate/p99/normal shutdown, then full5 only after worthwhile performance; original gates unchanged | P1 |
 | Then P1: retained composition (parent) | Purpose: qualify the kept public/native feature composition. Dependencies: successful CPU qualification and feature preservation | Exact-head full5/unskipped normal-debug exhaustive relay/docs/strict7+hook; no perfection claim, future work from measured residual | P1 |
 
+
+### CPU-4 A1 adapter schema before edits (R6, 23 October 2026)
+
+Finding A1 on exact e85 concerns generated observations on rejected enqueue,
+not consensus or a healthy denominator failure. Old A constructs each Original
+and FIFO wait and advances next before try_send. The B cursor already owns all
+originals before send; move generated-ID accounting to that same ownership
+boundary. Keep submitted_including_warmup's original generated-observation
+meaning; it does not count accepted queue transfers.
+
+Data/API: Pool::enqueue receives &mut next, checks shape/ID arithmetic, calls
+the actual normal Client::prepare/public begin, and validates the Port observer.
+Only after the owned invocation enters the global FIFO does it advance next,
+before the unchanged try_send. Pre-cursor preparation/begin failure leaves next
+and FIFO unchanged. Failed send retains exactly those cursor originals and
+propagates the same error. Caller/test traces no longer advance separately.
+No pumping, pacing, retry, request-boundary, Actor or public API change.
+
+Ownership/failure: available-prefix carry, count-minus-next remaining ORIGINALS,
+all original outcomes, domain/port cleanup and restart contracts are unchanged.
+The failed request drops its unsubmitted producer ownership; retained observers
+are NotSubmitted rather than Applied. No recovery state or extra owner is added.
+Acceptance: real bounded-full and closed queues at1/4/final3, sparse full-u128
+IDs, real prepare/begin failures before cursor, source-anchored old-A comparison,
+and final3 failed conjuncts using actual three-Actor state. A compiled corrected-
+API old-ordering mutant must fail the generated-count assertion, then restore.
+Complete source overlay applies/compiles/runs original9 plus new untimed controls
+and reverses exactly. Normal matched default/all-feature focused tests, all3
+width/checkpoint/snapshot controls, sequential strict7 and actual enabled hook
+are required. Normal root/matched RELEASE inputs stay byte-exact e85.
+
+Current evidence only: target/claude/pillar1-20261022/cpu4-adapter-a1-fix-r6.
+Original R5 evidence/report are immutable. Report pin:28998 UTF-8 bytes,
+28960 Unicode characters, SHA2560558c758bcaa5b152a9d3cecef76cfaf8e43caebb5ad9bd44b41d00204fb9673.
+No historical pre-R5 byte hash is asserted. Parent retains exact-head source
+confirmations, independent adapter re-audit, original9pairs/conditional64/full5.
+No CPU4 timing or historical resource-HOLD clearance follows this source fix.
+
+### A1 R6 actual focused evidence
+
+Real bounded-full/closed controls pass for1/4/final3, ordinary and full-u128 IDs;
+the failed cursor yields matching real NotSubmitted envelopes, old-A oneshots
+close, counts/FIFO remaining originals and propagated errors match. Zero-ID
+Client::prepare and real public port.begin after domain close leave count/FIFO
+unchanged; an already-open idle second slot ensures the latter reaches begin.
+Final3 faults at231/515 retain generated231/515 versus old-B successful-prefix
+228/512. With actual three-Actor campaign frontiers1, both A and corrected B
+fail exactly reply_count, unreplied, commit_frontiers, applied_frontiers,
+reported_frontiers and propagated_error. Old B additionally fails expected_count.
+This is a bounded one-round/no-warmup enqueue-fault closure with a source-anchored
+old-A segment, not a full old-engine campaign or complete consensus proof.
+
+The corrected-API old-ordering mutant compiled and failed the intended
+failed-send generated-count assertion (2 versus3); exact source/full manifest
+restored. Final normal matched default59/all-feature59 pass, including original
+56; complete installed overlay12 (original9+new3) passes and reverses/checks
+byte-exact. All3 real owned applications/receipts, healthy12000/12012/12360,
+two default5000 checkpoints each, suffix/pin/lagging real snapshot and resumed
+1/231/515 delivery remain checked. Telemetry-only/skipped-count failed conjuncts
+remain reported/reply_count. No timing entrypoint ran.
+
+Frozen actual input manifest: 1555 paths, 248286 bytes,
+SHA256 ea7ed1c28273da125aeefc3fcb1597c4f4f680c732491ddd0c1f129c3d8394f2.
+Normal release source (including P2 Actor), root module/Counter/example,
+Cargo/dependencies/hooks/native/core/logical/application remain e85-equivalent.
+Unchanged root/semantic and old mutation receipts are reused by source equality,
+not claimed rerun. Parent e85 source approvals remain historical; exact new-head
+confirmations and independent adapter re-audit/performance/full5 remain pending.
+
+R6 limits: initial fixed-bootstrap intake readers were audited by the loader,
+but preceded the sampled outer observer and own stock guard. Later controlled
+checks cannot certify those early reads or short-lived/reparented/shared hosts.
+One optional .cargo/config.toml read failed; one guessed Cargo executable did
+not exist and no build started. Logs persist; actual /usr/bin/cargo was then
+observed and used. The first passing closed-domain test reached cold registration;
+it was tightened before acceptance to use an existing idle port and reach begin.
+No live resource mismatch was observed in controlled samples; original histories
+and HOLDs remain unchanged and unattributed. Strict7/actual hook follow separately.
+
+R6 final local acceptance: normal default59/all-feature59, complete overlay12,
+compiled intended old-ordering kill/exact restoration and all seven sequential
+strict checks pass with zero diagnostics on the frozen1555-input manifest.
+Actual enabled nonforce push-hook acceptance/publication is recorded separately
+in cpu4-adapter-a1-fix-r6/publication-command.log. No hook/Cargo/lint change.
+Parent confirmations/re-audit/performance/full5 and resource HOLDs remain pending.
 
 ### CPU-4 P2 repair schema before edits (23 October 2026)
 

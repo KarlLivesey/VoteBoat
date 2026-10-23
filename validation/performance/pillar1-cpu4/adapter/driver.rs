@@ -42,8 +42,7 @@ pub(crate) fn r3_drive<const TRACE: bool>(
             while left > 0 {
                 let n = left.min(per);
                 left -= n;
-                pool.enqueue(next, n)?;
-                next += n as u128;
+                pool.enqueue(&mut next, n)?;
             }
             let first = actors[0]
                 .parts
