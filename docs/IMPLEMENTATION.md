@@ -31,17 +31,19 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 
 | Mini-plan item | Purpose and dependencies | Completion checks | Advances |
 | --- | --- | --- | --- |
-| Current CPU-1: explicit commit notices without replies | Design audit on main `0bf9271e` selected a typed commit notice for eligible static physical voters, with exact emission provenance and acknowledged fallback. Remove two steady-cycle replies; preserve commit persistence and application. Compatibility changes authorised; no networking/storage tuning prerequisite | Before code: schema/API/state/ownership/failure plan and exact source map. Candidate: focused causal controls, stable/joint/learner/transfer/recovery boundaries as touched, equal-core paired driver and framework CPU/write, instruction/allocation/effect counts, strict checks and independent reviews | P1 |
-| Next CPU-2: remove the next structural cost from the measured residual | Depends on CPU-1 measurements and keep/reject decision. Consider direct volatile completion or a cheaper public embedding flow if it removes real work; do not resurrect parked networking/storage candidates | Concrete measured cost class and smallest usable implementation; unchanged client-work accounting; focused correctness, paired equal-core performance and normal merge checks | P1 |
-| Then CPU-3: optimise remaining per-original data movement and lookups | Depends on a profile of the kept CPU composition; membership/peer lookups, staging copies and batch admission are candidates, not predetermined extra helpers | Remove a measured whole class or reject it promptly; show singleton and bulk CPU/write, instructions and allocations; keep actual evidence separate from plans | P1 |
+| CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
+| Current CPU-2: remove the next structural cost from the measured residual | CPU-1 rejected as implemented; production remains `0bf9271e`. Bounded source/design audit will choose a larger core/embedding cost, considering volatile completion/staging handoffs. No parked networking/storage candidate is reopened | Concrete measured cost class and smallest usable implementation; unchanged client-work accounting; focused correctness, paired equal-core performance and normal merge checks | P1 |
+| Next CPU-3: optimise remaining per-original data movement and lookups | Depends on a profile of the kept CPU composition; membership/peer lookups, staging copies and batch admission are candidates, not predetermined extra helpers | Remove a measured whole class or reject it promptly; show singleton and bulk CPU/write, instructions and allocations; keep actual evidence separate from plans | P1 |
+| Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
 
 The 20 October V3g scratch report is input, not current-head qualification:
 `target/claude/research-r4/v3g-profile.md`. Its unqualified commit-notice prototype
 removed two messages and measured about 15% driver / 7% singleton full-path CPU.
 A new candidate must establish its own source identities, correctness and paired
-results. No new performance result or production change is claimed here.
+results. Those prototype estimates do not qualify a candidate; CPU-1 results
+are recorded below. No CPU-1 production is incorporated.
 
-CPU-1 build brief: [schema, ownership, consumer audit and causal controls](../validation/performance/pillar1-cpu1/CPU1-DESIGN.md).
+Historical CPU-1 build brief: [schema, ownership, consumer audit and causal controls](../validation/performance/pillar1-cpu1/CPU1-DESIGN.md).
 The public startup capability is equal-guarantee composition, not a weaker
 commit mode. An explicit notice uses a distinct RPC; ordinary Append heartbeats,
 probes and catch-up remain acknowledged. Exact sender emission stamps classify
@@ -51,8 +53,31 @@ Primary CPU qualification uses unchanged **default-retention** workloads, all
 original outcomes/frontiers and normal owned shutdown. Retain-all is secondary.
 The builder must prove fast-path reachability through ordinary maintenance and
 snapshot/compaction before spending a full measurement matrix; do not replace
-the primary workload or relax membership fences to obtain a score. Current
-head has no established CPU-1 result.
+the primary workload or relax membership fences to obtain a score.
+The implemented candidate was measured and rejected as recorded below.
+
+
+### CPU-1 result and rejection (23 October 2026)
+
+[PR25](https://github.com/KarlLivesey/VoteBoat/pull/25) is rejected without merge
+on performance. Source `7799b4f8` has both final Sol source approvals and enabled
+strict/push checks; its release inputs equal measured `eb32cbef` except for
+docs and cfg(test). All 64 canonical children and18 fixed-driver children passed.
+At 16 workers singleton CPU fell 5.933%, but rate fell 1.111%; at 1 worker singleton
+rate fell 3.522%. Bulk canonical CPU was near flat. The fixed driver measured
+width 1 CPU -6.890%, widths 231/515 +3.229%/+2.260%, three complete pairs each.
+No parking cause, new guard tolerance, full-suite pass or feature-wide acceptance
+is inferred. No full suite was launched after the unmet performance gate.
+[Exact inputs, controls, limits and cleanup](../validation/performance/pillar1-cpu1/CPU1-RESULT.md).
+
+Original diagnostic failures remain preserved: missing synchronous telemetry
+publication; empty-operand scratch accounting; vanished-process observer race.
+The final driver reused the checked R3 binaries without rebuilding and retained
+all original/commit/application/fence/maintenance guards. The resource helper's
+empty-input fix changed no capacity or exclusion. Every owned build/measurement
+checkout, target, Mac root and job is swept. The next deliverable is a bounded
+CPU-2 design on unchanged production, preserving all implemented VoteBoat extras.
+
 
 
 ## Networked CPU track (pillar 2, opened 19 October 2026)
