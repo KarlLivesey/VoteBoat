@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 use crate::{Failure, MAX_PROPOSAL_ENTRIES};
 use serde::Serialize;
+#[cfg(test)]
+use std::sync::atomic::AtomicU64;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 struct Widths(Box<[AtomicUsize]>);
@@ -17,6 +19,10 @@ impl Default for Widths {
 
 #[derive(Default)]
 pub(super) struct Stats {
+    #[cfg(test)]
+    pub application_receipts: AtomicU64,
+    #[cfg(test)]
+    pub application_intervals: std::sync::Mutex<Vec<(u64, u64, usize)>>,
     pub retained: AtomicUsize,
     pub peak_retained: AtomicUsize,
     pub peak_peer_queue: AtomicUsize,

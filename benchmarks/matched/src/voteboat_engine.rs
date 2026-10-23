@@ -21,17 +21,11 @@ use tokio::{
 };
 use voteboat::{identity::*, log::*, quorum::*, raft::*};
 
-type Reply = oneshot::Sender<OperationId>;
-struct Original {
-    operation: OperationId,
-    bytes: Vec<u8>,
-    reply: Reply,
-}
-struct Request {
-    originals: Vec<Original>,
-}
-#[derive(Clone)]
-pub(super) struct Client(mpsc::Sender<Request>);
+mod writes;
+use voteboat::embedding::writes::*;
+pub(super) use writes::Client;
+use writes::{Original, Reply, Request};
+
 pub(super) struct Cluster {
     senders: Vec<mpsc::Sender<Request>>,
     actors: Vec<JoinHandle<Result<Option<Attribution>, Failure>>>,
@@ -41,6 +35,8 @@ pub(super) struct Cluster {
     stop: watch::Sender<bool>,
     stats: Arc<[stats::Stats; 3]>,
     batch_limits: BatchLimits,
+    factory: WriteFactory<OperationId>,
+    port_limits: WritePortLimits,
     #[cfg(test)]
     paused: Arc<[AtomicBool; 3]>,
     #[cfg(test)]
@@ -84,6 +80,8 @@ impl Cluster {
         let proposals_pause_observed = Arc::new(std::array::from_fn(|_| AtomicBool::new(false)));
         let batch_limits = settings.envelopes.voteboat_limits(settings.batch)?;
         let mut parts = Vec::new();
+        let (port_limits, domain_limits) = writes::registration_limits(settings)?;
+        let mut factories = Vec::new();
         for (slot, (receiver, peer_receiver)) in
             receivers.into_iter().zip(peer_receivers).enumerate()
         {
@@ -100,7 +98,18 @@ impl Cluster {
             if core.batch_limits() != batch_limits {
                 return Err("Core batch limit readback differs from requested profile".into());
             }
+            let (domain, factory) = WriteDomain::new(
+                WriteBinding {
+                    group,
+                    node,
+                    store: binding,
+                },
+                domain_limits,
+            )
+            .map_err(debug_error)?;
+            factories.push(factory);
             parts.push(actor::Parts {
+                domain,
                 slot,
                 core,
                 store,
@@ -122,6 +131,7 @@ impl Cluster {
                 proposals_pause_observed: proposals_pause_observed.clone(),
             });
         }
+        let factory = factories.remove(0);
         // Validate all fallible replica construction before starting any actor.
         let actors = parts
             .into_iter()
@@ -136,6 +146,8 @@ impl Cluster {
             stop,
             stats,
             batch_limits,
+            factory,
+            port_limits,
             #[cfg(test)]
             paused,
             #[cfg(test)]
@@ -160,8 +172,8 @@ impl Cluster {
     pub fn batch_limits(&self) -> BatchLimits {
         self.batch_limits
     }
-    pub fn client(&self) -> Client {
-        Client(self.senders[0].clone())
+    pub fn client(&self) -> Result<Client, Failure> {
+        Client::new(self.senders[0].clone(), &self.factory, self.port_limits)
     }
     async fn wait_frontier(&self, expected: u64) -> Result<(), Failure> {
         tokio::time::timeout(Duration::from_secs(10), async {
@@ -211,31 +223,6 @@ impl Cluster {
         first.map_or(Ok(()), Err)
     }
 }
-impl Client {
-    pub async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
-        let mut entries = Vec::with_capacity(originals.len());
-        let mut waits = Vec::with_capacity(originals.len());
-        for &original in originals {
-            let operation = OperationId::new(original).ok_or("zero original identity")?;
-            let (reply, wait) = oneshot::channel();
-            entries.push(Original {
-                operation,
-                bytes: Vec::new(),
-                reply,
-            });
-            waits.push(wait);
-        }
-        self.0.send(Request { originals: entries }).await?;
-        let mut expected = originals.iter();
-        for wait in waits {
-            let applied = wait.await?;
-            if expected.next().copied() != Some(applied.get()) {
-                return Err("VoteBoat original applied result differs".into());
-            }
-        }
-        Ok(originals.len())
-    }
-}
 fn debug_error(error: impl std::fmt::Debug) -> Failure {
     format!("{error:?}").into()
 }
@@ -281,12 +268,14 @@ mod tests {
                 originals.push(Original {
                     operation,
                     bytes: Vec::new(),
-                    reply,
+                    reply: Reply::Owned(reply),
                 });
                 waits.push(wait);
             }
             assert!(
-                cluster.senders[0].try_send(Request { originals }).is_ok(),
+                cluster.senders[0]
+                    .try_send(Request::Owned { originals })
+                    .is_ok(),
                 "preloaded requests must fit the bounded admission queue"
             );
         }
@@ -373,7 +362,7 @@ mod tests {
             .unwrap();
             let mut cluster = Cluster::new(settings).await.unwrap();
             cluster.pause_follower(2, true);
-            let client = cluster.client();
+            let mut client = cluster.client().unwrap();
             for start in (1..=12_000).step_by(4) {
                 let originals: Vec<_> = (start..start + 4).map(|n| n as u128).collect();
                 let completed = match tokio::time::timeout(
@@ -495,3 +484,6 @@ mod client_requests;
 
 #[cfg(test)]
 mod client_outcomes;
+
+#[cfg(test)]
+mod client_fixture;

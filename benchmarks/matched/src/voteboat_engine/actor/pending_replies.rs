@@ -84,6 +84,15 @@ impl<T> PendingReplies<T> {
         previous
     }
 
+    pub fn get_mut(&mut self, operation: &OperationId) -> Option<&mut T> {
+        let (key, slot) = location(*operation);
+        let index = match self.cached {
+            Some((cached, index)) if cached == key => index,
+            _ => *self.index.get(&key)?,
+        };
+        self.cached = Some((key, index));
+        self.blocks[index].slots[slot].as_mut()
+    }
     pub fn remove(&mut self, operation: &OperationId) -> Option<T> {
         let (key, slot) = location(*operation);
         let index = match self.cached {

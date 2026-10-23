@@ -4035,6 +4035,39 @@
         "tests/native_relay/envelopes.rs"
       ],
       "scope": "Fixed owned helper-capture chain, not a quorum/readiness token or a route catalog. Linux actual native histories exercise hops/len; the empty predicate is a simple unqualified observation, not new authority. Source view and native relay qualification remain scoped separately; no arbitrary-provider or global path certification."
+    },
+    {
+      "design_id": "C08/C10/C14",
+      "public_contract": "embedding::writes::{WriteDomain, WriteFactory, WritePort, WriteSubmission, WriteInvocation, OriginalReply, OriginalEnvelope}",
+      "operations": [
+        "new",
+        "open_port",
+        "begin",
+        "validate_submission",
+        "take_next",
+        "bind_proposal",
+        "publish_applied",
+        "not_submitted",
+        "unknown",
+        "waiter",
+        "try_take",
+        "cancel_wait",
+        "finish",
+        "reap",
+        "close",
+        "usage",
+        "required_bytes"
+      ],
+      "native": "Safe std-only bounded delivery ownership, available without default features. Unique host authority plus separate fallible cold registration; real public Counter host and normal matched Client/Actor consume the same public API.",
+      "conformance": [
+        "src/embedding/writes/tests.rs",
+        "tests/write_ports.rs",
+        "examples/inprocess_counter_delivery.rs",
+        "benchmarks/matched/src/voteboat_engine/actor/tests/ports.rs",
+        "benchmarks/matched/src/voteboat_engine/client_requests.rs",
+        "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+      ],
+      "scope": "One invocation and one actively polled waiter per independent reusable port. Full group/node/store/domain/epoch/generation/ordinal/ID/content/position correlation; routing is not a commit certificate. Actual whole-interval apply and all3 owned receipts remain host obligations. Affine accepted ownership survives cancellation; genuine owners and exported envelopes retain byte/registration reservations. Quiescent generation exhaustion renews an opaque epoch. Per-port locks and atomic readiness/waker registration; callbacks and arbitrary R destruction outside locks. Domain close preserves Applied and cannot revive through a factory. Existing StateMachine/native/logical/durable contracts and owned fallback remain functional. See validation/performance/pillar1-cpu4/CPU4-DESIGN.md and CPU4-VALIDATION.md for actual tests, compiled mutants, costs and pending parent qualification; no CPU gain/full-suite claim."
     }
   ],
   "not_yet_implemented": [

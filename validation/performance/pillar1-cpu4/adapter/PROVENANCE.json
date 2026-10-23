@@ -1,0 +1,55 @@
+{
+  "reference_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu1-driver-r3/driver-addition.rs",
+  "reference": {
+    "size": 6411,
+    "sha256": "c2b3bf066abcc02419b0d2c485ffddbacad4e4c612eadcd527b7b2c3b2b172f0"
+  },
+  "patch": {
+    "size": 1027,
+    "sha256": "143a106d681d97a759e3697c7acc72b3f158b7436d3833c4a9546c3262e83679"
+  },
+  "before": {
+    "benchmarks/matched/src/voteboat_engine.rs": {
+      "size": 18495,
+      "sha256": "1025d56c75b38523034d93b605b65c8946a26bcecbd0bc44c4bcc5a65d8462b9"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor.rs": {
+      "size": 28542,
+      "sha256": "c8370a922e2476080ae6b697dcb95fd73fc6c5ef14958a3d448b5200e572802b"
+    }
+  },
+  "after": {
+    "benchmarks/matched/src/voteboat_engine.rs": {
+      "size": 18651,
+      "sha256": "b780b9717aec96bf3d98f5a6b480cd2875aa8e25b9a9727ae0c366033d067e79"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor.rs": {
+      "size": 28646,
+      "sha256": "0517ab6246549fbe286a3f961fcb7854d95016fdbfc0588022b75f02ab97d184"
+    }
+  },
+  "timing_executed": false,
+  "independent_old_new_audit": "parent pending",
+  "guards": "same ten original final conjuncts; unreplied counts remaining originals",
+  "initial_unformatted_driver": {
+    "size": 6260,
+    "sha256": "2c780fce0964e6915aac3901fca0e414034c5ba4f6b74118042aa40ac7bcefef"
+  },
+  "driver": {
+    "size": 6713,
+    "sha256": "2b41b95fee184c92c92c09cb53ba8b9eb6e28c5f31bf04f69cd41eead7f1fe51"
+  },
+  "pool": {
+    "size": 7241,
+    "sha256": "7e524c7e8728b9605bb267212cc8cae58baf5912d63d7eff4c3d01295f2908b0"
+  },
+  "steps": {
+    "size": 1093,
+    "sha256": "23b6b16d720f741f3b658087e2c57da70eb856d57776bcc34101e360ee1ec024"
+  },
+  "final_functional_build": {
+    "size": 247737,
+    "sha256": "628a35d4a9f537bd1dfa7a776b552a6ef3dc9e896ccec91b9c14777826da4739"
+  },
+  "timing_entrypoint_execution": "not invoked; full source compiled and nine untimed public-path controls executed"
+}

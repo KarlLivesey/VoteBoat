@@ -1,0 +1,29 @@
+--- a/benchmarks/matched/src/voteboat_engine.rs
++++ b/benchmarks/matched/src/voteboat_engine.rs
+@@ -130,6 +130,10 @@
+                 #[cfg(test)]
+                 proposals_pause_observed: proposals_pause_observed.clone(),
+             });
++        }
++        if let Ok(spec) = std::env::var("R3_DRIVE") {
++            actor::r3_drive(parts, &senders[0], &spec)?;
++            std::process::exit(0);
+         }
+         let factory = factories.remove(0);
+         // Validate all fallible replica construction before starting any actor.
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -751,9 +751,11 @@
+     }
+ }
+ 
+-#[cfg(test)]
+ #[path = "../../../../validation/performance/pillar1-cpu4/adapter/ports.rs"]
+ mod r3_ports;
+-#[cfg(test)]
+ #[path = "../../../../validation/performance/pillar1-cpu4/adapter/steps.rs"]
+ mod r3_steps;
++
++#[path = "../../../../validation/performance/pillar1-cpu4/adapter/driver.rs"]
++mod r3_driver;
++pub(super) use r3_driver::r3_drive;

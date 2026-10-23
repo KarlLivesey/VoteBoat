@@ -9,15 +9,19 @@ use super::*;
 // Only slot 0 delivers client results, so this test checks application.
 const LEADER: usize = 1;
 
-struct Replicas {
-    actors: Vec<Actor>,
-    clients: Vec<mpsc::Sender<Request>>,
+pub(super) struct Replicas {
+    pub actors: Vec<Actor>,
+    pub clients: Vec<mpsc::Sender<Request>>,
+    pub factories: Vec<WriteFactory<OperationId>>,
     stop: watch::Sender<bool>,
 }
 
 fn replicas() -> Replicas {
+    replicas_for(16)
+}
+pub(super) fn replicas_for(client_count: usize) -> Replicas {
     let settings = Settings {
-        clients: 16,
+        clients: client_count,
         server_workers: crate::DEFAULT_SERVER_WORKERS,
         batch: 4,
         requested_operations: 16384,
@@ -45,6 +49,7 @@ fn replicas() -> Replicas {
     let paused = Arc::new(std::array::from_fn(|_| AtomicBool::new(false)));
     let paused_proposals = Arc::new(AtomicBool::new(false));
     let proposals_pause_observed = Arc::new(std::array::from_fn(|_| AtomicBool::new(false)));
+    let mut factories = Vec::new();
     let actors = receivers
         .into_iter()
         .zip(peer_receivers)
@@ -59,7 +64,21 @@ fn replicas() -> Replicas {
             let state = store.log.bootstrap(&bootstrap).unwrap();
             let mut core = Raft::recover_volatile(node, &store.log, state).unwrap();
             core.configure_batch_limits(batch_limits).unwrap();
+            let (domain, factory) = WriteDomain::new(
+                WriteBinding {
+                    group,
+                    node,
+                    store: binding,
+                },
+                WriteDomainLimits {
+                    ports: client_count + 1,
+                    retained_bytes: 256 * 1024 * 1024,
+                },
+            )
+            .unwrap();
+            factories.push(factory);
             Actor::new(Parts {
+                domain,
                 slot,
                 core,
                 store,
@@ -83,6 +102,7 @@ fn replicas() -> Replicas {
         actors,
         clients,
         stop,
+        factories,
     }
 }
 
@@ -107,10 +127,10 @@ fn request(ids: std::ops::RangeInclusive<u128>) -> Request {
         .map(|id| Original {
             operation: OperationId::new(id).unwrap(),
             bytes: Vec::new(),
-            reply: oneshot::channel().0,
+            reply: Reply::Owned(oneshot::channel().0),
         })
         .collect();
-    Request { originals }
+    Request::Owned { originals }
 }
 
 fn leader_widths(actors: &[Actor]) -> serde_json::Value {
@@ -133,6 +153,7 @@ async fn peer_progress_during_a_pass_waits_for_it_and_precedes_the_next_pass() {
         mut actors,
         clients,
         stop,
+        factories: _,
     } = replicas();
     actors[LEADER].step(Event::Campaign).unwrap();
     settle(&mut actors);
@@ -266,7 +287,7 @@ fn a_request_queued_after_the_pass_starts_waits_for_the_next_pass() {
 
     // The next pass takes the late request alone.
     let late = actors[LEADER].parts.receiver.try_recv().unwrap();
-    let late_ids: Vec<_> = late.originals.iter().map(|o| o.operation).collect();
+    let late_ids: Vec<_> = late.owned_originals().iter().map(|o| o.operation).collect();
     let expected: Vec<_> = (17..=20).map(|id| OperationId::new(id).unwrap()).collect();
     assert_eq!(late_ids, expected);
     actors[LEADER].requests(late).unwrap();

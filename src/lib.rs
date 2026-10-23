@@ -28,6 +28,7 @@ pub mod dial;
 pub mod directory;
 pub mod discovery;
 pub mod drain;
+pub mod embedding;
 mod format_crc;
 pub mod identity;
 pub mod log;

@@ -14,12 +14,14 @@ fn commit_update<const TRACE: bool>(
         originals.push(Original {
             operation,
             bytes: bytes.to_vec(),
-            reply,
+            reply: Reply::Owned(reply),
         });
         waits.push(wait);
     }
     let mut batch = staging(actor);
-    actor.include(Request { originals }, &mut batch).unwrap();
+    actor
+        .include(Request::Owned { originals }, &mut batch)
+        .unwrap();
     let mut initial = actor.parts.core.propose_entries(batch).unwrap();
     assert_eq!(initial.len(), 1);
     let Effect::PersistVolatile(append) = initial.remove(0) else {

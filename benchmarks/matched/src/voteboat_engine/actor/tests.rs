@@ -5,6 +5,7 @@ use super::*;
 mod collection;
 mod completion;
 mod originals;
+mod ports;
 mod replies;
 
 fn staging<const TRACE: bool>(actor: &Actor<TRACE>) -> ProposalBatch {
@@ -21,6 +22,17 @@ fn ready_actor_clients<const TRACE: bool>(
     envelopes: crate::Envelopes,
     clients: usize,
 ) -> (Actor<TRACE>, mpsc::Sender<Request>) {
+    let (actor, sender, _) = ready_actor_with_factory(envelopes, clients);
+    (actor, sender)
+}
+fn ready_actor_with_factory<const TRACE: bool>(
+    envelopes: crate::Envelopes,
+    clients: usize,
+) -> (
+    Actor<TRACE>,
+    mpsc::Sender<Request>,
+    WriteFactory<OperationId>,
+) {
     let node = NodeId::new(1).unwrap();
     let mut bootstrap = bootstrap().unwrap();
     bootstrap.voter_stores.retain(|member, _| *member == node);
@@ -64,7 +76,20 @@ fn ready_actor_clients<const TRACE: bool>(
     .validate()
     .unwrap();
     let (sender, receiver) = mpsc::channel(CHANNEL_CAPACITY);
+    let (domain, factory) = WriteDomain::new(
+        WriteBinding {
+            group,
+            node,
+            store: binding,
+        },
+        WriteDomainLimits {
+            ports: clients + 1,
+            retained_bytes: 256 * 1024 * 1024,
+        },
+    )
+    .unwrap();
     let parts = Parts {
+        domain,
         slot: 0,
         core,
         store,
@@ -85,7 +110,7 @@ fn ready_actor_clients<const TRACE: bool>(
     let mut actor = Actor::new(parts);
     actor.step(Event::Campaign).unwrap();
     assert_eq!(actor.parts.core.role(), Role::Leader);
-    (actor, sender)
+    (actor, sender, factory)
 }
 
 #[test]
@@ -170,11 +195,11 @@ fn preload(sender: &mpsc::Sender<Request>) -> Vec<(OperationId, oneshot::Receive
             originals.push(Original {
                 operation,
                 bytes: Vec::new(),
-                reply,
+                reply: Reply::Owned(reply),
             });
             waits.push((operation, wait));
         }
-        assert!(sender.try_send(Request { originals }).is_ok());
+        assert!(sender.try_send(Request::Owned { originals }).is_ok());
     }
     waits
 }
@@ -229,11 +254,11 @@ fn checked_checkpoint_scopes<const TRACE: bool>() {
             originals.push(Original {
                 operation,
                 bytes: Vec::new(),
-                reply,
+                reply: Reply::Owned(reply),
             });
             waits.push((operation, wait));
         }
-        actor.requests(Request { originals }).unwrap();
+        actor.requests(Request::Owned { originals }).unwrap();
         actor.maintain().unwrap();
         for (expected, mut wait) in waits {
             assert_eq!(wait.try_recv().unwrap(), expected);

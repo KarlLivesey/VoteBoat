@@ -16,11 +16,11 @@ fn request(ids: &[OperationId], mixed: bool) -> (Request, Vec<Wait>) {
         originals.push(Original {
             operation,
             bytes,
-            reply,
+            reply: Reply::Owned(reply),
         });
         waits.push(wait);
     }
-    (Request { originals }, waits)
+    (Request::Owned { originals }, waits)
 }
 
 fn commands(actor: &Actor<false>) -> Vec<(OperationId, Vec<u8>)> {
@@ -45,23 +45,36 @@ fn queued_boundary_stages_mixed_originals_without_receipts_and_drop_cancels_them
         .map(|n| OperationId::new(u128::MAX ^ n as u128).unwrap())
         .collect();
     let (first, mut first_waits) = request(&ids, true);
-    let expected: Vec<_> = first.originals.iter().map(|o| o.bytes.clone()).collect();
+    let expected: Vec<_> = first
+        .owned_originals()
+        .iter()
+        .map(|o| o.bytes.clone())
+        .collect();
     let tail_ids = [
         OperationId::new((1 << 127) | 17).unwrap(),
         OperationId::new(u128::MAX).unwrap(),
     ];
     let (tail, mut tail_waits) = request(&tail_ids, true);
-    let tail_bytes: Vec<_> = tail.originals.iter().map(|o| o.bytes.clone()).collect();
+    let tail_bytes: Vec<_> = tail
+        .owned_originals()
+        .iter()
+        .map(|o| o.bytes.clone())
+        .collect();
     assert!(sender.try_send(tail).is_ok());
     let batch = actor.collect(first).unwrap().into_batch();
     assert_eq!(batch.len(), width - 1);
     assert_eq!(actor.pending.len(), width - 1);
-    assert_eq!(actor.deferred.as_ref().unwrap().originals.len(), 2);
+    assert_eq!(actor.deferred.as_ref().unwrap().len(), 2);
     for wait in first_waits.iter_mut().chain(&mut tail_waits) {
         assert_eq!(wait.try_recv(), Err(oneshot::error::TryRecvError::Empty));
     }
     let deferred = actor.deferred.as_ref().unwrap();
-    for ((original, id), bytes) in deferred.originals.iter().zip(&tail_ids).zip(&tail_bytes) {
+    for ((original, id), bytes) in deferred
+        .owned_originals()
+        .iter()
+        .zip(&tail_ids)
+        .zip(&tail_bytes)
+    {
         assert_eq!(original.operation, *id);
         assert_eq!(&original.bytes, bytes);
     }
@@ -103,7 +116,10 @@ fn queued_boundary_empty_originals_commit_in_order_after_deferral() {
         assert_eq!(wait.try_recv(), Err(oneshot::error::TryRecvError::Empty));
     }
     let deferred = actor.deferred.take().unwrap();
-    assert!(deferred.originals.iter().all(|o| o.bytes.is_empty()));
+    assert!(deferred
+        .owned_originals()
+        .iter()
+        .all(|o| o.bytes.is_empty()));
     actor.requests(deferred).unwrap();
     for (id, wait) in tail_ids.iter().zip(&mut tail_waits) {
         assert_eq!(wait.try_recv().unwrap(), *id);
@@ -139,7 +155,7 @@ fn empty_and_oversized_shapes_precede_full_pending_budget_without_admission() {
     assert_eq!(
         actor
             .include(
-                Request {
+                Request::Owned {
                     originals: Vec::new()
                 },
                 &mut batch
@@ -184,11 +200,11 @@ fn width_one_passes_use_the_propose_event_and_staging_matches_it() {
         // original for the core's single-proposal event.
         let (reply, mut wait) = oneshot::channel();
         let collected = event
-            .collect(Request {
+            .collect(Request::Owned {
                 originals: vec![Original {
                     operation,
                     bytes: bytes.clone(),
-                    reply,
+                    reply: Reply::Owned(reply),
                 }],
             })
             .unwrap();
@@ -231,9 +247,15 @@ fn width_one_passes_use_the_propose_event_and_staging_matches_it() {
             })
             .unwrap();
         let (staged_reply, mut staged_wait) = oneshot::channel();
-        assert!(staged.pending.insert(operation, staged_reply).is_none());
+        assert!(staged
+            .pending
+            .insert(operation, Reply::Owned(staged_reply))
+            .is_none());
         let (old_reply, mut old_wait) = oneshot::channel();
-        assert!(old.pending.insert(operation, old_reply).is_none());
+        assert!(old
+            .pending
+            .insert(operation, Reply::Owned(old_reply))
+            .is_none());
         staged.effects(effects).unwrap();
         old.effects(expected).unwrap();
         event.effects(event_effects).unwrap();

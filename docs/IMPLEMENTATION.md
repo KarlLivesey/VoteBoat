@@ -34,9 +34,50 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
 | CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
 | CPU-3: rejected after canonical observations | PR27 public receipt-capacity reuse passed driver gate but canonical singleton CPU/rate did not improve; resource reporting assertion remains unresolved | Both exact-head Sol source approvals, focused325/6mutants/strict+hook green; driver18/18 and canonical64/64 functional checks passed. No full suites. [Result](../validation/performance/pillar1-cpu3/CPU3-RESULT.md) | P1 evidence |
-| Current CPU-4: locate a larger actual embedding cost | Production remains0bf; driver improvements did not carry across all canonical cells. Bounded baseline profiles of real asynchronous in-process client/Actor/completion paths, no candidate or causal claim about CPU3 | Fixed diagnostic-only protocol, exact original/application/normal-shutdown checks, useful running-stack coverage, source/owner map and one supported removal or explicit no-go | P1 |
-| Next CPU-4 implementation and qualification | Depends on that evidence selecting one bounded production/public embedding change while preserving every implemented feature | Schema/ownership/failure plan; checked focused candidate; fresh dual Sol review and original paired CPU/rate/p99 gates. Preserve all failures and no replacement/tolerance | P1 |
-| Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
+| Current CPU-4: preserved candidate, focused R3 gates passed | Purpose: remove fresh per-original channel/request ownership on the actual Rust embedding. Dependencies: existing public core/application, safe std, unique host plus bounded registration factory. [Schema and inventory plan](../validation/performance/pillar1-cpu4/CPU4-DESIGN.md) | Focused public Counter/normal matched ownership, cancellation, bounds/races/ABA, partial/FIFO failures, all3 default checkpoints/catch-up, compiled changed-branch controls, strict7 and actual enabled push hook. R3 public15+Counter4 in all4 configs and example; matched56; compiled9 mutants/restored; final source-only overlay compiled/nine untimed controls; inventory/matrix complete. Exact sequential strict7 passed with zero diagnostics; actual enabled nonforce push hook/publication next | P1 |
+| Next CPU-4: qualification or rejection (parent) | Purpose: determine actual equal-core CPU benefit. Dependencies: checked exact source/adapter, independent old/new schedule audit and two fresh Sol source approvals | Original9pairs, conditional64 canonical CPU/rate/p99/normal shutdown, then full5 only after worthwhile performance; original gates unchanged | P1 |
+| Then P1: retained composition (parent) | Purpose: qualify the kept public/native feature composition. Dependencies: successful CPU qualification and feature preservation | Exact-head full5/unskipped normal-debug exhaustive relay/docs/strict7+hook; no perfection claim, future work from measured residual | P1 |
+
+
+### CPU-4 R3 continuation schema and status (23 October 2026)
+
+Continue the same bounded candidate from R2, without redesign or new slices.
+Independent R3 restoration matched the required full-patch SHA256
+`acec671596ddaa3e28afd6c7ff8a2a9a1790276ae29045b7fbb87678a2b80762`,
+the stopped manifest and all32 stopped-source file hashes/sizes before edits.
+The existing schema still defines API/data, affine ownership, epoch/generation
+transitions, failure fencing and cleanup. No release guarantee or scope changes.
+
+Current deliverable purpose/dependencies/checks remain the CPU-4 row above.
+Remaining work: execute final15 module tests and4 public integration controls in
+all4 feature configurations plus the actual example; rerun affected normal
+Actor tests after R2 helper extraction; reconcile component inventory and
+semantic feature coverage; compile all intended changed-branch mutants and
+restore exact inputs; deliver the full source-only R3 adapter and functional
+traces/negative controls; freeze final inputs; sequential strict7 and actual
+enabled hook; checked commit/push/draft PR then immediate owned cleanup.
+The next two parent deliverables and P1 macro milestone remain as above.
+
+R2 module14/Counter3/engine52/public-path9/width1,231,515 checkpoint and snapshot
+passes, and partial root/matched lint passes are historical only. Its helper
+SyntaxError and missing-file invocation preceded audit setup; settings and
+identities are UNKNOWN. No live mismatch, mutant installation or CPU failure
+was established. Original evidence and resource/read/input coverage limits stay
+immutable; CPU3 resource HOLD is unchanged. R3 evidence belongs only under
+`target/claude/pillar1-20261022/cpu4-builder-r3` in the parent checkout.
+
+R3 uses the parent-fixed bootstrap before payload read/compile and an owned
+descendant/thread observer with preexec absolute19/cores0-3 and join-before-error.
+New local controller/build-input helpers are solely the evidence mechanism
+required for this deliverable; they add no product prerequisite or runtime.
+Source-only semantic evidence is distinct from execution and future full5,
+original9pairs/conditional64, independent adapter audit and dual source reviews.
+No CPU gain/full qualification is claimed.
+
+
+### CPU-4 R3 actual focused evidence (23 October 2026)
+
+Public module15 and public Counter4 pass in each of default/all/no-default/native-only; actual no-default example ran. Normal matched56 passed after the preserved late lint/helper extraction. All9 intended changed-branch semantic mutants compiled, failed intended assertions and restored exact bytes. Full formatted SOURCE-ONLY R3 overlay compiled with9 untimed public-path controls; normal engine/Actor restored exactly. Application23/directory31/membership32/quorum6/logical persistence2 passed. Component inventory and [semantic matrix, receipts, costs and limitations](../validation/performance/pillar1-cpu4/CPU4-VALIDATION.md) distinguish actual execution/source-unchanged evidence from pending parent full5. [Full adapter and provenance](../validation/performance/pillar1-cpu4/adapter/README.md) preserve original schedule/guard cardinality/carry without owned fallback. No timer entrypoint, performance/fullsuite/Macbuild or subagent ran. Exact strict7 and actual enabled hook/publication remain next; parent reviews/untimed independent adapter audit/original9pairs/conditional64/full5 remain separate. P1 macro and next-two deliverables are unchanged.
 
 The 20 October V3g scratch report is input, not current-head qualification:
 `target/claude/research-r4/v3g-profile.md`. Its unqualified commit-notice prototype
@@ -43215,3 +43256,8 @@ Remaining after round 2:
   `DialWork` with the same wrapper.
 - Single-cluster waits while other clusters are borrowed by the lower host
   still leave those clusters unpolled for their duration (unchanged).
+
+
+### CPU-4 R3 final local checks before publication
+
+All seven exact sequential checks passed on one unchanged actual input manifest: rootfmt; default/all/no-default/native strict locked offline keep-going all-target Clippy; matchedfmt and separate matched locked offline all-target strict Clippy. Zero diagnostics; enabled .githooks/pre-push is unchanged. FINAL-seven-strict-checks.json and FINAL-actual-build-input-manifest.json are in parent-safe cpu4-builder-r3. Checked commit/nonforce push/DRAFT PR and immediate cleanup follow; the actual push hook receipt is recorded there after execution, not predicted here. Parent main remains exactffea/clean. No CPU gain/full-suite qualification; all parent gates remain pending. Initial R3 POSIX read bridges lacked full persisted identity/descendant rows and cannot establish absolute priority; later bootstrap/controlled-build receipts do not certify those reads. R3-LIMITS.md preserves this plus bounded-display/search/classifier limits; original R1/R2 gaps and CPU3 HOLD are unchanged.

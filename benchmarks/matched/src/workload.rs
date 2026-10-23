@@ -9,7 +9,6 @@ pub(super) enum Cluster {
     Openraft(openraft_engine::Cluster),
     Voteboat(voteboat_engine::Cluster),
 }
-#[derive(Clone)]
 enum Client {
     Openraft(openraft_engine::Client),
     Voteboat(voteboat_engine::Client),
@@ -29,10 +28,10 @@ impl Cluster {
             _ => Err("unknown engine".into()),
         }
     }
-    fn client(&self) -> Client {
+    fn client(&self) -> Result<Client, Failure> {
         match self {
-            Self::Openraft(c) => Client::Openraft(c.client()),
-            Self::Voteboat(c) => Client::Voteboat(c.client()),
+            Self::Openraft(c) => Ok(Client::Openraft(c.client())),
+            Self::Voteboat(c) => c.client().map(Client::Voteboat),
         }
     }
     async fn verify(&self, settings: Settings) -> Result<Vec<u64>, Failure> {
@@ -49,7 +48,7 @@ impl Cluster {
     }
 }
 impl Client {
-    async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
+    async fn write(&mut self, originals: &[u128]) -> Result<usize, Failure> {
         match self {
             Self::Openraft(c) => c.write(originals).await,
             Self::Voteboat(c) => c.write(originals).await,
@@ -103,7 +102,7 @@ struct Completed {
     latencies: Vec<u64>,
 }
 async fn client_loop(
-    client: Client,
+    mut client: Client,
     id: usize,
     settings: Settings,
     start: Arc<Barrier>,
@@ -128,7 +127,7 @@ async fn client_loop(
     })
 }
 pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Report, Failure> {
-    let client = cluster.client();
+    let mut client = cluster.client()?;
     for original in 1..=settings.warmup {
         if client.write(&[original as u128]).await? != 1 {
             return Err("warmup original completion differs".into());
@@ -137,7 +136,7 @@ pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Rep
     let start = Arc::new(Barrier::new(settings.clients + 1));
     let mut tasks = tokio::task::JoinSet::new();
     for id in 0..settings.clients {
-        tasks.spawn(client_loop(client.clone(), id, settings, start.clone()));
+        tasks.spawn(client_loop(cluster.client()?, id, settings, start.clone()));
     }
     let now = Instant::now();
     start.wait().await;

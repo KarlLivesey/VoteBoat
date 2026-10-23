@@ -16,11 +16,11 @@ fn request(ids: &[OperationId]) -> (Request, Vec<Wait>) {
         originals.push(Original {
             operation,
             bytes: Vec::new(),
-            reply,
+            reply: Reply::Owned(reply),
         });
         waits.push(wait);
     }
-    (Request { originals }, waits)
+    (Request::Owned { originals }, waits)
 }
 
 fn received(waits: Vec<Wait>, ids: &[OperationId]) {
@@ -145,7 +145,9 @@ fn checked_budget(clients: usize) {
     );
     canceled(&mut over_waits[0]);
     let (mut malformed, mut malformed_waits) = request(&[operation(3)]);
-    malformed.originals.clear();
+    if let Request::Owned { originals } = &mut malformed {
+        originals.clear();
+    }
     assert_eq!(
         actor
             .include(malformed, &mut proposals)

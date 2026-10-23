@@ -16,6 +16,8 @@ mod tests;
 
 mod pending_replies;
 use pending_replies::PendingReplies;
+mod applied;
+use applied::Applied;
 
 /// One collection pass's originals.
 enum Collected {
@@ -42,6 +44,7 @@ impl Collected {
 
 pub(super) struct Parts<const TRACE: bool = false> {
     pub slot: usize,
+    pub domain: WriteDomain<OperationId>,
     pub core: Raft,
     pub store: VolatileStore<TRACE>,
     pub snapshots: MemorySnapshots<TRACE>,
@@ -71,6 +74,7 @@ pub(super) struct Actor<const TRACE: bool = false> {
     /// drain (such as `record_proposals` after a core call) ends the actor.
     queue: VecDeque<Effect>,
     last_snapshot_at: u64,
+    unbound: Option<(u64, usize)>,
     last_contact: Instant,
     #[cfg(test)]
     tick_paused: bool,
@@ -88,6 +92,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             deferred: None,
             queue: VecDeque::new(),
             last_snapshot_at: 0,
+            unbound: None,
             last_contact: Instant::now(),
             #[cfg(test)]
             tick_paused: false,
@@ -244,6 +249,14 @@ impl<const TRACE: bool> Actor<TRACE> {
         );
         let collected = collected?;
         let width = collected.len();
+        let first = self
+            .parts
+            .core
+            .state()
+            .last_index()
+            .checked_add(1)
+            .ok_or("proposal index exhausted")?;
+        self.unbound = Some((first, width));
         let started = Recorder::<TRACE>::start();
         let result = match collected {
             Collected::One(operation, bytes) => self
@@ -272,7 +285,7 @@ impl<const TRACE: bool> Actor<TRACE> {
         }
         // A pass of one original takes the core's single-proposal event, as
         // before the builder; the builder stages wider passes once.
-        if ready == 0 && first.originals.len() == 1 {
+        if ready == 0 && first.len() == 1 {
             let (operation, bytes) = self.include_one(first)?;
             self.reserve(size_of::<Event>() + bytes.capacity())?;
             return Ok(Collected::One(operation, bytes));
@@ -281,13 +294,13 @@ impl<const TRACE: bool> Actor<TRACE> {
         let mut batch = self
             .parts
             .core
-            .proposal_batch(first.originals.len().min(capacity))
+            .proposal_batch(first.len().min(capacity))
             .map_err(debug_error)?;
         self.include(first, &mut batch)?;
         while batch.len() < capacity && ready > 0 {
             ready -= 1;
             match self.parts.receiver.try_recv() {
-                Ok(request) if batch.len() + request.originals.len() <= capacity => {
+                Ok(request) if batch.len() + request.len() <= capacity => {
                     self.include(request, &mut batch)?;
                 }
                 Ok(request) => {
@@ -304,24 +317,24 @@ impl<const TRACE: bool> Actor<TRACE> {
         Ok(Collected::Batch(batch))
     }
     fn admissible(&self, request: &Request) -> Result<(), Failure> {
-        if request.originals.is_empty()
-            || request.originals.len() > self.parts.core.batch_limits().max_proposal_entries
+        if request.is_empty() || request.len() > self.parts.core.batch_limits().max_proposal_entries
         {
             return Err("original proposal/reply shape differs".into());
         }
-        if self.pending.len() + request.originals.len() > self.parts.settings.clients * 4 + 1 {
+        if self.pending.len() + request.len() > self.parts.settings.clients * 4 + 1 {
             return Err("original result budget exceeded".into());
         }
         Ok(())
     }
     fn include(&mut self, request: Request, batch: &mut ProposalBatch) -> Result<(), Failure> {
         self.admissible(&request)?;
-        for Original {
-            operation,
-            bytes,
-            reply,
-        } in request.originals
-        {
+        request.validate(&self.parts.domain)?;
+        for original in request.into_originals() {
+            let Original {
+                operation,
+                bytes,
+                reply,
+            } = original?;
             if self.pending.insert(operation, reply).is_some() {
                 return Err("duplicate original admission".into());
             }
@@ -332,11 +345,12 @@ impl<const TRACE: bool> Actor<TRACE> {
     /// `include` for a request of exactly one original, without a builder.
     fn include_one(&mut self, request: Request) -> Result<(OperationId, Vec<u8>), Failure> {
         self.admissible(&request)?;
+        request.validate(&self.parts.domain)?;
         let Some(Original {
             operation,
             bytes,
             reply,
-        }) = request.originals.into_iter().next()
+        }) = request.into_originals().next().transpose()?
         else {
             return Err("original proposal/reply shape differs".into());
         };
@@ -344,6 +358,31 @@ impl<const TRACE: bool> Actor<TRACE> {
             return Err("duplicate original admission".into());
         }
         Ok((operation, bytes))
+    }
+    fn bind_installed(&mut self) -> Result<(), Failure> {
+        let Some((first, count)) = self.unbound else {
+            return Ok(());
+        };
+        for ordinal in 0..count {
+            let index = first
+                .checked_add(ordinal as u64)
+                .ok_or("proposal index exhausted")?;
+            let entry = self
+                .parts
+                .core
+                .state()
+                .entry_at(index)
+                .ok_or("actual proposal not installed")?;
+            let EntryPayload::Command { operation, .. } = &entry.payload else {
+                return Err("actual proposal is not a command".into());
+            };
+            self.pending
+                .get_mut(operation)
+                .ok_or("missing original proposal binding")?
+                .bind(&self.parts.domain, entry)?;
+        }
+        self.unbound = None;
+        Ok(())
     }
     /// Handle owned effects from a helper that returns them.
     fn effects(&mut self, initial: Vec<Effect>) -> Result<(), Failure> {
@@ -408,14 +447,17 @@ impl<const TRACE: bool> Actor<TRACE> {
                 .finish(Phase::PersistHelper, started, result.is_err(), 0);
             // The following effects wait in the queue until this interval
             // is applied.
-            if let Some(entries) = result.map_err(debug_error)? {
-                Self::apply_entries(
+            match result.map_err(debug_error)? {
+                Some(entries) => Self::apply_entries(
                     &mut self.parts.application,
                     &mut self.pending,
+                    &self.parts.domain,
                     &self.attribution,
                     self.parts.slot,
-                    |application| application.apply_entries(entries),
-                )?;
+                    Applied::Borrowed(entries),
+                    &self.parts.stats[self.parts.slot],
+                )?,
+                None => self.bind_installed()?,
             }
         } else {
             // Existing FIFO work precedes every newly completed effect.
@@ -427,6 +469,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             self.attribution
                 .finish(Phase::PersistHelper, started, result.is_err(), 0);
             result.map_err(debug_error)?;
+            self.bind_installed()?;
         }
         Ok(())
     }
@@ -454,20 +497,24 @@ impl<const TRACE: bool> Actor<TRACE> {
         Self::apply_entries(
             &mut self.parts.application,
             &mut self.pending,
+            &self.parts.domain,
             &self.attribution,
             self.parts.slot,
-            |application| application.apply_batch(&entries),
+            Applied::Owned(&entries),
+            &self.parts.stats[self.parts.slot],
         )
     }
     fn apply_entries(
         application: &mut Noop,
         pending: &mut PendingReplies<Reply>,
+        domain: &WriteDomain<OperationId>,
         attribution: &Recorder<TRACE>,
         slot: usize,
-        apply: impl FnOnce(&mut Noop) -> Result<Vec<OperationId>, ApplicationError>,
+        entries: Applied<'_>,
+        stats: &stats::Stats,
     ) -> Result<(), Failure> {
         let started = Recorder::<TRACE>::start();
-        let results = apply(application);
+        let results = entries.apply(application);
         attribution.finish(
             Phase::Application,
             started,
@@ -475,30 +522,96 @@ impl<const TRACE: bool> Actor<TRACE> {
             results.as_ref().map_or(0, Vec::len),
         );
         let results = results.map_err(debug_error)?;
+        #[cfg(test)]
+        {
+            stats
+                .application_receipts
+                .fetch_add(results.len() as u64, Ordering::Relaxed);
+            stats
+                .application_intervals
+                .lock()
+                .unwrap_or_else(|p| p.into_inner())
+                .push((
+                    entries
+                        .iter()
+                        .next()
+                        .map_or(application.applied, |e| e.index),
+                    entries
+                        .iter()
+                        .last()
+                        .map_or(application.applied, |e| e.index),
+                    results.len(),
+                ));
+        }
+        #[cfg(not(test))]
+        let _ = stats;
+        // Noop's ordinary owned Vec/spare capacity is retained and charged.
+        let expected = entries.commands().count();
+        let capacity_bound = expected
+            .max(4)
+            .checked_mul(2)
+            .and_then(|n| n.checked_mul(size_of::<OperationId>()))
+            .ok_or("receipt capacity overflow")?;
+        if results
+            .capacity()
+            .checked_mul(size_of::<OperationId>())
+            .is_none_or(|n| n > capacity_bound)
+        {
+            return Err("owned receipt capacity exceeds reservation".into());
+        }
         if slot == 0 {
             let started = Recorder::<TRACE>::start();
             let count = results.len();
-            let result = Self::deliver_results(pending, results);
+            let result = Self::deliver_results(pending, domain, entries, results);
             attribution.finish(Phase::Results, started, result.is_err(), count);
             result?;
+        } else {
+            let mut commands = entries.commands();
+            for operation in results {
+                let entry = commands.next().ok_or("extra follower original result")?;
+                if !matches!(entry.payload,EntryPayload::Command { operation:actual,.. } if actual==operation)
+                {
+                    return Err("follower original applied result differs".into());
+                }
+            }
+            if commands.next().is_some() {
+                return Err("missing follower original result".into());
+            }
         }
         Ok(())
     }
     #[cfg(test)]
     fn deliver(&mut self, results: Vec<OperationId>) -> Result<(), Failure> {
-        Self::deliver_results(&mut self.pending, results)
+        // Baseline owned-helper controls deliberately have no real committed
+        // context. Public-port controls must exercise the real consumer above.
+        for operation in results {
+            self.pending
+                .remove(&operation)
+                .ok_or("missing/duplicate original applied result")?
+                .legacy_send(operation)?;
+        }
+        Ok(())
     }
     fn deliver_results(
         pending: &mut PendingReplies<Reply>,
+        domain: &WriteDomain<OperationId>,
+        entries: Applied<'_>,
         results: Vec<OperationId>,
     ) -> Result<(), Failure> {
+        let mut commands = entries.commands();
         for operation in results {
+            let entry = commands.next().ok_or("extra original applied result")?;
             let reply = pending
                 .remove(&operation)
                 .ok_or("missing/duplicate original applied result")?;
-            reply
-                .send(operation)
-                .map_err(|_| "original client dropped result wait")?;
+            if !matches!(entry.payload,EntryPayload::Command { operation:actual,.. } if actual==operation)
+            {
+                return Err("original applied result differs".into());
+            }
+            reply.publish(domain, entry, operation)?;
+        }
+        if commands.next().is_some() {
+            return Err("missing original applied result".into());
         }
         Ok(())
     }
@@ -637,3 +750,10 @@ impl<const TRACE: bool> Actor<TRACE> {
         Ok(())
     }
 }
+
+#[cfg(test)]
+#[path = "../../../../validation/performance/pillar1-cpu4/adapter/ports.rs"]
+mod r3_ports;
+#[cfg(test)]
+#[path = "../../../../validation/performance/pillar1-cpu4/adapter/steps.rs"]
+mod r3_steps;
