@@ -1,0 +1,20 @@
+{
+  "state": "TERMINAL",
+  "stage1_pairs": 9,
+  "all18_functionally_valid": true,
+  "stage1_cpu_gate": false,
+  "canonical_children": 0,
+  "unpaired_children": 0,
+  "owned_Mac_roots_removed": true,
+  "owned_jobs_remaining": 0,
+  "stock_guard_sha256": "649f0e53f3cc3b3f9456feb1f600fd173131e74b75a50bb45843738a9075abd9",
+  "postcleanup_full_guard": "free_gb=2867 (min 500)\ntarget_gb=3 (cap 150) cargo_build_dirs=0\nlive_worktrees=1 (cap 5) prunable=0 worktree_target_gb=0 (cap 120)\nlinux_tmp_voteboat_dirs=0 (cap 300) linux_tmp_gb=0 (cap 10)\nmac_loop_gb=10 (cap 40) mac_voteboat_dirs=2 (cap 3)\nOK: disk within budget\n",
+  "main_status": "",
+  "head": "03f3ffd9d013ee02e115fb5c17cd256b4372eea5",
+  "pr_comment_url": "https://github.com/KarlLivesey/VoteBoat/pull/26#issuecomment-6355434674",
+  "pr_comment_count": 1,
+  "pr_linked": true,
+  "watching": false,
+  "terminal_postcomment_guard": "free_gb=2867 (min 500)\ntarget_gb=3 (cap 150) cargo_build_dirs=0\nlive_worktrees=1 (cap 5) prunable=0 worktree_target_gb=0 (cap 120)\nlinux_tmp_voteboat_dirs=0 (cap 300) linux_tmp_gb=0 (cap 10)\nmac_loop_gb=10 (cap 40) mac_voteboat_dirs=2 (cap 3)\nOK: disk within budget\n",
+  "all_controller_sessions_returned": true
+}

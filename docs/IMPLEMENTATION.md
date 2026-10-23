@@ -32,8 +32,9 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | Mini-plan item | Purpose and dependencies | Completion checks | Advances |
 | --- | --- | --- | --- |
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
-| Current CPU-2: remove the next structural cost from the measured residual | CPU-1 rejected as implemented; production remains `0bf9271e`. Bounded source/design audit will choose a larger core/embedding cost, considering volatile completion/staging handoffs. No parked networking/storage candidate is reopened | Concrete measured cost class and smallest usable implementation; unchanged client-work accounting; focused correctness, paired equal-core performance and normal merge checks | P1 |
-| Next CPU-3: optimise remaining per-original data movement and lookups | Depends on a profile of the kept CPU composition; membership/peer lookups, staging copies and batch admission are candidates, not predetermined extra helpers | Remove a measured whole class or reject it promptly; show singleton and bulk CPU/write, instructions and allocations; keep actual evidence separate from plans | P1 |
+| CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
+| Current CPU-3: choose a larger per-original core/embedding cost | CPU-1/CPU-2 rejected; production remains `0bf9271e`. Bounded source/evidence audit of repeated data movement, scans and staging; no predetermined helper or revival of rejected candidates | One schema with actual consumer/fallback/ownership/feature audit and causal measurement plan. Implement only a bounded usable candidate; measure singleton and bulk CPU/write before full qualification | P1 |
+| Next CPU-3 qualification or rejection | Depends on that candidate retaining every implemented feature and passing focused correctness/strict checks | Fresh dual Sol source review and paired equal-core CPU/rate/p99 gates. Record all failures; no tolerance or replacement schedule to rescue a rejected score | P1 |
 | Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
 
 The 20 October V3g scratch report is input, not current-head qualification:
@@ -77,6 +78,27 @@ all original/commit/application/fence/maintenance guards. The resource helper's
 empty-input fix changed no capacity or exclusion. Every owned build/measurement
 checkout, target, Mac root and job is swept. The next deliverable is a bounded
 CPU-2 design on unchanged production, preserving all implemented VoteBoat extras.
+
+
+### CPU-2 result and rejection (23 October 2026)
+
+[PR26](https://github.com/KarlLivesey/VoteBoat/pull/26) is rejected without merge.
+Exact `d7b4ec73` has both independent Sol source approvals,621 focused passes
+with one existing ignored timing report, and clean strict/enabled-hook checks.
+Its public volatile turn removes six external completion handoffs while retaining
+the same eight messages and six checked installations in focused traces.
+
+All18 fresh fixed-driver children/nine pairs passed their functional guards.
+Paired median CPU/original changed -1.097% at width1, -2.143% at width231 and
++0.695% at width515; CPU wins were3/3,2/3 and1/3. Width515 failed the
+predeclared per-width CPU gate. No canonical child or full suite was launched;
+no throughput/p99/full-qualification claim or relaxed gate follows.
+[Inputs, all nine pairs, limits and cleanup](../validation/performance/pillar1-cpu2/CPU2-RESULT.md).
+
+None of the candidate is integrated. Owned build/measurement roots and known
+owned jobs are swept; uncertain automatic harness hosts remain untouched and
+disclosed. Next work stays on pillar1 repeated per-original core/embedding cost
+from unchanged production; network/storage and parked PRs remain paused.
 
 
 

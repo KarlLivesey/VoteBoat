@@ -1,0 +1,96 @@
+{
+  "pass": false,
+  "widths": {
+    "1": {
+      "qualified": 3,
+      "pairs": [
+        {
+          "pair": 1,
+          "cpu_ratio": 0.9859822537077217,
+          "internal_ratio": 0.9846892639038337,
+          "A_cpu_ns": 2521.0899999999997,
+          "B_cpu_ns": 2485.75
+        },
+        {
+          "pair": 2,
+          "cpu_ratio": 0.9890276163573042,
+          "internal_ratio": 0.9894501716154495,
+          "A_cpu_ns": 2508.115,
+          "B_cpu_ns": 2480.595
+        },
+        {
+          "pair": 3,
+          "cpu_ratio": 0.9933704942104045,
+          "internal_ratio": 0.9932907815682134,
+          "A_cpu_ns": 2506.22,
+          "B_cpu_ns": 2489.6049999999996
+        }
+      ],
+      "cpu_ratio_median": 0.9890276163573042,
+      "internal_ratio_median": 0.9894501716154495,
+      "cpu_wins": 3,
+      "gate": true
+    },
+    "231": {
+      "qualified": 3,
+      "pairs": [
+        {
+          "pair": 1,
+          "cpu_ratio": 0.9785662450756791,
+          "internal_ratio": 0.9742085525011648,
+          "A_cpu_ns": 111.35353535353535,
+          "B_cpu_ns": 108.96681096681097
+        },
+        {
+          "pair": 2,
+          "cpu_ratio": 0.9748592870544088,
+          "internal_ratio": 0.9704869367933624,
+          "A_cpu_ns": 111.52236652236653,
+          "B_cpu_ns": 108.7186147186147
+        },
+        {
+          "pair": 3,
+          "cpu_ratio": 1.0019847328244276,
+          "internal_ratio": 1.0029034522337534,
+          "A_cpu_ns": 108.69408369408367,
+          "B_cpu_ns": 108.9098124098124
+        }
+      ],
+      "cpu_ratio_median": 0.9785662450756791,
+      "internal_ratio_median": 0.9742085525011648,
+      "cpu_wins": 2,
+      "gate": true
+    },
+    "515": {
+      "qualified": 3,
+      "pairs": [
+        {
+          "pair": 1,
+          "cpu_ratio": 1.0225814588565598,
+          "internal_ratio": 1.0237236029420487,
+          "A_cpu_ns": 118.0336569579288,
+          "B_cpu_ns": 120.69902912621357
+        },
+        {
+          "pair": 2,
+          "cpu_ratio": 0.9893345448251992,
+          "internal_ratio": 0.9906034550392078,
+          "A_cpu_ns": 119.67378640776697,
+          "B_cpu_ns": 118.39741100323624
+        },
+        {
+          "pair": 3,
+          "cpu_ratio": 1.0069536734254976,
+          "internal_ratio": 1.0042591836090193,
+          "A_cpu_ns": 117.37411003236247,
+          "B_cpu_ns": 118.19029126213593
+        }
+      ],
+      "cpu_ratio_median": 1.0069536734254976,
+      "internal_ratio_median": 1.0042591836090193,
+      "cpu_wins": 1,
+      "gate": false
+    }
+  },
+  "canonical": "HELD: predeclared CPU condition failed"
+}
