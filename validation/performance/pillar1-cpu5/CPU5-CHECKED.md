@@ -1,5 +1,12 @@
 # CPU5 borrowed LogView: focused checked candidate
 
+Historical a97 evidence. The subsequent normal Apple R2 machine gate FAILED
+because equivalent predecessor materialization remained across append_summary;
+no benchmark binary ran. The separately authorized one-callsite follow-up,
+fresh-check scope and pending new-head gates are in
+[CPU5-ORDER-FOLLOWUP](CPU5-ORDER-FOLLOWUP.md). These original borrowing controls
+remain source-only evidence; a97 reviews are historical after the new edit.
+
 23 October 2026. Candidate only; machine elimination, CPU benefit and release
 qualification remain **PENDING**. Parent base is `8c0fe77fba43020ce0cdcaccdc883bbffd5502c7`,
 with unchanged production baseline `0bf9271ecb5a34c4089c6bb10381303232624170`.

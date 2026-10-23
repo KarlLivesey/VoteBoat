@@ -29,7 +29,21 @@ substitutes for lower CPU. Report deterministic core/driver and full embedding
 cost separately. No claimed gain from extra cores, skipped application,
 weaker evidence, changed command counts or benchmark-only shortcuts.
 
-CPU-5 pre-edit schema: [private view ownership, transitions, failure paths and
+CPU-5 construction-order follow-up (pre-edit, 23 October): R2 at `a97b4d4`
+passed the normal Apple build and five view tests but failed the machine gate:
+an equivalent304-byte predecessor temporary survived across `append_summary`.
+No benchmark binary, diagnostic controls, nine pairs, canonical64 or full5 ran.
+The failure and historical HOLDs remain immutable. Parent revised the initial
+rejection only because that precise dataflow supports one bounded callsite fix.
+See [order schema](../validation/performance/pillar1-cpu5/CPU5-ORDER-FOLLOWUP.md).
+Independently audited immutable helper/charge reads permit computing the next
+summary first, then taking the same required owned predecessor. Only
+`OwnedAppend::new` may change relative to a97; view.rs stays byte-identical.
+No API/type/layout/validator/error/stamp/charge/completion change or guaranteed
+codegen/CPU benefit follows. P1 remains active; the full goal and P2/P3 pause
+are unchanged. Independent ship/fleet/department writes need no ancestor commit.
+
+CPU-5 original pre-edit schema: [private view ownership, transitions, failure paths and
 acceptance checks](../validation/performance/pillar1-cpu5/CPU5-DESIGN.md).
 Summarized views select the metadata of their existing immutable summary borrow;
 new/trimmed overlays own metadata. Required predecessor, Pending, validation,
@@ -42,8 +56,8 @@ an independently authorized candidate, with machine/CPU qualification pending.
 | CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
 | CPU-3: rejected after canonical observations | PR27 public receipt-capacity reuse passed driver gate but canonical singleton CPU/rate did not improve; resource reporting assertion remains unresolved | Both exact-head Sol source approvals, focused325/6mutants/strict+hook green; driver18/18 and canonical64/64 functional checks passed. No full suites. [Result](../validation/performance/pillar1-cpu3/CPU3-RESULT.md) | P1 evidence |
 | CPU-4: measured and rejected | PR28 reusable public write ports preserved tested semantics but increased CPU in every original driver pair; no source merged | Both final Sol source approvals and adapter GO, Stage0 tests12/Counter/driver controls14 and all18 primary children passed. CPU +9.352%/+153.994%/+167.467%, zero wins at every width. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu4/CPU4-RESULT.md) | P1 evidence |
-| Current CPU-5: checked private borrowed view candidate | Parent release depends on static canonicalA attribution of the transient304-byte metadata snapshot, after the source-only NO-GO; preserve production0bf completion/validation contracts | Borrowed/owned identity and full-oracle controls, compiled old-owned negative plus exact restoration, focused default/all-feature/public/native/matched checks, strict7 and actual enabled-hook draft publication. Machine elimination and CPU remain pending | P1 |
-| Next: parent exact-head source and codegen qualification | Depends on the frozen checked CPU-5 candidate; establish independent source approval and whether the particular summary-to-temporary copy disappears without replacement | Fresh dual source reviews; exact Apple candidate codegen against canonicalA, retaining owned predecessor/next summary/staging/effects. No source pointer test substitutes for machine evidence | P1 |
+| Current CPU-5: one construction-order follow-up | Depends on published a97 ancestry, R2 replacement witness and independent purity audit; shorten the predecessor temporary across the pure helper | Only compute summary first in OwnedAppend::new; existing oracle/charge/failure/public/native/matched checks in sequential graphs; strict7 and actual enabled nonforce hook; exact old-order-only machine control patch, frozen inputs and immediate owned cleanup | P1 |
+| Next: parent new-head source and codegen qualification | Depends on the frozen follow-up; a97 source approvals are historical after this edit | Fresh dual reviews; normal Apple candidate elimination without replacement, old-order-only machine negative and exact restoration, retaining required owned predecessor/summary/staging/effects. Stop if work survives; no further rewrite authorized | P1 |
 | Then: parent original performance and conditional full qualification | Depends on source/codegen acceptance and unchanged feature contracts; establish whole-path benefit before release | Original nine driver pairs, conditional canonical64 and, only for a kept candidate, full5 including unskipped normal-debug relay/docs; exact outcomes/IDs/default maintenance and owned cleanup. No replacement runs or relaxed gates | P1 |
 
 CPU-5 implemented evidence is separate from that plan: the private view change,
@@ -52,6 +66,15 @@ restoration, focused default/all-feature/public/native/matched results and
 semantic retention matrix are in [CPU5-CHECKED](../validation/performance/pillar1-cpu5/CPU5-CHECKED.md).
 P1 remains active; no milestone, machine-copy elimination or CPU gain is claimed.
 The parent owns fresh source/codegen/performance and conditional full qualification.
+Those a97 checks are historical; follow-up results will be recorded separately
+in the order report, never substituted for the failed R2 machine gate.
+Follow-up implemented evidence: only the authorized pure-callsite reorder,
+1036 bounded test events/zero failed or selected ignored, strict7 zero diagnostics,
+1532 frozen build inputs (only incoming.rs changed relative a97) and an exact
+old-order-only machine control patch. The order report records each graph and
+the unchanged feature matrix; actual enabled-hook publication, exact head/tree
+and immediate owned cleanup are retained in ignored evidence/PR29 CURRENT.
+This completes a checked follow-up only, not macro P1 or any qualification gate.
 
 The 20 October V3g scratch report is input, not current-head qualification:
 `target/claude/research-r4/v3g-profile.md`. Its unqualified commit-notice prototype

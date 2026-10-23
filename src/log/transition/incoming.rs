@@ -331,9 +331,10 @@ impl OwnedAppend {
         metadata: LogMetadata,
         suffix: Option<Suffix>,
     ) -> Self {
+        let summary = append_summary(view, summary, metadata, suffix.as_ref());
         Self {
             predecessor: *view.metadata(),
-            summary: append_summary(view, summary, metadata, suffix.as_ref()),
+            summary,
             suffix,
         }
     }
