@@ -34,10 +34,12 @@ mod admitted_replication;
 mod batch_limits;
 pub use batch_limits::BatchLimits;
 mod completion;
+mod volatile_turn;
 use completion::PreparedCompletion;
 pub use completion::{
     persist_effect_borrowed, persist_volatile, persist_volatile_into, CompletionEffects,
 };
+pub use volatile_turn::VolatileTurn;
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
@@ -313,6 +315,10 @@ pub enum RaftError {
     /// before the core proposed it. This is not a replicated outcome.
     Admission(crate::application::ApplicationError),
     Busy,
+    /// Selected synchronous turns require an empty reusable output queue.
+    NonemptyEffects,
+    /// Selected synchronous turns require a core recovered over VolatileLog.
+    NotVolatile,
     Fenced,
     NotLeader,
     /// A learner or removed replica cannot start an election.
@@ -437,6 +443,8 @@ pub struct Raft {
     volatile: bool,
     // Nonzero only for a volatile core: the `recover_volatile` call that made it.
     incarnation: u64,
+    // Temporary owner-local completion delivery, always Host outside a turn.
+    completion_delivery: volatile_turn::Delivery,
 }
 
 impl Raft {
@@ -564,6 +572,7 @@ impl Raft {
             leader_contact: None,
             volatile: false,
             incarnation: 0,
+            completion_delivery: volatile_turn::Delivery::Host,
         })
     }
     /// Static voter over a [`VolatileLog`]: the core's log becomes the only
@@ -1594,13 +1603,30 @@ impl Raft {
             .transpose()
             .map_err(|_| RaftError::InvalidRecovery)?;
         let metadata = next.metadata();
+        let local = matches!(
+            self.completion_delivery,
+            volatile_turn::Delivery::Local { .. }
+        ) && update.is_none()
+            && out.is_empty()
+            && next.is_append_or_commit()
+            && metadata.hard_state == self.durable.hard_state
+            && metadata.ballot_origin == self.durable.ballot_origin
+            && metadata.generation == self.durable.generation
+            && matches!(after, After::Reply | After::LeaderAppend | After::Commit);
         let effect = match update {
-            Some(update) => Effect::Persist(update),
-            None => Effect::PersistVolatile(VolatilePersist {
-                incarnation: self.incarnation,
-                revision: metadata.revision,
-                generation: metadata.generation,
-            }),
+            Some(update) => Some(Effect::Persist(update)),
+            None => {
+                let key = VolatilePersist {
+                    incarnation: self.incarnation,
+                    revision: metadata.revision,
+                    generation: metadata.generation,
+                };
+                if local && self.completion_delivery.schedule(key) {
+                    None
+                } else {
+                    Some(Effect::PersistVolatile(key))
+                }
+            }
         };
         let accepted_membership = membership.as_deref().unwrap_or(&self.membership);
         if self
@@ -1635,7 +1661,9 @@ impl Raft {
             reply,
             planned,
         });
-        out.push_back(effect);
+        if let Some(effect) = effect {
+            out.push_back(effect);
+        }
         Ok(())
     }
     /// Exact accepted node/store voting assignment, never durability evidence.

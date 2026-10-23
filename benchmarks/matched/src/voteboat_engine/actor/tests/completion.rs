@@ -180,3 +180,62 @@ fn borrowed_and_fifo_owned_delivery_stop_after_same_dropped_wait() {
         );
     }
 }
+
+#[test]
+fn selected_application_failure_releases_no_original_result() {
+    let (mut actor, _sender) = ready_actor_clients::<false>(crate::Envelopes::Common64, 1);
+    let operation = OperationId::new(99).unwrap();
+    let (reply, mut wait) = oneshot::channel();
+    let error = actor
+        .requests(Request {
+            originals: vec![Original {
+                operation,
+                bytes: vec![7, 255],
+                reply,
+            }],
+        })
+        .unwrap_err();
+    assert!(error.to_string().contains("InvalidCommand"));
+    assert_eq!(actor.parts.core.state().commit_index, 2);
+    assert_eq!(actor.parts.application.applied, 1);
+    assert_eq!(wait.try_recv(), Err(oneshot::error::TryRecvError::Empty));
+    assert_eq!(actor.parts.stats[0].local_units.load(Ordering::Relaxed), 2);
+}
+
+#[test]
+fn selected_dropped_wait_stops_later_results_after_actual_application() {
+    let (mut actor, _sender) = ready_actor_clients::<false>(crate::Envelopes::Common64, 1);
+    let ids = [
+        OperationId::new(1).unwrap(),
+        OperationId::new(2).unwrap(),
+        OperationId::new(3).unwrap(),
+    ];
+    let mut waits = Vec::new();
+    let originals = ids
+        .into_iter()
+        .map(|operation| {
+            let (reply, wait) = oneshot::channel();
+            waits.push(wait);
+            Original {
+                operation,
+                bytes: Vec::new(),
+                reply,
+            }
+        })
+        .collect();
+    drop(waits.remove(1));
+    assert_eq!(
+        actor
+            .requests(Request { originals })
+            .unwrap_err()
+            .to_string(),
+        "original client dropped result wait"
+    );
+    assert_eq!(actor.parts.application.applied, 4);
+    assert_eq!(waits[0].try_recv().unwrap(), ids[0]);
+    assert_eq!(
+        waits[1].try_recv(),
+        Err(oneshot::error::TryRecvError::Empty)
+    );
+    assert_eq!(actor.pending.len(), 1);
+}

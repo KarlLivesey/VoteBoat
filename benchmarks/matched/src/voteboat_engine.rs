@@ -401,6 +401,26 @@ mod tests {
             cluster.pause_follower(2, false);
             let result = cluster.verify(12_000, 0).await;
             let installed = cluster.stats[2].snapshot_installs.load(Ordering::Relaxed);
+            result.as_ref().unwrap();
+            let local_before: Vec<_> = cluster
+                .stats
+                .iter()
+                .map(|stats| stats.local_units.load(Ordering::Relaxed))
+                .collect();
+            assert_eq!(
+                client
+                    .write(&[12_001, 12_002, 12_003, 12_004])
+                    .await
+                    .unwrap(),
+                4
+            );
+            assert_eq!(cluster.verify(12_004, 0).await.unwrap(), vec![12_005; 3]);
+            for (slot, stats) in cluster.stats.iter().enumerate() {
+                assert!(
+                    stats.local_units.load(Ordering::Relaxed) > local_before[slot],
+                    "selected writes resume on every replica after actual snapshot catch-up"
+                );
+            }
             let cleanup = cluster.shutdown().await;
             assert_eq!(result.unwrap(), vec![12_001; 3]);
             assert!(

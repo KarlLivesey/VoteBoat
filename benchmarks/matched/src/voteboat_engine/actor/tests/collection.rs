@@ -5,6 +5,8 @@
 //! the biased loop handles the peer progress before the next pass.
 use super::*;
 
+mod volatile_turns;
+
 // A non-zero slot leads so the actor loop does not start with a campaign.
 // Only slot 0 delivers client results, so this test checks application.
 const LEADER: usize = 1;
@@ -16,8 +18,11 @@ struct Replicas {
 }
 
 fn replicas() -> Replicas {
+    replicas_with_clients(16)
+}
+fn replicas_with_clients(clients: usize) -> Replicas {
     let settings = Settings {
-        clients: 16,
+        clients,
         server_workers: crate::DEFAULT_SERVER_WORKERS,
         batch: 4,
         requested_operations: 16384,

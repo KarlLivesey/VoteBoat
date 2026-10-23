@@ -32,7 +32,7 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | Mini-plan item | Purpose and dependencies | Completion checks | Advances |
 | --- | --- | --- | --- |
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
-| Current CPU-2: remove the next structural cost from the measured residual | CPU-1 rejected as implemented; production remains `0bf9271e`. Bounded source/design audit will choose a larger core/embedding cost, considering volatile completion/staging handoffs. No parked networking/storage candidate is reopened | Concrete measured cost class and smallest usable implementation; unchanged client-work accounting; focused correctness, paired equal-core performance and normal merge checks | P1 |
+| Current CPU-2: checked synchronous volatile turns | CPU-1 rejected; base docs-only `03f3ffd9`, production `0bf9271e`. Implement the accepted public selected turn and actual consumers; preserve Pending, exact keys, sole installer and FIFO. [Pre-edit schema/graph/acceptance](../validation/performance/pillar1-cpu2/CPU2-DESIGN.md). No network/storage/roadmap dependency | Focused histories/negative controls/feature matrix/default-retention reachability, seven strict checks, enabled push and draft PR; parent then owns reviews/performance/full qualification | P1 |
 | Next CPU-3: optimise remaining per-original data movement and lookups | Depends on a profile of the kept CPU composition; membership/peer lookups, staging copies and batch admission are candidates, not predetermined extra helpers | Remove a measured whole class or reject it promptly; show singleton and bulk CPU/write, instructions and allocations; keep actual evidence separate from plans | P1 |
 | Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
 
@@ -79,6 +79,43 @@ checkout, target, Mac root and job is swept. The next deliverable is a bounded
 CPU-2 design on unchanged production, preserving all implemented VoteBoat extras.
 
 
+
+### CPU-2 bounded implementation plan (23 October 2026)
+
+The current deliverable and next two remain CPU-2, CPU-3 and P1 qualification
+in the linked mini plan above. CPU-2 removes external volatile completion
+handoffs only: ordinary caught-up three-voter work must remain eight messages,
+nine public event steps, six checked plan installations and three application
+intervals. The target is six external helper handoffs to zero, with no claimed
+measured gain. This is a public Rust embedding slice and its real matched
+consumer, not a benchmark-only internal helper.
+
+Before production edits, the linked CPU2 contract records API/data shapes,
+actual continuation graph, ownership, failure/partial-progress paths, consumer
+audit and planned acceptance. Pending stays visible until event plus finish
+hook return; a scoped local key drives existing checked completion afterward.
+One multi-voter install or two singleton installs may produce at most one
+interval. Preceding fallible effects retain the existing public token; borrowed
+intervals never coexist with host core mutation. Cold nonzero-position results
+are materialised at the exact legacy FIFO position. Static compacted logs
+remain eligible. Unsupported selection uses functional existing dispatch with
+no replay and no weakened durable/logical assembly. No new infrastructure,
+cache authority, unchecked mutation, physical durability claim or commit-release
+amendment is needed for P1.
+
+Implemented evidence is separate from those plans in the linked CPU2 record.
+The public selected event and ProposalBatch methods and actual matched consumer
+are implemented. Exact ordinary B1/231/515 histories retain8 sends/9 public
+events/6 checked installs/3 application intervals and remove6 external helper
+handoffs. Final focused selections passed621 tests with one existing timing
+report ignored. This includes all-three selection before/after two default5000
+checkpoints for single/wide writes and actual snapshot catch-up/resumption;
+five causal mutations fail as required. All seven strict checks passed with
+zero diagnostics. Raw fixture errors, control failures, source inputs and
+resource limits remain recorded. Nonforce publication uses the enabled hook;
+exact head/PR and cleanup are saved in the designated safe builder report.
+Fresh dual reviews, equal-core CPU/rate/p99 measurement and full five-config
+qualification remain parent-owned. There is no measured gain or merge claim.
 
 ## Networked CPU track (pillar 2, opened 19 October 2026)
 

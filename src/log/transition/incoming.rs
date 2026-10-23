@@ -32,6 +32,11 @@ pub(crate) enum PreparedOwnedLog {
     Other(PreparedLog),
 }
 impl OwnedNextLog {
+    /// Sealed append/scalar representation; callers still check its ballot.
+    /// An append on a plain history may also carry a changed hard state.
+    pub(crate) fn is_append_or_commit(&self) -> bool {
+        matches!(self.0, OwnedChange::Append(_) | OwnedChange::Commit(_))
+    }
     pub(crate) fn preserves_checkpoint_prefix(&self) -> bool {
         match &self.0 {
             OwnedChange::Append(_) | OwnedChange::Commit(_) => true,

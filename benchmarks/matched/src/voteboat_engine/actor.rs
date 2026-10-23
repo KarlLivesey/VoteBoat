@@ -227,10 +227,21 @@ impl<const TRACE: bool> Actor<TRACE> {
         };
         self.reserve(input)?;
         let started = Recorder::<TRACE>::start();
-        let result = self.parts.core.step_into(event, &mut self.queue);
+        let result =
+            self.parts
+                .core
+                .step_volatile_into(&self.parts.store.log, event, &mut self.queue);
         self.attribution
             .finish(Phase::Core, started, result.is_err(), 0);
-        result.map_err(debug_error)?;
+        Self::finish_turn(
+            result.map_err(debug_error)?,
+            &mut self.queue,
+            &mut self.parts.application,
+            &mut self.pending,
+            &self.attribution,
+            &self.parts.stats[self.parts.slot],
+            self.parts.slot,
+        )?;
         self.drain()
     }
     fn requests(&mut self, first: Request) -> Result<(), Failure> {
@@ -246,17 +257,61 @@ impl<const TRACE: bool> Actor<TRACE> {
         let width = collected.len();
         let started = Recorder::<TRACE>::start();
         let result = match collected {
-            Collected::One(operation, bytes) => self
-                .parts
-                .core
-                .step_into(Event::Propose { operation, bytes }, &mut self.queue),
-            Collected::Batch(batch) => self.parts.core.propose_entries_into(batch, &mut self.queue),
+            Collected::One(operation, bytes) => self.parts.core.step_volatile_into(
+                &self.parts.store.log,
+                Event::Propose { operation, bytes },
+                &mut self.queue,
+            ),
+            Collected::Batch(batch) => self.parts.core.propose_entries_volatile_into(
+                &self.parts.store.log,
+                batch,
+                &mut self.queue,
+            ),
         };
         self.attribution
             .finish(Phase::Core, started, result.is_err(), width);
-        result.map_err(debug_error)?;
+        let turn = result.map_err(debug_error)?;
         self.parts.stats[self.parts.slot].record_proposals(width)?;
+        Self::finish_turn(
+            turn,
+            &mut self.queue,
+            &mut self.parts.application,
+            &mut self.pending,
+            &self.attribution,
+            &self.parts.stats[self.parts.slot],
+            self.parts.slot,
+        )?;
         self.drain()
+    }
+    fn finish_turn(
+        turn: voteboat::raft::VolatileTurn<'_>,
+        queue: &mut VecDeque<Effect>,
+        application: &mut Noop,
+        pending: &mut PendingReplies<Reply>,
+        attribution: &Recorder<TRACE>,
+        stats: &stats::Stats,
+        slot: usize,
+    ) -> Result<(), Failure> {
+        stats
+            .persistence_units
+            .fetch_add(turn.completed_local_units(), Ordering::Relaxed);
+        #[cfg(test)]
+        stats
+            .local_units
+            .fetch_add(turn.completed_local_units(), Ordering::Relaxed);
+        if let Some(entries) = turn.committed() {
+            if turn.commit_position() == 0 {
+                Self::apply_entries(application, pending, attribution, slot, |application| {
+                    application.apply_entries(entries)
+                })?;
+            } else {
+                // A preceding host effect may mutate the core. End its borrow
+                // by materialising only this cold interval at the legacy FIFO
+                // position; leave all effects for the ordinary ordered drain.
+                queue.insert(turn.commit_position(), Effect::Committed(entries.to_vec()));
+            }
+        }
+        Ok(())
     }
     fn collect(&mut self, first: Request) -> Result<Collected, Failure> {
         let capacity = self.parts.core.batch_limits().max_proposal_entries;

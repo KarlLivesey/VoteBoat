@@ -22,6 +22,8 @@ pub(super) struct Stats {
     pub peak_peer_queue: AtomicUsize,
     pub peak_client_queue: AtomicUsize,
     pub persistence_units: AtomicUsize,
+    #[cfg(test)]
+    pub local_units: AtomicUsize,
     pub checkpoint_count: AtomicUsize,
     pub snapshot_installs: AtomicUsize,
     proposal_widths: Widths,
