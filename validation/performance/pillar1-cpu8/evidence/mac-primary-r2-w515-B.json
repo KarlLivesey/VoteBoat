@@ -1,0 +1,283 @@
+{
+  "raw_target_result_sha256": "a2abe680a4e42aa19564ab5f6b4f72220fe817f754b5bc97562cf8bd8fbc1bb1",
+  "raw_row_sha256": "7f27ee3ca4a139e3ca4fc72d38a35147b5b3781872e4f3bb42c0110e18e9809c",
+  "pid": 72854,
+  "wait4_pid": 72854,
+  "wait_status": 0,
+  "rc": 0,
+  "joined": true,
+  "rusage": {
+    "ru_idrss": 0,
+    "ru_inblock": 0,
+    "ru_isrss": 0,
+    "ru_ixrss": 0,
+    "ru_majflt": 97,
+    "ru_maxrss": 11190272,
+    "ru_minflt": 1053,
+    "ru_msgrcv": 0,
+    "ru_msgsnd": 0,
+    "ru_nivcsw": 101,
+    "ru_nsignals": 0,
+    "ru_nswap": 0,
+    "ru_nvcsw": 1,
+    "ru_oublock": 0,
+    "ru_stime": 0.005312,
+    "ru_utime": 0.183272
+  },
+  "native_identity": {
+    "requested_pid": 72854,
+    "capture_begin_ns": 1792793705609773000,
+    "layout": {
+      "structure_bytes": 136,
+      "alignment": 8,
+      "offsets": {
+        "pbi_flags": 0,
+        "pbi_status": 4,
+        "pbi_xstatus": 8,
+        "pbi_pid": 12,
+        "pbi_ppid": 16,
+        "pbi_uid": 20,
+        "pbi_gid": 24,
+        "pbi_ruid": 28,
+        "pbi_rgid": 32,
+        "pbi_svuid": 36,
+        "pbi_svgid": 40,
+        "rfu_1": 44,
+        "pbi_comm": 48,
+        "pbi_name": 64,
+        "pbi_nfiles": 96,
+        "pbi_pgid": 100,
+        "pbi_pjobc": 104,
+        "e_tdev": 108,
+        "e_tpgid": 112,
+        "pbi_nice": 116,
+        "pbi_start_tvsec": 120,
+        "pbi_start_tvusec": 128
+      },
+      "flavor": 3,
+      "path_buffer_bytes": 4096,
+      "library": "/usr/lib/libproc.dylib",
+      "pidpath_result": "positive strlen excluding NUL; zero on error",
+      "pidinfo_result": "must equal sizeof(proc_bsdinfo),136"
+    },
+    "bsd": [
+      {
+        "return_bytes": 136,
+        "errno": 0,
+        "raw_hex": "104040000200000000000000961c01004e180100f501000014000000f501000014000000f50100001400000000000000646961676e6f737469632d422e626900646961676e6f737469632d422e62696e00657200000000000000000000000000190000004e18010000000000ffffffff000000001300000069dcdb6a000000005f44090000000000",
+        "fields": {
+          "pbi_flags": 4210704,
+          "pbi_status": 2,
+          "pbi_xstatus": 0,
+          "pbi_pid": 72854,
+          "pbi_ppid": 71758,
+          "pbi_uid": 501,
+          "pbi_gid": 20,
+          "pbi_ruid": 501,
+          "pbi_rgid": 20,
+          "pbi_svuid": 501,
+          "pbi_svgid": 20,
+          "rfu_1": 0,
+          "pbi_comm": "diagnostic-B.bi",
+          "pbi_name": "diagnostic-B.bin",
+          "pbi_nfiles": 25,
+          "pbi_pgid": 71758,
+          "pbi_pjobc": 0,
+          "e_tdev": 4294967295,
+          "e_tpgid": 0,
+          "pbi_nice": 19,
+          "pbi_start_tvsec": 1792793705,
+          "pbi_start_tvusec": 607327
+        }
+      },
+      {
+        "return_bytes": 136,
+        "errno": 0,
+        "raw_hex": "104040000200000000000000961c01004e180100f501000014000000f501000014000000f50100001400000000000000646961676e6f737469632d422e626900646961676e6f737469632d422e62696e00657200000000000000000000000000190000004e18010000000000ffffffff000000001300000069dcdb6a000000005f44090000000000",
+        "fields": {
+          "pbi_flags": 4210704,
+          "pbi_status": 2,
+          "pbi_xstatus": 0,
+          "pbi_pid": 72854,
+          "pbi_ppid": 71758,
+          "pbi_uid": 501,
+          "pbi_gid": 20,
+          "pbi_ruid": 501,
+          "pbi_rgid": 20,
+          "pbi_svuid": 501,
+          "pbi_svgid": 20,
+          "rfu_1": 0,
+          "pbi_comm": "diagnostic-B.bi",
+          "pbi_name": "diagnostic-B.bin",
+          "pbi_nfiles": 25,
+          "pbi_pgid": 71758,
+          "pbi_pjobc": 0,
+          "e_tdev": 4294967295,
+          "e_tpgid": 0,
+          "pbi_nice": 19,
+          "pbi_start_tvsec": 1792793705,
+          "pbi_start_tvusec": 607327
+        }
+      }
+    ],
+    "path_return": 106,
+    "path_errno": 0,
+    "path_raw_hex": "2f707269766174652f746d702f766f7465626f61742d636c617564652d6c6f6f702f70696c6c6172312d637075382d3732362d32303236313032332f63616e6469646174652d37323631323439342f2e637075382d706572662f646961676e6f737469632d422e62696e00",
+    "path": "/private/tmp/voteboat-claude-loop/pillar1-cpu8-726-20261023/candidate-72612494/.cpu8-perf/diagnostic-B.bin",
+    "path_realpath": "/private/tmp/voteboat-claude-loop/pillar1-cpu8-726-20261023/candidate-72612494/.cpu8-perf/diagnostic-B.bin",
+    "capture_end_ns": 1792793705609948000
+  },
+  "native_failures": [],
+  "binary_sha256": "2fd7cfad470b6cca23cb0d24d0420f1821c2ef91aca13f5ef41a5031dfed3d23",
+  "source_and_binary_before_after": {
+    "frozen_input_manifest_sha256": "e0130b18adbd3d7489ce0988fdb17b58634830247fc21e1369d03a9bd0cf5a05",
+    "actual_source_inputs": 1534,
+    "source_state": "exact original CPU1 R3 two-file diagnostic overlay",
+    "frozen_binaries": {
+      "A/diagnostic-A.bin": "c05c3c718ab6d9ac5a72f2e04cfce29fb35f6618a76b3e0debdda10ff7f5fa6a",
+      "A/canonical-A.bin": "0c6998bc63614f43faaba36dfff64f9291b7a14336853f4d901c4068c2c69208",
+      "B/diagnostic-B.bin": "2fd7cfad470b6cca23cb0d24d0420f1821c2ef91aca13f5ef41a5031dfed3d23",
+      "B/canonical-B.bin": "8cd053c6fb643f9e8db6a15e73da282c724f38e6923bff7cef605eb0ad53234d"
+    }
+  },
+  "observed_document": {
+    "applied_frontiers": [
+      2072361,
+      2072361,
+      2072361
+    ],
+    "checks": {
+      "applied_frontiers": true,
+      "commit_frontiers": true,
+      "expected_count": true,
+      "nonfenced": true,
+      "propagated_error": true,
+      "replicas": true,
+      "reply_count": true,
+      "reply_ids": true,
+      "reported_frontiers": true,
+      "unreplied": true
+    },
+    "commit_frontiers": [
+      2072361,
+      2072361,
+      2072361
+    ],
+    "completed_originals": 1545000,
+    "default_retention": true,
+    "diagnostic": "fixed_schedule_r3",
+    "diagnostics": [
+      {
+        "checkpoint_count": 402,
+        "maximum_proposal_width": 515,
+        "peak_client_queue": 0,
+        "peak_peer_queue": 0,
+        "peak_retained_entries": 0,
+        "persistence_units": 8051,
+        "proposal_batches": 4024,
+        "proposal_widths": [
+          {
+            "batches": 4024,
+            "original_entries": 515
+          }
+        ],
+        "proposed_originals": 2072360,
+        "retained_entries": 3060,
+        "snapshot_installs": 0
+      },
+      {
+        "checkpoint_count": 402,
+        "maximum_proposal_width": 0,
+        "peak_client_queue": 0,
+        "peak_peer_queue": 0,
+        "peak_retained_entries": 0,
+        "persistence_units": 8051,
+        "proposal_batches": 0,
+        "proposal_widths": [],
+        "proposed_originals": 0,
+        "retained_entries": 3060,
+        "snapshot_installs": 0
+      },
+      {
+        "checkpoint_count": 402,
+        "maximum_proposal_width": 0,
+        "peak_client_queue": 0,
+        "peak_peer_queue": 0,
+        "peak_retained_entries": 0,
+        "persistence_units": 8051,
+        "proposal_batches": 0,
+        "proposal_widths": [],
+        "proposed_originals": 0,
+        "retained_entries": 3060,
+        "snapshot_installs": 0
+      }
+    ],
+    "expected_frontier": 2072361,
+    "failed_conjuncts": [],
+    "fenced": [
+      false,
+      false,
+      false
+    ],
+    "internal_elapsed_ns": 137618250,
+    "internal_ns_per_original": 89.07330097087379,
+    "per_request": 4,
+    "propagated_error": null,
+    "publication_enabled": true,
+    "replied_including_warmup": 2072360,
+    "reported_frontiers": [
+      2072361,
+      2072361,
+      2072361
+    ],
+    "rounds": 3000,
+    "settings": [
+      {
+        "attribution": false,
+        "batch": 4,
+        "campaign_timeout_secs": 600,
+        "clients": 4096,
+        "envelopes": "upstream_default",
+        "maintenance": "default_retention",
+        "operations": 16384,
+        "requested_operations": 16384,
+        "server_workers": 1,
+        "warmup": 1024
+      },
+      {
+        "attribution": false,
+        "batch": 4,
+        "campaign_timeout_secs": 600,
+        "clients": 4096,
+        "envelopes": "upstream_default",
+        "maintenance": "default_retention",
+        "operations": 16384,
+        "requested_operations": 16384,
+        "server_workers": 1,
+        "warmup": 1024
+      },
+      {
+        "attribution": false,
+        "batch": 4,
+        "campaign_timeout_secs": 600,
+        "clients": 4096,
+        "envelopes": "upstream_default",
+        "maintenance": "default_retention",
+        "operations": 16384,
+        "requested_operations": 16384,
+        "server_workers": 1,
+        "warmup": 1024
+      }
+    ],
+    "shutdown_scope": "diagnostic process::exit before owned shutdown; opaque early scope, not lifecycle/canonical gate",
+    "submitted_including_warmup": 2072360,
+    "unreplied": 0,
+    "warmup_originals": 527360,
+    "warmup_rounds": 1024,
+    "width": 515,
+    "wrong_reply": false
+  },
+  "actual_completed_originals": 1545000,
+  "parent_recomputed_cpu_ns_per_original": 122.06084142394822,
+  "score": "whole direct wait4 all-thread user+system / actual measured originals; startup/warmup/drop/exit included"
+}

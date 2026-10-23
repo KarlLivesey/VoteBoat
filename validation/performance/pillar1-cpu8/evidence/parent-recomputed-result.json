@@ -1,0 +1,144 @@
+{
+  "candidate": "72612494e14eaa53b398e143af1a2d937ceadbea",
+  "tree": "530e157192107fbed54c46c873421f3a36c41510",
+  "baseline": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "verdict": "REJECT_FAIL_PRIMARY_WIDTH515",
+  "parent_independently_verified_children": 18,
+  "pairs": [
+    {
+      "width": 1,
+      "pair": 1,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 2578.3849999999998,
+      "B_cpu_ns": 2462.275,
+      "B_over_A": 0.9549679353548831,
+      "B_win": true
+    },
+    {
+      "width": 1,
+      "pair": 2,
+      "order": [
+        "B",
+        "A"
+      ],
+      "A_cpu_ns": 2566.8399999999997,
+      "B_cpu_ns": 2432.325,
+      "B_over_A": 0.9475950974739369,
+      "B_win": true
+    },
+    {
+      "width": 1,
+      "pair": 3,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 2590.7799999999997,
+      "B_cpu_ns": 2479.1549999999997,
+      "B_over_A": 0.9569145199515204,
+      "B_win": true
+    },
+    {
+      "width": 231,
+      "pair": 1,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 113.54473304473305,
+      "B_cpu_ns": 110.59884559884557,
+      "B_over_A": 0.9740552699637165,
+      "B_win": true
+    },
+    {
+      "width": 231,
+      "pair": 2,
+      "order": [
+        "B",
+        "A"
+      ],
+      "A_cpu_ns": 110.88600288600288,
+      "B_cpu_ns": 112.42568542568543,
+      "B_over_A": 1.0138852740617355,
+      "B_win": false
+    },
+    {
+      "width": 231,
+      "pair": 3,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 114.37157287157287,
+      "B_cpu_ns": 110.57215007215007,
+      "B_over_A": 0.9667800074439026,
+      "B_win": true
+    },
+    {
+      "width": 515,
+      "pair": 1,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 120.20388349514565,
+      "B_cpu_ns": 121.81747572815534,
+      "B_over_A": 1.013423794523867,
+      "B_win": false
+    },
+    {
+      "width": 515,
+      "pair": 2,
+      "order": [
+        "B",
+        "A"
+      ],
+      "A_cpu_ns": 122.57022653721683,
+      "B_cpu_ns": 122.06084142394822,
+      "B_over_A": 0.99584413664183,
+      "B_win": true
+    },
+    {
+      "width": 515,
+      "pair": 3,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 121.44142394822008,
+      "B_cpu_ns": 122.0621359223301,
+      "B_over_A": 1.0051112046773651,
+      "B_win": false
+    }
+  ],
+  "widths": [
+    {
+      "width": 1,
+      "median_paired_B_over_A": 0.9549679353548831,
+      "paired_percent": -4.503206464511688,
+      "wins": 3,
+      "pass_gate": true
+    },
+    {
+      "width": 231,
+      "median_paired_B_over_A": 0.9740552699637165,
+      "paired_percent": -2.5944730036283503,
+      "wins": 2,
+      "pass_gate": true
+    },
+    {
+      "width": 515,
+      "median_paired_B_over_A": 1.0051112046773651,
+      "paired_percent": 0.5111204677365144,
+      "wins": 1,
+      "pass_gate": false
+    }
+  ],
+  "canonical_children": 0,
+  "full5": "NOT RELEASED",
+  "canonical_or_stack_gain": "UNKNOWN",
+  "limits": "Finite diagnostic driver exits before normal owned shutdown; no canonical rate/p99/lifecycle or CPU-loss cause inference. Historical HOLDs and sampling/isolation limitations remain."
+}

@@ -37,7 +37,8 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-4: measured and rejected | PR28 reusable public write ports preserved tested semantics but increased CPU in every original driver pair; no source merged | Both final Sol source approvals and adapter GO, Stage0 tests12/Counter/driver controls14 and all18 primary children passed. CPU +9.352%/+153.994%/+167.467%, zero wins at every width. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu4/CPU4-RESULT.md) | P1 evidence |
 | CPU-5: measured and rejected | PR29 borrowed summarized metadata and reordered append construction; the targeted extra304-byte copy was eliminated on Apple, but the CPU gate failed at widths1 and231; no source merged | Both fresh exact-head Sol source approvals; builder1036 test events/strict7/actual hook green; compiled old-order negative/exact restoration/five Mac view tests passed; final identity2/Rust6 controls and all18 primary children passed. CPU +0.82755%/+0.28720%/-0.00053%, wins0/3,1/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu5/CPU5-RESULT.md) | P1 evidence |
 | CPU-6: measured and rejected | PR30 inline singleton batches and fused wide assignment/facts removed their intended work on Apple, but singleton CPU rose; no source merged | Both exact-head Sol source approvals; builder1377 focused events/2existing ignored/strict7/actual hook green; Apple34 tests/two valid work controls/restoration, metadata2/Rust6 and all18 primary children passed. CPU +7.781924%/-0.267725%/-0.677237%, wins0/3,3/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu6/CPU6-RESULT.md) | P1 evidence |
-| Current P1 residual structural design, conditional | Depends on unchanged production0bf and all six rejected candidates; identify a material remaining cost before another implementation | One coherent ownership/API design may specialize singleton and wide paths. Ground it in actual source/compiled/profile evidence, preserve every implemented feature, and name one precise missing fact if unsupported. No speedup or implementation is authorized by this plan row alone | P1 |
+| CPU-8: measured and rejected | PR31 compact checked plans removed targeted Apple movement, but width515 CPU rose; no source merged | Both exact-head Sol source approvals; focused/control/strict7/actual hook green; Apple work/VALID/semantic/restoration and identity2/Rust6 controls passed. All18 primary children passed. CPU -4.503206%/-2.594473%/+0.511120%, wins3/3,2/3,1/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu8/CPU8-RESULT.md) | P1 evidence |
+| Current P1 CPU-9 effect ownership design, conditional | Reduce physical movement of small effects through a large owned enum; depends on unchanged production0bf and preserved CPU1–6/CPU8 rejections, with CPU7 attribution unknown | One source-supported public reusable ordered ownership design with exact async lifetimes/FIFO/rollback/budgets, actual consumers and independent controls; no implementation or CPU claim until parent release | P1 |
 | Then a checked CPU candidate, conditional | Depends on one justified bounded design and parent implementation release; rejected source and performance claims stay excluded | Schema/ownership/failure plan, focused semantic and causal controls, actual strict/enabled-hook publication, fresh dual Sol source reviews and original paired CPU/rate/p99 gates; preserve failures without replacement/tolerance | P1 |
 | Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
 
@@ -61,6 +62,16 @@ snapshot/compaction before spending a full measurement matrix; do not replace
 the primary workload or relax membership fences to obtain a score.
 The implemented candidate was measured and rejected as recorded below.
 
+
+### CPU-8 result and rejection (23 October 2026)
+
+[PR31](https://github.com/KarlLivesey/VoteBoat/pull/31) is rejected without merge.
+Its smaller checked hot plans passed both source reviews and the Apple compiled
+work/VALID-control/restoration gate. All18 primary children passed functional
+checks, but width515 median CPU +0.511120% with one win from three failed the
+unchanged per-width gate. Width1/231 were -4.503206%/-2.594473%; they do not offset
+the failed width. Canonical0/64/full5 unrun; production remains0bf.
+[Result and independent raw-score verification](../validation/performance/pillar1-cpu8/CPU8-RESULT.md).
 
 ### CPU-1 result and rejection (23 October 2026)
 

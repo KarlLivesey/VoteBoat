@@ -1,0 +1,179 @@
+{
+  "stage": 1,
+  "verdict": "FAIL_PRIMARY_CPU_GATE",
+  "pairs": [
+    {
+      "width": 1,
+      "pair": 1,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 2578.3849999999998,
+      "B_cpu_ns": 2462.275,
+      "B_over_A": 0.9549679353548831,
+      "B_win": true,
+      "actual_completed": {
+        "A": 200000,
+        "B": 200000
+      }
+    },
+    {
+      "width": 1,
+      "pair": 2,
+      "order": [
+        "B",
+        "A"
+      ],
+      "A_cpu_ns": 2566.8399999999997,
+      "B_cpu_ns": 2432.325,
+      "B_over_A": 0.9475950974739369,
+      "B_win": true,
+      "actual_completed": {
+        "B": 200000,
+        "A": 200000
+      }
+    },
+    {
+      "width": 1,
+      "pair": 3,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 2590.7799999999997,
+      "B_cpu_ns": 2479.1549999999997,
+      "B_over_A": 0.9569145199515204,
+      "B_win": true,
+      "actual_completed": {
+        "A": 200000,
+        "B": 200000
+      }
+    },
+    {
+      "width": 231,
+      "pair": 1,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 113.54473304473305,
+      "B_cpu_ns": 110.59884559884557,
+      "B_over_A": 0.9740552699637165,
+      "B_win": true,
+      "actual_completed": {
+        "A": 1386000,
+        "B": 1386000
+      }
+    },
+    {
+      "width": 231,
+      "pair": 2,
+      "order": [
+        "B",
+        "A"
+      ],
+      "A_cpu_ns": 110.88600288600288,
+      "B_cpu_ns": 112.42568542568543,
+      "B_over_A": 1.0138852740617355,
+      "B_win": false,
+      "actual_completed": {
+        "B": 1386000,
+        "A": 1386000
+      }
+    },
+    {
+      "width": 231,
+      "pair": 3,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 114.37157287157287,
+      "B_cpu_ns": 110.57215007215007,
+      "B_over_A": 0.9667800074439026,
+      "B_win": true,
+      "actual_completed": {
+        "A": 1386000,
+        "B": 1386000
+      }
+    },
+    {
+      "width": 515,
+      "pair": 1,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 120.20388349514565,
+      "B_cpu_ns": 121.81747572815534,
+      "B_over_A": 1.013423794523867,
+      "B_win": false,
+      "actual_completed": {
+        "A": 1545000,
+        "B": 1545000
+      }
+    },
+    {
+      "width": 515,
+      "pair": 2,
+      "order": [
+        "B",
+        "A"
+      ],
+      "A_cpu_ns": 122.57022653721683,
+      "B_cpu_ns": 122.06084142394822,
+      "B_over_A": 0.99584413664183,
+      "B_win": true,
+      "actual_completed": {
+        "B": 1545000,
+        "A": 1545000
+      }
+    },
+    {
+      "width": 515,
+      "pair": 3,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A_cpu_ns": 121.44142394822008,
+      "B_cpu_ns": 122.0621359223301,
+      "B_over_A": 1.0051112046773651,
+      "B_win": false,
+      "actual_completed": {
+        "A": 1545000,
+        "B": 1545000
+      }
+    }
+  ],
+  "widths": [
+    {
+      "width": 1,
+      "median_paired_B_over_A": 0.9549679353548831,
+      "paired_percent": -4.503206464511688,
+      "wins": 3,
+      "pass_gate": true
+    },
+    {
+      "width": 231,
+      "median_paired_B_over_A": 0.9740552699637165,
+      "paired_percent": -2.5944730036283503,
+      "wins": 2,
+      "pass_gate": true
+    },
+    {
+      "width": 515,
+      "median_paired_B_over_A": 1.0051112046773651,
+      "paired_percent": 0.5111204677365144,
+      "wins": 1,
+      "pass_gate": false
+    }
+  ],
+  "primary_pairs": 9,
+  "primary_children": 18,
+  "canonical_released": false,
+  "canonical_children": 0,
+  "full5": "NOT RELEASED",
+  "score": "whole exact-PID wait4 all target threads user+system / actual measured originals; no subtraction"
+}

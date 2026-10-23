@@ -1,0 +1,73 @@
+{
+  "A": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "B": "72612494e14eaa53b398e143af1a2d937ceadbea",
+  "tree": "530e157192107fbed54c46c873421f3a36c41510",
+  "roots": [
+    "/tmp/voteboat-claude-loop/pillar1-cpu8-726-20261023/base-0bf9271e",
+    "/tmp/voteboat-claude-loop/pillar1-cpu8-726-20261023/candidate-72612494"
+  ],
+  "input_manifest_sha256": "49d1868fec8318e2ab9fb57b7fd871d13144d5aa3e2a99c042f7af46321ff2b7",
+  "selected_inputs_sha256": "e0130b18adbd3d7489ce0988fdb17b58634830247fc21e1369d03a9bd0cf5a05",
+  "primary": [
+    {
+      "round": 1,
+      "width": 1,
+      "order": "AB",
+      "spec": "200000,1,1"
+    },
+    {
+      "round": 1,
+      "width": 231,
+      "order": "AB",
+      "spec": "6000,231,4"
+    },
+    {
+      "round": 1,
+      "width": 515,
+      "order": "AB",
+      "spec": "3000,515,4"
+    },
+    {
+      "round": 2,
+      "width": 1,
+      "order": "BA",
+      "spec": "200000,1,1"
+    },
+    {
+      "round": 2,
+      "width": 231,
+      "order": "BA",
+      "spec": "6000,231,4"
+    },
+    {
+      "round": 2,
+      "width": 515,
+      "order": "BA",
+      "spec": "3000,515,4"
+    },
+    {
+      "round": 3,
+      "width": 1,
+      "order": "AB",
+      "spec": "200000,1,1"
+    },
+    {
+      "round": 3,
+      "width": 231,
+      "order": "AB",
+      "spec": "6000,231,4"
+    },
+    {
+      "round": 3,
+      "width": 515,
+      "order": "AB",
+      "spec": "3000,515,4"
+    }
+  ],
+  "warmup_rounds": 1024,
+  "whole_wait4": true,
+  "per_width_median_lt_one": true,
+  "per_width_wins_required": 2,
+  "stage2_condition": "ALL Stage0 and ALL three width CPU gates PASS",
+  "full5_released": false
+}
