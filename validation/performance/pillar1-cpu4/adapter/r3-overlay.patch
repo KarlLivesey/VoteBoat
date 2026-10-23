@@ -13,7 +13,7 @@
          // Validate all fallible replica construction before starting any actor.
 --- a/benchmarks/matched/src/voteboat_engine/actor.rs
 +++ b/benchmarks/matched/src/voteboat_engine/actor.rs
-@@ -751,9 +751,11 @@
+@@ -757,9 +757,11 @@
      }
  }
  

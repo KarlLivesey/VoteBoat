@@ -598,20 +598,26 @@ impl<const TRACE: bool> Actor<TRACE> {
         entries: Applied<'_>,
         results: Vec<OperationId>,
     ) -> Result<(), Failure> {
+        // Validate the WHOLE owned receipt set against actual committed commands
+        // before removing any producer or publishing any current-interval result.
         let mut commands = entries.commands();
-        for operation in results {
+        for &operation in &results {
             let entry = commands.next().ok_or("extra original applied result")?;
-            let reply = pending
-                .remove(&operation)
-                .ok_or("missing/duplicate original applied result")?;
             if !matches!(entry.payload,EntryPayload::Command { operation:actual,.. } if actual==operation)
             {
                 return Err("original applied result differs".into());
             }
-            reply.publish(domain, entry, operation)?;
         }
         if commands.next().is_some() {
             return Err("missing original applied result".into());
+        }
+        // Delivery can still fail after a valid whole application. Preserve its
+        // successful prefix and leave later producers pending for normal cleanup.
+        for (entry, operation) in entries.commands().zip(results) {
+            let reply = pending
+                .remove(&operation)
+                .ok_or("missing/duplicate original applied result")?;
+            reply.publish(domain, entry, operation)?;
         }
         Ok(())
     }

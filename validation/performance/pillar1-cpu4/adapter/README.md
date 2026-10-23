@@ -42,3 +42,12 @@ resumed port delivery. Telemetry-only fails only reported; deliberately skipped
 original counting fails only reply_count. The compiled timing entry point was
 not executed; independent old-A/new-B schedule/telemetry audit remains parent
 work before timing. The adapter is not canonical shutdown qualification.
+
+P2 repair R4 refreshes only the overlay's Actor context/line offsets and exact
+before/after provenance. `driver.rs`, `ports.rs`, `steps.rs` and the original
+workload reference remain byte-identical to ec6052/R3. R4 checks actual patch
+application/reversal and compiles the complete source overlay while running
+the nine untimed public-path controls; exact receipts are named in
+`PROVENANCE.json`. Its timing entrypoint is never invoked. The historical R3
+functional manifest is explicitly historical; the new contemporaneous R4
+manifest includes the refreshed provenance and changed Actor/test source.

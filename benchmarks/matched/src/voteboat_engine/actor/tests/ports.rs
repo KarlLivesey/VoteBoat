@@ -507,19 +507,45 @@ fn committed_owned(actor: &mut Actor, commit: VolatilePersist) -> Vec<LogEntry> 
     entries
 }
 #[test]
-fn public_missing_duplicate_and_reversed_results_keep_actual_applied_prefix_and_pending_tail() {
-    for kind in 0..3 {
+fn malformed_current_results_publish_nothing_and_keep_all_pending_in_both_contexts() {
+    for (owned, kind) in [false, true]
+        .into_iter()
+        .flat_map(|owned| (0..6).map(move |kind| (owned, kind)))
+    {
         let (mut actor, sender, factory) =
-            ready_actor_with_factory::<false>(crate::Envelopes::UpstreamDefault, 1);
+            ready_actor_with_factory::<false>(crate::Envelopes::UpstreamDefault, 2);
+        let mut first = client(sender.clone(), &factory, 1);
+        let (request, mut prior) = prepare(&mut first, &[11]);
+        actor.requests(request).unwrap();
         let mut client = client(sender, &factory, 3);
-        let ids = [17, u128::MAX, 1u128 << 122];
+        let ids = [17, (1u128 << 120) | 17, u128::MAX];
         let (request, mut invocation) = prepare(&mut client, &ids);
         let commit = commit_update(&mut actor, request);
-        let entries = committed_owned(&mut actor, commit);
+        let materialized;
+        let mut effects = VecDeque::new();
+        let entries = if owned {
+            materialized = committed_owned(&mut actor, commit);
+            super::super::applied::Applied::Owned(&materialized)
+        } else {
+            let entries = persist_volatile_into(
+                &mut actor.parts.core,
+                &actor.parts.store.log,
+                commit,
+                &mut effects,
+            )
+            .unwrap()
+            .unwrap();
+            let receipts = actor.parts.application.apply_entries(entries).unwrap();
+            assert_eq!(receipts.len(), ids.len());
+            super::super::applied::Applied::Borrowed(entries)
+        };
         let values = match kind {
             0 => vec![ids[0]],
-            1 => vec![ids[0], ids[0]],
-            _ => vec![ids[1], ids[0], ids[2]],
+            1 => vec![ids[0], ids[1], ids[2], 37],
+            2 => vec![ids[0], ids[1], ids[1]],
+            3 => vec![ids[0], ids[1], ids[2] ^ (1u128 << 100)],
+            4 => vec![ids[1], ids[0], ids[2]],
+            _ => vec![],
         };
         let values = values
             .into_iter()
@@ -528,32 +554,45 @@ fn public_missing_duplicate_and_reversed_results_keep_actual_applied_prefix_and_
         let error = Actor::<false>::deliver_results(
             &mut actor.pending,
             &actor.parts.domain,
-            super::super::applied::Applied::Owned(&entries),
+            entries,
             values,
         )
         .unwrap_err();
+        // Check the publication boundary first: the old behavior must be killed
+        // here, rather than by a changed error string or a pending-count check.
+        for ordinal in 0..ids.len() {
+            assert!(
+                invocation.try_take(ordinal).unwrap().is_none(),
+                "malformed current receipt set must publish no new Applied: owned={owned} kind={kind} ordinal={ordinal}"
+            );
+        }
         assert!(error.to_string().contains(match kind {
-            0 => "missing original",
-            1 => "missing/duplicate",
+            0 | 5 => "missing original",
+            1 => "extra original",
             _ => "differs",
         }));
-        if kind < 2 {
-            take(&mut invocation, 0, ids[0]);
-            assert!(invocation.try_take(1).unwrap().is_none());
-        } else {
-            assert!(invocation.try_take(0).unwrap().is_none());
-            assert!(matches!(
-                invocation.try_take(1).unwrap().unwrap().into_outcome(),
-                OriginalOutcome::Unknown(_)
-            ));
+        assert_eq!(actor.pending.len(), ids.len());
+        for id in ids {
+            assert!(actor
+                .pending
+                .get_mut(&OperationId::new(id).unwrap())
+                .is_some());
         }
-        assert!(invocation.try_take(2).unwrap().is_none());
-        assert_eq!(actor.pending.len(), 2);
+        assert!(effects.is_empty());
+        assert_eq!(actor.parts.application.applied, 5);
+        assert_eq!(actor.parts.core.state().commit_index, 5);
         drop(actor);
-        assert!(matches!(
-            invocation.try_take(2).unwrap().unwrap().into_outcome(),
-            OriginalOutcome::Unknown(_)
-        ));
+        take(&mut prior, 0, 11);
+        for ordinal in 0..ids.len() {
+            assert_eq!(
+                invocation
+                    .try_take(ordinal)
+                    .unwrap()
+                    .unwrap()
+                    .into_outcome(),
+                OriginalOutcome::Unknown(WriteUnknown::OwnerFailed)
+            );
+        }
     }
 }
 #[test]

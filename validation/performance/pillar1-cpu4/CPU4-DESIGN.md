@@ -59,3 +59,34 @@ Same restored32-path candidate and schema; no redesign. The continued macro/curr
 ## R3 executed evidence and retained costs
 
 Final focused executions, nine compiled semantic kills/restorations, complete source-only overlay and semantic feature matrix are in CPU4-VALIDATION.md. The component inventory now records the actual seam/consumers. No material production correction or redesign was needed in R3: restored production remains byte-exact; matched late test helpers received standard formatting. All new locks/refcounts/copies/registry/cursor/descriptor/startup costs remain charged, not predicted savings. Exact strict7 and actual enabled hook/publication are the remaining builder checks. Parent source reviews/independent old-new audit/original9pairs/conditional64/full5 remain pending. Original R1/R2 audit/read/input limits and CPU3 HOLD remain.
+
+## P2 whole-result prevalidation, before the correction
+
+Review A on ec6052 withheld approval for `deliver_results` publishing a prefix
+of a malformed current result vector. Before consuming any producer, borrow the
+complete returned vector against `Applied::commands()` and require exact count
+and full u128 identity/order. Then use the same committed context for ordered
+delivery. Both borrowed EntryRange and materialized owned FIFO contexts retain
+their existing lifetimes, owned Noop receipts, capacity checks and all3 apply.
+No new vector, cloning, receipt API, hash change or host authority is needed.
+
+Malformed short/extra/duplicate/wrong-tail/reversed sets must leave all current
+pending producers and observations untouched until ordinary owner teardown;
+earlier successful intervals remain Applied. Valid whole-interval application
+followed by a middle ConsumerClosed or missing pending producer remains an
+ordered delivery failure with its successful prefix intact. No transactional
+delivery or application rollback is introduced. Acceptance: corrected controls
+in both contexts, compiled restoration of the old behavior killed at the
+no-new-Applied assertion, final matched/width1,231,515 and untimed updated-overlay
+checks, exact strict7/actual enabled hook. R3 unaffected source-equivalent
+receipts remain historical; parent dual source approval/performance/full5 stay
+pending. This extra validation walk is a retained cost for later measurement.
+
+R4 implemented exactly this boundary in the existing delivery method. No
+signature, ownership representation, application/follower capacity check or
+pending lookup algorithm changed. Corrected controls pass on both actual
+contexts; the original method compiles and fails the no-new-Applied assertion.
+Final engine default/all-feature56 each, full overlay9 untimed and strict7
+pass; detailed receipts/source-equivalence limits are in CPU4-VALIDATION.md.
+The enabled hook/nonforce update is the publication step; parent fresh reviews,
+adapter audit/performance/full5 and all historical HOLDs remain pending.

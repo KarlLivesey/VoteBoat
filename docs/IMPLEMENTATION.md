@@ -34,9 +34,81 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-1: measured and rejected | PR25 explicit commit notices preserved correctness paths, but singleton rate fell and wide fixed-driver CPU rose; no source merged | Final source approved by both Sol reviewers; focused/strict/hook green; canonical64/64 and driver18/18 passed. Performance gate failed; full suites not launched. [Result](../validation/performance/pillar1-cpu1/CPU1-RESULT.md) | P1 evidence |
 | CPU-2: measured and rejected | PR26 checked synchronous volatile turns preserve the same six installations, but width515 CPU rose; no source merged | Both exact-head Sol source approvals, focused621/1existing ignored, strict/hook green; all18 driver children passed. Width515 CPU +0.695%/1 of3 wins failed the agreed gate. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu2/CPU2-RESULT.md) | P1 evidence |
 | CPU-3: rejected after canonical observations | PR27 public receipt-capacity reuse passed driver gate but canonical singleton CPU/rate did not improve; resource reporting assertion remains unresolved | Both exact-head Sol source approvals, focused325/6mutants/strict+hook green; driver18/18 and canonical64/64 functional checks passed. No full suites. [Result](../validation/performance/pillar1-cpu3/CPU3-RESULT.md) | P1 evidence |
-| Current CPU-4: preserved candidate, focused R3 gates passed | Purpose: remove fresh per-original channel/request ownership on the actual Rust embedding. Dependencies: existing public core/application, safe std, unique host plus bounded registration factory. [Schema and inventory plan](../validation/performance/pillar1-cpu4/CPU4-DESIGN.md) | Focused public Counter/normal matched ownership, cancellation, bounds/races/ABA, partial/FIFO failures, all3 default checkpoints/catch-up, compiled changed-branch controls, strict7 and actual enabled push hook. R3 public15+Counter4 in all4 configs and example; matched56; compiled9 mutants/restored; final source-only overlay compiled/nine untimed controls; inventory/matrix complete. Exact sequential strict7 passed with zero diagnostics; actual enabled nonforce push hook/publication next | P1 |
+| Current CPU-4: P2 repair checked locally, publication next | Purpose: meet the host receipt contract before exposing any current-interval result. Dependencies: published ec6052 candidate, review A finding, existing actual committed borrowed/owned contexts. [Schema](../validation/performance/pillar1-cpu4/CPU4-DESIGN.md) | Full count/u128 sequence prevalidation; malformed controls in both contexts; preserved valid prefixes/FIFO failures. Final default56/all-feature56, compiled old-behavior kill/exact restoration, updated overlay9 untimed controls, all3 width/checkpoint/snapshot checks and sequential strict7 passed. Actual enabled hook/nonforce publication is the next action; source approval/qualification remain parent gates | P1 |
 | Next CPU-4: qualification or rejection (parent) | Purpose: determine actual equal-core CPU benefit. Dependencies: checked exact source/adapter, independent old/new schedule audit and two fresh Sol source approvals | Original9pairs, conditional64 canonical CPU/rate/p99/normal shutdown, then full5 only after worthwhile performance; original gates unchanged | P1 |
 | Then P1: retained composition (parent) | Purpose: qualify the kept public/native feature composition. Dependencies: successful CPU qualification and feature preservation | Exact-head full5/unskipped normal-debug exhaustive relay/docs/strict7+hook; no perfection claim, future work from measured residual | P1 |
+
+
+### CPU-4 P2 repair schema before edits (23 October 2026)
+
+Review A of exact `ec6052b73d2b4005aeb9030de6d21cec989bcd1c`
+withheld source approval at `actor.rs:611`: malformed returned receipt sets
+could expose a valid prefix before the missing/extra/wrong later result was
+detected. The concrete Noop produces correct vectors; this repairs the generic
+host precondition and negative controls, without claiming an observed malformed
+Noop workload. [Review](https://github.com/KarlLivesey/VoteBoat/pull/28#pullrequestreview-5625046357).
+
+Data/API: retain `Applied::{Borrowed(EntryRange), Owned(&[LogEntry])}` and
+the existing owned `Vec<OperationId>`. In `deliver_results`, first borrow every
+returned ID against actual committed commands and check exact exhaustion, then
+consume in original order. No new receipt/entry vector, clone, heap owner,
+hash algorithm, public seam or core change. Existing capacity/follower checks
+remain. The extra validation walk is a cost for later parent measurement.
+
+State/ownership: malformed current sets return before any pending removal or
+Applied publication; pending producers remain owned until normal host teardown.
+Application progress cannot roll back. A structurally valid set followed by a
+closed middle consumer or missing pending producer retains the existing
+successful delivery prefix/error order. Earlier successful intervals, prior
+Send/application failures and normal shutdown remain intact. No new restart
+state or cleanup owner is introduced.
+
+Acceptance is the current row above; next parent qualification and then P1
+retained composition remain the linked next-two deliverables. P1 macro scope,
+CPU1/2/3 rejections and all resource HOLDs remain unchanged. R4 evidence belongs
+only in `target/claude/pillar1-20261022/cpu4-p2-fix-r4`; R1/R2/R3/review evidence
+is immutable. Source approvals, old/new adapter audit, performance and full5 are
+pending parent work. No additional helper or product prerequisite is needed.
+
+R4 actual local evidence: the normal consumer validates all returned IDs and
+exact command exhaustion before its first pending removal. Final engine tests
+pass56/56 in default and all-feature configurations on the same1554-input
+manifest as strict7, SHA256
+`847bcf24d93d07dcef69d60fce4441c8eec07b561fa00ba29f152e3e5a2b6263`.
+The replacement malformed control exercises short, extra, duplicate, wrong-tail,
+reversed and empty sets in both actual contexts; no new Applied/no removal,
+earlier success and normal Unknown cleanup are asserted. Restoring the original
+delivery method compiled and failed the intended no-new-Applied assertion;
+exact fixed bytes were restored. Valid closed-middle prefixes and prior
+Send/application failures still pass. All3 two5000 checkpoints and real lagging
+snapshot/resumed delivery pass at widths1/231/515. The refreshed full source-only
+overlay applies/reverses exactly, compiles and passes9 untimed controls.
+Driver/pool/steps/reference are byte-identical to R3. Its functional manifest
+predates only the final explanatory adapter README; executable assets match.
+
+All root public-port/Counter/example sources and the native/core/application
+paths remain byte-identical to ec6052/R3: their focused receipts are reused by
+source equivalence, not relabelled new executions. The nine R3 mutant receipts
+remain historical; their unchanged trigger/control branches are mapped in
+`FINAL-source-equivalence.json`. The new compiled mutation covers the missing
+boundary. Exact rootfmt/four strict root Clippy configurations/matchedfmt/strict
+matched Clippy passed sequentially, zero diagnostics, with unchanged inputs.
+`FINAL-seven-strict-checks.json` records command observations and join ordering.
+The actual enabled hook receipt will be in `publication-command.log`; no hook,
+dependency, feature, lint threshold or capacity was changed.
+
+R4 limits: the initial mistaken bootstrap `--help` invocation failed before
+payload read/compile and before an identity/affinity receipt. Its original log
+and subsequent unsampled loader-contract inspection are retained; later
+controlled receipts do not certify those early reads. Two read-only path
+lookups failed and grouped historical displays truncated; critical current
+contracts/finding/source were read in bounded sections. All controlled samples
+so far conform and children are joined; sampling cannot certify unknown/shared
+infrastructure. The native-only and matched-format envelopes briefly overlapped
+during the next guard, while actual check commands executed sequentially. No prior
+resource HOLD, including the unexplained parent Python priority change, is
+cleared or attributed by this source repair. No timing/full5/Mac build/review
+launch is part of R4.
 
 
 ### CPU-4 R3 continuation schema and status (23 October 2026)

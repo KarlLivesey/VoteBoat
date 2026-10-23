@@ -6,6 +6,83 @@ It is not CPU qualification or a full-suite result. Production starts at
 CPU3 resource HOLD remains unresolved. R2 evidence and its limitations remain
 historical and immutable.
 
+## P2 repair acceptance (planned before source edits)
+
+Review A on ec6052 withheld source approval for whole-result prevalidation.
+R4 must reject short/extra/duplicate/wrong-tail/reversed current receipt vectors
+with no new Applied and no pending removal, in actual borrowed and owned
+committed contexts with sparse full-u128 IDs. Earlier Applied intervals remain;
+valid complete application followed by a closed middle consumer retains its
+successful prefix. Existing prior Send/application-failure ordering stays.
+Compile old-behavior restoration against the corrected controls and require
+the intended no-new-Applied failure, then restore exact fixed inputs. Execute
+focused final matched default/all-feature controls and widths1/231/515 with
+all3 two5000 checkpoints, real lagging snapshot and resumed delivery. Update
+source-only overlay provenance, check/install/compile its final asset, run
+untimed guards and restore exact sources. Finish sequential strict7 and actual
+enabled hook. Evidence: parent-safe `cpu4-p2-fix-r4`, never prior evidence edits.
+
+Unchanged root public-port/Counter/example and native/core/application paths
+reuse the R3 receipts above by source equivalence; they are not new R4 runs.
+The nine R3 mutants target unaffected branches and are preserved rather than
+rerun. The new malformed-result mutant supplements their missing boundary.
+Exact source approval, independent old/new audit, CPU performance and full5
+remain pending parent gates; no prior resource HOLD is cleared.
+
+## Actual R4 P2 executions
+
+Evidence directory: parent-safe `cpu4-p2-fix-r4`. Final normal matched engine
+default56 and all-feature56 pass with0 failed/ignored, after overlay restoration
+and asset freeze. Both have the exact same1554-input SHA256/size manifest as
+the seven strict checks:
+`847bcf24d93d07dcef69d60fce4441c8eec07b561fa00ba29f152e3e5a2b6263`.
+Every build records before/after equality and archived source objects.
+
+The corrected malformed-result test covers six shapes (short, extra, duplicate,
+wrong full-u128 tail, reversed, empty) in both actual borrowed EntryRange and
+owned committed contexts. It checks no new Applied before error, all current
+pending producers retained, an earlier interval still Applied, and owner-drop
+Unknown cleanup. Sparse IDs share low bits while differing high bits. A compiled
+restoration of the old delivery method fails exactly at
+`malformed current receipt set must publish no new Applied: owned=false kind=0 ordinal=0`;
+the fixed source and all build inputs restore exactly. This is one intended
+semantic kill, not a compiler failure. Existing valid whole-interval closed-middle
+consumer prefix and prior Send/application-failure controls still pass.
+
+Every final engine configuration and the updated overlay retain all3 real owned
+applications/receipts at widths1/231/515, healthy originals12000/12012/12360,
+two default5000 checkpoints on every replica, historical1000 suffix/pins,
+actual lagging snapshot installation and resumed1/231/515 originals. Updated
+patch application/reversal and before/after hashes verify exact restoration;
+the complete overlay compiles and passes9 untimed public-path controls. Actual
+telemetry-only/skipped-original traces retain their original failed conjuncts,
+chunks1/4/final3, FIFO carry and original cardinality. Driver/pool/steps/reference
+are byte-identical to ec6052. The final explanatory adapter README was added
+after that functional manifest; no executable asset differs. No timer ran.
+
+Root `src/`, `tests/`, `examples/`, native/core/application/Cargo/hooks and all
+Actor code outside `deliver_results` are source-equivalent to R3. Root module15,
+Counter4/all4 configurations/example and semantic receipts above are historical
+reuse, not new tests. Nine preserved mutant impacts: generation/old-owner reuse,
+content/full-ID, readiness and registry-capacity branches stay in unchanged
+public producer/invocation/state/domain code; one-is-batch and fallback triggers
+stay in unchanged matched client code; pre-apply trigger and its existing control
+stay in unchanged `apply_entries`/test code. Their downstream delivery boundary
+is now strengthened; R3 kills are not claimed as fresh R4 executions. The new
+old-behavior mutation specifically qualifies the changed boundary.
+
+Strict7 passed with zero diagnostics and sequential actual command execution:
+rootfmt, default/all/no-default/native-only strict locked-offline all-target
+Clippy, matchedfmt and strict matched Clippy. Same input manifest for all7;
+`FINAL-seven-strict-checks.json` records exact commands and join observations.
+The native-only and matched-format outer envelopes briefly overlap in a stock
+guard, with the prior check joined before the next check starts. Actual enabled nonforce hook runs on
+the ensuing publication; its receipt is separate. Initial bootstrap-interface
+failure/unsampled contract inspection, failed read paths and truncated historical
+displays remain explicit limits in docs/IMPLEMENTATION.md and the R4 report.
+Later controlled samples do not certify early reads or unknown infrastructure,
+attribute the earlier parent priority change, or clear any resource HOLD.
+
 ## Actual R3 executions
 
 Evidence directory in the parent checkout:
