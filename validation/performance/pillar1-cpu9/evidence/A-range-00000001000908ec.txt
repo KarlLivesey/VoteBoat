@@ -1,0 +1,396 @@
+
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu1-perf/artifacts/canonical-A.bin:	file format mach-o arm64
+
+Disassembly of section __TEXT,__text:
+
+00000001000908ec <<voteboat::raft::Raft>::stage_pending_into>:
+1000908ec:     	stp	x28, x27, [sp, #-0x60]!
+1000908f0:     	stp	x26, x25, [sp, #0x10]
+1000908f4:     	stp	x24, x23, [sp, #0x20]
+1000908f8:     	stp	x22, x21, [sp, #0x30]
+1000908fc:     	stp	x20, x19, [sp, #0x40]
+100090900:     	stp	x29, x30, [sp, #0x50]
+100090904:     	add	x29, sp, #0x50
+100090908:     	sub	sp, sp, #0x260
+10009090c:     	str	x6, [sp, #0x18]
+100090910:     	mov	x20, x5
+100090914:     	mov	x25, x4
+100090918:     	mov	x26, x3
+10009091c:     	mov	x19, x2
+100090920:     	mov	x24, x1
+100090924:     	mov	x27, x0
+100090928:     	ldp	x23, x21, [x29, #0x10]
+10009092c:     	ldr	x8, [x2]
+100090930:     	cmp	x8, #0x3
+100090934:     	str	x7, [sp, #0x10]
+100090938:     	b.ne	0x1000909c0 <<voteboat::raft::Raft>::stage_pending_into+0xd4>
+10009093c:     	ldr	x22, [x19, #0x100]
+100090940:     	ldr	x8, [x22]
+100090944:     	cmp	x8, #0x3
+100090948:     	b.ne	0x100090a24 <<voteboat::raft::Raft>::stage_pending_into+0x138>
+10009094c:     	mov	x28, x7
+100090950:     	ldr	x0, [x22, #0x230]
+100090954:     	add	x8, sp, #0x130
+100090958:     	bl	0x1000867d8 <<voteboat::log::GroupLog>::membership>
+10009095c:     	ldr	x8, [sp, #0x130]
+100090960:     	cmn	x8, #0x1
+100090964:     	b.eq	0x100090ce0 <<voteboat::raft::Raft>::stage_pending_into+0x3f4>
+100090968:     	mov	w0, #0x120              ; =288
+10009096c:     	bl	0x100210678 <dyld_stub_binder+0x100210678>
+100090970:     	cbz	x0, 0x100090d60 <<voteboat::raft::Raft>::stage_pending_into+0x474>
+100090974:     	mov	x28, x0
+100090978:     	add	x1, sp, #0x130
+10009097c:     	mov	w2, #0x120              ; =288
+100090980:     	bl	0x100210690 <dyld_stub_binder+0x100210690>
+100090984:     	ldr	x8, [x22]
+100090988:     	cmp	x8, #0x0
+10009098c:     	cset	w9, ne
+100090990:     	subs	x8, x8, x9
+100090994:     	b.ne	0x100090a38 <<voteboat::raft::Raft>::stage_pending_into+0x14c>
+100090998:     	add	x8, x22, #0x30
+10009099c:     	add	x10, x22, #0xf8
+1000909a0:     	add	x11, x22, #0x100
+1000909a4:     	add	x9, x22, #0x108
+1000909a8:     	ldr	x12, [x20]
+1000909ac:     	cmn	x12, #0x3
+1000909b0:     	cset	w12, eq
+1000909b4:     	str	w12, [sp, #0xc]
+1000909b8:     	b.eq	0x100090a08 <<voteboat::raft::Raft>::stage_pending_into+0x11c>
+1000909bc:     	b	0x100090a64 <<voteboat::raft::Raft>::stage_pending_into+0x178>
+1000909c0:     	add	x12, x19, #0x30
+1000909c4:     	add	x10, x19, #0xf8
+1000909c8:     	add	x11, x19, #0x100
+1000909cc:     	add	x13, x19, #0x108
+1000909d0:     	add	x14, x19, #0x40
+1000909d4:     	add	x15, x19, #0x110
+1000909d8:     	add	x9, x19, #0x118
+1000909dc:     	cmp	x8, #0x2
+1000909e0:     	csel	x9, x13, x9, lo
+1000909e4:     	csel	x11, x11, x15, lo
+1000909e8:     	csel	x10, x10, x13, lo
+1000909ec:     	csel	x8, x12, x14, lo
+1000909f0:     	mov	x28, xzr
+1000909f4:     	ldr	x12, [x20]
+1000909f8:     	cmn	x12, #0x3
+1000909fc:     	cset	w12, eq
+100090a00:     	str	w12, [sp, #0xc]
+100090a04:     	b.ne	0x100090a64 <<voteboat::raft::Raft>::stage_pending_into+0x178>
+100090a08:     	ldr	x11, [x11]
+100090a0c:     	ldr	x10, [x10]
+100090a10:     	ldr	x12, [x24, #0x13e8]
+100090a14:     	stp	x10, x11, [sp, #0x28]
+100090a18:     	str	x12, [sp, #0x38]
+100090a1c:     	mov	w10, #0x2               ; =2
+100090a20:     	b	0x100090aa8 <<voteboat::raft::Raft>::stage_pending_into+0x1bc>
+100090a24:     	mov	x28, #0x0               ; =0
+100090a28:     	cmp	x8, #0x0
+100090a2c:     	cset	w9, ne
+100090a30:     	subs	x8, x8, x9
+100090a34:     	b.eq	0x100090998 <<voteboat::raft::Raft>::stage_pending_into+0xac>
+100090a38:     	cmp	x8, #0x1
+100090a3c:     	b.ne	0x100090cb4 <<voteboat::raft::Raft>::stage_pending_into+0x3c8>
+100090a40:     	add	x8, x22, #0x40
+100090a44:     	add	x10, x22, #0x108
+100090a48:     	add	x11, x22, #0x110
+100090a4c:     	add	x9, x22, #0x118
+100090a50:     	ldr	x12, [x20]
+100090a54:     	cmn	x12, #0x3
+100090a58:     	cset	w12, eq
+100090a5c:     	str	w12, [sp, #0xc]
+100090a60:     	b.eq	0x100090a08 <<voteboat::raft::Raft>::stage_pending_into+0x11c>
+100090a64:     	ldp	q0, q1, [x20, #0xc0]
+100090a68:     	stp	q0, q1, [sp, #0xf0]
+100090a6c:     	ldr	q0, [x20, #0xe0]
+100090a70:     	str	q0, [sp, #0x110]
+100090a74:     	ldp	q0, q1, [x20, #0x80]
+100090a78:     	stp	q0, q1, [sp, #0xb0]
+100090a7c:     	ldp	q1, q0, [x20, #0xa0]
+100090a80:     	stp	q1, q0, [sp, #0xd0]
+100090a84:     	ldp	q0, q1, [x20, #0x40]
+100090a88:     	stp	q0, q1, [sp, #0x70]
+100090a8c:     	ldp	q1, q0, [x20, #0x60]
+100090a90:     	stp	q1, q0, [sp, #0x90]
+100090a94:     	ldp	q0, q1, [x20]
+100090a98:     	stp	q0, q1, [sp, #0x30]
+100090a9c:     	ldp	q1, q0, [x20, #0x20]
+100090aa0:     	mov	w10, #0x1               ; =1
+100090aa4:     	stp	q1, q0, [sp, #0x50]
+100090aa8:     	ldr	x13, [x8]
+100090aac:     	ldr	x9, [x9]
+100090ab0:     	str	x10, [sp, #0x20]
+100090ab4:     	add	x8, x24, #0x310
+100090ab8:     	cmp	x28, #0x0
+100090abc:     	csel	x12, x8, x28, eq
+100090ac0:     	mov	w10, #0x10c0            ; =4288
+100090ac4:     	add	x10, x24, x10
+100090ac8:     	ldr	x15, [x24, #0x10c8]
+100090acc:     	ldr	x16, [x24, #0x10c0]
+100090ad0:     	mov	w11, #0x11a0            ; =4512
+100090ad4:     	add	x11, x24, x11
+100090ad8:     	mov	x14, x10
+100090adc:     	orr	x15, x16, x15
+100090ae0:     	cbnz	x15, 0x100090af4 <<voteboat::raft::Raft>::stage_pending_into+0x208>
+100090ae4:     	ldp	x16, x15, [x11]
+100090ae8:     	mov	x14, x11
+100090aec:     	orr	x15, x16, x15
+100090af0:     	cbz	x15, 0x100090b38 <<voteboat::raft::Raft>::stage_pending_into+0x24c>
+100090af4:     	ldr	x15, [x14, #0xa8]
+100090af8:     	cmp	x15, x13
+100090afc:     	b.ne	0x100090b30 <<voteboat::raft::Raft>::stage_pending_into+0x244>
+100090b00:     	ldr	x13, [x12, #0x70]
+100090b04:     	cmn	x13, #0x1
+100090b08:     	mov	w13, #0xf0              ; =240
+100090b0c:     	mov	w15, #0x38              ; =56
+100090b10:     	csel	x13, x15, x13, eq
+100090b14:     	ldr	x12, [x12, x13]
+100090b18:     	ldr	x13, [x14, #0x90]
+100090b1c:     	cmp	x13, x12
+100090b20:     	b.ne	0x100090b30 <<voteboat::raft::Raft>::stage_pending_into+0x244>
+100090b24:     	ldr	x12, [x14, #0xb0]
+100090b28:     	cmp	x12, x9
+100090b2c:     	b.hs	0x100090b38 <<voteboat::raft::Raft>::stage_pending_into+0x24c>
+100090b30:     	stp	xzr, xzr, [x10]
+100090b34:     	stp	xzr, xzr, [x11]
+100090b38:     	cbz	x28, 0x100090ba4 <<voteboat::raft::Raft>::stage_pending_into+0x2b8>
+100090b3c:     	ldr	x9, [x28, #0x70]
+100090b40:     	cmn	x9, #0x1
+100090b44:     	mov	w9, #0xf0               ; =240
+100090b48:     	mov	w10, #0x38              ; =56
+100090b4c:     	csel	x11, x10, x9, eq
+100090b50:     	ldr	x11, [x28, x11]
+100090b54:     	ldr	x12, [x24, #0x430]
+100090b58:     	ldr	x13, [x24, #0x870]
+100090b5c:     	cmp	x13, #0x0
+100090b60:     	ccmn	x12, #0x1, #0x4, ne
+100090b64:     	csel	x8, x8, x13, eq
+100090b68:     	ldr	x12, [x8, #0x70]
+100090b6c:     	cmn	x12, #0x1
+100090b70:     	csel	x9, x10, x9, eq
+100090b74:     	ldr	x8, [x8, x9]
+100090b78:     	cmp	x11, x8
+100090b7c:     	b.eq	0x100090ba4 <<voteboat::raft::Raft>::stage_pending_into+0x2b8>
+100090b80:     	ldr	x8, [x24, #0xdf8]
+100090b84:     	ldr	x9, [x24, #0xdf0]
+100090b88:     	orr	x8, x9, x8
+100090b8c:     	cbz	x8, 0x100090b98 <<voteboat::raft::Raft>::stage_pending_into+0x2ac>
+100090b90:     	add	x0, x24, #0xe70
+100090b94:     	bl	0x10006bcc0 <core::ptr::drop_glue::<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, alloc::collections::btree::set_val::SetValZST>>>
+100090b98:     	movi.2d	v0, #0000000000000000
+100090b9c:     	str	q0, [x24, #0xdf0]
+100090ba0:     	str	q0, [x24, #0xe90]
+100090ba4:     	add	x0, x24, #0x430
+100090ba8:     	bl	0x10006ae28 <core::ptr::drop_glue::<core::option::Option<voteboat::raft::Pending>>>
+100090bac:     	add	x0, x24, #0x430
+100090bb0:     	mov	x1, x19
+100090bb4:     	mov	w2, #0x2a0              ; =672
+100090bb8:     	bl	0x100210690 <dyld_stub_binder+0x100210690>
+100090bbc:     	ldp	q0, q1, [x23, #0xc0]
+100090bc0:     	str	q0, [x24, #0x7a0]
+100090bc4:     	str	q1, [x24, #0x7b0]
+100090bc8:     	ldp	q0, q1, [x23, #0xe0]
+100090bcc:     	str	q0, [x24, #0x7c0]
+100090bd0:     	str	q1, [x24, #0x7d0]
+100090bd4:     	ldp	q0, q1, [x23, #0x80]
+100090bd8:     	str	q0, [x24, #0x760]
+100090bdc:     	str	q1, [x24, #0x770]
+100090be0:     	ldp	q0, q1, [x23, #0xa0]
+100090be4:     	str	q0, [x24, #0x780]
+100090be8:     	str	q1, [x24, #0x790]
+100090bec:     	ldp	q0, q1, [x23, #0x40]
+100090bf0:     	str	q0, [x24, #0x720]
+100090bf4:     	str	q1, [x24, #0x730]
+100090bf8:     	ldp	q0, q1, [x23, #0x60]
+100090bfc:     	str	q0, [x24, #0x740]
+100090c00:     	str	q1, [x24, #0x750]
+100090c04:     	ldp	q0, q1, [x23]
+100090c08:     	str	q0, [x24, #0x6e0]
+100090c0c:     	str	q1, [x24, #0x6f0]
+100090c10:     	ldp	q0, q1, [x23, #0x20]
+100090c14:     	str	q0, [x24, #0x700]
+100090c18:     	ldp	x8, x9, [sp, #0x10]
+100090c1c:     	str	x9, [x24, #0x6d0]
+100090c20:     	str	x8, [x24, #0x6d8]
+100090c24:     	str	q1, [x24, #0x710]
+100090c28:     	movi.2d	v0, #0000000000000000
+100090c2c:     	str	q0, [x24, #0x7e0]
+100090c30:     	str	x26, [x24, #0x860]
+100090c34:     	str	x25, [x24, #0x868]
+100090c38:     	str	x28, [x24, #0x870]
+100090c3c:     	ldr	x8, [x21, #0x18]
+100090c40:     	ldr	x9, [x21]
+100090c44:     	cmp	x8, x9
+100090c48:     	b.ne	0x100090c5c <<voteboat::raft::Raft>::stage_pending_into+0x370>
+100090c4c:     	mov	x0, x21
+100090c50:     	bl	0x10020d674 <<alloc::collections::vec_deque::VecDeque<voteboat::raft::Effect>>::grow>
+100090c54:     	ldr	x8, [x21, #0x18]
+100090c58:     	ldr	x9, [x21]
+100090c5c:     	add	x10, x8, #0x1
+100090c60:     	str	x10, [x21, #0x18]
+100090c64:     	ldp	x11, x10, [x21, #0x8]
+100090c68:     	add	x8, x10, x8
+100090c6c:     	cmp	x8, x9
+100090c70:     	csel	x9, xzr, x9, lo
+100090c74:     	sub	x8, x8, x9
+100090c78:     	mov	w9, #0x110              ; =272
+100090c7c:     	madd	x0, x8, x9, x11
+100090c80:     	add	x1, sp, #0x20
+100090c84:     	mov	w2, #0x110              ; =272
+100090c88:     	bl	0x100210690 <dyld_stub_binder+0x100210690>
+100090c8c:     	mov	x8, #-0x1               ; =-1
+100090c90:     	str	x8, [x27]
+100090c94:     	add	sp, sp, #0x260
+100090c98:     	ldp	x29, x30, [sp, #0x50]
+100090c9c:     	ldp	x20, x19, [sp, #0x40]
+100090ca0:     	ldp	x22, x21, [sp, #0x30]
+100090ca4:     	ldp	x24, x23, [sp, #0x20]
+100090ca8:     	ldp	x26, x25, [sp, #0x10]
+100090cac:     	ldp	x28, x27, [sp], #0x60
+100090cb0:     	ret
+100090cb4:     	ldr	x9, [x22, #0x230]
+100090cb8:     	add	x10, x9, #0x188
+100090cbc:     	add	x11, x9, #0x190
+100090cc0:     	add	x8, x9, #0x80
+100090cc4:     	add	x9, x9, #0x198
+100090cc8:     	ldr	x12, [x20]
+100090ccc:     	cmn	x12, #0x3
+100090cd0:     	cset	w12, eq
+100090cd4:     	str	w12, [sp, #0xc]
+100090cd8:     	b.eq	0x100090a08 <<voteboat::raft::Raft>::stage_pending_into+0x11c>
+100090cdc:     	b	0x100090a64 <<voteboat::raft::Raft>::stage_pending_into+0x178>
+100090ce0:     	mov	x8, #0x11               ; =17
+100090ce4:     	movk	x8, #0x8000, lsl #48
+100090ce8:     	str	x8, [x27]
+100090cec:     	ldrb	w8, [x23]
+100090cf0:     	cmp	w8, #0xff
+100090cf4:     	b.eq	0x100090d00 <<voteboat::raft::Raft>::stage_pending_into+0x414>
+100090cf8:     	mov	x0, x23
+100090cfc:     	bl	0x10006c5b0 <core::ptr::drop_glue::<voteboat::raft::Rpc>>
+100090d00:     	ldr	x8, [sp, #0x18]
+100090d04:     	cmp	x8, #0x5
+100090d08:     	b.lo	0x100090d14 <<voteboat::raft::Raft>::stage_pending_into+0x428>
+100090d0c:     	mov	x0, x28
+100090d10:     	bl	0x100210618 <dyld_stub_binder+0x100210618>
+100090d14:     	ldr	x8, [x20]
+100090d18:     	cmn	x8, #0x3
+100090d1c:     	b.eq	0x100090d3c <<voteboat::raft::Raft>::stage_pending_into+0x450>
+100090d20:     	cmn	x8, #0x2
+100090d24:     	b.eq	0x100090d30 <<voteboat::raft::Raft>::stage_pending_into+0x444>
+100090d28:     	mov	x0, x20
+100090d2c:     	bl	0x10006cf78 <core::ptr::drop_glue::<voteboat::log::entries::Spans>>
+100090d30:     	ldr	x0, [x20, #0xe0]
+100090d34:     	cbz	x0, 0x100090d3c <<voteboat::raft::Raft>::stage_pending_into+0x450>
+100090d38:     	bl	0x10006b408 <core::ptr::drop_glue::<alloc::boxed::Box<voteboat::membership::Membership>>>
+100090d3c:     	mov	x0, x19
+100090d40:     	add	sp, sp, #0x260
+100090d44:     	ldp	x29, x30, [sp, #0x50]
+100090d48:     	ldp	x20, x19, [sp, #0x40]
+100090d4c:     	ldp	x22, x21, [sp, #0x30]
+100090d50:     	ldp	x24, x23, [sp, #0x20]
+100090d54:     	ldp	x26, x25, [sp, #0x10]
+100090d58:     	ldp	x28, x27, [sp], #0x60
+100090d5c:     	b	0x10006d0fc <core::ptr::drop_glue::<voteboat::log::transition::incoming::OwnedNextLog>>
+100090d60:     	mov	w0, #0x10               ; =16
+100090d64:     	mov	w1, #0x120              ; =288
+100090d68:     	bl	0x100206518 <alloc::alloc::handle_alloc_error>
+100090d6c:     	brk	#0x1
+100090d70:     	mov	x21, x0
+100090d74:     	ldr	x0, [x20, #0xe0]
+100090d78:     	cbz	x0, 0x100090eec <<voteboat::raft::Raft>::stage_pending_into+0x600>
+100090d7c:     	bl	0x10006b408 <core::ptr::drop_glue::<alloc::boxed::Box<voteboat::membership::Membership>>>
+100090d80:     	b	0x100090eec <<voteboat::raft::Raft>::stage_pending_into+0x600>
+100090d84:     	bl	0x100206f38 <core::panicking::panic_in_cleanup>
+100090d88:     	mov	x21, x0
+100090d8c:     	b	0x100090eec <<voteboat::raft::Raft>::stage_pending_into+0x600>
+100090d90:     	mov	x21, x0
+100090d94:     	mov	w8, #0x1                ; =1
+100090d98:     	str	w8, [sp, #0xc]
+100090d9c:     	b	0x100090eb4 <<voteboat::raft::Raft>::stage_pending_into+0x5c8>
+100090da0:     	mov	x21, x0
+100090da4:     	movi.2d	v0, #0000000000000000
+100090da8:     	str	q0, [x24, #0xdf0]
+100090dac:     	mov	w22, #0x1               ; =1
+100090db0:     	b	0x100090e68 <<voteboat::raft::Raft>::stage_pending_into+0x57c>
+100090db4:     	mov	x21, x0
+100090db8:     	b	0x100090e98 <<voteboat::raft::Raft>::stage_pending_into+0x5ac>
+100090dbc:     	mov	x21, x0
+100090dc0:     	add	x0, sp, #0x20
+100090dc4:     	bl	0x10006ca2c <core::ptr::drop_glue::<voteboat::raft::Effect>>
+100090dc8:     	b	0x100090e84 <<voteboat::raft::Raft>::stage_pending_into+0x598>
+100090dcc:     	bl	0x100206f38 <core::panicking::panic_in_cleanup>
+100090dd0:     	mov	x21, x0
+100090dd4:     	add	x0, x24, #0x430
+100090dd8:     	mov	x1, x19
+100090ddc:     	mov	w2, #0x2a0              ; =672
+100090de0:     	bl	0x100210690 <dyld_stub_binder+0x100210690>
+100090de4:     	mov	w22, #0x0               ; =0
+100090de8:     	ldp	q0, q1, [x23, #0xc0]
+100090dec:     	str	q0, [x24, #0x7a0]
+100090df0:     	str	q1, [x24, #0x7b0]
+100090df4:     	ldp	q0, q1, [x23, #0xe0]
+100090df8:     	str	q0, [x24, #0x7c0]
+100090dfc:     	str	q1, [x24, #0x7d0]
+100090e00:     	ldp	q0, q1, [x23, #0x80]
+100090e04:     	str	q0, [x24, #0x760]
+100090e08:     	str	q1, [x24, #0x770]
+100090e0c:     	ldp	q0, q1, [x23, #0xa0]
+100090e10:     	str	q0, [x24, #0x780]
+100090e14:     	str	q1, [x24, #0x790]
+100090e18:     	ldp	q0, q1, [x23, #0x40]
+100090e1c:     	str	q0, [x24, #0x720]
+100090e20:     	str	q1, [x24, #0x730]
+100090e24:     	ldp	q0, q1, [x23, #0x60]
+100090e28:     	str	q0, [x24, #0x740]
+100090e2c:     	str	q1, [x24, #0x750]
+100090e30:     	ldp	q0, q1, [x23]
+100090e34:     	str	q0, [x24, #0x6e0]
+100090e38:     	str	q1, [x24, #0x6f0]
+100090e3c:     	ldp	q0, q1, [x23, #0x20]
+100090e40:     	str	q0, [x24, #0x700]
+100090e44:     	str	x26, [x24, #0x860]
+100090e48:     	ldp	x8, x9, [sp, #0x10]
+100090e4c:     	str	x9, [x24, #0x6d0]
+100090e50:     	str	x8, [x24, #0x6d8]
+100090e54:     	str	q1, [x24, #0x710]
+100090e58:     	movi.2d	v0, #0000000000000000
+100090e5c:     	str	q0, [x24, #0x7e0]
+100090e60:     	str	x25, [x24, #0x868]
+100090e64:     	str	x28, [x24, #0x870]
+100090e68:     	add	x0, sp, #0x20
+100090e6c:     	bl	0x10006ca2c <core::ptr::drop_glue::<voteboat::raft::Effect>>
+100090e70:     	tbz	w22, #0x0, 0x100090e84 <<voteboat::raft::Raft>::stage_pending_into+0x598>
+100090e74:     	cbz	x28, 0x100090ea0 <<voteboat::raft::Raft>::stage_pending_into+0x5b4>
+100090e78:     	mov	x0, x28
+100090e7c:     	bl	0x10006b408 <core::ptr::drop_glue::<alloc::boxed::Box<voteboat::membership::Membership>>>
+100090e80:     	b	0x100090ea0 <<voteboat::raft::Raft>::stage_pending_into+0x5b4>
+100090e84:     	mov	w22, #0x0               ; =0
+100090e88:     	b	0x100090ecc <<voteboat::raft::Raft>::stage_pending_into+0x5e0>
+100090e8c:     	mov	x21, x0
+100090e90:     	add	x0, sp, #0x130
+100090e94:     	bl	0x10006c1d8 <core::ptr::drop_glue::<voteboat::membership::Membership>>
+100090e98:     	mov	w8, #0x1                ; =1
+100090e9c:     	str	w8, [sp, #0xc]
+100090ea0:     	ldrb	w8, [x23]
+100090ea4:     	cmp	w8, #0xff
+100090ea8:     	b.eq	0x100090eb4 <<voteboat::raft::Raft>::stage_pending_into+0x5c8>
+100090eac:     	mov	x0, x23
+100090eb0:     	bl	0x10006c5b0 <core::ptr::drop_glue::<voteboat::raft::Rpc>>
+100090eb4:     	ldr	x8, [sp, #0x18]
+100090eb8:     	cmp	x8, #0x5
+100090ebc:     	b.lo	0x100090ec8 <<voteboat::raft::Raft>::stage_pending_into+0x5dc>
+100090ec0:     	ldr	x0, [sp, #0x10]
+100090ec4:     	bl	0x100210618 <dyld_stub_binder+0x100210618>
+100090ec8:     	mov	w22, #0x1               ; =1
+100090ecc:     	ldr	w8, [sp, #0xc]
+100090ed0:     	cbz	w8, 0x100090ee8 <<voteboat::raft::Raft>::stage_pending_into+0x5fc>
+100090ed4:     	ldr	x8, [x20]
+100090ed8:     	cmn	x8, #0x3
+100090edc:     	b.eq	0x100090ee8 <<voteboat::raft::Raft>::stage_pending_into+0x5fc>
+100090ee0:     	mov	x0, x20
+100090ee4:     	bl	0x10006c550 <core::ptr::drop_glue::<voteboat::log::LogUpdate>>
+100090ee8:     	tbz	w22, #0x0, 0x100090ef4 <<voteboat::raft::Raft>::stage_pending_into+0x608>
+100090eec:     	mov	x0, x19
+100090ef0:     	bl	0x10006d0fc <core::ptr::drop_glue::<voteboat::log::transition::incoming::OwnedNextLog>>
+100090ef4:     	mov	x0, x21
+100090ef8:     	bl	0x100210510 <dyld_stub_binder+0x100210510>
+100090efc:     	bl	0x100206f38 <core::panicking::panic_in_cleanup>
+100090f00:     	bl	0x100206f38 <core::panicking::panic_in_cleanup>

@@ -1,0 +1,54 @@
+{
+  "verdict": "FAIL_NORMAL_APPLE_WORK_REMOVAL",
+  "head": "52f4571e18f0ec5407b8dd4942c5a26d93f0528a",
+  "tree": "542426e051eaeaae1b34c26521aded21e06a671c",
+  "binary": {
+    "bytes": 4112000,
+    "sha256": "9ef043d7ff0daf49265f15ca2b0928d4885995bbf89bc1c07174b1c7eeb0f91d",
+    "mode": "0o644"
+  },
+  "stage": {
+    "symbol": "Raft::stage_pending_into",
+    "entry": "0x100090e4c",
+    "none_test": "0x100091094..0x10009109c tests update niche -3, falls through None branch",
+    "pending": "0x1000910a0..0x100091138 installs existing Pending before token",
+    "token_stack": "0x10009113c..0x100091148 loads incarnation plus revision/generation and writes discriminant2/token at sp+0x140..sp+0x158",
+    "join": "0x100091158 b.ne ->0x10009126c; growth branch returns via0x100091264",
+    "destination": "0x10009126c..0x10009128c increments length and computes ring slot pointer with272-byte stride",
+    "transfer": "0x100091290 x1=sp+0x140;0x100091294 w2=272;0x100091298 bl0x100211084",
+    "import_stub": [
+      "0x0000000100211084  7046 _memcpy",
+      "0x0000000100211090  7047 _memmove",
+      "0x000000010021109c  7048 _memset",
+      "0x00000001002c41a0  7046 _memcpy",
+      "0x00000001002c41a8  7047 _memmove",
+      "0x00000001002c41b0  7048 _memset"
+    ]
+  },
+  "baseline": {
+    "binary_sha256": "0c6998bc63614f43faaba36dfff64f9291b7a14336853f4d901c4068c2c69208",
+    "entry": "0x1000908ec",
+    "transfer": "0x100090c80 x1=sp+0x20;0x100090c84 w2=272;0x100090c88 memcpy"
+  },
+  "interpretation": "The actual volatile None branch and durable Some branch join the same full272-byte stack-envelope-to-ring transfer in NORMAL B. Branch-local source spelling did not remove the required old common staging work. This concrete normal counterexample fails the conjunctive gate independently of extraction. No complete consumer/removal GO, frequency, CPU loss or gain claim.",
+  "focused_actual": {
+    "queue_passed": 4,
+    "failed": 0,
+    "other_focused_not_launched": true
+  },
+  "controls_actual": {
+    "valid_old": 0,
+    "semantic_mutants": 0,
+    "metadata": 0,
+    "rust_healthy_negative": 0
+  },
+  "timing": {
+    "primary_children": 0,
+    "pairs": 0,
+    "canonical_children": 0,
+    "full5": false,
+    "gain": "UNKNOWN"
+  },
+  "stop": "No dependent functional/control/diagnostic/timed launch, no retry/product fix/redesign/successor. Collect/hash and immediate owned cleanup.",
+  "source_unchanged": true
+}

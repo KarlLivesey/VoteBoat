@@ -1,0 +1,69 @@
+{
+  "candidate": "52f4571e18f0ec5407b8dd4942c5a26d93f0528a",
+  "tree": "542426e051eaeaae1b34c26521aded21e06a671c",
+  "baseline": "0bf9271ecb5a34c4089c6bb10381303232624170",
+  "disposition": "REJECT_WITHOUT_MERGE",
+  "reason": "Normal Apple binary retains mandatory common272B Effect staging transfer; mechanism gate failed before timings",
+  "normalBinary": {
+    "bytes": 4112000,
+    "sha256": "9ef043d7ff0daf49265f15ca2b0928d4885995bbf89bc1c07174b1c7eeb0f91d",
+    "mode": "0o644"
+  },
+  "rawBranchAndImportReadByParent": true,
+  "primaryPairs": 0,
+  "canonicalChildren": 0,
+  "gain": "UNKNOWN",
+  "full5Released": false,
+  "sourceReviewIds": [
+    5636280441,
+    5636278733
+  ],
+  "runnerComment": "https://github.com/KarlLivesey/VoteBoat/pull/32#issuecomment-6378658073",
+  "artifacts": [
+    {
+      "source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu9-perf/REPORT.md",
+      "tracked": "validation/performance/pillar1-cpu9/evidence/runner-report.md",
+      "bytes": 10911,
+      "sha256": "a3bebad1ad3a66343e13186fa7f2187db69c2e4cd7292c860a29543ef1836594"
+    },
+    {
+      "source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu9-perf/WORK-GATE.json",
+      "tracked": "validation/performance/pillar1-cpu9/evidence/WORK-GATE.json",
+      "bytes": 2430,
+      "sha256": "094da5e8c41125494dc7f1c9bf4d4e204f6cb612d8052f72a0bec61e75f5b8ac"
+    },
+    {
+      "source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu9-perf/B-range-0000000100090e4c.txt",
+      "tracked": "validation/performance/pillar1-cpu9/evidence/B-range-0000000100090e4c.txt",
+      "bytes": 20588,
+      "sha256": "aec2c993ed284067b600595a831462bbe574767d27963609edd6a82d87c8919b"
+    },
+    {
+      "source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu9-perf/A-range-00000001000908ec.txt",
+      "tracked": "validation/performance/pillar1-cpu9/evidence/A-range-00000001000908ec.txt",
+      "bytes": 17923,
+      "sha256": "39c4496b57cadfc6f09a11826dc758f2db79aa717eeb7d38d1c25a38542329e4"
+    },
+    {
+      "source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu9-perf/B-imports.txt",
+      "tracked": "validation/performance/pillar1-cpu9/evidence/B-imports.txt",
+      "bytes": 8398,
+      "sha256": "8eff67823a28fca5d09e0d4d708660e1c868bc78f89243db751b65c40c6af78b"
+    },
+    {
+      "source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu9-perf/A-imports.txt",
+      "tracked": "validation/performance/pillar1-cpu9/evidence/A-imports.txt",
+      "bytes": 8408,
+      "sha256": "d276672c3a794e6b7cd048595b7fb0d451e953facd9083bbeb2084929aa3e37a"
+    },
+    {
+      "source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu9-perf/mac-focused-queue.result.json",
+      "tracked": "validation/performance/pillar1-cpu9/evidence/mac-focused-queue.result.json",
+      "bytes": 3062,
+      "sha256": "f6c1ab7db93783950686612bddcdbd914e7aeda86ffc74c3ae510f76ecde5dbf"
+    }
+  ],
+  "githubState": "CLOSED",
+  "merged": false,
+  "closedAt": "2026-10-24T02:24:29Z"
+}
