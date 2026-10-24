@@ -16,17 +16,17 @@
 use super::*;
 
 impl Raft {
-    pub(super) fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
-        let mut effects = VecDeque::new();
+    pub(super) fn receive_inner(&mut self, m: Message) -> Result<EffectQueue, RaftError> {
+        let mut effects = EffectQueue::new();
         self.receive_inner_into(m, &mut effects)?;
-        Ok(effects.into())
+        Ok(effects)
     }
     /// Appends this message's effects to `out`; the hot replication arms
     /// write in place, colder ones append their owned effects.
     pub(super) fn receive_inner_into(
         &mut self,
         m: Message,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         if matches!(
             m.rpc,
@@ -172,7 +172,7 @@ impl Raft {
         hard: HardState,
         last_index: u64,
         last_term: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let old = self.durable.hard_state;
         if last_term > m.term || ((last_index == 0) != (last_term == 0)) {
             return Err(RaftError::InvalidMessage);
@@ -206,7 +206,7 @@ impl Raft {
                 Some(reply),
             )
         } else {
-            Ok(vec![Effect::Send(reply)])
+            Ok(vec![Effect::Send(reply)].into())
         }
     }
     fn receive_voted(
@@ -214,7 +214,7 @@ impl Raft {
         m: &Message,
         hard: HardState,
         granted: bool,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let old = self.durable.hard_state;
         if hard != old {
             return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
@@ -223,7 +223,7 @@ impl Raft {
             || m.term != old.term
             || self.vote_context != Some(m.context)
         {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         if granted {
             self.votes.insert(m.from);
@@ -231,14 +231,14 @@ impl Raft {
         if self.membership().is_satisfied(&self.votes) {
             self.become_leader()
         } else {
-            Ok(Vec::new())
+            Ok(EffectQueue::new())
         }
     }
     fn receive_append_into(
         &mut self,
         mut m: Message,
         hard: HardState,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         let Rpc::Append {
             previous_index,
@@ -385,7 +385,7 @@ impl Raft {
         hard: HardState,
         success: bool,
         matching_index: u64,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         let old = self.durable.hard_state;
         if hard != old {
@@ -444,12 +444,12 @@ impl Raft {
         &mut self,
         m: &Message,
         hard: HardState,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let old = self.durable.hard_state;
         if m.term < old.term {
             // The higher-term response makes the requester step down;
             // its term cannot satisfy the request's read quorum.
-            return Ok(vec![Effect::Send(self.reply(m, Rpc::ReadAck))]);
+            return Ok(vec![Effect::Send(self.reply(m, Rpc::ReadAck))].into());
         }
         self.role = Role::Follower;
         self.clear_reads();
@@ -467,25 +467,25 @@ impl Raft {
                 Some(reply),
             )
         } else {
-            Ok(vec![Effect::Send(reply)])
+            Ok(vec![Effect::Send(reply)].into())
         }
     }
-    fn receive_read_ack(&mut self, m: &Message, hard: HardState) -> Result<Vec<Effect>, RaftError> {
+    fn receive_read_ack(&mut self, m: &Message, hard: HardState) -> Result<EffectQueue, RaftError> {
         let old = self.durable.hard_state;
         if hard != old {
             return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
         }
         if self.role != Role::Leader || m.term != old.term {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         if let Some(read) = &mut self.read {
             if read.barrier.context == m.context {
                 read.acknowledgements.insert(m.from);
             }
         }
-        Ok(self.maybe_read_ready())
+        Ok(self.maybe_read_ready().into())
     }
-    fn receive_snapshot(&mut self, m: Message, hard: HardState) -> Result<Vec<Effect>, RaftError> {
+    fn receive_snapshot(&mut self, m: Message, hard: HardState) -> Result<EffectQueue, RaftError> {
         let old = self.durable.hard_state;
         let Rpc::Snapshot { snapshot } = &m.rpc else {
             unreachable!()
@@ -502,9 +502,7 @@ impl Raft {
             return Err(RaftError::InvalidMessage);
         }
         if m.term < old.term {
-            return Ok(vec![Effect::Send(
-                self.reply(&m, Rpc::SnapshotAck { index: 0 }),
-            )]);
+            return Ok(vec![Effect::Send(self.reply(&m, Rpc::SnapshotAck { index: 0 }))].into());
         }
         self.role = Role::Follower;
         self.clear_reads();
@@ -530,34 +528,34 @@ impl Raft {
                     Some(reply),
                 )
             } else {
-                Ok(vec![Effect::Send(reply)])
+                Ok(vec![Effect::Send(reply)].into())
             };
         }
         self.staged_snapshot = Some(m.clone());
         self.staged_snapshot_repair = false;
-        Ok(vec![Effect::StageSnapshot(m)])
+        Ok(vec![Effect::StageSnapshot(m)].into())
     }
     fn receive_snapshot_ack(
         &mut self,
         m: &Message,
         hard: HardState,
         index: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let old = self.durable.hard_state;
         if hard != old {
             return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
         }
         if self.role != Role::Leader || m.term != old.term {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         let Some(sent) = self.requests.get(&m.from).copied() else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         if sent.context != m.context
             || sent.configuration != m.configuration
             || sent.snapshot.is_none()
         {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         if index != sent.end {
             return Err(RaftError::InvalidMessage);
@@ -568,7 +566,7 @@ impl Raft {
         self.next_index.insert(m.from, prefix + 1);
         let mut effects = self.maybe_commit()?;
         if self.pending.is_none() {
-            effects.push(self.append_for(m.from)?);
+            effects.push_back(self.append_for(m.from)?);
         }
         Ok(effects)
     }
@@ -578,13 +576,13 @@ impl Raft {
         hard: HardState,
         index: u64,
         term: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let old = self.durable.hard_state;
         if hard != old {
             return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
         }
         if self.role != Role::Leader || m.term != old.term {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         if self.is_empty_alias(m) {
             if index == 0
@@ -598,16 +596,16 @@ impl Raft {
                 return Err(RaftError::InvalidMessage);
             }
             self.empty_append_aliases.remove(&m.from);
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         let Some(sent) = self.requests.get(&m.from) else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         if sent.context != m.context
             || sent.configuration != m.configuration
             || sent.snapshot.is_some()
         {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         if index == 0
             || term == 0
@@ -626,7 +624,7 @@ impl Raft {
         }
         let mut effects = self.maybe_commit()?;
         if self.pending.is_none() {
-            effects.push(self.append_for(m.from)?);
+            effects.push_back(self.append_for(m.from)?);
         }
         Ok(effects)
     }

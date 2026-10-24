@@ -40,7 +40,10 @@ impl Raft {
     /// This direct Core API does not add batching to Node or ClientRouter.
     /// Invalid shape/budgets reject the entire batch before pending log state.
     /// Success returns a persistence request, not commitment or application.
-    pub fn propose_batch(&mut self, proposals: Vec<Proposal>) -> Result<Vec<Effect>, RaftError> {
+    pub fn propose_batch_queue(
+        &mut self,
+        proposals: Vec<Proposal>,
+    ) -> Result<EffectQueue, RaftError> {
         self.begin_step()?;
         self.check_proposal_role()?;
         let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
@@ -57,10 +60,10 @@ impl Raft {
                 },
             })
             .collect();
-        let mut effects = VecDeque::new();
+        let mut effects = EffectQueue::new();
         self.persist_proposal_entries_into(first, entries, &mut effects)?;
         self.finish_step_into(&mut effects)?;
-        Ok(effects.into())
+        Ok(effects)
     }
 
     pub(super) fn begin_step(&mut self) -> Result<(), RaftError> {
@@ -75,7 +78,7 @@ impl Raft {
         Ok(())
     }
 
-    pub(super) fn finish_step_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+    pub(super) fn finish_step_into(&mut self, out: &mut EffectQueue) -> Result<(), RaftError> {
         out.append_result(self.drive_transfer())
     }
 
@@ -83,7 +86,7 @@ impl Raft {
         &mut self,
         operation: OperationId,
         bytes: Vec<u8>,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         self.check_proposal_role()?;
         if bytes.len() > self.limits.max_command_bytes {
@@ -188,7 +191,7 @@ impl Raft {
         &mut self,
         first: u64,
         entries: Vec<LogEntry>,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         self.persist_into(
             self.durable.hard_state,
@@ -217,3 +220,11 @@ impl Raft {
 
 #[cfg(test)]
 mod tests;
+
+impl Raft {
+    /// Explicit legacy owned-output convenience boundary.
+    pub fn propose_batch(&mut self, proposals: Vec<Proposal>) -> Result<Vec<Effect>, RaftError> {
+        self.propose_batch_queue(proposals)
+            .map(EffectQueue::into_owned)
+    }
+}

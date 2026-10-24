@@ -164,13 +164,15 @@ pub(super) fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> 
         None,
     )
     .unwrap()
+    .into_owned()
 }
 /// Set up an already committed journal boundary, independently of the live
 /// quorum test under examination. The core still validates the logical update.
 pub(super) fn committed_fixture(core: &mut Raft, index: u64) {
     let effects = core
         .persist(core.durable.hard_state, index, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     durable(core, effects);
 }
 pub(super) fn staged() -> Raft {
@@ -289,7 +291,7 @@ fn partially_delivered_final_can_elect_new_leader_after_old_leader_loss() {
         })
         .unwrap();
     let candidate = peers.get_mut(&2).unwrap();
-    let effects = candidate.receive_inner(final_to_two).unwrap();
+    let effects = candidate.receive_inner(final_to_two).unwrap().into_owned();
     let [Effect::Send(failed_probe)] = effects.as_slice() else {
         panic!("expected initial final-prefix probe")
     };
@@ -307,7 +309,7 @@ fn partially_delivered_final_can_elect_new_leader_after_old_leader_loss() {
             _ => None,
         })
         .unwrap();
-    let effects = candidate.receive_inner(final_to_two).unwrap();
+    let effects = candidate.receive_inner(final_to_two).unwrap().into_owned();
     durable(candidate, effects);
     assert_eq!(candidate.membership().id(), cid(4));
     assert_eq!(candidate.state().commit_index, 3);
@@ -342,11 +344,11 @@ fn partially_delivered_final_can_elect_new_leader_after_old_leader_loss() {
     assert_eq!(candidate.role(), Role::Leader);
     let probe = message_to(effects, 3);
     let voter = peers.get_mut(&3).unwrap();
-    let rejected = message_to(voter.receive_inner(probe).unwrap(), 2);
+    let rejected = message_to(voter.receive_inner(probe).unwrap().into_owned(), 2);
     let candidate = peers.get_mut(&2).unwrap();
     let suffix = message_to(candidate.step(Event::Receive(rejected)).unwrap(), 3);
     let voter = peers.get_mut(&3).unwrap();
-    let effects = voter.receive_inner(suffix).unwrap();
+    let effects = voter.receive_inner(suffix).unwrap().into_owned();
     let ack = message_to(durable(voter, effects), 2);
     let candidate = peers.get_mut(&2).unwrap();
     let effects = candidate.step(Event::Receive(ack)).unwrap();
@@ -354,7 +356,7 @@ fn partially_delivered_final_can_elect_new_leader_after_old_leader_loss() {
     assert_eq!(candidate.state().commit_index, 5);
     let announcement = message_to(committed, 3);
     let voter = peers.get_mut(&3).unwrap();
-    let effects = voter.receive_inner(announcement).unwrap();
+    let effects = voter.receive_inner(announcement).unwrap().into_owned();
     durable(voter, effects);
     assert_eq!(voter.state().commit_index, 5);
     assert_eq!(voter.membership().id(), cid(4));
@@ -812,7 +814,7 @@ fn joint_repair_trims_only_a_verified_compacted_overlap() {
             file_bytes: 128,
             checksum: 7,
         };
-        let effects = receiver.begin_compact(reference).unwrap();
+        let effects = receiver.begin_compact(reference).unwrap().into_owned();
         durable(&mut receiver, effects);
         let mut message = emitted_repair(&mut source);
         if !valid {
@@ -1090,7 +1092,7 @@ fn batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authori
         file_bytes: 128,
         checksum: 7,
     };
-    let effects = receiver.begin_compact(reference).unwrap();
+    let effects = receiver.begin_compact(reference).unwrap().into_owned();
     durable(&mut receiver, effects);
     let effects = source.step(Event::Campaign).unwrap();
     let request = durable(&mut source, effects)
@@ -1178,7 +1180,7 @@ fn batched_repair_missing_compacted_joint_keeps_ordinary_election_available() {
         file_bytes: 128,
         checksum: 7,
     };
-    let effects = source.begin_compact(reference).unwrap();
+    let effects = source.begin_compact(reference).unwrap().into_owned();
     durable(&mut source, effects);
     let mut source = source.with_batched_joint_repair();
     let effects = source.step(Event::Campaign).unwrap();
@@ -1391,7 +1393,8 @@ fn accepted_final_clears_prior_authority_and_rollback_restores_joint_base() {
             After::Reply,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert_eq!(core.membership().id(), cid(3));
     durable(&mut core, effects);
     assert_eq!(core.membership(), &core.state().membership().unwrap());
@@ -1407,7 +1410,7 @@ fn accepted_final_clears_prior_authority_and_rollback_restores_joint_base() {
         file_bytes: 128,
         checksum: 7,
     };
-    let effects = core.begin_compact(reference).unwrap();
+    let effects = core.begin_compact(reference).unwrap().into_owned();
     durable(&mut core, effects);
     assert_eq!(core.membership(), &core.state().membership().unwrap());
     assert!(core
@@ -1576,7 +1579,7 @@ fn lagging_follower_probes_and_joint_replication_echo_the_request_scope() {
     let mut follower = follower(staged(), 2);
     let probe = sent(leader.append_for(node(2)).unwrap());
     assert_eq!(probe.configuration, cid(3));
-    let rejection = one_reply(follower.receive_inner(probe).unwrap());
+    let rejection = one_reply(follower.receive_inner(probe).unwrap().into_owned());
     assert_eq!(rejection.configuration, cid(3));
     assert_eq!(follower.membership().id(), cid(2));
     assert!(matches!(
@@ -1596,7 +1599,7 @@ fn lagging_follower_probes_and_joint_replication_echo_the_request_scope() {
         follower.step(Event::Receive(append.clone())),
         Err(RaftError::InvalidMessage)
     );
-    let effects = follower.receive_inner(append.clone()).unwrap();
+    let effects = follower.receive_inner(append.clone()).unwrap().into_owned();
     assert_eq!(follower.membership().id(), cid(3));
     assert_eq!(follower.state().membership().unwrap().id(), cid(2));
     assert!(matches!(&effects[..], [Effect::Persist(_)]));
@@ -1640,13 +1643,14 @@ fn older_request_scope_can_roll_back_uncommitted_final_without_early_reply() {
             After::LeaderAppend,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     durable(&mut leader, effects);
     leader.requests.remove(&node(2));
     leader.next_index.insert(node(2), 4);
     let append = sent(leader.append_for(node(2)).unwrap());
     assert_eq!(append.configuration, cid(3));
-    let effects = follower.receive_inner(append).unwrap();
+    let effects = follower.receive_inner(append).unwrap().into_owned();
     assert_eq!(follower.membership().id(), cid(3));
     assert_eq!(follower.state().membership().unwrap().id(), cid(4));
     let reply = one_reply(durable(&mut follower, effects));
@@ -1688,7 +1692,7 @@ fn partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation(
             leader_commit: 3,
         },
     );
-    let effects = follower.receive_inner(append).unwrap();
+    let effects = follower.receive_inner(append).unwrap().into_owned();
     let reply = one_reply(
         durable(&mut follower, effects)
             .into_iter()
@@ -1706,7 +1710,7 @@ fn partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation(
     ));
     let append = one_reply(leader.step(Event::Receive(reply)).unwrap());
     assert_eq!(leader.progress[&node(2)], 2);
-    let effects = follower.receive_inner(append).unwrap();
+    let effects = follower.receive_inner(append).unwrap().into_owned();
     let reply = one_reply(
         durable(&mut follower, effects)
             .into_iter()
@@ -1750,7 +1754,7 @@ fn compacted_joint() -> (Raft, SnapshotRef, Snapshot) {
         file_bytes: 128,
         checksum: 7,
     };
-    let effects = leader.begin_compact(reference).unwrap();
+    let effects = leader.begin_compact(reference).unwrap().into_owned();
     durable(&mut leader, effects);
     (leader, reference, snapshot)
 }
@@ -1774,7 +1778,8 @@ fn snapshot_reply_keeps_head_scope_through_log_and_application_dependencies() {
     let message = one_reply(
         leader
             .snapshot_send(to, context, reference, snapshot)
-            .unwrap(),
+            .unwrap()
+            .into_owned(),
     );
     assert_eq!(message.configuration, cid(4));
     assert!(
@@ -1784,13 +1789,19 @@ fn snapshot_reply_keeps_head_scope_through_log_and_application_dependencies() {
         follower.step(Event::Receive(message.clone())),
         Err(RaftError::InvalidMessage)
     );
-    let effects = follower.receive_inner(message.clone()).unwrap();
+    let effects = follower
+        .receive_inner(message.clone())
+        .unwrap()
+        .into_owned();
     assert!(matches!(&effects[..], [Effect::StageSnapshot(m)] if m == &message));
     let local_reference = SnapshotRef {
         store: store(2),
         ..reference
     };
-    let effects = follower.snapshot_stored(local_reference).unwrap();
+    let effects = follower
+        .snapshot_stored(local_reference)
+        .unwrap()
+        .into_owned();
     assert!(matches!(&effects[..], [Effect::Persist(_)]));
     let effects = durable(&mut follower, effects);
     assert!(matches!(&effects[..], [Effect::SnapshotInstalled(r)] if *r == local_reference));
@@ -1800,7 +1811,12 @@ fn snapshot_reply_keeps_head_scope_through_log_and_application_dependencies() {
         follower.snapshot_applied(local_reference, 2),
         Err(RaftError::WrongCompletion)
     ));
-    let reply = one_reply(follower.snapshot_applied(local_reference, 3).unwrap());
+    let reply = one_reply(
+        follower
+            .snapshot_applied(local_reference, 3)
+            .unwrap()
+            .into_owned(),
+    );
     assert_eq!(reply.configuration, cid(4));
     assert_eq!(reply.context, context);
     check_snapshot_ack_then_retry(&mut leader, reply, message, reference, to, context);
@@ -1816,7 +1832,7 @@ fn compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix() {
     leader.requests.remove(&node(2));
     leader.next_index.insert(node(2), 2);
     let append = sent(leader.append_for(node(2)).unwrap());
-    let hint = one_reply(follower.receive_inner(append).unwrap());
+    let hint = one_reply(follower.receive_inner(append).unwrap().into_owned());
     assert_eq!(hint.configuration, cid(4));
     assert!(matches!(hint.rpc, Rpc::Compacted { index: 3, term: 1 }));
     let append = one_reply(leader.step(Event::Receive(hint)).unwrap());
@@ -2394,7 +2410,7 @@ fn retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_h
         checksum: 7,
     };
     // This internal fixture asserts an already verified/pinned joint checkpoint.
-    let compact = leader.begin_compact(reference).unwrap();
+    let compact = leader.begin_compact(reference).unwrap().into_owned();
     durable(&mut leader, compact);
     let binding = StoreBinding {
         identity: store(4),
@@ -2424,7 +2440,10 @@ fn retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_h
         generation: SnapshotGeneration::new(2).unwrap(),
         ..reference
     };
-    let compact = receiver.begin_compact(final_reference).unwrap();
+    let compact = receiver
+        .begin_compact(final_reference)
+        .unwrap()
+        .into_owned();
     durable(&mut receiver, compact);
     assert_eq!(receiver.state().base_index(), 4);
     assert_eq!(
@@ -2519,7 +2538,7 @@ fn witnessed_promoted_leader_catches_up_only_after_exact_durability() {
         receiver.step(Event::Receive(replication.clone())),
         Err(RaftError::InvalidMessage)
     );
-    let effects = receiver.receive_inner(replication).unwrap();
+    let effects = receiver.receive_inner(replication).unwrap().into_owned();
     assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
     assert!(receiver.replication_permit.is_some());
     assert_eq!(receiver.durable.last_index(), 2);
@@ -2766,7 +2785,7 @@ fn witness_compaction_preserves_only_the_locally_retained_authorization_base() {
         checksum: 7,
     };
     // Host-verified pin fixture, as in the other core compaction histories.
-    let effects = witness.begin_compact(reference).unwrap();
+    let effects = witness.begin_compact(reference).unwrap().into_owned();
     durable(&mut witness, effects);
     assert!(matches!(
         one_reply(witness.step(Event::Receive(query.clone())).unwrap()).rpc,
@@ -2779,7 +2798,8 @@ fn witness_compaction_preserves_only_the_locally_retained_authorization_base() {
             generation: SnapshotGeneration::new(2).unwrap(),
             ..reference
         })
-        .unwrap();
+        .unwrap()
+        .into_owned();
     durable(&mut witness, effects);
     assert_eq!(
         witness.step(Event::Receive(query)),
@@ -2883,7 +2903,8 @@ fn connection_retention_includes_pending_and_rollback_views_until_exact_commit()
             After::Reply,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert_eq!(core.connection_replicas(6).unwrap(), pending);
     durable(&mut core, effects);
     assert_eq!(core.connection_replicas(6).unwrap(), initial);
@@ -2895,7 +2916,8 @@ fn connection_retention_includes_pending_and_rollback_views_until_exact_commit()
     durable(&mut core, effects);
     let effects = core
         .persist(core.state().hard_state, 3, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     // Commit intent is insufficient to revoke the old learner's connection.
     assert_eq!(core.connection_replicas(6).unwrap(), pending);
     durable(&mut core, effects);
@@ -2924,7 +2946,8 @@ fn connection_retention_keeps_committed_joint_predecessor_until_final_is_durable
     assert!(core.connection_replicas(6).unwrap().contains_key(&node(1)));
     let effects = core
         .persist(core.state().hard_state, 4, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert!(core.connection_replicas(6).unwrap().contains_key(&node(1)));
     durable(&mut core, effects);
     assert!(!core.connection_replicas(6).unwrap().contains_key(&node(1)));
@@ -2996,6 +3019,7 @@ fn owner_connection_budget_retains_pending_and_rollback_history_and_fences_unres
                 None,
             )
             .unwrap()
+            .into_owned()
         })
         .unwrap();
     shard
@@ -3045,7 +3069,7 @@ fn connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_perm
             .len(),
         5
     );
-    let effects = receiver.receive_inner(message).unwrap();
+    let effects = receiver.receive_inner(message).unwrap().into_owned();
     assert!(matches!(&effects[..], [Effect::StageSnapshot(_)]));
     assert!(receiver.staged_snapshot.is_some());
     assert!(receiver.pending.is_none());
@@ -3107,7 +3131,8 @@ fn finalized_repair_pair() -> (Raft, Raft) {
             After::Commit,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     durable(&mut source, effects);
     assert!(source.membership().joint().is_none());
     source = source.with_batched_joint_repair();
@@ -3265,7 +3290,7 @@ fn historical_repair_requires_old_voter_source_and_retained_promotion_evidence()
         file_bytes: 128,
         checksum: 7,
     };
-    let effects = compacted.begin_compact(reference).unwrap();
+    let effects = compacted.begin_compact(reference).unwrap().into_owned();
     durable(&mut compacted, effects);
     let effects = compacted.step(Event::Campaign).unwrap();
     let effects = durable(&mut compacted, effects);
@@ -3645,9 +3670,12 @@ fn sink_step(core: &mut Raft, event: Event) -> Result<Vec<Effect>, RaftError> {
         sequence: 1,
     };
     let earlier = Effect::Send(core.message(node(2), context, Rpc::Voted { granted: true }));
-    let mut queue = VecDeque::from([earlier.clone()]);
+    let mut queue = EffectQueue::from(vec![earlier.clone()]);
     let result = core.step_into(event, &mut queue);
-    assert_eq!(queue.pop_front(), Some(earlier));
+    let Some(EffectFront::Send(front)) = queue.front() else {
+        panic!("earlier send stays first")
+    };
+    assert_eq!(Effect::Send(front.take()), earlier);
     result.map(|()| queue.into())
 }
 type Step = fn(&mut Raft, Event) -> Result<Vec<Effect>, RaftError>;

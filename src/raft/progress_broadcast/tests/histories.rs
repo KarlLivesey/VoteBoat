@@ -48,7 +48,7 @@ fn checkpoint_history_keeps_progress_and_owed_notification_contracts() {
         file_bytes: 128,
         checksum: 7,
     };
-    let effects = leader.begin_compact(reference).unwrap();
+    let effects = leader.begin_compact(reference).unwrap().into_owned();
     let effects = durable(&mut leader, effects);
     for peer in [2, 3] {
         leader
@@ -109,17 +109,17 @@ fn pending_snapshot_keeps_original_progress_retry_context() {
         file_bytes: 128,
         checksum: 7,
     };
-    let effects = leader.begin_compact(reference).unwrap();
+    let effects = leader.begin_compact(reference).unwrap().into_owned();
     durable(&mut leader, effects);
     leader.clear_replication_requests();
     leader.next_index.insert(node(2), 1);
-    let effects = leader.broadcast_commit_progress().unwrap();
+    let effects = leader.broadcast_commit_progress().unwrap().into_owned();
     let original = leader.requests[&node(2)];
     assert_eq!(original.snapshot, Some(reference));
     assert!(effects.iter().any(|effect| matches!(effect,
         Effect::SnapshotRequired { to, context, .. }
             if *to == node(2) && *context == original.context)));
-    let repeated = leader.broadcast_commit_progress().unwrap();
+    let repeated = leader.broadcast_commit_progress().unwrap().into_owned();
     assert!(repeated.iter().any(|effect| matches!(effect,
         Effect::SnapshotRequired { to, context, .. }
             if *to == node(2) && *context == original.context)));
@@ -139,7 +139,7 @@ fn leadership_transfer_keeps_legacy_progress_retry_context() {
     let effects = leader.step(Event::TransferLeadership(request)).unwrap();
     let held = message(&effects, 3);
     assert!(!leader.progress_sends_enabled());
-    let repeated = message(&leader.broadcast_commit_progress().unwrap(), 3);
+    let repeated = message(&leader.broadcast_commit_progress().unwrap().into_owned(), 3);
     assert_eq!(repeated.context, held.context);
     assert_eq!(repeated.rpc, held.rpc);
 }

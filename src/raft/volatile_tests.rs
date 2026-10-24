@@ -170,7 +170,8 @@ fn volatile_commit_only_round_borrows_canonical_interval() {
             After::Reply,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     let result = persist_volatile(&mut core, &log, token(&effects)).unwrap();
     assert!(result.committed().is_none());
     assert!(result.following().is_empty());
@@ -178,7 +179,8 @@ fn volatile_commit_only_round_borrows_canonical_interval() {
     let canonical_bytes = command_bytes(&core.state().entries[1]);
     let effects = core
         .persist(core.state().hard_state, 3, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     let result = persist_volatile(&mut core, &log, token(&effects)).unwrap();
     let committed = result.committed().unwrap();
     assert!(std::ptr::eq(&committed[0], canonical));
@@ -278,7 +280,8 @@ fn volatile_plan_moves_the_input_suffix_allocation() {
                 After::Reply,
                 None,
             )
-            .unwrap();
+            .unwrap()
+            .into_owned();
         let pending = core.pending.as_ref().unwrap();
         let planned = &pending.next.suffix().unwrap().entries;
         assert_eq!(planned.len(), 2);
@@ -412,7 +415,7 @@ pub(super) fn observed(core: &Raft) -> impl Eq + std::fmt::Debug + use<> {
 
 /// Two granted votes this core never emitted, already queued at the end of
 /// an eight-slot ring so that the call's own effects wrap to its start.
-fn wrapped_granted_votes(core: &Raft) -> (VecDeque<Effect>, Vec<Effect>) {
+fn wrapped_granted_votes(core: &Raft) -> (EffectQueue, Vec<Effect>) {
     let granted: Vec<_> = (2..=3)
         .map(|peer| {
             let to = NodeId::new(peer).unwrap();
@@ -439,7 +442,7 @@ fn wrapped_granted_votes(core: &Raft) -> (VecDeque<Effect>, Vec<Effect>) {
     queue.extend(granted.iter().cloned());
     assert_eq!(queue.as_slices().0.len(), granted.len());
     assert_eq!(queue.capacity(), capacity);
-    (queue, granted)
+    (queue.into(), granted)
 }
 
 fn twins() -> ((Raft, VolatileLog), (Raft, VolatileLog)) {

@@ -41,7 +41,7 @@ impl Raft {
         }
     }
 
-    pub(super) fn batched_joint_repair_messages(&mut self) -> Result<Vec<Effect>, RaftError> {
+    pub(super) fn batched_joint_repair_messages(&mut self) -> Result<EffectQueue, RaftError> {
         if self.snapshot_joint_repair {
             if let Some(effects) = self.repair_snapshot_messages()? {
                 return Ok(effects);
@@ -52,7 +52,7 @@ impl Raft {
             .replicas()
             .map(|(node, _)| node)
             .collect::<Vec<_>>();
-        let mut effects = Vec::new();
+        let mut effects = EffectQueue::new();
         for peer in peers {
             if let Some((joint, start, _)) = self.repair_joint(peer, None)? {
                 let EntryPayload::Configuration(record) = &joint.payload else {
@@ -121,13 +121,13 @@ impl Raft {
         peer: NodeId,
         start: u64,
         configuration: ConfigurationId,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let Some((joint, _, _)) = self.repair_joint(peer, Some(configuration))? else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         let previous_index = start - 1;
         let Some(previous_term) = self.durable.term_at(previous_index) else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         let mut bytes = 256usize
             .saturating_add(joint.retained_payload_bytes())
@@ -155,7 +155,7 @@ impl Raft {
             bytes = total;
         }
         let Some(end) = entries.last().map(|e| e.index) else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         let context = self.context()?;
         self.repair_requests.insert(
@@ -179,13 +179,14 @@ impl Raft {
                 previous_term,
                 entries,
             },
-        ))])
+        ))]
+        .into())
     }
 
     pub(super) fn receive_learner_repair(
         &mut self,
         mut message: Message,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         if let Rpc::LearnerRepaired {
             success,
             matching_index,
@@ -247,7 +248,7 @@ impl Raft {
                 convert(reply, &|index| pending.next.term_at(&self.durable, index));
             }
         }
-        for effect in &mut effects {
+        for effect in effects.iter_mut() {
             if let Effect::Send(reply) = effect {
                 convert(reply, &|index| self.durable.term_at(index));
             }
@@ -298,7 +299,7 @@ impl Raft {
         success: bool,
         matching_index: u64,
         matching_term: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let RepairReplyScope {
             checkpoint,
             historical,
@@ -307,13 +308,13 @@ impl Raft {
             return self.receive_higher_repair_term(message, matching_index);
         }
         if self.role != Role::Candidate || message.term != self.durable.hard_state.term {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         let Some(sent) = self.repair_requests.get(&message.from).copied() else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         if sent.context != message.context || sent.configuration != message.configuration {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         let joint_index = if sent.snapshot.is_some() {
             checkpoint.ok_or(RaftError::InvalidMessage)?.voting_index
@@ -329,7 +330,7 @@ impl Raft {
         self.repair_requests.remove(&message.from);
         if success && matching_index >= joint_index {
             let Some(context) = self.vote_context else {
-                return Ok(Vec::new());
+                return Ok(EffectQueue::new());
             };
             return Ok(vec![Effect::Send(self.message(
                 message.from,
@@ -338,10 +339,11 @@ impl Raft {
                     last_index: self.durable.last_index(),
                     last_term: self.durable.last_term(),
                 },
-            ))]);
+            ))]
+            .into());
         }
         if matching_index < sent.start {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         self.repair_batch(message.from, matching_index + 1, sent.configuration)
     }
@@ -349,7 +351,7 @@ impl Raft {
         &mut self,
         mut message: Message,
         matching_index: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         if message.configuration != self.membership().id() {
             // A historical reply cannot pass the ordinary current-head
             // response gate. Observe only its exact admitted context,
@@ -357,7 +359,7 @@ impl Raft {
             if !self.repair_requests.get(&message.from).is_some_and(|sent| {
                 sent.context == message.context && sent.configuration == message.configuration
             }) {
-                return Ok(Vec::new());
+                return Ok(EffectQueue::new());
             }
             self.clear_reads();
             self.role = Role::Follower;

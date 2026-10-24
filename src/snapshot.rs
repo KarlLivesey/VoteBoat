@@ -20,7 +20,7 @@ use crate::{
     identity::*,
     log::{Bootstrap, LogStore, VolatileLog},
     raft::{
-        persist_effect, persist_volatile, CompletionEffects, Effect, Message, Raft, RaftError,
+        persist_effect, persist_volatile_into, EffectFront, EffectQueue, Message, Raft, RaftError,
         RecoveryMode, RequestContext, Rpc,
     },
 };
@@ -434,17 +434,11 @@ trait LogSeam: LogCheck {
     fn persist(
         &mut self,
         raft: &mut Raft,
-        effects: Vec<Effect>,
-    ) -> Result<Vec<Effect>, CheckpointError>;
+        effects: EffectQueue,
+    ) -> Result<EffectQueue, CheckpointError>;
 }
 struct Durable<L>(L);
 struct Volatile<'a>(&'a VolatileLog);
-fn single(effects: Vec<Effect>) -> Result<Effect, CheckpointError> {
-    let [effect]: [Effect; 1] = effects
-        .try_into()
-        .map_err(|_| CheckpointError::InvalidBoundary)?;
-    Ok(effect)
-}
 impl<L: LogStore> LogCheck for Durable<&L> {
     fn volatile(&self) -> bool {
         false
@@ -476,12 +470,16 @@ impl<L: LogStore> LogSeam for Durable<&mut L> {
     fn persist(
         &mut self,
         raft: &mut Raft,
-        effects: Vec<Effect>,
-    ) -> Result<Vec<Effect>, CheckpointError> {
-        let Effect::Persist(update) = single(effects)? else {
+        mut effects: EffectQueue,
+    ) -> Result<EffectQueue, CheckpointError> {
+        if effects.len() != 1 {
+            return Err(CheckpointError::InvalidBoundary);
+        }
+        let Some(EffectFront::Persist(front)) = effects.front() else {
             return Err(CheckpointError::InvalidBoundary);
         };
-        Ok(persist_effect(raft, self.0, update)?)
+        let update = front.take();
+        Ok(persist_effect(raft, self.0, update)?.into())
     }
 }
 impl LogCheck for Volatile<'_> {
@@ -502,12 +500,20 @@ impl LogSeam for Volatile<'_> {
     fn persist(
         &mut self,
         raft: &mut Raft,
-        effects: Vec<Effect>,
-    ) -> Result<Vec<Effect>, CheckpointError> {
-        let Effect::PersistVolatile(persist) = single(effects)? else {
+        mut effects: EffectQueue,
+    ) -> Result<EffectQueue, CheckpointError> {
+        if effects.len() != 1 {
+            return Err(CheckpointError::InvalidBoundary);
+        }
+        let Some(EffectFront::PersistVolatile(front)) = effects.front() else {
             return Err(CheckpointError::InvalidBoundary);
         };
-        Ok(persist_volatile(raft, self.0, persist).map(CompletionEffects::into_owned)?)
+        let persist = front.take();
+        let mut following = EffectQueue::new();
+        if let Some(entries) = persist_volatile_into(raft, self.0, persist, &mut following)? {
+            following.insert_committed(0, entries.to_vec());
+        }
+        Ok(following)
     }
 }
 /// Recovery of a compacted voter verifies retained data and restores application
@@ -745,25 +751,25 @@ fn recover_replica_as<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetenti
     store.reconcile_log(core.state().snapshot)?;
     Ok((core, restored))
 }
-pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+pub fn compact_replica_queue<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
     raft: &mut Raft,
     log: &mut L,
     store: &mut S,
     application: &A,
     reference: SnapshotRef,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     compact_with(raft, Durable(log), store, application, reference)
 }
 /// [`compact_replica`] for a volatile core: the same order of binding, pin,
 /// pinned load and restore checks before compaction; the core's log is the
 /// only copy, so there is no provider copy to compare.
-pub fn compact_volatile_replica<A: CheckpointStateMachine, S: SnapshotRetention>(
+pub fn compact_volatile_replica_queue<A: CheckpointStateMachine, S: SnapshotRetention>(
     raft: &mut Raft,
     log: &VolatileLog,
     store: &mut S,
     application: &A,
     reference: SnapshotRef,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     compact_with(raft, Volatile(log), store, application, reference)
 }
 fn compact_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
@@ -772,7 +778,7 @@ fn compact_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
     store: &mut S,
     application: &A,
     reference: SnapshotRef,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     // Binding remains first; only compaction uses the protected core view.
     log.check_mode(raft)?;
     if log.binding() != raft.storage_binding() || !log.matches_checkpoint(raft)? {
@@ -810,37 +816,37 @@ fn compact_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
 }
 /// A snapshot message owns its bounded image; no pin is released while a read
 /// is outstanding. A later compaction invalidates the old request context.
-pub fn supply_snapshot<S: SnapshotRetention>(
+pub fn supply_snapshot_queue<S: SnapshotRetention>(
     raft: &Raft,
     store: &mut S,
     to: NodeId,
     context: RequestContext,
     reference: SnapshotRef,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     check_binding(raft, store)?;
     let snapshot = store.load_pinned(reference)?;
     Ok(raft.snapshot_send(to, context, reference, snapshot)?)
 }
 /// Selected snapshot and log providers certify separate dependencies. No remote
 /// acknowledgement escapes until pin, log binding and application restore finish.
-pub fn stage_snapshot_effect<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+pub fn stage_snapshot_effect_queue<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
     raft: &mut Raft,
     log: &mut L,
     store: &mut S,
     application: &A,
     message: Message,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     stage_with(raft, Durable(log), store, application, message)
 }
 /// [`stage_snapshot_effect`] for a volatile core. A wrong-mode call returns
 /// `InvalidBinding` before any mutation; later errors fence as for durable cores.
-pub fn stage_volatile_snapshot_effect<A: CheckpointStateMachine, S: SnapshotRetention>(
+pub fn stage_volatile_snapshot_effect_queue<A: CheckpointStateMachine, S: SnapshotRetention>(
     raft: &mut Raft,
     log: &VolatileLog,
     store: &mut S,
     application: &A,
     message: Message,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     stage_with(raft, Volatile(log), store, application, message)
 }
 fn stage_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
@@ -849,7 +855,7 @@ fn stage_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
     store: &mut S,
     application: &A,
     message: Message,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     log.check_mode(raft)?;
     let result = (|| {
         log.verify(raft)?;
@@ -897,24 +903,28 @@ fn stage_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
     }
     result
 }
-pub fn finish_snapshot_install<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+pub fn finish_snapshot_install_queue<
+    A: CheckpointStateMachine,
+    L: LogStore,
+    S: SnapshotRetention,
+>(
     raft: &mut Raft,
     log: &L,
     store: &mut S,
     application: &mut A,
     reference: SnapshotRef,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     finish_install_with(raft, &Durable(log), store, application, reference)
 }
 /// [`finish_snapshot_install`] for a volatile core. A wrong-mode call returns
 /// `InvalidBinding` before any mutation; later errors fence as for durable cores.
-pub fn finish_volatile_snapshot_install<A: CheckpointStateMachine, S: SnapshotRetention>(
+pub fn finish_volatile_snapshot_install_queue<A: CheckpointStateMachine, S: SnapshotRetention>(
     raft: &mut Raft,
     log: &VolatileLog,
     store: &mut S,
     application: &mut A,
     reference: SnapshotRef,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     finish_install_with(raft, &Volatile(log), store, application, reference)
 }
 fn finish_install_with<A: CheckpointStateMachine, L: LogCheck, S: SnapshotRetention>(
@@ -923,7 +933,7 @@ fn finish_install_with<A: CheckpointStateMachine, L: LogCheck, S: SnapshotRetent
     store: &mut S,
     application: &mut A,
     reference: SnapshotRef,
-) -> Result<Vec<Effect>, CheckpointError> {
+) -> Result<EffectQueue, CheckpointError> {
     log.check_mode(raft)?;
     let result = (|| {
         log.verify(raft)?;
@@ -956,4 +966,85 @@ fn finish_install_with<A: CheckpointStateMachine, L: LogCheck, S: SnapshotRetent
         raft.storage_failed();
     }
     result
+}
+
+/// Explicit legacy owned-output convenience; the queue form retains typed fronts.
+pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &mut L,
+    store: &mut S,
+    application: &A,
+    reference: SnapshotRef,
+) -> Result<Vec<crate::raft::Effect>, CheckpointError> {
+    compact_replica_queue(raft, log, store, application, reference).map(EffectQueue::into_owned)
+}
+
+/// Explicit legacy owned-output convenience; the queue form retains typed fronts.
+pub fn compact_volatile_replica<A: CheckpointStateMachine, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &VolatileLog,
+    store: &mut S,
+    application: &A,
+    reference: SnapshotRef,
+) -> Result<Vec<crate::raft::Effect>, CheckpointError> {
+    compact_volatile_replica_queue(raft, log, store, application, reference)
+        .map(EffectQueue::into_owned)
+}
+
+/// Explicit legacy owned-output convenience; the queue form retains typed fronts.
+pub fn supply_snapshot<S: SnapshotRetention>(
+    raft: &Raft,
+    store: &mut S,
+    to: NodeId,
+    context: RequestContext,
+    reference: SnapshotRef,
+) -> Result<Vec<crate::raft::Effect>, CheckpointError> {
+    supply_snapshot_queue(raft, store, to, context, reference).map(EffectQueue::into_owned)
+}
+
+/// Explicit legacy owned-output convenience; the queue form retains typed fronts.
+pub fn stage_snapshot_effect<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &mut L,
+    store: &mut S,
+    application: &A,
+    message: Message,
+) -> Result<Vec<crate::raft::Effect>, CheckpointError> {
+    stage_snapshot_effect_queue(raft, log, store, application, message).map(EffectQueue::into_owned)
+}
+
+/// Explicit legacy owned-output convenience; the queue form retains typed fronts.
+pub fn stage_volatile_snapshot_effect<A: CheckpointStateMachine, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &VolatileLog,
+    store: &mut S,
+    application: &A,
+    message: Message,
+) -> Result<Vec<crate::raft::Effect>, CheckpointError> {
+    stage_volatile_snapshot_effect_queue(raft, log, store, application, message)
+        .map(EffectQueue::into_owned)
+}
+
+/// Explicit legacy owned-output convenience; the queue form retains typed fronts.
+pub fn finish_snapshot_install<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &L,
+    store: &mut S,
+    application: &mut A,
+    reference: SnapshotRef,
+) -> Result<Vec<crate::raft::Effect>, CheckpointError> {
+    finish_snapshot_install_queue(raft, log, store, application, reference)
+        .map(EffectQueue::into_owned)
+}
+
+/// Explicit legacy owned-output convenience; the queue form retains typed fronts.
+pub fn finish_volatile_snapshot_install<A: CheckpointStateMachine, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &VolatileLog,
+    store: &mut S,
+    application: &mut A,
+    reference: SnapshotRef,
+) -> Result<Vec<crate::raft::Effect>, CheckpointError> {
+    finish_volatile_snapshot_install_queue(raft, log, store, application, reference)
+        .map(EffectQueue::into_owned)
 }

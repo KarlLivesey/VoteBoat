@@ -7,7 +7,8 @@ fn compact_pending_and_durable_keep_exact_terms_pointers_membership_and_charge()
     core.propose_batch((1..=4).map(proposal).collect()).unwrap();
     complete_exact(&mut core);
     core.persist(core.durable.hard_state, 5, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     complete_exact(&mut core);
     let pointers = payload_pointers(&core);
     let peers = core.connection_replicas(3).unwrap();
@@ -25,7 +26,7 @@ fn compact_pending_and_durable_keep_exact_terms_pointers_membership_and_charge()
         checksum: 7,
     };
     // This internal fixture supplies the host's already verified/pinned reference.
-    core.begin_compact(reference).unwrap();
+    core.begin_compact(reference).unwrap().into_owned();
     assert!(!core.pending.as_ref().unwrap().next.is_append());
     assert!(core.pending.as_ref().unwrap().next.full().is_none());
     assert_eq!(core.state(), &before);
@@ -55,7 +56,7 @@ fn compact_pending_and_durable_keep_exact_terms_pointers_membership_and_charge()
         generation: SnapshotGeneration::new(2).unwrap(),
         ..reference
     };
-    core.begin_compact(final_reference).unwrap();
+    core.begin_compact(final_reference).unwrap().into_owned();
     complete_exact(&mut core);
     assert!(core.state().entries.is_empty());
     assert_eq!(core.retained_log_bytes(), Some(0));

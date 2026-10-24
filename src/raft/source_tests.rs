@@ -53,7 +53,8 @@ fn source_preflight_allows_actual_not_caught_up_readiness_reply() {
             After::LeaderAppend,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     durable(&mut leader, effects);
     committed_fixture(&mut leader, 3);
     let request = message_to(

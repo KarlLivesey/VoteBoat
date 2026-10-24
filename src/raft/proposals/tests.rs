@@ -165,7 +165,8 @@ fn plain_append_and_commit_preserve_historical_payloads_and_exact_accounting() {
         After::Commit,
         None,
     )
-    .unwrap();
+    .unwrap()
+    .into_owned();
     assert!(core.pending.as_ref().unwrap().next.full().is_none());
     let all = payload_pointers(&core);
     complete_exact(&mut core);

@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 mod actor;
 mod stats;
+#[cfg(test)]
+mod typed_front_tests;
 use super::{
     application::Noop, snapshots::MemorySnapshots, store::VolatileStore, Failure, Settings,
 };

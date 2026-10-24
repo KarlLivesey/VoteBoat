@@ -113,7 +113,7 @@ fn protected_native_comparison_reuses_exact_prefix_and_transfers_compaction_surv
     };
     // Exercise only the canonical compaction transition here; snapshot data
     // and pin dependencies are covered by the actual integration histories.
-    let effects = owner.begin_compact(reference).unwrap();
+    let effects = owner.begin_compact(reference).unwrap().into_owned();
     drive(&mut owner, &mut store, effects);
     assert_ne!(owner.state().generation, old_generation);
     assert_eq!(verified(&store), Some((4, 5)));

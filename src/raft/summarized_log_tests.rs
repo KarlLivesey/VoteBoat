@@ -215,7 +215,7 @@ fn summary_and_version_follow_durable_configuration_compaction_and_snapshot_inst
         application: vec![7],
     };
     let effects = tracked(&mut leader, &mut changes, |core| {
-        core.begin_compact(reference).unwrap()
+        core.begin_compact(reference).unwrap().into_owned()
     });
     tracked(&mut leader, &mut changes, |core| durable(core, effects));
     assert_eq!(leader.state().base_index(), 4);
@@ -229,23 +229,24 @@ fn summary_and_version_follow_durable_configuration_compaction_and_snapshot_inst
     let message = one_reply(
         leader
             .snapshot_send(to, context, reference, snapshot)
-            .unwrap(),
+            .unwrap()
+            .into_owned(),
     );
     tracked(&mut lagging, &mut changes, |core| {
-        core.receive_inner(message).unwrap()
+        core.receive_inner(message).unwrap().into_owned()
     });
     let local = SnapshotRef {
         store: store(2),
         ..reference
     };
     let effects = tracked(&mut lagging, &mut changes, |core| {
-        core.snapshot_stored(local).unwrap()
+        core.snapshot_stored(local).unwrap().into_owned()
     });
     let effects = tracked(&mut lagging, &mut changes, |core| durable(core, effects));
     assert!(matches!(&effects[..], [Effect::SnapshotInstalled(r)] if *r == local));
     assert_eq!(lagging.state().base_index(), 4);
     tracked(&mut lagging, &mut changes, |core| {
-        core.snapshot_applied(local, 4).unwrap()
+        core.snapshot_applied(local, 4).unwrap().into_owned()
     });
     // Configuration, two commits, proposals, compaction and the install.
     assert!(changes >= 6, "only {changes} log changes observed");
@@ -320,7 +321,8 @@ fn stage_append(core: &mut Raft, from: u64, to: u64) -> VolatilePersist {
             After::Reply,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert!(!core.pending.as_ref().unwrap().next.is_commit());
     token(&effects)
 }
@@ -335,7 +337,8 @@ fn ordinary_appends_and_commit_rounds_install_without_a_predecessor_comparison()
     persist_volatile(&mut replica, &log, persist).unwrap();
     let effects = replica
         .persist(replica.state().hard_state, 3, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert!(replica.pending.as_ref().unwrap().next.is_commit());
     persist_volatile(&mut replica, &log, token(&effects)).unwrap();
     assert_eq!(
@@ -401,7 +404,7 @@ fn a_plan_moved_to_another_core_at_the_same_version_is_refused() {
     let before = other.state().clone();
     other.pending = short.pending.take();
     let start = count();
-    let mut out = VecDeque::new();
+    let mut out = EffectQueue::new();
     assert!(matches!(
         other.install_pending_into(&mut out),
         Err(RaftError::Storage(StorageError::Rejected(
@@ -422,7 +425,8 @@ fn a_plan_moved_to_another_core_at_the_same_version_is_refused() {
 fn commit_round(core: &mut Raft, log: &VolatileLog, commit: u64) {
     let effects = core
         .persist(core.state().hard_state, commit, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert!(core.pending.as_ref().unwrap().next.is_commit());
     persist_volatile(core, log, token(&effects)).unwrap();
     assert_eq!(core.state().commit_index, commit);
@@ -440,7 +444,7 @@ fn refuse_moved_plan(from: &mut Raft, into: &mut Raft) {
     let before = into.state().clone();
     into.pending = from.pending.take();
     let start = count();
-    let mut out = VecDeque::new();
+    let mut out = EffectQueue::new();
     assert!(matches!(
         into.install_pending_into(&mut out),
         Err(RaftError::Storage(StorageError::Rejected(

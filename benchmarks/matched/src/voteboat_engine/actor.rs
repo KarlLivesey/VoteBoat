@@ -1,3 +1,4 @@
+use voteboat::raft::{EffectFront, EffectQueue};
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
@@ -5,7 +6,7 @@ use crate::{
     attribution::{Attribution, Phase, Recorder},
     Maintenance,
 };
-use std::{collections::VecDeque, mem::size_of, time::Instant};
+use std::{mem::size_of, time::Instant};
 use voteboat::{
     application::{ApplicationError, StateMachine},
     snapshot::*,
@@ -69,7 +70,7 @@ pub(super) struct Actor<const TRACE: bool = false> {
     /// The one effect queue the core fills in place. Empty between successful
     /// calls: every drain leaves it empty, and any failure that skips the
     /// drain (such as `record_proposals` after a core call) ends the actor.
-    queue: VecDeque<Effect>,
+    queue: EffectQueue,
     last_snapshot_at: u64,
     last_contact: Instant,
     #[cfg(test)]
@@ -86,7 +87,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             attribution: Recorder::default(),
             pending,
             deferred: None,
-            queue: VecDeque::new(),
+            queue: EffectQueue::new(),
             last_snapshot_at: 0,
             last_contact: Instant::now(),
             #[cfg(test)]
@@ -101,6 +102,30 @@ impl<const TRACE: bool> Actor<TRACE> {
         self.attribution
             .finish(Phase::ActorLifetime, started, result.is_err(), 0);
         result?;
+        #[cfg(test)]
+        {
+            use voteboat::application::CheckpointStateMachine;
+            let state = self.parts.core.state().clone();
+            let snapshot = state.snapshot.and_then(|reference| {
+                self.parts
+                    .snapshots
+                    .pins
+                    .get(&reference.generation)
+                    .map(|(_, image)| image.clone())
+            });
+            *self.parts.stats[self.parts.slot].shutdown.lock().unwrap() =
+                Some(stats::ShutdownState {
+                    state,
+                    node: NodeId::new(self.parts.slot as u64 + 1).unwrap(),
+                    binding: self.parts.store.log.binding(),
+                    limits: self.parts.store.log.limits(),
+                    applied: self.parts.application.applied,
+                    reported: self.parts.frontiers[self.parts.slot].load(Ordering::Acquire),
+                    checkpoint: self.parts.application.checkpoint(8).map_err(debug_error)?,
+                    snapshot,
+                    fenced: self.parts.core.is_fenced(),
+                });
+        }
         self.attribution.report(
             self.parts.slot,
             &self.parts.store.attribution,
@@ -346,8 +371,8 @@ impl<const TRACE: bool> Actor<TRACE> {
         Ok((operation, bytes))
     }
     /// Handle owned effects from a helper that returns them.
-    fn effects(&mut self, initial: Vec<Effect>) -> Result<(), Failure> {
-        self.queue.extend(initial);
+    fn effects(&mut self, initial: EffectQueue) -> Result<(), Failure> {
+        self.queue.append(initial);
         self.drain()
     }
     /// Handle every queued effect in order. Completions append to the same
@@ -359,19 +384,38 @@ impl<const TRACE: bool> Actor<TRACE> {
         self.queue = effects;
         result
     }
-    fn handle(&mut self, effects: &mut VecDeque<Effect>) -> Result<(), Failure> {
-        while let Some(effect) = effects.pop_front() {
+    fn handle(&mut self, effects: &mut EffectQueue) -> Result<(), Failure> {
+        while let Some(effect) = effects.front() {
             match effect {
-                Effect::PersistVolatile(persist) => self.persist(persist, effects)?,
-                Effect::Persist(_) => {
-                    return Err("volatile replica emitted durable persistence".into())
+                EffectFront::PersistVolatile(front) => self.persist(front.take(), effects)?,
+                EffectFront::Persist(front) => {
+                    drop(front.take());
+                    return Err("volatile replica emitted durable persistence".into());
                 }
-                Effect::Send(message) => self.send(message)?,
-                Effect::Committed(entries) => self.apply(entries)?,
-                snapshot @ (Effect::SnapshotRequired { .. }
-                | Effect::StageSnapshot(_)
-                | Effect::SnapshotInstalled(_)
-                | Effect::CheckpointCompacted(_)) => {
+                EffectFront::Send(front) => self.send(front.take())?,
+                EffectFront::Committed(front) => self.apply(front.take())?,
+                snapshot @ (EffectFront::SnapshotRequired(_)
+                | EffectFront::StageSnapshot(_)
+                | EffectFront::SnapshotInstalled(_)
+                | EffectFront::CheckpointCompacted(_)) => {
+                    let snapshot = match snapshot {
+                        EffectFront::SnapshotRequired(front) => {
+                            let request = front.take();
+                            Effect::SnapshotRequired {
+                                to: request.to,
+                                context: request.context,
+                                reference: request.reference,
+                            }
+                        }
+                        EffectFront::StageSnapshot(front) => Effect::StageSnapshot(front.take()),
+                        EffectFront::SnapshotInstalled(front) => {
+                            Effect::SnapshotInstalled(front.take())
+                        }
+                        EffectFront::CheckpointCompacted(front) => {
+                            Effect::CheckpointCompacted(front.take())
+                        }
+                        _ => unreachable!("selected snapshot front"),
+                    };
                     let started = Recorder::<TRACE>::start();
                     let result = self.snapshot(snapshot);
                     self.attribution.finish(
@@ -380,7 +424,7 @@ impl<const TRACE: bool> Actor<TRACE> {
                         result.is_err(),
                         0,
                     );
-                    effects.extend(result?);
+                    effects.append(result?);
                 }
                 _ => return Err("unexpected read/configuration effect in framework run".into()),
             }
@@ -390,7 +434,7 @@ impl<const TRACE: bool> Actor<TRACE> {
     fn persist(
         &mut self,
         persist: VolatilePersist,
-        effects: &mut VecDeque<Effect>,
+        effects: &mut EffectQueue,
     ) -> Result<(), Failure> {
         self.parts.stats[self.parts.slot]
             .persistence_units
@@ -421,7 +465,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             // Existing FIFO work precedes every newly completed effect.
             let result = result.map(|committed| {
                 if let Some(entries) = committed {
-                    effects.insert(queued, Effect::Committed(entries.to_vec()));
+                    effects.insert_committed(queued, entries.to_vec());
                 }
             });
             self.attribution
@@ -502,13 +546,13 @@ impl<const TRACE: bool> Actor<TRACE> {
         }
         Ok(())
     }
-    fn snapshot(&mut self, effect: Effect) -> Result<Vec<Effect>, Failure> {
+    fn snapshot(&mut self, effect: Effect) -> Result<EffectQueue, Failure> {
         match effect {
             Effect::SnapshotRequired {
                 to,
                 context,
                 reference,
-            } => supply_snapshot(
+            } => voteboat::snapshot::supply_snapshot_queue(
                 &self.parts.core,
                 &mut self.parts.snapshots,
                 to,
@@ -516,19 +560,21 @@ impl<const TRACE: bool> Actor<TRACE> {
                 reference,
             )
             .map_err(debug_error),
-            Effect::StageSnapshot(message) => stage_volatile_snapshot_effect(
-                &mut self.parts.core,
-                &self.parts.store.log,
-                &mut self.parts.snapshots,
-                &self.parts.application,
-                message,
-            )
-            .map_err(debug_error),
+            Effect::StageSnapshot(message) => {
+                voteboat::snapshot::stage_volatile_snapshot_effect_queue(
+                    &mut self.parts.core,
+                    &self.parts.store.log,
+                    &mut self.parts.snapshots,
+                    &self.parts.application,
+                    message,
+                )
+                .map_err(debug_error)
+            }
             Effect::SnapshotInstalled(reference) => {
                 self.parts.stats[self.parts.slot]
                     .snapshot_installs
                     .fetch_add(1, Ordering::Relaxed);
-                finish_volatile_snapshot_install(
+                voteboat::snapshot::finish_volatile_snapshot_install_queue(
                     &mut self.parts.core,
                     &self.parts.store.log,
                     &mut self.parts.snapshots,
@@ -539,7 +585,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             }
             Effect::CheckpointCompacted(reference) => {
                 self.parts.snapshots.reconcile_log(Some(reference))?;
-                Ok(Vec::new())
+                Ok(EffectQueue::new())
             }
             _ => Err("not a snapshot effect".into()),
         }
@@ -611,7 +657,7 @@ impl<const TRACE: bool> Actor<TRACE> {
         let receipt = receipt.map_err(debug_error)?;
         let started = Recorder::<TRACE>::start();
         let before = self.provider_snapshot();
-        let effects = compact_volatile_replica(
+        let effects = voteboat::snapshot::compact_volatile_replica_queue(
             &mut self.parts.core,
             &self.parts.store.log,
             &mut self.parts.snapshots,

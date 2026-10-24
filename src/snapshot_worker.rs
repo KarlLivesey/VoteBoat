@@ -388,7 +388,7 @@ pub fn complete_snapshot_work<A: CheckpointStateMachine>(
     if result.is_err() {
         raft.storage_failed();
     }
-    result
+    result.map(crate::raft::EffectQueue::into_owned)
 }
 
 /// Capacity-based retained image cost, independent of its encoded file length.

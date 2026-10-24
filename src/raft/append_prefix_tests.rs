@@ -34,7 +34,8 @@ fn fixture(payloads: Vec<EntryPayload>, count: usize, budget: usize) -> Raft {
                 After::Reply,
                 None,
             )
-            .unwrap();
+            .unwrap()
+            .into_owned();
         durable(&mut core, effects);
     }
     core.requests.clear();

@@ -204,10 +204,13 @@ impl Raft {
     /// separately reserve individual application receipts, as for
     /// `propose_batch`. A refused batch leaves no pending log state.
     /// Success returns a persistence request, not commitment or application.
-    pub fn propose_entries(&mut self, batch: ProposalBatch) -> Result<Vec<Effect>, RaftError> {
-        let mut effects = VecDeque::new();
+    pub fn propose_entries_queue(
+        &mut self,
+        batch: ProposalBatch,
+    ) -> Result<EffectQueue, RaftError> {
+        let mut effects = EffectQueue::new();
         self.propose_entries_into(batch, &mut effects)?;
-        Ok(effects.into())
+        Ok(effects)
     }
 
     /// [`Self::propose_entries`] into a host-owned queue: the effects are
@@ -217,7 +220,7 @@ impl Raft {
     pub fn propose_entries_into(
         &mut self,
         batch: ProposalBatch,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         let mark = out.len();
         let result = self.stage_entry_batch(batch, out);
@@ -230,7 +233,7 @@ impl Raft {
     fn stage_entry_batch(
         &mut self,
         batch: ProposalBatch,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         self.begin_step()?;
         self.check_proposal_role()?;
@@ -281,5 +284,13 @@ impl Raft {
             return Err(StorageError::Rejected("proposal shared conversion peak budget").into());
         }
         Ok(first)
+    }
+}
+
+impl Raft {
+    /// Explicit legacy owned-output convenience boundary.
+    pub fn propose_entries(&mut self, batch: ProposalBatch) -> Result<Vec<Effect>, RaftError> {
+        self.propose_entries_queue(batch)
+            .map(EffectQueue::into_owned)
     }
 }

@@ -86,7 +86,7 @@ impl Raft {
         witness: PeerIdentity,
         candidate: PeerIdentity,
         configuration: ConfigurationId,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         if self.authority_request.is_some() {
             return Err(RaftError::Busy);
         }
@@ -120,7 +120,7 @@ impl Raft {
             base,
             context,
         });
-        Ok(vec![Effect::Send(message)])
+        Ok(vec![Effect::Send(message)].into())
     }
     pub(super) fn permitted_replication(&self, message: &Message) -> bool {
         self.replication_permit.as_ref().is_some_and(|permit| {
@@ -226,7 +226,7 @@ impl Raft {
         }
         Ok(())
     }
-    pub(super) fn receive_authority(&mut self, message: Message) -> Result<Vec<Effect>, RaftError> {
+    pub(super) fn receive_authority(&mut self, message: Message) -> Result<EffectQueue, RaftError> {
         self.authority_message_header(&message)?;
         match message.rpc {
             Rpc::AuthorityRequest {
@@ -255,7 +255,7 @@ impl Raft {
         message: &Message,
         candidate: PeerIdentity,
         configuration: ConfigurationId,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         self.authority_request_source(message, candidate, configuration)?;
         let committed = self
             .durable
@@ -288,7 +288,7 @@ impl Raft {
             },
         );
         reply.term = reply.term.max(1);
-        Ok(vec![Effect::Send(reply)])
+        Ok(vec![Effect::Send(reply)].into())
     }
     fn receive_authority_reply(
         &mut self,
@@ -298,7 +298,7 @@ impl Raft {
         committed_index: u64,
         committed_term: u64,
         granted: bool,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let pending = self
             .authority_request
             .as_ref()
@@ -318,6 +318,6 @@ impl Raft {
             base: pending.base,
         });
         self.authority_request = None;
-        Ok(Vec::new())
+        Ok(EffectQueue::new())
     }
 }

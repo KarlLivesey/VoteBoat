@@ -94,7 +94,7 @@ impl Raft {
         })
     }
 
-    pub(super) fn repair_snapshot_messages(&mut self) -> Result<Option<Vec<Effect>>, RaftError> {
+    pub(super) fn repair_snapshot_messages(&mut self) -> Result<Option<EffectQueue>, RaftError> {
         let Some(reference) = self.durable.snapshot else {
             return Ok(None);
         };
@@ -103,7 +103,7 @@ impl Raft {
             .replicas()
             .map(|(node, _)| node)
             .collect::<Vec<_>>();
-        let mut effects = Vec::new();
+        let mut effects = EffectQueue::new();
         for peer in peers {
             let Some(scope) = self.snapshot_repair_scope(peer) else {
                 continue;
@@ -120,7 +120,7 @@ impl Raft {
                     commit_at_start: self.durable.commit_index,
                 },
             );
-            effects.push(Effect::SnapshotRequired {
+            effects.push_back(Effect::SnapshotRequired {
                 to: peer,
                 context,
                 reference,
@@ -135,7 +135,7 @@ impl Raft {
         context: RequestContext,
         reference: SnapshotRef,
         snapshot: Snapshot,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let Some(sent) = self.repair_requests.get(&to) else {
             return Err(RaftError::WrongCompletion);
         };
@@ -167,7 +167,8 @@ impl Raft {
                     snapshot: Box::new(snapshot),
                 }
             },
-        ))])
+        ))]
+        .into())
     }
 
     pub(super) fn validate_repair_snapshot_source(
@@ -236,7 +237,7 @@ impl Raft {
     pub(super) fn receive_repair_snapshot(
         &mut self,
         mut message: Message,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         self.validate_repair_snapshot_source(&message)?;
         let snapshot = match &message.rpc {
             Rpc::LearnerRepairSnapshot { snapshot }
@@ -265,7 +266,7 @@ impl Raft {
                     convert(reply);
                 }
             }
-            for effect in &mut effects {
+            for effect in effects.iter_mut() {
                 if let Effect::Send(reply) = effect {
                     convert(reply);
                 }

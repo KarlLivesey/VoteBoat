@@ -69,7 +69,8 @@ fn pending_entries(core: &mut Raft, entries: Vec<LogEntry>, after: After) -> Log
             after,
             Some(response),
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     let [effect]: [Effect; 1] = effects.try_into().unwrap();
     let Effect::Persist(update) = effect else {
         panic!("one pending transition")
@@ -145,7 +146,8 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
             After::Reply,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert!(durable(&mut core, effects).is_empty());
     let canonical: *const LogEntry = &core.state().entries[1];
     let EntryPayload::Command { bytes, .. } = &core.state().entries[1].payload else {
@@ -153,7 +155,8 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
     };
     let canonical_bytes = bytes.as_ptr();
     core.persist(core.state().hard_state, 3, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     let exact = admit(&mut core);
     let result = core.complete_borrowed(&exact).unwrap();
     let committed = result.committed().unwrap();
@@ -176,7 +179,8 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
     *bytes = replacement.into();
     assert_ne!(materialized, core.state().entries.to_vec()[1..]);
     core.persist(core.state().hard_state, 3, None, After::Reply, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     let exact = admit(&mut core);
     let result = core.complete_borrowed(&exact).unwrap();
     assert!(result.committed().is_none());
@@ -262,7 +266,8 @@ fn late_vote_reset_failure_exposes_no_output_and_preserves_original_mutations() 
         After::Reply,
         Some(response),
     )
-    .unwrap();
+    .unwrap()
+    .into_owned();
     core.election_reset = u64::MAX;
     let exact = admit(&mut core);
     assert!(matches!(
@@ -307,7 +312,8 @@ fn snapshot_install_completion_suppresses_committed_output_until_application_ins
                 After::SnapshotInstall(Box::new(reference)),
                 Some(response),
             )
-            .unwrap();
+            .unwrap()
+            .into_owned();
     }
     let exact = admit(&mut owned);
     let expected = owned.complete(&exact).unwrap();
@@ -323,7 +329,10 @@ fn snapshot_install_completion_suppresses_committed_output_until_application_ins
         Err(RaftError::WrongCompletion)
     );
     assert!(matches!(
-        &borrowed.snapshot_applied(reference, 4).unwrap()[..],
+        &borrowed
+            .snapshot_applied(reference, 4)
+            .unwrap()
+            .into_owned()[..],
         [Effect::Send(_)]
     ));
 }
@@ -388,11 +397,13 @@ fn retiring() -> Raft {
                 After::Reply,
                 None,
             )
-            .unwrap();
+            .unwrap()
+            .into_owned();
         durable(&mut core, effects);
     }
     core.persist(core.state().hard_state, 3, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     core
 }
 

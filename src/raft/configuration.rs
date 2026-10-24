@@ -83,7 +83,7 @@ impl Raft {
     pub(super) fn configure(
         &mut self,
         proposal: ConfigurationProposal,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         // A volatile log has static membership: `recover_volatile` accepts no
         // configuration state, so the core never commits any.
         if self.volatile {

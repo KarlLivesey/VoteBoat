@@ -104,7 +104,7 @@ struct Active {
     received_from: Option<NodeId>,
     reserved: usize,
     continuation_bytes: usize,
-    effects: VecDeque<Effect>,
+    effects: crate::raft::EffectQueue,
     leased: Option<EffectTicket>,
     leased_bytes: usize,
     kind: Option<LeaseKind>,
@@ -684,6 +684,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             if a.leased.is_some() || a.effects.is_empty() {
                 continue;
             }
+            if matches!(a.effects.peek(), Some(Effect::PersistVolatile(_))) {
+                return self.fail(EffectOwnerError::ProviderContract);
+            }
             self.sequence = self
                 .sequence
                 .checked_add(1)
@@ -692,9 +695,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 visit: a.visit,
                 sequence: self.sequence,
             };
-            let effect = a.effects.pop_front().unwrap();
+            let effect = a
+                .effects
+                .take_durable()
+                .ok_or(EffectOwnerError::ProviderContract)?;
             if a.effects.is_empty() {
-                a.effects = VecDeque::new();
+                a.effects = crate::raft::EffectQueue::new();
             }
             a.leased = Some(ticket);
             a.leased_bytes = effect_bytes(std::slice::from_ref(&effect), 1)

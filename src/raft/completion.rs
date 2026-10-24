@@ -137,11 +137,11 @@ pub fn persist_volatile<'a>(
     log: &VolatileLog,
     persist: VolatilePersist,
 ) -> Result<CompletionEffects<'a>, RaftError> {
-    let mut following = VecDeque::new();
+    let mut following = EffectQueue::new();
     let committed = persist_volatile_into(raft, log, persist, &mut following)?;
     Ok(CompletionEffects {
         committed,
-        following: following.into(),
+        following: following.into_owned(),
     })
 }
 
@@ -158,7 +158,7 @@ pub fn persist_volatile_into<'a>(
     raft: &'a mut Raft,
     log: &VolatileLog,
     persist: VolatilePersist,
-    out: &mut VecDeque<Effect>,
+    out: &mut EffectQueue,
 ) -> Result<Option<EntryRange<'a>>, RaftError> {
     let mark = out.len();
     let result = if log.binding() != raft.binding {

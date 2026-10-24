@@ -35,7 +35,7 @@ fn configured_pending_append_and_compacted_joint_commit_keep_connections_and_mem
                 file_bytes: 128,
                 checksum: 7,
             };
-            let effects = core.begin_compact(reference).unwrap();
+            let effects = core.begin_compact(reference).unwrap().into_owned();
             durable(&mut core, effects);
         }
         let membership = core.membership().clone();
@@ -58,14 +58,16 @@ fn configured_pending_append_and_compacted_joint_commit_keep_connections_and_mem
                 After::LeaderAppend,
                 None,
             )
-            .unwrap();
+            .unwrap()
+            .into_owned();
         compare_pending_connections(&mut core);
         durable(&mut core, effects);
         assert_eq!(core.membership(), &membership);
         assert!(!core.durable.summary().is_plain());
         let effects = core
             .persist(core.state().hard_state, 4, None, After::Commit, None)
-            .unwrap();
+            .unwrap()
+            .into_owned();
         compare_pending_connections(&mut core);
         durable(&mut core, effects);
         assert_eq!(core.membership(), &membership);

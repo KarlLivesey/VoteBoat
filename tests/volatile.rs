@@ -31,7 +31,7 @@ struct Replica {
     snapshots: HostSnapshots,
     application: Counter,
     /// The one reused effect queue of an `Api::Sink` replica.
-    queue: VecDeque<Effect>,
+    queue: EffectQueue,
 }
 /// Which public API family a cluster drives.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -88,12 +88,39 @@ fn sentinels() -> Vec<Effect> {
     ]
 }
 /// The sentinels lead `queue`, unchanged; remove them.
-fn take_sentinels(queue: &mut VecDeque<Effect>, from: usize) {
-    let sentinels = sentinels();
-    let end = from + sentinels.len();
-    assert!(queue.range(from..end).eq(sentinels.iter()));
-    queue.drain(from..end);
+fn take_sentinels(queue: &mut EffectQueue, from: usize) {
+    // This fixture explicitly exports its historical owned observation boundary.
+    let mut observed = std::mem::take(queue).into_owned();
+    let end = from + sentinels().len();
+    assert!(observed[from..end].iter().eq(sentinels().iter()));
+    observed.drain(from..end);
+    *queue = observed.into();
 }
+fn observed_front(queue: &mut EffectQueue) -> Option<Effect> {
+    Some(match queue.front()? {
+        EffectFront::PersistVolatile(front) => Effect::PersistVolatile(front.take()),
+        EffectFront::Persist(front) => Effect::Persist(front.take()),
+        EffectFront::Send(front) => Effect::Send(front.take()),
+        EffectFront::Committed(front) => Effect::Committed(front.take()),
+        EffectFront::ReadReady(front) => Effect::ReadReady(front.take()),
+        EffectFront::SnapshotRequired(front) => {
+            let value = front.take();
+            Effect::SnapshotRequired {
+                to: value.to,
+                context: value.context,
+                reference: value.reference,
+            }
+        }
+        EffectFront::StageSnapshot(front) => Effect::StageSnapshot(front.take()),
+        EffectFront::SnapshotInstalled(front) => Effect::SnapshotInstalled(front.take()),
+        EffectFront::CheckpointCompacted(front) => Effect::CheckpointCompacted(front.take()),
+        EffectFront::CheckpointRequired(front) => Effect::CheckpointRequired {
+            context: front.take(),
+        },
+        EffectFront::VerifyLearnerReadiness(front) => Effect::VerifyLearnerReadiness(front.take()),
+    })
+}
+
 impl Cluster {
     fn sink(api: Api) -> Self {
         Self {
@@ -125,7 +152,7 @@ impl Cluster {
                     log,
                     snapshots: host_snapshots(id),
                     application: Counter::new(100).unwrap(),
-                    queue: VecDeque::new(),
+                    queue: EffectQueue::new(),
                 },
             );
         }
@@ -143,7 +170,7 @@ impl Cluster {
         if self.api == Api::Sink {
             let r = self.replicas.get_mut(&id).unwrap();
             assert!(r.queue.is_empty(), "an effect outlived its drain");
-            r.queue.extend(sentinels());
+            r.queue.append(sentinels().into());
             r.core.step_into(event, &mut r.queue).unwrap();
             take_sentinels(&mut r.queue, 0);
             return self.drain(id);
@@ -177,7 +204,7 @@ impl Cluster {
         }
         if self.api == Api::Sink {
             assert!(r.queue.is_empty(), "an effect outlived its drain");
-            r.queue.extend(sentinels());
+            r.queue.append(sentinels().into());
             r.core.propose_entries_into(batch, &mut r.queue).unwrap();
             take_sentinels(&mut r.queue, 0);
             self.drain(id);
@@ -198,7 +225,7 @@ impl Cluster {
         self.pump();
     }
     fn effects(&mut self, id: u64, effects: Vec<Effect>) {
-        let mut queue = VecDeque::from(effects);
+        let mut queue = EffectQueue::from(effects);
         self.run(id, &mut queue);
     }
     /// Handle a sink replica's queue, which must end empty and is kept.
@@ -209,8 +236,8 @@ impl Cluster {
         queue.clear();
         self.replicas.get_mut(&id).unwrap().queue = queue;
     }
-    fn run(&mut self, id: u64, queue: &mut VecDeque<Effect>) {
-        while let Some(effect) = queue.pop_front() {
+    fn run(&mut self, id: u64, queue: &mut EffectQueue) {
+        while let Some(effect) = observed_front(queue) {
             let seen = match &effect {
                 Effect::Persist(_) | Effect::PersistVolatile(_) => Seen::Persist,
                 other => Seen::Other(Box::new(other.clone())),
@@ -225,12 +252,12 @@ impl Cluster {
                     // Earlier work stays first: the interval goes where this
                     // call's effects start, ahead of them.
                     let queued = queue.len();
-                    queue.extend(sentinels());
+                    queue.append(sentinels().into());
                     let mark = queue.len();
                     let committed =
                         persist_volatile_into(&mut r.core, log, persist, queue).unwrap();
                     if let Some(entries) = committed {
-                        queue.insert(mark, Effect::Committed(entries.to_vec()));
+                        queue.insert_committed(mark, entries.to_vec());
                         self.inserted += 1;
                     }
                     take_sentinels(queue, queued);
@@ -310,7 +337,7 @@ impl Cluster {
                     _,
                 ) => panic!("synchronous static history has no asynchronous checkpoints"),
             };
-            queue.extend(more);
+            queue.append(more.into());
         }
     }
     fn pump(&mut self) {
@@ -851,13 +878,16 @@ fn only_token(effects: &[Effect]) -> VolatilePersist {
 }
 /// Complete every volatile token in order; return the other effects.
 fn settle(core: &mut Raft, log: &VolatileLog, effects: Vec<Effect>) -> Vec<Effect> {
-    let mut queue = VecDeque::from(effects);
+    let mut queue = EffectQueue::from(effects);
     let mut other = Vec::new();
-    while let Some(effect) = queue.pop_front() {
+    while let Some(effect) = observed_front(&mut queue) {
         match effect {
-            Effect::PersistVolatile(persist) => {
-                queue.extend(persist_volatile(core, log, persist).unwrap().into_owned())
-            }
+            Effect::PersistVolatile(persist) => queue.append(
+                persist_volatile(core, log, persist)
+                    .unwrap()
+                    .into_owned()
+                    .into(),
+            ),
             effect => other.push(effect),
         }
     }
@@ -1280,16 +1310,19 @@ fn one_batch(core: &Raft, operation: u128) -> ProposalBatch {
     batch
 }
 
+fn assert_refused_sink_same(sink: &Cluster, twin: &Cluster, queue: &mut EffectQueue) {
+    let observed = std::mem::take(queue).into_owned();
+    assert!(observed.iter().eq(sentinels().iter()));
+    *queue = observed.into();
+    sink.assert_same(twin);
+}
+
 #[test]
 fn refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms() {
     let mut sink = committed_api(Api::Sink);
     let mut twin = committed_api(Api::Entries);
     sink.assert_same(&twin);
-    let mut queue = VecDeque::from(sentinels());
-    let same = |sink: &Cluster, twin: &Cluster, queue: &VecDeque<Effect>| {
-        assert!(queue.iter().eq(sentinels().iter()));
-        sink.assert_same(twin);
-    };
+    let mut queue = EffectQueue::from(sentinels());
     // A follower refuses proposals in either form.
     let (s, t) = (
         sink.replicas.get_mut(&2).unwrap(),
@@ -1311,19 +1344,21 @@ fn refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms() {
         t.core.propose_entries(one_batch(&t.core, 5)).map(drop),
         refused
     );
-    same(&sink, &twin, &queue);
+    assert_refused_sink_same(&sink, &twin, &mut queue);
     // A leader with a pending transition is busy in either form.
     let (s, t) = (
         sink.replicas.get_mut(&1).unwrap(),
         twin.replicas.get_mut(&1).unwrap(),
     );
-    let mut pending = VecDeque::new();
+    let mut pending = EffectQueue::new();
     s.core.step_into(command(6), &mut pending).unwrap();
     let vec_effects = t.core.step(command(6)).unwrap();
-    let [Effect::PersistVolatile(token)] = pending.make_contiguous() else {
-        panic!("one token: {pending:?}")
+    let observed = std::mem::take(&mut pending).into_owned();
+    let [Effect::PersistVolatile(token)] = observed.as_slice() else {
+        panic!("one token: {observed:?}")
     };
     let token = *token;
+    pending = observed.into();
     assert!(matches!(vec_effects[..], [Effect::PersistVolatile(_)]));
     assert_eq!(
         s.core.step_into(Event::Heartbeat, &mut queue),
@@ -1341,7 +1376,7 @@ fn refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms() {
         t.core.propose_entries(one_batch(&t.core, 7)).map(drop),
         refused
     );
-    same(&sink, &twin, &queue);
+    assert_refused_sink_same(&sink, &twin, &mut queue);
     // A stale token fences in either form and leaves no partial effects.
     let Effect::PersistVolatile(twin_token) = vec_effects[0] else {
         unreachable!()
@@ -1366,7 +1401,7 @@ fn refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms() {
     ));
     assert!(s.core.is_fenced());
     assert_eq!(s.core.state(), &committed);
-    same(&sink, &twin, &queue);
+    assert_refused_sink_same(&sink, &twin, &mut queue);
     // A fenced core refuses every sink call without touching the queue.
     let (s, t) = (
         sink.replicas.get_mut(&1).unwrap(),
@@ -1384,7 +1419,7 @@ fn refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms() {
         .core
         .propose_entries_into(one_batch(&s.core, 8), &mut queue);
     assert_eq!(refused, Err(RaftError::Fenced));
-    same(&sink, &twin, &queue);
+    assert_refused_sink_same(&sink, &twin, &mut queue);
 }
 
 #[test]
@@ -1398,21 +1433,24 @@ fn reused_sink_queues_keep_their_allocation_and_hold_nothing_between_calls() {
     for operation in 1..66 {
         cluster.propose(1, operation, 1);
     }
-    let allocation = |cluster: &Cluster| {
+    let allocation = |cluster: &mut Cluster| {
         cluster
             .replicas
-            .values()
+            .values_mut()
             .map(|r| {
                 assert!(r.queue.is_empty());
-                (r.queue.as_slices().0.as_ptr(), r.queue.capacity())
+                let observed = std::mem::take(&mut r.queue).into_owned();
+                let allocation = (observed.as_ptr(), observed.capacity());
+                r.queue = observed.into();
+                allocation
             })
             .collect::<Vec<_>>()
     };
-    let warm = allocation(&cluster);
+    let warm = allocation(&mut cluster);
     assert!(warm.iter().all(|&(_, capacity)| capacity > 0));
     for operation in 66..1066 {
         cluster.propose(1, operation, 1);
-        assert_eq!(allocation(&cluster), warm);
+        assert_eq!(allocation(&mut cluster), warm);
     }
     for r in cluster.replicas.values() {
         assert_eq!(r.core.state().commit_index, r.core.state().last_index());

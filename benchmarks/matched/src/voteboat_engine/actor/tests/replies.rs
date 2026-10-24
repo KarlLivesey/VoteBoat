@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+use std::collections::VecDeque;
 
 type Wait = oneshot::Receiver<OperationId>;
 

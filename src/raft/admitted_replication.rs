@@ -47,10 +47,13 @@ impl Raft {
     /// additional inspected output alongside the original durable continuation.
     /// Local matching/commit/application and all reply processing remain gated by
     /// the exact durable completion. Public `admitted` retains its original path.
-    pub fn replicate_admitted(&mut self, ticket: LogTicket) -> Result<Vec<Effect>, RaftError> {
+    pub fn replicate_admitted_queue(
+        &mut self,
+        ticket: LogTicket,
+    ) -> Result<EffectQueue, RaftError> {
         self.admitted(ticket)?;
         if self.admitted_replication_reservation().is_none() {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         let peers: Vec<_> = self
             .membership()
@@ -98,7 +101,7 @@ impl Raft {
                 },
             )));
         }
-        Ok(effects)
+        Ok(effects.into())
     }
     fn early_suffix(&self) -> Option<&Suffix> {
         let pending = self.pending.as_ref()?;
@@ -214,13 +217,13 @@ impl Raft {
         message: &Message,
         success: bool,
         matching: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         let alias = self.empty_append_aliases[&message.from];
         if success && matching != alias.original.end {
             return Err(RaftError::InvalidMessage);
         }
         self.empty_append_aliases.remove(&message.from);
-        Ok(Vec::new())
+        Ok(EffectQueue::new())
     }
     pub(super) fn retire_replication(&mut self, peer: NodeId) {
         self.requests.remove(&peer);
@@ -234,7 +237,7 @@ impl Raft {
     }
     pub(super) fn broadcast_after_admission_into(
         &mut self,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         self.refresh_peer_order();
         for at in 0..self.peer_order.len() {
@@ -256,3 +259,11 @@ impl Raft {
 
 #[cfg(test)]
 mod tests;
+
+impl Raft {
+    /// Explicit legacy owned-output convenience boundary.
+    pub fn replicate_admitted(&mut self, ticket: LogTicket) -> Result<Vec<Effect>, RaftError> {
+        self.replicate_admitted_queue(ticket)
+            .map(EffectQueue::into_owned)
+    }
+}

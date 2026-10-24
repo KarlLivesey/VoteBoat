@@ -182,7 +182,7 @@ impl Raft {
     pub(crate) fn readiness_check_matches(&self, message: &Message) -> bool {
         self.readiness_check.as_ref() == Some(message)
     }
-    pub(crate) fn receive_readiness(&mut self, message: Message) -> Result<Vec<Effect>, RaftError> {
+    pub(crate) fn receive_readiness(&mut self, message: Message) -> Result<EffectQueue, RaftError> {
         let request = match &message.rpc {
             Rpc::LearnerReadinessRequest(request) | Rpc::LearnerReadinessReply { request, .. } => {
                 **request
@@ -198,7 +198,7 @@ impl Raft {
                     .check_readiness_request(request, message.sender)
                     .is_err()
                 {
-                    return Ok(Vec::new());
+                    return Ok(EffectQueue::new());
                 }
                 if request.index > self.durable.commit_index
                     || self.durable.term_at(request.index) != Some(request.index_term)
@@ -209,10 +209,11 @@ impl Raft {
                             request: Box::new(request),
                             ready: false,
                         },
-                    ))]);
+                    ))]
+                    .into());
                 }
                 self.readiness_check = Some(message.clone());
-                Ok(vec![Effect::VerifyLearnerReadiness(message)])
+                Ok(vec![Effect::VerifyLearnerReadiness(message)].into())
             }
             Rpc::LearnerReadinessReply { ready, .. } => {
                 let receipt = LearnerReadinessReceipt {
@@ -222,7 +223,7 @@ impl Raft {
                 if self.learner_readiness != Some(request)
                     || self.check_ready_scope(&receipt, message.sender).is_err()
                 {
-                    return Ok(Vec::new());
+                    return Ok(EffectQueue::new());
                 }
                 if ready {
                     self.ready_learner = Some(
@@ -232,7 +233,7 @@ impl Raft {
                 } else {
                     self.cancel_learner_readiness();
                 }
-                Ok(Vec::new())
+                Ok(EffectQueue::new())
             }
             _ => unreachable!(),
         }
@@ -309,7 +310,7 @@ impl Raft {
         application: &A,
         snapshot: Option<crate::snapshot::Snapshot>,
         limits: crate::snapshot::SnapshotLimits,
-    ) -> Result<Vec<Effect>, ReadinessError> {
+    ) -> Result<EffectQueue, ReadinessError> {
         if !self.readiness_check_matches(message) {
             return Err(RaftError::WrongCompletion.into());
         }
@@ -342,7 +343,8 @@ impl Raft {
                 request: Box::new(request),
                 ready,
             },
-        ))])
+        ))]
+        .into())
     }
     fn check_ready_scope(
         &self,

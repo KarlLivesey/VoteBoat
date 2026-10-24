@@ -95,7 +95,7 @@ fn queued_boundary_empty_originals_commit_in_order_after_deferral() {
     let batch = actor.collect(first).unwrap().into_batch();
     assert_eq!(batch.len(), width - 1);
     let effects = actor.parts.core.propose_entries(batch).unwrap();
-    actor.effects(effects).unwrap();
+    actor.effects(effects.into()).unwrap();
     for (id, wait) in ids.iter().zip(&mut first_waits) {
         assert_eq!(wait.try_recv().unwrap(), *id);
     }
@@ -234,9 +234,9 @@ fn width_one_passes_use_the_propose_event_and_staging_matches_it() {
         assert!(staged.pending.insert(operation, staged_reply).is_none());
         let (old_reply, mut old_wait) = oneshot::channel();
         assert!(old.pending.insert(operation, old_reply).is_none());
-        staged.effects(effects).unwrap();
-        old.effects(expected).unwrap();
-        event.effects(event_effects).unwrap();
+        staged.effects(effects.into()).unwrap();
+        old.effects(expected.into()).unwrap();
+        event.effects(event_effects.into()).unwrap();
         assert_eq!(wait.try_recv().unwrap(), operation);
         assert_eq!(staged_wait.try_recv().unwrap(), operation);
         assert_eq!(old_wait.try_recv().unwrap(), operation);

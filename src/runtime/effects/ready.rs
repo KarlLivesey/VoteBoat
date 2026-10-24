@@ -108,7 +108,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 received_from: None,
                 reserved,
                 continuation_bytes: reserved,
-                effects: VecDeque::new(),
+                effects: crate::raft::EffectQueue::new(),
                 leased: None,
                 leased_bytes: 0,
                 kind: None,

@@ -53,7 +53,7 @@ fn check_immediate<const TRACE: bool>() {
         assert_eq!(wait.try_recv(), Err(oneshot::error::TryRecvError::Empty));
     }
     actor
-        .effects(vec![Effect::PersistVolatile(update)])
+        .effects(vec![Effect::PersistVolatile(update)].into())
         .unwrap();
     assert_eq!(actor.parts.application.applied, 3);
     assert_eq!(actor.parts.core.state().commit_index, 3);
@@ -74,10 +74,13 @@ fn existing_fifo_application_error_precedes_new_commit_application() {
         payload: EntryPayload::Noop,
     };
     let error = actor
-        .effects(vec![
-            Effect::PersistVolatile(update),
-            Effect::Committed(vec![invalid]),
-        ])
+        .effects(
+            vec![
+                Effect::PersistVolatile(update),
+                Effect::Committed(vec![invalid]),
+            ]
+            .into(),
+        )
         .unwrap_err();
     assert!(error.to_string().contains("IndexGap"));
     assert_eq!(actor.parts.core.state().commit_index, 2);
@@ -114,7 +117,7 @@ fn existing_fifo_send_error_precedes_new_commit_receipt() {
     };
     assert_eq!(
         actor
-            .effects(vec![Effect::PersistVolatile(update), Effect::Send(message)])
+            .effects(vec![Effect::PersistVolatile(update), Effect::Send(message)].into())
             .unwrap_err()
             .to_string(),
         "unknown recipient"
@@ -133,7 +136,7 @@ fn borrowed_application_failure_preserves_frontier_and_all_original_waits() {
     let id = OperationId::new(u128::MAX).unwrap();
     let (update, mut waits) = commit_update(&mut actor, &[id], &[7, 255]);
     assert!(actor
-        .effects(vec![Effect::PersistVolatile(update)])
+        .effects(vec![Effect::PersistVolatile(update)].into())
         .unwrap_err()
         .to_string()
         .contains("InvalidCommand"));
@@ -162,7 +165,7 @@ fn borrowed_and_fifo_owned_delivery_stop_after_same_dropped_wait() {
             effects.push(Effect::Committed(Vec::new()));
         }
         assert_eq!(
-            actor.effects(effects).unwrap_err().to_string(),
+            actor.effects(effects.into()).unwrap_err().to_string(),
             "original client dropped result wait"
         );
         assert_eq!(actor.parts.application.applied, 4);

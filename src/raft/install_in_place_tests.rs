@@ -130,14 +130,16 @@ fn stage_append(core: &mut Raft, from: u64, to: u64) -> VolatilePersist {
             After::Reply,
             Some(reply),
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert!(core.pending.as_ref().unwrap().next.is_append());
     token(&effects)
 }
 fn stage_commit(core: &mut Raft, commit: u64) -> VolatilePersist {
     let effects = core
         .persist(core.state().hard_state, commit, None, After::Commit, None)
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert!(core.pending.as_ref().unwrap().next.is_commit());
     token(&effects)
 }
@@ -192,7 +194,7 @@ fn a_failed_install_of_a_foreign_plan_leaves_the_plan_intact() {
     // The public completion path: the moved plan's token is not this
     // incarnation's, so drive the install the completions use.
     let log = log_view(&other);
-    let mut out = VecDeque::new();
+    let mut out = EffectQueue::new();
     let result = other.install_pending_into(&mut out).map(|_| ());
     fenced_as_before(&mut other, result, &log);
     assert!(out.is_empty());

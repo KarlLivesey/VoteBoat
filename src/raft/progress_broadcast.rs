@@ -55,7 +55,7 @@ impl Raft {
 
     pub(super) fn broadcast_append_progress_into(
         &mut self,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         if !self.progress_sends_enabled() {
             return self.broadcast_after_admission_into(out);
@@ -64,15 +64,15 @@ impl Raft {
     }
 
     #[cfg(test)]
-    pub(super) fn broadcast_commit_progress(&mut self) -> Result<Vec<Effect>, RaftError> {
-        let mut effects = VecDeque::new();
+    pub(super) fn broadcast_commit_progress(&mut self) -> Result<EffectQueue, RaftError> {
+        let mut effects = EffectQueue::new();
         self.broadcast_commit_progress_into(&mut effects)?;
-        Ok(effects.into())
+        Ok(effects)
     }
 
     pub(super) fn broadcast_commit_progress_into(
         &mut self,
-        out: &mut VecDeque<Effect>,
+        out: &mut EffectQueue,
     ) -> Result<(), RaftError> {
         if !self.progress_sends_enabled() {
             return self.broadcast_into(out);
@@ -80,7 +80,7 @@ impl Raft {
         self.broadcast_ready_peers_into(out)
     }
 
-    fn broadcast_ready_peers_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+    fn broadcast_ready_peers_into(&mut self, out: &mut EffectQueue) -> Result<(), RaftError> {
         self.refresh_peer_order();
         for at in 0..self.peer_order.len() {
             let peer = self.peer_order[at];

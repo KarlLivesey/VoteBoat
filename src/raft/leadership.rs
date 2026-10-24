@@ -36,13 +36,13 @@ impl Raft {
     pub(super) fn start_transfer(
         &mut self,
         request: LeadershipTransferRequest,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         if self.role != Role::Leader || !self.local_voter() {
             return Err(RaftError::NotLeader);
         }
         if let Some(current) = self.transfer {
             return if current.request == request {
-                Ok(Vec::new())
+                Ok(EffectQueue::new())
             } else {
                 Err(RaftError::Busy)
             };
@@ -69,17 +69,17 @@ impl Raft {
     pub(super) fn cancel_transfer(
         &mut self,
         context: RequestContext,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         if self.transfer.is_none_or(|t| t.context != context) {
             return Err(RaftError::StaleTransfer);
         }
         self.transfer = None;
-        Ok(Vec::new())
+        Ok(EffectQueue::new())
     }
-    pub(super) fn drive_transfer(&mut self) -> Result<Vec<Effect>, RaftError> {
+    pub(super) fn drive_transfer(&mut self) -> Result<EffectQueue, RaftError> {
         self.refresh_transfer();
         let Some(t) = self.transfer else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         if t.signal_sent
             || self.has_pending_dependency()
@@ -93,7 +93,7 @@ impl Raft {
                 .unwrap_or(0)
                 < t.index
         {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         self.transfer.as_mut().unwrap().signal_sent = true;
         Ok(vec![Effect::Send(self.message(
@@ -104,16 +104,17 @@ impl Raft {
                 index: t.index,
                 log_term: t.term,
             },
-        ))])
+        ))]
+        .into())
     }
     pub(super) fn receive_timeout_now(
         &mut self,
         m: &Message,
         index: u64,
         log_term: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+    ) -> Result<EffectQueue, RaftError> {
         if m.term != self.durable.hard_state.term || self.role != Role::Follower {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         if !self.local_voter()
             || self.membership().joint().is_some()

@@ -275,7 +275,7 @@ fn configuration_payload_shares_its_input_and_preserves_full_membership() {
         receiver.step(Event::Receive(message.clone())),
         Err(RaftError::InvalidMessage)
     );
-    let effects = receiver.receive_inner(message).unwrap();
+    let effects = receiver.receive_inner(message).unwrap().into_owned();
     assert_eq!(suffix(&effects).entries, expected);
     assert_eq!(
         suffix(&effects).entries.first_backing_ptr(),
@@ -346,7 +346,8 @@ fn uncommitted_rewrite_has_the_same_atomic_term_commit_and_reply_as_clone() {
             After::Reply,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     durable(&mut optimized, initial);
     let mut cloned = Raft::recover(
         optimized.node,

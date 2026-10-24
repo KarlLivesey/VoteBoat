@@ -17,6 +17,8 @@ impl Default for Widths {
 
 #[derive(Default)]
 pub(super) struct Stats {
+    #[cfg(test)]
+    pub shutdown: std::sync::Mutex<Option<ShutdownState>>,
     pub retained: AtomicUsize,
     pub peak_retained: AtomicUsize,
     pub peak_peer_queue: AtomicUsize,
@@ -25,6 +27,18 @@ pub(super) struct Stats {
     pub checkpoint_count: AtomicUsize,
     pub snapshot_installs: AtomicUsize,
     proposal_widths: Widths,
+}
+#[cfg(test)]
+pub(super) struct ShutdownState {
+    pub state: voteboat::log::GroupLog,
+    pub node: voteboat::identity::NodeId,
+    pub binding: voteboat::identity::StoreBinding,
+    pub limits: voteboat::log::LogLimits,
+    pub applied: u64,
+    pub reported: u64,
+    pub checkpoint: Vec<u8>,
+    pub snapshot: Option<voteboat::snapshot::Snapshot>,
+    pub fenced: bool,
 }
 #[derive(Serialize)]
 struct ProposalWidth {

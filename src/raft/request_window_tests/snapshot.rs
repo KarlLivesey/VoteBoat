@@ -32,7 +32,8 @@ fn relay_snapshot_scope_keeps_exact_original_boundary_and_retires_on_reply() {
     assert_eq!(actual, reference);
     let original = sent(
         core.snapshot_send(node(2), context, actual, snapshot)
-            .unwrap(),
+            .unwrap()
+            .into_owned(),
         2,
     );
     let scope = window(&core, &original);
@@ -79,7 +80,7 @@ fn committed_pin(source: &mut Raft, historical: bool) -> (SnapshotRef, Snapshot)
     };
     // Existing contract fixture asserts a host-verified pin; no native filesystem
     // publication claim. Complete actual compaction before requesting the image.
-    let compact = source.begin_compact(reference).unwrap();
+    let compact = source.begin_compact(reference).unwrap().into_owned();
     durable(source, compact);
     (reference, snapshot)
 }
@@ -96,7 +97,8 @@ fn relay_committed_snapshot_repair_preserves_historical_and_final_scope_variants
         let original = sent(
             source
                 .snapshot_send(node(4), context, actual, snapshot)
-                .unwrap(),
+                .unwrap()
+                .into_owned(),
             4,
         );
         assert_eq!(source.role(), Role::Candidate);

@@ -17,19 +17,19 @@ use super::*;
 use crate::membership::ConfigurationChange;
 
 impl Raft {
-    pub(super) fn joint_repair_messages(&mut self) -> Result<Vec<Effect>, RaftError> {
+    pub(super) fn joint_repair_messages(&mut self) -> Result<EffectQueue, RaftError> {
         if self.membership().stable().voter_stores().get(&self.node) != Some(&self.binding.identity)
         {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         let Some(joint) = self.membership().joint() else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         if joint.index <= self.durable.commit_index {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         }
         let Some(_) = self.durable.entry_at(joint.index) else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         // Retain the largest bounded tail ending at the joint. Never include
         // another configuration: the receiver must already have this stable
@@ -69,11 +69,11 @@ impl Raft {
         entries.reverse();
         let entries = EntryBatch::from(entries);
         let Some(first) = entries.first() else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         let previous_index = first.index - 1;
         let Some(previous_term) = self.durable.term_at(previous_index) else {
-            return Ok(Vec::new());
+            return Ok(EffectQueue::new());
         };
         let targets = joint
             .next
@@ -97,7 +97,7 @@ impl Raft {
                 },
             )));
         }
-        Ok(effects)
+        Ok(effects.into())
     }
 
     pub(super) fn permits_joint_repair(&self, message: &Message) -> bool {

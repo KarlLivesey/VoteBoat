@@ -51,7 +51,8 @@ fn follower(volatile: bool) -> (Raft, VolatileLog) {
             After::Reply,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
     assert!(!core.pending.as_ref().unwrap().next.is_commit());
     if volatile {
         persist_volatile(&mut core, &log, token(&effects)).unwrap();
@@ -65,6 +66,7 @@ fn follower(volatile: bool) -> (Raft, VolatileLog) {
 fn commit_only(core: &mut Raft, commit: u64) -> Vec<Effect> {
     core.persist(core.state().hard_state, commit, None, After::Commit, None)
         .unwrap()
+        .into_owned()
 }
 
 /// The completed state a commit-only round must produce: only the revision and
@@ -248,7 +250,10 @@ fn ballot_entries_or_snapshot_rounds_do_not_take_the_scalar_path() {
             term: core.state().hard_state.term + 1,
             voted_for: None,
         };
-        let effects = core.persist(hard, 3, None, After::Commit, None).unwrap();
+        let effects = core
+            .persist(hard, 3, None, After::Commit, None)
+            .unwrap()
+            .into_owned();
         let next = &core.pending.as_ref().unwrap().next;
         assert!(!next.is_commit());
         assert_eq!(next.update().hard_state, hard);
@@ -263,7 +268,9 @@ fn ballot_entries_or_snapshot_rounds_do_not_take_the_scalar_path() {
             voted_for: Some(NodeId::new(2).unwrap()),
             ..core.state().hard_state
         };
-        core.persist(hard, 3, None, After::Commit, None).unwrap();
+        core.persist(hard, 3, None, After::Commit, None)
+            .unwrap()
+            .into_owned();
         assert!(!core.pending.as_ref().unwrap().next.is_commit());
         // New entries with an unchanged ballot.
         let (mut core, _) = follower(volatile);
@@ -277,7 +284,8 @@ fn ballot_entries_or_snapshot_rounds_do_not_take_the_scalar_path() {
             After::Reply,
             None,
         )
-        .unwrap();
+        .unwrap()
+        .into_owned();
         let next = &core.pending.as_ref().unwrap().next;
         assert!(next.is_append() && !next.is_commit());
         // Compaction keeps the ballot and commit index but carries a snapshot.
@@ -300,7 +308,7 @@ fn ballot_entries_or_snapshot_rounds_do_not_take_the_scalar_path() {
             checksum: 7,
         };
         let commit = core.state().commit_index;
-        core.begin_compact(reference).unwrap();
+        core.begin_compact(reference).unwrap().into_owned();
         let next = &core.pending.as_ref().unwrap().next;
         assert!(!next.is_commit());
         assert_eq!(next.update().snapshot, Some(reference));

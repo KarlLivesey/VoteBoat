@@ -38,9 +38,9 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-5: measured and rejected | PR29 borrowed summarized metadata and reordered append construction; the targeted extra304-byte copy was eliminated on Apple, but the CPU gate failed at widths1 and231; no source merged | Both fresh exact-head Sol source approvals; builder1036 test events/strict7/actual hook green; compiled old-order negative/exact restoration/five Mac view tests passed; final identity2/Rust6 controls and all18 primary children passed. CPU +0.82755%/+0.28720%/-0.00053%, wins0/3,1/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu5/CPU5-RESULT.md) | P1 evidence |
 | CPU-6: measured and rejected | PR30 inline singleton batches and fused wide assignment/facts removed their intended work on Apple, but singleton CPU rose; no source merged | Both exact-head Sol source approvals; builder1377 focused events/2existing ignored/strict7/actual hook green; Apple34 tests/two valid work controls/restoration, metadata2/Rust6 and all18 primary children passed. CPU +7.781924%/-0.267725%/-0.677237%, wins0/3,3/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu6/CPU6-RESULT.md) | P1 evidence |
 | CPU-8: measured and rejected | PR31 compact checked plans removed targeted Apple movement, but width515 CPU rose; no source merged | Both exact-head Sol source approvals; focused/control/strict7/actual hook green; Apple work/VALID/semantic/restoration and identity2/Rust6 controls passed. All18 primary children passed. CPU -4.503206%/-2.594473%/+0.511120%, wins3/3,2/3,1/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu8/CPU8-RESULT.md) | P1 evidence |
-| Current P1 CPU-9 effect ownership design, conditional | Reduce physical movement of small effects through a large owned enum; depends on unchanged production0bf and preserved CPU1–6/CPU8 rejections, with CPU7 attribution unknown | One source-supported public reusable ordered ownership design with exact async lifetimes/FIFO/rollback/budgets, actual consumers and independent controls; no implementation or CPU claim until parent release | P1 |
-| Then a checked CPU candidate, conditional | Depends on one justified bounded design and parent implementation release; rejected source and performance claims stay excluded | Schema/ownership/failure plan, focused semantic and causal controls, actual strict/enabled-hook publication, fresh dual Sol source reviews and original paired CPU/rate/p99 gates; preserve failures without replacement/tolerance | P1 |
-| Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
+| Current P1 CPU-9 typed effect fronts | Implement the released single concrete queue over the unchanged Effect ring. Depends on exact264522d5/production0bf, existing correlation/ownership contracts and the CPU9 design; rejected sources remain excluded | Independent FIFO/value/ownership oracles, all variants/rollback/borrow rejection, public/native/provider/budget checks, all three real applications at widths1/231/515 through two default checkpoints/catch-up/resume/shutdown, VALID old-work and separate semantic controls, strict7 and actual enabled-hook draft publication | P1 candidate implementation |
+| Next CPU-9 independent source and Apple gates, parent-owned | Assess the checked exact head; depends on complete builder evidence and no unresolved implementation/budget failure | Fresh dual source reviews, original-R3 adapter audit, complete Apple producer-to-consumer removal proof, VALID old-work restoration, semantic controls and exact normal restoration. Physical removal and CPU gain remain UNKNOWN | P1 qualification |
+| Then conditional CPU-9 performance and integration, parent-owned | Depends on every source/adapter/Apple gate passing; no source-only performance approval | Original nine pairs: each width median B/A<1 and at least2/3 wins, then conditional64 and full5/integration. Preserve every failure and historical HOLD; no unchanged retry or cross-width offset | P1 qualification |
 
 The 20 October V3g scratch report is input, not current-head qualification:
 `target/claude/research-r4/v3g-profile.md`. Its unqualified commit-notice prototype
@@ -62,6 +62,162 @@ snapshot/compaction before spending a full measurement matrix; do not replace
 the primary workload or relax membership fences to obtain a score.
 The implemented candidate was measured and rejected as recorded below.
 
+### CPU-9 schema and acceptance plan (23 October 2026; before production edits)
+
+**24 October R1 terminal builder HOLD (historical):** a forbidden bootstrap-as-payload launcher
+error stopped publication. No commit/push/PR; source is preserved as a durable
+patch and the owned checkout is swept. [Actual evidence and incomplete gates](../validation/performance/pillar1-cpu9/BUILDER-HOLD.md).
+The P1 milestone remains incomplete; the next two conditional parent gates above
+are not released by this result.
+
+One public `EffectQueue` owns exactly one `VecDeque<Effect>`, with the same
+slot size, capacities, growth and reservation policies. Variant-specific front
+guards contain an exclusive queue borrow and have no Clone, Drop action, slot
+identity, allocation or new counter. Inspection/drop/forget leaves the front and
+async credits intact. Taking the volatile guard copies the existing 24-byte
+token and drops a non-iterated prefix drain in place. Large guards transfer the
+actual owned variant payload; their full-envelope extraction remains paid.
+Construction of a volatile output occurs in its own staging arm after unchanged
+membership/readiness checks and Pending installation. There is still one Pending
+and one checked installer. No protocol/completion turn changes.
+
+Core queue producers, cold queue paths and public completion helpers use this
+concrete queue. The actual matched Actor takes typed fronts before invoking
+core/provider/application work. Its committed insertion index is the PRE-CALL
+queue length; immediate borrowed application is allowed only when that length
+was zero. Append failures truncate only the new suffix. Existing Vec convenience
+exports remain explicit owned boundaries. Durable runtime Active adopts the same
+ring and preserves owned leases/callbacks, Written/Durable stages and external
+reservations; Shard's existing volatile rejection stays in place.
+
+Before endorsement, inventory simultaneous queue/header/front/drain/cold-growth/
+callback/live-lease ownership against the OLD bound, including actual capacity
+times Effect size and payload/spare backing. Token transfer size does not reduce
+slot accounting. No larger cap, admission reduction, extra persistent header or
+new peak may be hidden by the existing four-times conversion slack/control
+reserve. A failure of this proof stops the slice.
+
+Use existing independent full-state/application/FIFO/provider/budget assertions
+and baseline old-owned checks before edits; freeze a finite <=8MiB old trace only
+if an existing independent oracle is insufficient. Required new guards cover all
+mixed variants, wrapping/growth, inspect/drop/forget/take, exact rollback and a
+downstream compile-fail exclusive-borrow test. Compile a real old common staging
+join plus full-Effect Actor-pop restoration separately from incorrect removal,
+rollback, FIFO, correlation/stage, reservation and early-reuse mutants. Restore
+normal source and record exact hashes after each control. Actual Linux results,
+feature matrix, source closure and remaining parent gates will be recorded under
+`validation/performance/pillar1-cpu9`; none is claimed executed by this plan.
+
+On a real unrelated/missing-input/resource failure, hold dependent launches,
+preserve the actual input/raw failure and patch, join known children, remove only
+owned target/scratch/worktree/seed, run the unchanged final actual-Mac guard and
+return the precise blocker. No performance timing, Apple build or full5 is part
+of this implementation task. RPL-1.5 and the original design pack are unchanged.
+
+
+CPU-9 capacity audit refinement (24 October, before the corrective production
+edit): typed concatenation must reserve the source length before taking fronts,
+matching the old exact-size Vec iterator's single deque reservation. Incremental
+push growth could otherwise produce a different capacity. A finite independent
+old-VecDeque capacity/FIFO oracle will check empty, spare, wrapped and grown
+states. The durable staging arm also keeps its owned update without introducing
+volatile revision/generation locals; those locals belong only in the None arm.
+Both arms install the identical Pending before emitting their output. This is
+needed for P1's unchanged simultaneous ownership bound, not a new prerequisite
+or capacity allowance. Physical compiler movement remains a parent gate.
+
+CPU-9 public-surface audit refinement (before its edit): raw slot iteration and
+slice inspection belong inside the crate. Public ordinary consumers select a
+typed exclusive front; explicit owned export remains the legacy observation
+boundary. The historical downstream trace fixture will choose that owned
+boundary for sentinel/value/allocation observations. No new inspection handle,
+counter, capacity, completion authority or product feature is introduced.
+
+
+### CPU-9 R4 continuation: schema and current plan (24 October 2026)
+
+This continues the exact R2 saved tree85cfd9a2; it adds no new slice. The full
+63369-entry identity manifest and2606-row actual build closure matched before
+further edits/build. R1/R2/R3 terminal limits remain historical, with R4's
+explicit setup amendment permitting harmless read/CLI corrections. Current
+validation is recorded separately from those prior results.
+
+Schema/state/ownership: EffectQueue remains a transparent VecDeque<Effect>
+(272-byte full slots). Exclusive noncloneable borrowed fronts select without
+consumption; take ends the borrow before completion/provider/application work.
+Volatile take copies the24-byte capability and drops the in-place prefix drain.
+Large values keep independent owned payloads; durable runtime bridges retain
+existing leases, ticket stages and capacity-based charges. No new generation,
+async authority, pool, startup reservation or native volatile lease is added.
+
+Failure/restart/cleanup: append errors truncate only the saved suffix; commitment
+is inserted at the pre-call boundary. Binding/incarnation/revision/generation,
+Written/Durable and worker fences remain exact. External accepted/dropped leases
+stay charged until terminal release. Restart discards transient guards/queue and
+rebuilds durable state through existing recovery. Controls restore every normal
+source/mode and consumer hash. A substantive unrelated/resource/identity failure
+holds dependents; preserve complete evidence then sweep only owned resources.
+
+| R4 mini-plan | Purpose and dependencies | Completion checks | Macro |
+|---|---|---|---|
+| Current: finish saved typed fronts | Depends on exact R2 reconstruction, corrected observer and unchanged ownership/budget contracts | Fresh188 Raft/public volatile/borrow doctests/matched two-checkpoint all-width histories; VALID+six mutants/restoration; stopped-ancestor histories and relevant feature/provider/worker/snapshot/budget matrix; strict7, actual enabled-hook push, one linked draft PR | P1 candidate implementation |
+| Next: independent source/adapter/Apple gates, parent-owned | Depends on checked exact published head and complete builder evidence | Fresh dual source reviews, original R3 adapter audit, complete Apple producer-to-consumer physical proof, VALID/semantic controls/exact restoration | P1 qualification |
+| Then: conditional performance/integration, parent-owned | Depends on every preceding gate passing | Original nine pairs per width with original acceptance; conditional64 and full5/integration | P1 qualification |
+
+Macro review: P1 remains open; networked service and Rust embedding stay the
+usable release priority outside this bounded CPU task. No physical-removal,
+CPU gain or full-Raft qualification follows from source sizes or these checks.
+R4 durable receipts: main-ignored target/claude/pillar1-20261022/cpu9-builder-r4/.
+
+### CPU-9 R4 implemented evidence (24 October 2026)
+
+Final-source normal checks passed188 Raft/11public volatile/2borrow doctests/
+47matched; VALID188+47 and all six incorrect semantic controls passed their
+required healthy/detection results with exact restoration. Routed stopped-
+ancestor histories8+4, all-feature ownership/lifecycle408 and public provider/
+runtime/worker/quorum/volatile125 passed. Strict7 is zero diagnostics. These are
+finite test events with duplicates, not full5 or performance qualification.
+[Actual matrix, failures, limits and pending gates](../validation/performance/pillar1-cpu9/BUILDER-R4.md).
+
+Macro review: P1 stays open. The current deliverable has final-source semantic
+and lint evidence; enabled-hook checked draft publication is its final step.
+The next two mini-plan rows remain parent source/adapter/Apple qualification,
+then conditional original performance/integration. They are not prerequisites
+for a separate new CPU slice. Publication/head/cleanup outcome is retained in
+the durable R4 REPORT.md; no speed claim follows from these Linux checks.
+
+### CPU-9 R2 continuation (24 October 2026; before further edits)
+
+**R2 terminal HOLD:** the first current-source188-test Raft child passed/exit0,
+but the inherited observer raised ProcessLookupError during its /proc scan;
+controller exit1. All dependent qualification/publication stopped. No code or
+observer repair/retry. [Raw limitation and unrun gates](../validation/performance/pillar1-cpu9/BUILDER-R2-HOLD.md).
+
+The same unpublished R1 candidate was reconstructed on exact264522d5. Patch
+186343 bytes/SHA256 c39885c12eb64988cdfb474f2a31618bd856ddf7f26eec671642352e32eb05b9
+matched every63368 manifest entry and2606 build-input row. This is implemented
+identity evidence only. R1 remains HOLD; its earlier tests and controls do not
+qualify this current source. The unchanged stock guard reached the actual Mac
+and passed before reconstruction. Durable R2 receipts live in main-ignored
+`target/claude/pillar1-20261022/cpu9-builder-r2/`; original R1 evidence is read-only.
+
+The schema above remains unchanged: one full-sized ring, exclusive typed fronts,
+no consumption/credit release on observation/drop/forget, exact pre-call committed
+insertion and suffix rollback, existing Pending and completion authority, owned
+large payloads and async leases through terminal release. Restart invalidates
+transient queue borrows through existing incarnation/recovery domains. Failure
+preserves raw source/exit before a bounded causal fix; unrelated/missing-input/
+budget/resource/liveunknown failures stop dependent work and trigger owned cleanup.
+
+| R2 mini-plan item | Purpose and dependencies | Completion checks | Advances |
+| --- | --- | --- | --- |
+| Current: current-source semantic qualification | Resume the same candidate after exact reconstruction; retain existing independent oracles and original budget | Queue/FIFO/capacity/lifetime checks, VALID real old staging+Actor work and six incorrect controls with exact restoration, stopped-ancestor histories and focused semantic/provider/ownership matrix | P1 candidate implementation |
+| Next: checked candidate publication | Depends on every current semantic/budget gate; preserve hook and pinned locks | Rootfmt/four strict all-target Clippys, matchedfmt/strict separate-lock Clippy, actual enabled-hook nonforce push, one immediately linked draft PR and exact source closure | P1 candidate implementation |
+| Following: parent qualification | Depends on checked source; no builder approval of performance | Fresh dual source reviews, original adapter audit, Apple complete-flow/VALID/semantic/restoration, original nine pairs, conditional64/full5/integration | P1 qualification |
+
+Planned checks above are not executed evidence. Physical removal and CPU gain
+remain UNKNOWN. No budget, capacity, native volatile support or semantic feature
+change is authorized. The macro P1 goal and next two parent gates remain open.
 
 ### CPU-8 result and rejection (23 October 2026)
 
@@ -43312,3 +43468,24 @@ Remaining after round 2:
   `DialWork` with the same wrapper.
 - Single-cluster waits while other clusters are borrowed by the lower host
   still leave those clusters unpolled for their duration (unchanged).
+
+R4 lint schema refinement (before edit): the raw as_slices helper is crate-private
+and only used by raft unit-test observers. Its ordinary library definition is
+unused (matrix-matrix-0.log). Gate that observer helper with cfg(test), retaining
+the identical unit-test body and every public typed front. Data/API, state,
+ownership, reservation, failure and restart behavior are unchanged. No lint
+level is reduced. Preserve the full pre-edit patch/build closure and raw warning.
+Acceptance: final normal/core/public/doctest/matched tests and compiled VALID/six
+controls/restoration on the adjusted source, relevant feature matrix and strict7
+zero diagnostics plus actual hook. No unrelated code repair is included.
+
+R4 strict fixture refinement (before edit): default all-target Clippy failed
+too_many_lines (103/100) in refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms.
+The migrated raw-view observer made that new queue fixture exceed its existing
+limit. Extract its identical sentinel/state comparison closure into a named
+test helper; retain every call, refusal/fence assertion, owned observation and
+state comparison. No production API, state, ownership, failure, restart, budget
+or cleanup changes. This is needed for P1 checked publication with zero strict
+diagnostics; do not alter lint levels/thresholds. Preserve exact failed input
+patch/closure and raw child101/observer0. Acceptance: final strict7 and final
+normal/public/borrow/matched/VALID/mutant/feature matrix, followed by actual hook.

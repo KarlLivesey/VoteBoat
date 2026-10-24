@@ -96,7 +96,7 @@ fn genuine_core_and_owned_plans_preserve_append_compact_and_metadata_but_reset_r
         file_bytes: 100,
         checksum: 7,
     };
-    let effects = core.begin_compact(reference).unwrap();
+    let effects = core.begin_compact(reference).unwrap().into_owned();
     complete(&mut core, &mut owned, effects, &mut sequence, &mut history);
     assert_eq!(lineage, *core.checkpoint_log().lineage());
     assert_eq!(
