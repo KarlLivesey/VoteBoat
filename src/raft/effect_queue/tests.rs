@@ -150,7 +150,15 @@ fn exact_one_adoption_and_queue_headers_do_not_add_storage_or_credits() {
     };
     assert_eq!(front.take().incarnation, 77);
     assert_eq!(queue.capacity(), capacity);
-    assert_eq!(size_of::<EffectQueue>(), size_of::<VecDeque<Effect>>());
+    // The downstream doctest checks the normal, transparent header. Unit tests
+    // additionally carry a heap-free RAII witness after the real slot owner.
+    assert_eq!(
+        size_of::<EffectQueue>(),
+        size_of::<(
+            VecDeque<Effect>,
+            crate::snapshot::input_lifetime_tests::StorageWitness,
+        )>()
+    );
     assert_eq!(size_of::<VolatilePersist>(), 24);
     let largest_payload = [
         size_of::<Message>(),

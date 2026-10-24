@@ -25,6 +25,9 @@ use crate::{
     },
 };
 
+#[cfg(test)]
+pub(crate) mod input_lifetime_tests;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SnapshotIdentity {
     pub store: StoreIdentity,
@@ -479,6 +482,7 @@ impl<L: LogStore> LogSeam for Durable<&mut L> {
             return Err(CheckpointError::InvalidBoundary);
         };
         let update = front.take();
+        drop(effects);
         Ok(persist_effect(raft, self.0, update)?.into())
     }
 }
@@ -509,6 +513,7 @@ impl LogSeam for Volatile<'_> {
             return Err(CheckpointError::InvalidBoundary);
         };
         let persist = front.take();
+        drop(effects);
         let mut following = EffectQueue::new();
         if let Some(entries) = persist_volatile_into(raft, self.0, persist, &mut following)? {
             following.insert_committed(0, entries.to_vec());
@@ -807,6 +812,8 @@ fn compact_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
         &snapshot.application,
     )?;
     let effects = raft.begin_compact(reference)?;
+    #[cfg(test)]
+    let effects = input_lifetime_tests::watch_input(effects);
     let effects = log.persist(raft, effects)?;
     if let Err(e) = store.reconcile_log(Some(reference)) {
         raft.storage_failed();
@@ -896,6 +903,8 @@ fn stage_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
             return Err(CheckpointError::InvalidBoundary);
         }
         let effects = raft.snapshot_stored(reference)?;
+        #[cfg(test)]
+        let effects = input_lifetime_tests::watch_input(effects);
         log.persist(raft, effects)
     })();
     if result.is_err() {

@@ -13,6 +13,8 @@ mod tests;
 /// ```
 /// use voteboat::raft::{Effect, EffectQueue};
 /// let mut queue = EffectQueue::from(vec![Effect::Committed(Vec::new())]);
+/// assert_eq!(std::mem::size_of::<EffectQueue>(),
+///     std::mem::size_of::<std::collections::VecDeque<Effect>>());
 /// std::mem::forget(queue.front());
 /// assert_eq!(queue.len(), 1);
 /// ```
@@ -25,9 +27,13 @@ mod tests;
 /// drop(front);
 /// ```
 #[derive(Debug, Default, Eq, PartialEq)]
-#[repr(transparent)]
+#[cfg_attr(not(test), repr(transparent))]
 pub struct EffectQueue {
     slots: VecDeque<Effect>,
+    // Rust drops fields in declaration order: the observed slot allocation is
+    // destroyed before this test-only RAII witness. Normal builds have no field.
+    #[cfg(test)]
+    storage_witness: crate::snapshot::input_lifetime_tests::StorageWitness,
 }
 
 /// Snapshot work extracted from its actual front slot.
@@ -162,7 +168,13 @@ impl CheckpointFront<'_> {
 
 impl EffectQueue {
     pub fn new() -> Self {
+        #[cfg(test)]
+        crate::snapshot::input_lifetime_tests::at_boundary("following queue");
         Self::default()
+    }
+    #[cfg(test)]
+    pub(crate) fn watch_storage_destruction(&mut self) {
+        self.storage_witness = crate::snapshot::input_lifetime_tests::StorageWitness::armed();
     }
     pub fn len(&self) -> usize {
         self.slots.len()
@@ -218,14 +230,22 @@ impl EffectQueue {
 }
 impl From<Vec<Effect>> for EffectQueue {
     fn from(effects: Vec<Effect>) -> Self {
+        #[cfg(test)]
+        crate::snapshot::input_lifetime_tests::at_boundary("following queue");
         Self {
             slots: effects.into(),
+            #[cfg(test)]
+            storage_witness: Default::default(),
         }
     }
 }
 impl From<VecDeque<Effect>> for EffectQueue {
     fn from(slots: VecDeque<Effect>) -> Self {
-        Self { slots }
+        Self {
+            slots,
+            #[cfg(test)]
+            storage_witness: Default::default(),
+        }
     }
 }
 impl From<EffectQueue> for Vec<Effect> {

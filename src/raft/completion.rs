@@ -160,6 +160,8 @@ pub fn persist_volatile_into<'a>(
     persist: VolatilePersist,
     out: &mut EffectQueue,
 ) -> Result<Option<EntryRange<'a>>, RaftError> {
+    #[cfg(test)]
+    crate::snapshot::input_lifetime_tests::at_boundary("volatile completion");
     let mark = out.len();
     let result = if log.binding() != raft.binding {
         Err(RaftError::WrongIdentity)

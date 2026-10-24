@@ -51,6 +51,38 @@ and a selected front (at most16 before take, or guard8 during take). Its payload
 extraction remains owned; full-envelope moves of genuinely large values and
 growth/insert/truncate remain paid. No compact-storage accounting is claimed.
 
+PR32 P2 corrects a distinct consumed-single-input lifetime in both snapshot
+`LogSeam::persist` arms. Taking a front retains its ring; it does not deallocate
+empty storage. The reviewed1237b215 helper kept that dead ring through durable
+provider work or volatile completion and the following output allocation. That
+overlap was omitted from the earlier ledger; generic4x slack does not justify it.
+Both arms now destroy the consumed input queue immediately after taking its
+owned payload/token, before persistence/completion or construction of output.
+
+| Phase / simultaneously live owners | Baseline consuming single Vec | Reviewed1237b215 | Corrected helper |
+| --- | --- | --- | --- |
+| Selection/take | Input slot allocation + extracted full Effect/payload + core Pending | Input ring + exclusive front + owned update/token + core Pending | Same selection/take as reviewed head |
+| Durable append/barrier/completion | Owned LogUpdate/provider mutation/tickets + independent core Pending; input allocation already freed | Same owners PLUS empty input ring | Baseline owner set; input ring already destroyed |
+| Volatile completion | Token + core Pending/installed log + following output; input allocation already freed | Same owners PLUS empty input ring | Baseline owner set; input ring already destroyed |
+| Following output allocation/return | Output slots/payloads and core state; input allocation freed | Output slots/payloads and core state PLUS empty input ring until helper return | Output slots/payloads and core state; input ring freed before output construction |
+
+The normal fresh input has four272-byte slots:1088 dead input bytes overlapped
+the continuation in the reviewed helper. This correction removes that specific
+overlap; payload ownership, provider submission/barrier, output capacities/FIFO,
+existing growth overlaps and reservations remain paid without a new allowance.
+It does not claim observed OOM, a numeric reservation overrun, RSS or CPU change.
+
+The regression's cfg(test)-only heap-free RAII witness follows the actual slot
+field, so its destructor observes destruction AFTER that ring. Its thread-local
+scoped observer watches only one real public-helper input, checks real provider
+append/barrier, volatile completion entry and following queue construction, and
+is cleared on unwind. The unit-test header includes this witness; a downstream
+doctest separately checks the unchanged32-byte release header. No witness,
+observation hook, runtime lifecycle counter or per-write heap exists in normal
+builds. This is a destruction-order/source ownership check, not an allocator,
+machine stack/RSS or compiler movement measurement. Compiled late-drop controls
+and exact source restoration are recorded separately with actual results.
+
 For Active adoption, old Stepped/WorkerDelivery/callback Vec ownership remains
 the real external boundary and is adopted without a second allocation. For a
 callback the original live lease + old tail ring + callback Vec + insertion

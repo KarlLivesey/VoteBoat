@@ -62,6 +62,63 @@ snapshot/compaction before spending a full measurement matrix; do not replace
 the primary workload or relax membership fences to obtain a score.
 The implemented candidate was measured and rejected as recorded below.
 
+
+### CPU-9 PR32 P2 implemented evidence (24 October 2026)
+
+Both snapshot persistence arms explicitly destroy their consumed input ring
+before provider/completion/output work. The prior1088-byte dead-input overlap is
+now recorded in the joint-owner ledger. Four real public-helper lifetime checks
+passed; the compiled old late-drop mutant failed all4 intended ownership
+assertions, followed by exact normal source/mode/consumer restoration.
+Affected tests and strict7 passed; see [actual P2 evidence and limits](../validation/performance/pillar1-cpu9/SNAPSHOT-P2.md).
+The actual enabled pre-push hook and nonforce same-PR-branch publication are
+recorded in the ignored terminal receipt/PR CURRENT metadata. Review A remains
+withheld and all fresh changed-head source/adapter/Apple/CPU/full5 gates belong
+to the parent. The macro P1 milestone remains incomplete; no speed or merge claim.
+
+### CPU-9 PR32 P2 correction plan (24 October; before source edits)
+
+Macro P1 remains the active candidate milestone; the full service/embedding goal
+and implemented feature contracts remain in place. Review A on exact1237b215
+withholds source approval for a cold snapshot input-ring lifetime extension.
+This correction is the smallest path to restoring the original simultaneous
+owner set; it adds no helper prerequisite or new performance experiment.
+
+| Mini-plan item | Purpose / dependencies | Completion checks | Macro |
+| --- | --- | --- | --- |
+| Current: consumed snapshot ring release | Exact1237b215 and all2606 frozen input hashes/sizes/modes verified; take the owned update/token, then destroy its emptied queue before persistence/completion/output construction | Durable and volatile public compaction and installation observe actual owner destruction at provider/completion/output boundaries; compiled old late-drop mutant fails; exact normal restoration; affected checks and strict7/actual enabled hook | P1 candidate correction |
+| Next: fresh source/adapter/Apple qualification (parent) | Checked changed-head publication and P2 evidence; prior review A withheld, review B/adapter pinned to old1237 cannot approve a changed head | Fresh exact-head source confirmations and adapter audit; Apple complete-flow/VALID/semantic/exact-restoration gates | P1 qualification |
+| Then: conditional CPU/full5 integration (parent) | All source/adapter/Apple gates passed | Original nine pairs at all widths, conditional64, exclusive full5/integration; no speed or merge claim here | P1 qualification |
+
+Schema/drop order: the public APIs and one full-Effect VecDeque remain unchanged.
+Both LogSeam::persist arms validate exact length and variant, take the actual
+owned LogUpdate or24-byte token, drop the now-empty input EffectQueue, then call
+the existing persistence/completion helper and return its FIFO continuation.
+No borrowed front crosses provider/core work. The durable provider still receives
+the genuine update and independent Pending plan. Volatile completion keeps its
+binding/incarnation/revision/generation checks and inserts committed entries at
+zero only in the new empty continuation. No ticket/stage/fence/terminal change.
+
+Failure/cleanup: invalid length/variant drops the entire input on return;
+provider/completion failures occur after input storage destruction and preserve
+the original helper's fencing and completed-prefix behavior. Stage pin/publish,
+compaction reconciliation, application restore and restart contracts are unchanged.
+Audit only this helper family for other consumed-single input rings.
+
+Regression plan: safe cfg(test)-only RAII witness is the field AFTER the actual
+slot owner, so Rust destroys the ring first. Only an explicitly watched input
+arms it; observation is thread-local and scope-cleared on unwind. It has no
+allocator hook, unsafe code, release metadata, per-write heap, or runtime counter.
+Watch real public compaction/installation input; assert released at host append/
+barrier, volatile public completion entry, and following queue construction.
+The test header is explicitly separate from the unchanged release header; a
+downstream doctest checks release layout. Compile the old late-drop behavior,
+require the real lifetime assertion to fail, and restore exact normal bytes/modes.
+
+Planned checks are not implemented evidence. Preserve original raw errors before
+bounded causal corrections. Existing VALID/six semantic mutants are rerun only
+if this edit invalidates their mechanism; record source equivalence and limits.
+
 ### CPU-9 schema and acceptance plan (23 October 2026; before production edits)
 
 **24 October R1 terminal builder HOLD (historical):** a forbidden bootstrap-as-payload launcher

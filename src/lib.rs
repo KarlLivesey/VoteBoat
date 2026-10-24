@@ -13,6 +13,9 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Deterministic consensus components. See the README for implemented scope.
+#[cfg(test)]
+extern crate self as voteboat;
+
 pub mod admission;
 pub mod application;
 pub mod authorization;
