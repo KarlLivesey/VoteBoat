@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "own_target_removed": true,
+  "worktree_removed": true,
+  "registration_removed": true,
+  "unpublished_seed_removed": true,
+  "main_head": "ff21f12ad293fd5e5cefb7b203e493531fa5e2b0",
+  "main_clean": true,
+  "production_baseline_unchanged": true,
+  "patch_sha256": "a5d2c5e8bfbf269cc9869e17aa447ae986dc1d1577c9aa80533d2214f4098aa0",
+  "at": 1792811508.3306391
+}

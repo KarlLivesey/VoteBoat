@@ -39,7 +39,8 @@ weaker evidence, changed command counts or benchmark-only shortcuts.
 | CPU-6: measured and rejected | PR30 inline singleton batches and fused wide assignment/facts removed their intended work on Apple, but singleton CPU rose; no source merged | Both exact-head Sol source approvals; builder1377 focused events/2existing ignored/strict7/actual hook green; Apple34 tests/two valid work controls/restoration, metadata2/Rust6 and all18 primary children passed. CPU +7.781924%/-0.267725%/-0.677237%, wins0/3,3/3,2/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu6/CPU6-RESULT.md) | P1 evidence |
 | CPU-8: measured and rejected | PR31 compact checked plans removed targeted Apple movement, but width515 CPU rose; no source merged | Both exact-head Sol source approvals; focused/control/strict7/actual hook green; Apple work/VALID/semantic/restoration and identity2/Rust6 controls passed. All18 primary children passed. CPU -4.503206%/-2.594473%/+0.511120%, wins3/3,2/3,1/3. Canonical/full suites held. [Result](../validation/performance/pillar1-cpu8/CPU8-RESULT.md) | P1 evidence |
 | CPU-9: rejected at Apple mechanism gate | PR32 typed fronts preserved checked source contracts, but normal Apple code retained the common272-byte Effect staging transfer; no source merged | Both final Sol source approvals and Linux focused/control/strict7/actual hook green. Apple input/normal build/four queue tests passed; required compiled-work gate failed. Primary0/9, canonical0/64, gain unknown; full suites held. [Result](../validation/performance/pillar1-cpu9/CPU9-RESULT.md) | P1 evidence |
-| Current P1 CPU-10 structural design, conditional | Choose the next bounded CPU reduction using the actual CPU9 machine counterexample and prior rejected results; production0bf and implemented extras remain intact | One source-supported public ownership/representation design with exact dataflow, consumers, budgets, failure/restart cases and controls, or a precise missing fact; no implementation or measurement until parent release | P1 |
+| CPU-10: stopped at public byte-budget feasibility | Separate token/payload rings passed finite Linux layout/capacity checks, but retained storage exceeds an unchanged public reservation where the old queue fits; no production migration or PR | At C38994, old10606656 <= reservation10606720; new11542552 exceeds it by935832 bytes. One prototype pass/one failed boundary assertion; closeout fmt/all-feature strict Clippy passed. Semantic, Apple, CPU and full gates unrun. [Result](../validation/performance/pillar1-cpu10/CPU10-RESULT.md) | P1 evidence |
+| Current P1 CPU-11 structural design, conditional | Choose one bounded reduction after CPU9's retained machine staging and CPU10's concrete per-domain memory counterexample; production0bf and implemented extras remain intact | One source-supported public ownership/representation design with exact dataflow, consumers, budget-edge feasibility, failure/restart cases and controls, or a precise missing fact; no implementation or measurement until parent release | P1 |
 | Then a checked CPU candidate, conditional | Depends on one justified bounded design and parent implementation release; rejected source and performance claims stay excluded | Schema/ownership/failure plan, focused semantic and causal controls, actual strict/enabled-hook publication, fresh dual Sol source reviews and original paired CPU/rate/p99 gates; preserve failures without replacement/tolerance | P1 |
 | Then P1 qualification: validate the kept composition | Depends on a CPU candidate meeting equal-core CPU/rate/p99 and feature-preservation gates | Both final source approvals, exact-head strict checks and full default/all-feature/no-default/native/matched suites; actual committed/applied outcomes, complete inventory and owned cleanup. Further optimisation depends on measured residual, not a claim of perfection | P1 |
 
@@ -63,6 +64,19 @@ snapshot/compaction before spending a full measurement matrix; do not replace
 the primary workload or relax membership fences to obtain a score.
 The implemented candidate was measured and rejected as recorded below.
 
+
+### CPU-10 first feasibility rejection (24 October 2026)
+
+The separated token/payload FIFO stopped unpublished at its first compiled
+feasibility gate. Its test-only prototype passed finite layout and capacity
+histories, but a legal explicitly retained public capacity fits the old event
+reservation and exceeds it with the new storage. This is a public budget
+counterexample, not an organically observed matched Actor capacity, a CPU
+regression or an Apple mechanism finding. No production or consumer migration,
+PR, semantic matrix, Apple work, timing or full-suite gate ran.
+[Exact owners, source patches, limits and cleanup](../validation/performance/pillar1-cpu10/CPU10-RESULT.md).
+Production remains0bf. The next source-only design must account for each
+reservation domain without importing native-only slack or lowering admission.
 
 ### CPU-9 result and rejection (24 October 2026)
 

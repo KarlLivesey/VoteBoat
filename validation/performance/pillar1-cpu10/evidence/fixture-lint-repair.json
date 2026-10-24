@@ -1,0 +1,8 @@
+{
+  "cause": "107-line fixture exceeds original 100-line lint threshold; moved exhaustive conversion helper to module scope only",
+  "before_sha256": "875d1f611c54844d89a7c855e5eaf9c2e5169b784c57c8c93f10da1cdd1fc7f7",
+  "after_sha256": "f91b80caa2b515e4073b449987b7c7dd1bd87656656efda4c079e460ca351163",
+  "boundary_function_before_sha256": "dd781ade233f8d7b8987c5f9d2cff5872de9416029d1b9d5a3f85f009d728f1f",
+  "boundary_function_after_sha256": "dd781ade233f8d7b8987c5f9d2cff5872de9416029d1b9d5a3f85f009d728f1f",
+  "boundary_byte_identical": true
+}

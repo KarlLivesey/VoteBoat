@@ -1,0 +1,40 @@
+{
+  "head": "ff21f12ad293fd5e5cefb7b203e493531fa5e2b0",
+  "head_tree": "f1fb98de03fe01bbf444e5a9c0e274bdbc7de551",
+  "candidate_index_tree": "b7df7d6d7ae500af1f35a3b13e800670e19fcffb",
+  "branch": "t3/cpu10-builder-candidate",
+  "patch_sha256": "a5d2c5e8bfbf269cc9869e17aa447ae986dc1d1577c9aa80533d2214f4098aa0",
+  "patch_bytes": 26651,
+  "manifest_rows": 63374,
+  "manifest_sha256": "1f631f9d274138bdcbd6ad39a4e4e594aa451cbe90e1fb9cc87a9bba1dc18dc6",
+  "source_inputs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu4-parent/CPU10-BUILDER-RELEASE.md": {
+      "bytes": 12078,
+      "sha256": "aa6b3d412c6f1e975f7d070d71122ca1282eed11f22d5bbb0b940e8a1b4727f8"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu4-parent/CPU10-STRUCTURAL-DESIGN-BRIEF.md": {
+      "bytes": 7460,
+      "sha256": "3ef5761f7799bf8957174a986c9b786ffb5a50d7b6c9b7de68666513b6026339"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/CPU10-DESIGN.md": {
+      "bytes": 35086,
+      "sha256": "f5d91c22a27e993fb1ef7e19fe09b2ccd6013f56a494e41ab25ebf3e447fcebf"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/pillar1-20261022/cpu10-design/FINAL-STATE.json": {
+      "bytes": 3899,
+      "sha256": "f4181c82976f438a99d50728dc29029d925aae367c98cf6c1f14ef5c5c7bd91e"
+    }
+  },
+  "hooks": ".githooks",
+  "status": "M  docs/IMPLEMENTATION.md\nA  tests/cpu10_feasibility.rs\nA  validation/performance/pillar1-cpu10/IMPLEMENTED.md\n",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)\n",
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/.t3/worktrees/VoteBoat/t3-64ab42a5/target",
+    "CARGO_BUILD_JOBS": "4",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0"
+  },
+  "capture": "post-test, same formatted Rust source; no source mutation during compilation or between test and capture"
+}

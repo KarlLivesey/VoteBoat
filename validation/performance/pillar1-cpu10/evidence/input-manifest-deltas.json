@@ -1,0 +1,18 @@
+{
+  "tests/cpu10_feasibility.rs": {
+    "tested": {
+      "path": "tests/cpu10_feasibility.rs",
+      "mode": 420,
+      "git_mode": "100644",
+      "bytes": 12282,
+      "sha256": "875d1f611c54844d89a7c855e5eaf9c2e5169b784c57c8c93f10da1cdd1fc7f7"
+    },
+    "final": {
+      "path": "tests/cpu10_feasibility.rs",
+      "mode": 420,
+      "git_mode": "100644",
+      "bytes": 12191,
+      "sha256": "f91b80caa2b515e4073b449987b7c7dd1bd87656656efda4c079e460ca351163"
+    }
+  }
+}

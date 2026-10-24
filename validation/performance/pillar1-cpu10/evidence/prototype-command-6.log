@@ -1,0 +1,87 @@
+   Compiling libc v0.2.190
+   Compiling cfg-if v1.0.5
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling protobuf v2.28.0
+   Compiling cc v1.6.0
+   Compiling proc-macro2 v1.0.107
+   Compiling bytes v1.12.1
+   Compiling memchr v2.8.3
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+   Compiling aho-corasick v1.1.5
+   Compiling zeroize v1.9.1
+   Compiling untrusted v0.9.0
+   Compiling regex-syntax v0.8.11
+   Compiling ring v0.17.14
+   Compiling getrandom v0.2.17
+   Compiling rustls-pki-types v1.15.1
+   Compiling rustls v0.23.45
+   Compiling zerocopy v0.8.62
+   Compiling regex-automata v0.4.18
+   Compiling once_cell v1.21.4
+   Compiling bitflags v1.3.2
+   Compiling subtle v2.6.1
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-64ab42a5)
+   Compiling syn v2.0.119
+   Compiling rustls-webpki v0.103.15
+   Compiling regex v1.13.1
+   Compiling protobuf-codegen v2.28.0
+   Compiling rand_core v0.6.4
+   Compiling protobuf-build v0.14.1
+   Compiling thiserror v1.0.69
+   Compiling slog v2.7.0
+   Compiling raft-proto v0.7.0
+   Compiling thiserror-impl v1.0.69
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_chacha v0.3.1
+   Compiling byteorder v1.5.0
+   Compiling fxhash v0.2.1
+   Compiling rand v0.8.8
+   Compiling getset v0.1.7
+   Compiling raft v0.7.0
+    Finished `test` profile [unoptimized] target(s) in 37.45s
+     Running tests/cpu10_feasibility.rs (target/debug/deps/cpu10_feasibility-3d4355bed1c4fbb9)
+
+running 2 tests
+test compiled_layout_capacity_and_correspondence ... E=272 L=272 K=24 H0=32 H=64 B=8
+initial=0 kind=0 retained=64 payload_capacity=64
+initial=0 kind=1 retained=64 payload_capacity=64
+initial=0 kind=2 retained=64 payload_capacity=64
+initial=1 kind=0 retained=64 payload_capacity=64
+initial=1 kind=1 retained=64 payload_capacity=64
+initial=1 kind=2 retained=64 payload_capacity=64
+initial=2 kind=0 retained=64 payload_capacity=64
+initial=2 kind=1 retained=64 payload_capacity=64
+initial=2 kind=2 retained=64 payload_capacity=64
+initial=3 kind=0 retained=96 payload_capacity=96
+initial=3 kind=1 retained=96 payload_capacity=96
+initial=3 kind=2 retained=96 payload_capacity=96
+initial=4 kind=0 retained=64 payload_capacity=64
+initial=4 kind=1 retained=64 payload_capacity=64
+initial=4 kind=2 retained=64 payload_capacity=64
+initial=7 kind=0 retained=56 payload_capacity=56
+initial=7 kind=1 retained=56 payload_capacity=56
+initial=7 kind=2 retained=56 payload_capacity=56
+initial=8 kind=0 retained=64 payload_capacity=64
+initial=8 kind=1 retained=64 payload_capacity=64
+initial=8 kind=2 retained=64 payload_capacity=64
+initial=31 kind=0 retained=62 payload_capacity=62
+initial=31 kind=1 retained=62 payload_capacity=62
+initial=31 kind=2 retained=62 payload_capacity=62
+ok
+test public_reservation_retained_capacity_boundary ... public reservation=10606720 input=256 capacity=38994 old_owners=[32, 10606368, 256] old_total=10606656 new_owners=[8, 64, 935856, 10606368, 256] new_total=11542552 matched_accepts=true
+
+thread 'public_reservation_retained_capacity_boundary' (3897802) panicked at tests/cpu10_feasibility.rs:345:5:
+CPU10 FIRST GATE: original accepted public retained-capacity boundary exceeds unchanged reservation; native 4x capacity credit is not this domain
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    public_reservation_retained_capacity_boundary
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `--test cpu10_feasibility`

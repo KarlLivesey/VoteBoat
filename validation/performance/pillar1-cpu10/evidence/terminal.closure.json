@@ -1,0 +1,44 @@
+{
+  "pid": 3908014,
+  "errors": [],
+  "outer_rc": 0,
+  "children": [
+    {
+      "pid": 3908017,
+      "rc": 0,
+      "joined": true
+    },
+    {
+      "pid": 3908065,
+      "rc": 0,
+      "joined": true
+    },
+    {
+      "pid": 3908066,
+      "rc": 0,
+      "joined": true
+    },
+    {
+      "pid": 3908113,
+      "rc": 0,
+      "joined": true
+    },
+    {
+      "pid": 3908114,
+      "rc": 0,
+      "joined": true
+    },
+    {
+      "pid": 3908202,
+      "rc": 0,
+      "joined": true
+    },
+    {
+      "pid": 3908236,
+      "rc": 0,
+      "joined": true
+    }
+  ],
+  "observer": "single-thread synchronous",
+  "visibility": "Initial/T3/tool, short-lived, reparented and inaccessible process gaps; sampled owned identities only"
+}

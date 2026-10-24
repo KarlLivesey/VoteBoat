@@ -1,0 +1,20 @@
+{
+  "status": "REJECTED_AT_FIRST_PUBLIC_BUDGET_FEASIBILITY",
+  "mainInput": "ff21f12ad293fd5e5cefb7b203e493531fa5e2b0",
+  "capacity": 38994,
+  "reservation": 10606720,
+  "oldRetained": 10606656,
+  "splitRetained": 11542552,
+  "excess": 935832,
+  "layoutPass": true,
+  "finiteCapacityPass": true,
+  "productionMigration": false,
+  "pullRequest": null,
+  "semanticQualification": "UNRUN",
+  "appleQualification": "UNRUN",
+  "cpuPairs": 0,
+  "canonicalChildren": 0,
+  "gain": "UNKNOWN",
+  "cleanupVerified": true,
+  "historicalHoldsUnchanged": true
+}
